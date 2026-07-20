@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>OptiPaie PRO — Administration</title>
+<style>
+  :root{
+    --brand:#0F6E56; --brand-d:#0B5B47; --brand-s:#E1F5EE;
+    --ink:#1B2430; --muted:#6b7686; --line:#e7ebf0; --bg:#f4f6f8; --surface:#fff;
+    --ok:#137B50; --warn:#C97A10; --bad:#C0453B; --blue:#2B57A1;
+  }
+  *{box-sizing:border-box} html,body{margin:0;height:100%}
+  body{font-family:"Segoe UI",Tahoma,Arial,sans-serif;color:var(--ink);background:var(--bg);font-size:14px}
+  button{font:inherit;cursor:pointer;border:0;border-radius:8px;padding:8px 14px;background:var(--surface);color:var(--ink);border:1px solid var(--line)}
+  button.primary{background:var(--brand);color:#fff;border-color:var(--brand);font-weight:600}
+  button.primary:hover{background:var(--brand-d)}
+  button.sm{padding:5px 9px;font-size:12.5px}
+  button.danger{color:var(--bad);border-color:#f0cfcb}
+  button:disabled{opacity:.5;cursor:default}
+  input,select{font:inherit;padding:8px 10px;border:1px solid #d5dbe2;border-radius:8px;background:#fff;color:var(--ink)}
+  a{color:var(--brand)}
+  .hidden{display:none!important}
+
+  /* Login */
+  #login{display:flex;align-items:center;justify-content:center;height:100vh}
+  #login .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:32px;width:360px;box-shadow:0 8px 30px rgba(0,0,0,.06)}
+  #login .logo{width:52px;height:52px;border-radius:14px;background:var(--brand);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:20px}
+  #login h1{font-size:19px;margin:16px 0 2px} #login p{color:var(--muted);margin:0 0 20px;font-size:13px}
+  #login input{width:100%;margin-bottom:10px} #login button{width:100%;margin-top:6px}
+  .err{color:var(--bad);font-size:12.5px;margin-top:10px;min-height:16px}
+
+  /* Shell */
+  #app{display:grid;grid-template-columns:230px 1fr;height:100vh}
+  .side{background:#fff;border-right:1px solid var(--line);padding:18px 14px;display:flex;flex-direction:column}
+  .brand{display:flex;align-items:center;gap:10px;margin:2px 4px 20px;font-weight:700}
+  .brand .b{width:30px;height:30px;border-radius:8px;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px}
+  .nav a{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:var(--ink);text-decoration:none;font-weight:500;margin-bottom:2px}
+  .nav a:hover{background:var(--bg)} .nav a.active{background:var(--brand-s);color:var(--brand);font-weight:600}
+  .side .foot{margin-top:auto;font-size:12px;color:var(--muted)}
+  .main{overflow:auto;padding:24px 28px}
+  .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+  .top h2{margin:0;font-size:20px}
+  .grid{display:grid;gap:14px}
+  .cards{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+  .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px}
+  .card .k{color:var(--muted);font-size:12.5px} .card .v{font-size:26px;font-weight:700;margin-top:6px}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .panel h3{margin:0;padding:14px 16px;border-bottom:1px solid var(--line);font-size:14px}
+  table{width:100%;border-collapse:collapse}
+  th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);font-size:13px;white-space:nowrap}
+  th{color:var(--muted);font-weight:600;cursor:pointer;user-select:none;background:#fafbfc}
+  th.no{cursor:default} tbody tr:hover{background:#fafbfc}
+  .mono{font-family:Consolas,monospace}
+  .pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11.5px;font-weight:600}
+  .pill.ok{background:#e4f4ec;color:var(--ok)} .pill.bad{background:#fbe9e7;color:var(--bad)}
+  .pill.warn{background:#fdf0dc;color:var(--warn)} .pill.mut{background:#eef1f4;color:var(--muted)}
+  .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+  .toolbar .sp{flex:1}
+  .pg{display:flex;gap:8px;align-items:center;justify-content:flex-end;padding:12px 14px;color:var(--muted);font-size:13px}
+  /* modal */
+  .ov{position:fixed;inset:0;background:rgba(20,28,38,.45);display:flex;align-items:center;justify-content:center;z-index:50}
+  .modal{background:#fff;border-radius:14px;width:640px;max-width:94vw;max-height:90vh;overflow:auto}
+  .modal .h{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--line)}
+  .modal .h h3{margin:0;font-size:16px} .modal .body{padding:20px}
+  .fld{margin-bottom:12px} .fld label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:4px}
+  .fld input,.fld select{width:100%}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .mods label{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px}
+  .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  #toast{position:fixed;right:18px;bottom:18px;display:flex;flex-direction:column;gap:8px;z-index:100}
+  .t{background:#1b2430;color:#fff;padding:10px 14px;border-radius:8px;font-size:13px;box-shadow:0 6px 20px rgba(0,0,0,.2)}
+  .t.ok{background:var(--ok)} .t.bad{background:var(--bad)}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login">
+  <div class="card">
+    <div class="logo">OP</div>
+    <h1>OptiPaie PRO</h1>
+    <p>Console d'administration des licences</p>
+    <input id="email" type="email" placeholder="Email" autocomplete="username" />
+    <input id="password" type="password" placeholder="Mot de passe" autocomplete="current-password" />
+    <button class="primary" id="loginBtn">Se connecter</button>
+    <div class="err" id="loginErr"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" class="hidden">
+  <div class="side">
+    <div class="brand"><div class="b">OP</div> OptiPaie PRO</div>
+    <div class="nav">
+      <a data-view="dashboard" class="active">📊 Tableau de bord</a>
+      <a data-view="licenses">🔑 Licences</a>
+      <a data-view="devices">💻 Appareils</a>
+      <a data-view="updates">⬆️ Mises à jour</a>
+      <a data-view="reports">📈 Rapports</a>
+      <a data-view="audit">📜 Journal d'audit</a>
+    </div>
+    <div class="foot">Connecté : <span id="who"></span><br><a href="#" id="logout">Se déconnecter</a></div>
+  </div>
+  <div class="main">
+    <!-- DASHBOARD -->
+    <section id="v-dashboard">
+      <div class="top"><h2>Tableau de bord</h2><button class="sm" onclick="loadDashboard()">Actualiser</button></div>
+      <div class="grid cards" id="statCards"></div>
+      <div class="grid" style="grid-template-columns:1fr 1fr;margin-top:16px">
+        <div class="panel"><h3>Dernières activations</h3><table><tbody id="latestAct"></tbody></table></div>
+        <div class="panel"><h3>Dernières mises à jour</h3><table><tbody id="latestUpd"></tbody></table></div>
+      </div>
+    </section>
+
+    <!-- LICENSES -->
+    <section id="v-licenses" class="hidden">
+      <div class="top"><h2>Licences</h2>
+        <div style="display:flex;gap:8px">
+          <button class="sm" onclick="openBulk()">Génération en lot</button>
+          <button class="primary sm" onclick="openLicense(null)">+ Nouvelle licence</button>
+        </div>
+      </div>
+      <div class="toolbar">
+        <input id="q" placeholder="Rechercher (clé, société, email)…" style="width:280px" oninput="debouncedLoad()" />
+        <select id="fStatus" onchange="loadLicenses()"><option value="">Tous les statuts</option><option>active</option><option>suspended</option><option>revoked</option><option>pending</option></select>
+        <select id="fType" onchange="loadLicenses()"><option value="">Tous les types</option><option>trial</option><option>lifetime</option><option>annual</option><option>monthly</option><option>demo</option><option>enterprise</option></select>
+        <div class="sp"></div>
+        <button class="sm" onclick="loadLicenses()">Actualiser</button>
+      </div>
+      <div class="panel">
+        <table>
+          <thead><tr>
+            <th data-sort="license_key">Clé</th>
+            <th data-sort="company_name">Client</th>
+            <th data-sort="type">Type</th>
+            <th data-sort="status">Statut</th>
+            <th class="no">Appareils</th>
+            <th data-sort="expires_at">Expiration</th>
+            <th data-sort="created_at">Créée</th>
+            <th class="no"></th>
+          </tr></thead>
+          <tbody id="licRows"></tbody>
+        </table>
+        <div class="pg">
+          <span id="pgInfo"></span>
+          <button class="sm" id="pgPrev" onclick="page(-1)">‹ Préc.</button>
+          <button class="sm" id="pgNext" onclick="page(1)">Suiv. ›</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- DEVICES -->
+    <section id="v-devices" class="hidden">
+      <div class="top"><h2>Appareils</h2><button class="sm" onclick="loadDevices()">Actualiser</button></div>
+      <div class="panel">
+        <table>
+          <thead><tr><th>Device ID</th><th>Licence</th><th>App</th><th>Activé</th><th>Dernière sync</th><th>Statut</th><th></th></tr></thead>
+          <tbody id="devRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- UPDATES -->
+    <section id="v-updates" class="hidden">
+      <div class="top"><h2>Mises à jour</h2><button class="primary sm" onclick="openUpdate()">+ Publier une version</button></div>
+      <div class="panel">
+        <table>
+          <thead><tr><th>Version</th><th>Canal</th><th>Obligatoire</th><th>Dernière</th><th>Publiée</th><th></th></tr></thead>
+          <tbody id="updRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- REPORTS -->
+    <section id="v-reports" class="hidden">
+      <div class="top"><h2>Rapports</h2><button class="sm" onclick="loadReports()">Actualiser</button></div>
+      <div class="grid" style="grid-template-columns:1fr 1fr">
+        <div class="panel"><h3>Activation des modules</h3><table><thead><tr><th class="no">Module</th><th class="no">Licences</th></tr></thead><tbody id="repModules"></tbody></table></div>
+        <div class="panel"><h3>Licences par type</h3><table><tbody id="repTypes"></tbody></table></div>
+      </div>
+      <div class="grid" style="grid-template-columns:1fr 1fr;margin-top:14px">
+        <div class="panel"><h3>Licences par statut</h3><table><tbody id="repStatus"></tbody></table></div>
+        <div class="panel"><h3>Clés d'activation de module</h3><table><tbody id="repKeys"></tbody></table></div>
+      </div>
+    </section>
+
+    <!-- AUDIT LOG -->
+    <section id="v-audit" class="hidden">
+      <div class="top"><h2>Journal d'audit</h2></div>
+      <div class="toolbar">
+        <select id="auditAction" onchange="auditPage=0;loadAudit()">
+          <option value="">Toutes les actions</option>
+          <option value="license.generate">Génération de licence</option>
+          <option value="license.activate">Activation de licence</option>
+          <option value="license.validate">Validation</option>
+          <option value="module.activate">Activation de module</option>
+          <option value="module_key.generate">Génération clé module</option>
+          <option value="module_key.revoke">Révocation clé module</option>
+          <option value="module.validation_failed">Échec validation module</option>
+          <option value="activation.error">Erreur d'activation</option>
+          <option value="validation.error">Erreur de validation</option>
+        </select>
+        <div class="sp"></div>
+        <button class="sm" onclick="loadAudit()">Actualiser</button>
+      </div>
+      <div class="panel">
+        <table>
+          <thead><tr><th class="no">Date</th><th class="no">Administrateur</th><th class="no">Action</th><th class="no">Client</th><th class="no">Détails</th></tr></thead>
+          <tbody id="auditRows"></tbody>
+        </table>
+        <div class="pg">
+          <span id="auditInfo"></span>
+          <button class="sm" id="auditPrev" onclick="auditPageMove(-1)">‹ Préc.</button>
+          <button class="sm" id="auditNext" onclick="auditPageMove(1)">Suiv. ›</button>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<div id="modal"></div>
+<div id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ===== Config (public values) =====
+const SUPABASE_URL = "https://bajiomgtkpdqyvgpigsc.supabase.co";
+const SUPABASE_KEY = "sb_publishable_AAbnVY311vyP8hfD5WcEUg_0RDiYqxb";
+const PAGE_SIZE = 20;
+const MODULES = ["payroll","ats","attendance","leave","loans","performance","contracts","training","assets","work_certificate"];
+const MODULE_NAMES = {payroll:"Paie (core)",ats:"ATS / DRT",attendance:"Pointage",leave:"Congés",loans:"Prêts & avances",performance:"Évaluation",contracts:"Contrats",training:"Formation",assets:"Biens & équipements",work_certificate:"Attestation de travail"};
+
+let sb, session=null, PRODUCT_ID=null;
+let state={page:0,sort:"created_at",dir:false,count:0};
+
+// ===== helpers =====
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const esc=s=>(s==null?"":String(s)).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmtDate=d=>d?new Date(d).toLocaleDateString("fr-FR"):"—";
+const fmtDT=d=>d?new Date(d).toLocaleString("fr-FR"):"—";
+function toast(msg,kind){const t=document.createElement("div");t.className="t "+(kind||"");t.textContent=msg;$("#toast").appendChild(t);setTimeout(()=>t.remove(),3500);}
+function statusPill(s){const m={active:"ok",suspended:"warn",revoked:"bad",pending:"mut"};return `<span class="pill ${m[s]||"mut"}">${esc(s)}</span>`;}
+function closeModal(){$("#modal").innerHTML="";}
+async function guard(p){const{data,error}=await p;if(error){toast(error.message||"Erreur","bad");throw error;}return data;}
+
+// ===== auth =====
+async function boot(){
+  sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+  const {data}=await sb.auth.getSession();
+  if(data.session){session=data.session;await enter();}
+}
+$("#loginBtn").onclick=async()=>{
+  $("#loginErr").textContent="";
+  const email=$("#email").value.trim(), password=$("#password").value;
+  const {data,error}=await sb.auth.signInWithPassword({email,password});
+  if(error){$("#loginErr").textContent=error.message;return;}
+  session=data.session;await enter();
+};
+$("#password").addEventListener("keydown",e=>{if(e.key==="Enter")$("#loginBtn").click();});
+$("#logout").onclick=async e=>{e.preventDefault();await sb.auth.signOut();location.reload();};
+
+async function enter(){
+  $("#login").classList.add("hidden");$("#app").classList.remove("hidden");
+  $("#who").textContent=session.user.email;
+  const prod=await guard(sb.from("products").select("id").eq("key","payroll").maybeSingle());
+  PRODUCT_ID=prod?prod.id:null;
+  loadDashboard();
+}
+
+// ===== nav =====
+$$(".nav a").forEach(a=>a.onclick=()=>{
+  $$(".nav a").forEach(x=>x.classList.remove("active"));a.classList.add("active");
+  const v=a.dataset.view;$$(".main > section").forEach(s=>s.classList.add("hidden"));
+  $("#v-"+v).classList.remove("hidden");
+  ({dashboard:loadDashboard,licenses:loadLicenses,devices:loadDevices,updates:loadUpdates,reports:loadReports,audit:loadAudit}[v])();
+});
+
+// ===== dashboard =====
+async function loadDashboard(){
+  const o=await guard(sb.from("v_admin_overview").select("*").single());
+  const cards=[["Total licences",o.total_licenses],["Licences actives",o.active_licenses],["Expirées",o.expired_licenses],["Désactivées",o.disabled_licenses],["Appareils actifs",o.active_devices],["Nouvelles ce mois",o.new_this_month]];
+  $("#statCards").innerHTML=cards.map(c=>`<div class="card"><div class="k">${c[0]}</div><div class="v">${c[1]??0}</div></div>`).join("");
+  const acts=await guard(sb.from("activations").select("*").order("created_at",{ascending:false}).limit(8));
+  $("#latestAct").innerHTML=acts.length?acts.map(a=>`<tr><td>${esc(a.action)}</td><td>${statusPill(a.result==="ok"?"active":a.result)}</td><td class="mono">${esc((a.device_id||"").slice(0,12))}</td><td style="color:var(--muted)">${fmtDT(a.created_at)}</td></tr>`).join(""):`<tr><td style="color:var(--muted)">Aucune activation.</td></tr>`;
+  const ups=await guard(sb.from("updates").select("*").order("published_at",{ascending:false}).limit(5));
+  $("#latestUpd").innerHTML=ups.length?ups.map(u=>`<tr><td class="mono">${esc(u.version)}</td><td>${u.mandatory?'<span class="pill bad">obligatoire</span>':'<span class="pill mut">optionnelle</span>'}</td><td>${u.is_latest?'<span class="pill ok">latest</span>':''}</td><td style="color:var(--muted)">${fmtDate(u.published_at)}</td></tr>`).join(""):`<tr><td style="color:var(--muted)">Aucune version publiée.</td></tr>`;
+}
+
+// ===== licenses =====
+let debTimer;function debouncedLoad(){clearTimeout(debTimer);debTimer=setTimeout(()=>{state.page=0;loadLicenses();},300);}
+$$("#v-licenses th[data-sort]").forEach(th=>th.onclick=()=>{const c=th.dataset.sort;if(state.sort===c)state.dir=!state.dir;else{state.sort=c;state.dir=false;}loadLicenses();});
+function page(d){state.page=Math.max(0,state.page+d);loadLicenses();}
+
+async function loadLicenses(){
+  const q=$("#q").value.trim(), st=$("#fStatus").value, ty=$("#fType").value;
+  let query=sb.from("licenses").select("*",{count:"exact"});
+  if(q)query=query.or(`license_key.ilike.%${q}%,company_name.ilike.%${q}%,email.ilike.%${q}%`);
+  if(st)query=query.eq("status",st);
+  if(ty)query=query.eq("type",ty);
+  const from=state.page*PAGE_SIZE;
+  query=query.order(state.sort,{ascending:state.dir}).range(from,from+PAGE_SIZE-1);
+  const {data,count,error}=await query;
+  if(error){toast(error.message,"bad");return;}
+  state.count=count||0;
+  // device counts
+  const ids=data.map(l=>l.id);
+  let devMap={};
+  if(ids.length){const devs=await guard(sb.from("devices").select("license_id").in("license_id",ids).eq("is_active",true));devs.forEach(d=>devMap[d.license_id]=(devMap[d.license_id]||0)+1);}
+  $("#licRows").innerHTML=data.length?data.map(l=>`<tr>
+    <td class="mono">${esc(l.license_key)}</td>
+    <td>${esc(l.company_name||"—")}</td>
+    <td><span class="pill mut">${esc(l.type||"—")}</span></td>
+    <td>${statusPill(l.status)}</td>
+    <td>${devMap[l.id]||0} / ${l.max_devices||1}</td>
+    <td>${l.expires_at?fmtDate(l.expires_at):"Permanente"}</td>
+    <td style="color:var(--muted)">${fmtDate(l.created_at)}</td>
+    <td><button class="sm" onclick='openLicense(${JSON.stringify(l.id)})'>Gérer</button></td></tr>`).join(""):`<tr><td colspan="8" style="color:var(--muted);padding:20px">Aucune licence.</td></tr>`;
+  const pages=Math.max(1,Math.ceil(state.count/PAGE_SIZE));
+  $("#pgInfo").textContent=`${state.count} licence(s) · page ${state.page+1}/${pages}`;
+  $("#pgPrev").disabled=state.page<=0;$("#pgNext").disabled=state.page>=pages-1;
+}
+
+async function openLicense(id){
+  let lic={company_name:"",email:"",phone:"",type:"lifetime",max_devices:1,status:"pending",expires_at:null,notes:""};
+  if(id)lic=await guard(sb.from("licenses").select("*").eq("id",id).single());
+  const mods=id?await loadModulePerms(id):[];
+  const devs=id?await guard(sb.from("devices").select("*").eq("license_id",id).order("last_seen_at",{ascending:false})):[];
+  const isNew=!id;
+  $("#modal").innerHTML=`<div class="ov" onclick="if(event.target===this)closeModal()"><div class="modal">
+    <div class="h"><h3>${isNew?"Nouvelle licence":esc(lic.license_key)}</h3><button class="sm" onclick="closeModal()">✕</button></div>
+    <div class="body">
+      <div class="row2">
+        <div class="fld"><label>Client / société</label><input id="e_company" value="${esc(lic.company_name)}"></div>
+        <div class="fld"><label>Email</label><input id="e_email" value="${esc(lic.email||"")}"></div>
+      </div>
+      <div class="row2">
+        <div class="fld"><label>Type</label><select id="e_type">${["trial","lifetime","annual","monthly","demo","enterprise"].map(t=>`<option ${lic.type===t?"selected":""}>${t}</option>`).join("")}</select></div>
+        <div class="fld"><label>Appareils max</label><input id="e_max" type="number" min="1" value="${lic.max_devices||1}"></div>
+      </div>
+      <div class="row2">
+        <div class="fld"><label>Statut</label><select id="e_status">${["pending","active","suspended","revoked"].map(s=>`<option ${lic.status===s?"selected":""}>${s}</option>`).join("")}</select></div>
+        <div class="fld"><label>Expiration (vide = permanente)</label><input id="e_exp" type="date" value="${lic.expires_at?new Date(lic.expires_at).toISOString().slice(0,10):""}"></div>
+      </div>
+      <div class="actions">
+        <button class="primary" onclick='saveLicense(${JSON.stringify(id)})'>${isNew?"Créer":"Enregistrer"}</button>
+        ${id?`<button class="sm" onclick='licAction(${JSON.stringify(id)},"extend")'>+30 jours</button>
+        <button class="sm" onclick='licAction(${JSON.stringify(id)},"reset")'>Réinit. appareils</button>
+        <button class="sm danger" onclick='licAction(${JSON.stringify(id)},"delete")'>Supprimer</button>`:""}
+      </div>
+      ${id?`<h3 style="margin:22px 0 6px;font-size:14px">Modules</h3><div class="mods" id="modBox">${
+        MODULES.map(k=>{const row=mods.find(m=>m.module_key===k);const on=k==="payroll"||(row&&row.enabled);const info=[];if(row&&row.activated_at)info.push("activé le "+fmtDate(row.activated_at));if(row&&row.expires_at)info.push("exp. "+fmtDate(row.expires_at));return `<label><input type="checkbox" ${on?"checked":""} ${k==="payroll"?"disabled":""} onchange='toggleModule(${JSON.stringify(id)},"${k}",this.checked)'> ${MODULE_NAMES[k]}${info.length?`<span style="color:var(--muted);font-size:12px;margin-left:6px">· ${info.join(" · ")}</span>`:""}</label>`;}).join("")
+      }</div>
+
+      <h3 style="margin:22px 0 6px;font-size:14px">Clés d'activation de module</h3>
+      <div class="actions" style="margin-bottom:8px">
+        <select id="mk_mod">${MODULES.filter(k=>k!=="payroll").map(k=>`<option value="${k}">${MODULE_NAMES[k]}</option>`).join("")}</select>
+        <input id="mk_exp" type="date" title="Expiration (optionnel)">
+        <button class="primary sm" onclick='genModuleKey(${JSON.stringify(id)},${JSON.stringify(lic.license_key)})'>Générer une clé</button>
+      </div>
+      <div id="mkOut"></div>
+      <table><thead><tr><th class="no">Module</th><th class="no">Clé</th><th class="no">Statut</th><th class="no">Créée</th><th class="no">Expiration</th><th class="no"></th></tr></thead><tbody id="mkTable"></tbody></table>
+
+      <h3 style="margin:22px 0 6px;font-size:14px">Appareils (${devs.length})</h3><table><tbody>${
+        devs.length?devs.map(d=>`<tr><td class="mono">${esc((d.device_id||"").slice(0,20))}</td><td style="color:var(--muted)">${fmtDT(d.last_seen_at)}</td><td>${d.is_active?'<span class="pill ok">actif</span>':'<span class="pill mut">inactif</span>'}</td></tr>`).join(""):`<tr><td style="color:var(--muted)">Aucun appareil activé.</td></tr>`
+      }</tbody></table>`:""}
+    </div></div></div>`;
+  if(id)renderKeys(id);
+}
+
+async function loadModulePerms(id){return await guard(sb.from("license_modules").select("module_key,enabled,activated_at,expires_at").eq("license_id",id));}
+
+async function renderKeys(id){
+  const keys=await guard(sb.from("activation_keys").select("*").eq("license_id",id).order("created_at",{ascending:false}));
+  const tb=document.getElementById("mkTable"); if(!tb)return;
+  const pill={unused:"ok",used:"mut",revoked:"bad",expired:"warn"};
+  tb.innerHTML=keys.length?keys.map(k=>`<tr>
+    <td>${esc(MODULE_NAMES[k.module_key]||k.module_key)}</td>
+    <td class="mono">${esc(k.key_code)}</td>
+    <td><span class="pill ${pill[k.status]||"mut"}">${esc(k.status)}</span></td>
+    <td style="color:var(--muted)">${fmtDate(k.created_at)}</td>
+    <td style="color:var(--muted)">${k.expires_at?fmtDate(k.expires_at):"—"}</td>
+    <td>${k.status==="unused"?`<button class="sm danger" onclick='revokeKey(${JSON.stringify(k.id)},${JSON.stringify(id)})'>Révoquer</button>`:""}</td></tr>`).join(""):`<tr><td colspan="6" style="color:var(--muted)">Aucune clé générée.</td></tr>`;
+}
+async function genModuleKey(id,licKey){
+  const mod=document.getElementById("mk_mod").value;
+  const expv=document.getElementById("mk_exp").value;
+  const exp=expv?new Date(expv).toISOString():null;
+  const rows=await guard(sb.rpc("generate_module_keys",{p_license_key:licKey,p_module_key:mod,p_count:1,p_expires:exp}));
+  const code=rows[0].key_code;
+  document.getElementById("mkOut").innerHTML=`<div class="card" style="margin:0 0 10px;background:var(--brand-s)"><b>Clé générée :</b> <span class="mono">${esc(code)}</span> <button class="sm" onclick="navigator.clipboard&&navigator.clipboard.writeText('${code}');toast('Clé copiée','ok')">Copier</button></div>`;
+  toast("Clé générée","ok");renderKeys(id);
+}
+async function revokeKey(keyId,licId){
+  if(!confirm("Révoquer cette clé d'activation ?"))return;
+  await guard(sb.rpc("revoke_activation_key",{p_key_id:keyId}));
+  toast("Clé révoquée","ok");renderKeys(licId);
+}
+
+async function saveLicense(id){
+  const patch={company_name:$("#e_company").value.trim(),email:$("#e_email").value.trim(),type:$("#e_type").value,max_devices:parseInt($("#e_max").value)||1,status:$("#e_status").value,expires_at:$("#e_exp").value?new Date($("#e_exp").value).toISOString():null};
+  if(id){await guard(sb.from("licenses").update(patch).eq("id",id));toast("Licence enregistrée","ok");}
+  else{patch.product_id=PRODUCT_ID;patch.license_key=await genKey();await guard(sb.from("licenses").insert(patch));toast("Licence créée","ok");}
+  closeModal();loadLicenses();
+}
+async function genKey(){const d=await guard(sb.rpc("gen_license_key"));return d;}
+
+async function toggleModule(id,key,on){
+  await guard(sb.from("license_modules").upsert({license_id:id,product_id:PRODUCT_ID,module_key:key,enabled:on},{onConflict:"license_id,module_key"}));
+  toast((on?"Module activé : ":"Module désactivé : ")+MODULE_NAMES[key],"ok");
+}
+
+async function licAction(id,action){
+  if(action==="delete"){if(!confirm("Supprimer définitivement cette licence ?"))return;await guard(sb.from("licenses").delete().eq("id",id));toast("Licence supprimée","ok");closeModal();loadLicenses();return;}
+  if(action==="reset"){await guard(sb.from("devices").delete().eq("license_id",id));toast("Appareils réinitialisés","ok");openLicense(id);return;}
+  if(action==="extend"){const l=await guard(sb.from("licenses").select("expires_at").eq("id",id).single());const base=l.expires_at?new Date(l.expires_at):new Date();base.setDate(base.getDate()+30);await guard(sb.from("licenses").update({expires_at:base.toISOString()}).eq("id",id));toast("Prolongée de 30 jours","ok");openLicense(id);return;}
+}
+
+// ===== bulk =====
+function openBulk(){
+  $("#modal").innerHTML=`<div class="ov" onclick="if(event.target===this)closeModal()"><div class="modal">
+    <div class="h"><h3>Génération de licences en lot</h3><button class="sm" onclick="closeModal()">✕</button></div>
+    <div class="body">
+      <div class="fld"><label>Quantité</label><div class="actions">${[10,50,100,500,1000].map(n=>`<button onclick="runBulk(${n})">${n}</button>`).join("")}</div></div>
+      <div class="fld"><label>Note (lot)</label><input id="bulkNote" placeholder="ex. Lot janvier 2026"></div>
+      <div id="bulkOut"></div>
+    </div></div></div>`;
+}
+async function runBulk(n){
+  $("#bulkOut").innerHTML="Génération…";
+  const note=$("#bulkNote").value.trim()||null;
+  const rows=await guard(sb.rpc("generate_licenses",{p_count:n,p_product_key:"payroll",p_notes:note}));
+  const keys=rows.map(r=>r.license_key);
+  $("#bulkOut").innerHTML=`<p><b>${keys.length}</b> licence(s) générée(s).</p>
+    <div class="actions"><button class="primary" onclick='exportCsv(${JSON.stringify(keys)})'>Exporter en CSV</button></div>
+    <textarea readonly style="width:100%;height:160px;margin-top:10px;font-family:Consolas;font-size:12px">${keys.join("\n")}</textarea>`;
+  loadDashboard();
+}
+function exportCsv(keys){
+  const csv="license_key\n"+keys.join("\n");
+  const blob=new Blob([csv],{type:"text/csv"});const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);a.download="optipaie-licenses-"+Date.now()+".csv";a.click();
+}
+
+// ===== devices =====
+async function loadDevices(){
+  const devs=await guard(sb.from("devices").select("*, licenses(license_key,company_name)").order("last_seen_at",{ascending:false}).limit(200));
+  $("#devRows").innerHTML=devs.length?devs.map(d=>`<tr>
+    <td class="mono">${esc((d.device_id||"").slice(0,22))}</td>
+    <td class="mono">${esc(d.licenses?d.licenses.license_key:"—")}</td>
+    <td>${esc(d.app_version||"—")}</td>
+    <td style="color:var(--muted)">${fmtDate(d.activated_at)}</td>
+    <td style="color:var(--muted)">${fmtDT(d.last_seen_at)}</td>
+    <td>${d.is_active?'<span class="pill ok">actif</span>':'<span class="pill mut">inactif</span>'}</td>
+    <td><button class="sm danger" onclick='resetDevice(${JSON.stringify(d.id)})'>Réinitialiser</button></td></tr>`).join(""):`<tr><td colspan="7" style="color:var(--muted);padding:20px">Aucun appareil.</td></tr>`;
+}
+async function resetDevice(id){if(!confirm("Libérer cet appareil ?"))return;await guard(sb.from("devices").delete().eq("id",id));toast("Appareil réinitialisé","ok");loadDevices();}
+
+// ===== updates =====
+async function loadUpdates(){
+  const ups=await guard(sb.from("updates").select("*").order("published_at",{ascending:false}));
+  $("#updRows").innerHTML=ups.length?ups.map(u=>`<tr>
+    <td class="mono">${esc(u.version)}</td><td>${esc(u.channel)}</td>
+    <td>${u.mandatory?'<span class="pill bad">oui</span>':'<span class="pill mut">non</span>'}</td>
+    <td>${u.is_latest?'<span class="pill ok">latest</span>':`<button class="sm" onclick='setLatest(${JSON.stringify(u.id)},"${esc(u.version)}")'>Définir</button>`}</td>
+    <td style="color:var(--muted)">${fmtDate(u.published_at)}</td>
+    <td><button class="sm danger" onclick='delUpdate(${JSON.stringify(u.id)})'>Suppr.</button></td></tr>`).join(""):`<tr><td colspan="6" style="color:var(--muted);padding:20px">Aucune version.</td></tr>`;
+}
+function openUpdate(){
+  $("#modal").innerHTML=`<div class="ov" onclick="if(event.target===this)closeModal()"><div class="modal">
+    <div class="h"><h3>Publier une version</h3><button class="sm" onclick="closeModal()">✕</button></div>
+    <div class="body">
+      <div class="row2"><div class="fld"><label>Version</label><input id="u_ver" placeholder="1.1.0"></div>
+      <div class="fld"><label>Canal</label><select id="u_ch"><option>stable</option><option>beta</option></select></div></div>
+      <div class="fld"><label><input type="checkbox" id="u_mand"> Mise à jour obligatoire</label></div>
+      <div class="fld"><label>URL du package (feed Velopack)</label><input id="u_url" placeholder="https://…"></div>
+      <div class="fld"><label>Checksum (SHA-256)</label><input id="u_sum"></div>
+      <div class="fld"><label>Notes de version</label><input id="u_notes" placeholder="Corrections, nouveautés…"></div>
+      <div class="actions"><button class="primary" onclick="saveUpdate()">Publier</button></div>
+    </div></div></div>`;
+}
+async function saveUpdate(){
+  const rec={version:$("#u_ver").value.trim(),channel:$("#u_ch").value,mandatory:$("#u_mand").checked,package_url:$("#u_url").value.trim(),checksum:$("#u_sum").value.trim(),release_notes:$("#u_notes").value.trim()};
+  if(!rec.version){toast("Version requise","bad");return;}
+  await guard(sb.from("updates").insert(rec));
+  toast("Version publiée","ok");closeModal();loadUpdates();
+}
+async function setLatest(id,ver){
+  await guard(sb.from("updates").update({is_latest:false}).neq("id",id));
+  await guard(sb.from("updates").update({is_latest:true}).eq("id",id));
+  await guard(sb.from("app_settings").upsert({key:"latest_version",value:ver},{onConflict:"key"}));
+  toast("Version "+ver+" définie comme dernière","ok");loadUpdates();
+}
+async function delUpdate(id){if(!confirm("Supprimer cette version ?"))return;await guard(sb.from("updates").delete().eq("id",id));toast("Supprimée","ok");loadUpdates();}
+
+// ===== reports =====
+async function loadReports(){
+  const mods=await guard(sb.from("v_module_activation_stats").select("*").eq("product_key","payroll").order("sort_order"));
+  document.getElementById("repModules").innerHTML=mods.length?mods.map(m=>`<tr><td>${esc(m.name_fr)}${m.is_core?' <span class="pill mut">core</span>':''}</td><td><b>${m.enabled_count||0}</b></td></tr>`).join(""):`<tr><td style="color:var(--muted)">—</td></tr>`;
+  const lic=await guard(sb.from("licenses").select("type,status"));
+  const byType={}, byStatus={};
+  lic.forEach(l=>{const t=l.type||"—";byType[t]=(byType[t]||0)+1;const s=l.status||"—";byStatus[s]=(byStatus[s]||0)+1;});
+  const rows=o=>Object.keys(o).sort().map(k=>`<tr><td>${esc(k)}</td><td><b>${o[k]}</b></td></tr>`).join("")||`<tr><td style="color:var(--muted)">—</td></tr>`;
+  document.getElementById("repTypes").innerHTML=rows(byType);
+  document.getElementById("repStatus").innerHTML=rows(byStatus);
+  const keys=await guard(sb.from("activation_keys").select("status"));
+  const byKey={};keys.forEach(k=>{byKey[k.status]=(byKey[k.status]||0)+1;});
+  document.getElementById("repKeys").innerHTML=rows(byKey);
+}
+
+// ===== audit log =====
+let auditPage=0;
+function auditPageMove(d){auditPage=Math.max(0,auditPage+d);loadAudit();}
+async function loadAudit(){
+  const act=document.getElementById("auditAction").value;
+  let q=sb.from("audit_log").select("*",{count:"exact"});
+  if(act)q=q.eq("action",act);
+  const from=auditPage*30;
+  const {data,count,error}=await q.order("created_at",{ascending:false}).range(from,from+29);
+  if(error){toast(error.message,"bad");return;}
+  document.getElementById("auditRows").innerHTML=(data&&data.length)?data.map(a=>`<tr>
+    <td style="color:var(--muted)">${fmtDT(a.created_at)}</td>
+    <td>${esc(a.admin_email||"système")}</td>
+    <td><span class="pill mut">${esc(a.action)}</span></td>
+    <td>${esc(a.company_name||"—")}</td>
+    <td class="mono" style="color:var(--muted)">${esc(a.details?JSON.stringify(a.details).slice(0,60):"")}</td></tr>`).join(""):`<tr><td colspan="5" style="color:var(--muted);padding:20px">Aucune entrée.</td></tr>`;
+  const total=count||0, pages=Math.max(1,Math.ceil(total/30));
+  document.getElementById("auditInfo").textContent=`${total} entrée(s) · page ${auditPage+1}/${pages}`;
+  document.getElementById("auditPrev").disabled=auditPage<=0;
+  document.getElementById("auditNext").disabled=auditPage>=pages-1;
+}
+
+boot();
+</script>
+</body>
+</html>

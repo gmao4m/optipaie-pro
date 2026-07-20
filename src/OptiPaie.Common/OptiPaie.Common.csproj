@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    OptiPaie.Common - cross-cutting infrastructure utilities only.
+    Logging, machine-level configuration access, guards, validation primitives,
+    constants and paths. NO domain logic and NO reference to Core, so it can be
+    consumed by every layer without creating cycles.
+  -->
+
+  <PropertyGroup>
+    <RootNamespace>OptiPaie.Common</RootNamespace>
+    <AssemblyName>OptiPaie.Common</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <!-- Framework assembly used by AppConfigurationReader to read the host app config. -->
+  <ItemGroup>
+    <Reference Include="System.Configuration" />
+  </ItemGroup>
+
+</Project>

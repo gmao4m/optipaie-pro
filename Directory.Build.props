@@ -1,0 +1,53 @@
+<Project>
+
+  <!--
+    OptiPaie DZ - shared MSBuild properties applied to every project in the solution.
+    Centralising these here keeps versioning, framework target and the DevExpress
+    version in a single place (DRY). Change them once, not per-project.
+  -->
+
+  <PropertyGroup>
+    <!-- Product identity -->
+    <Company>OptiPaie</Company>
+    <Product>OptiPaie PRO</Product>
+    <Authors>OptiPaie</Authors>
+    <Copyright>© 2026 OptiPaie. Tous droits réservés.</Copyright>
+    <Version>1.0.0</Version>
+    <FileVersion>1.0.0.0</FileVersion>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+
+    <!-- Target platform: .NET Framework 4.8 (Windows 7 SP1 -> Windows 11) -->
+    <TargetFramework>net48</TargetFramework>
+
+    <!--
+      Single x86 build: one binary set that runs on both 32- and 64-bit Windows
+      and lets System.Data.SQLite load its native interop without bitness branching.
+    -->
+    <PlatformTarget>x86</PlatformTarget>
+    <Prefer32Bit>true</Prefer32Bit>
+
+    <!-- Language / compiler -->
+    <LangVersion>7.3</LangVersion>
+    <Nullable>disable</Nullable>
+    <Deterministic>true</Deterministic>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <NeutralLanguage>fr</NeutralLanguage>
+
+    <!--
+      DevExpress version used by the UI and Reporting projects.
+      >>> SET THIS to the exact DevExpress build installed on the developer machine. <<<
+      (Find it in DevExpress Project Converter or the installed assemblies version.)
+    -->
+    <DevExpressVersion>24.2.6</DevExpressVersion>
+
+    <!--
+      NU1603: a DevExpress meta-package may pin a transitive DevExpress dependency to
+      an exact build that the feed satisfies with the nearest higher 24.2.x patch.
+      All DevExpress PackageReferences use the single $(DevExpressVersion) above, so
+      this approximate-match restore warning is benign and must not fail the build.
+    -->
+    <NoWarn>$(NoWarn);NU1603</NoWarn>
+  </PropertyGroup>
+
+</Project>

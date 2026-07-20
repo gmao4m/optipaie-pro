@@ -1,0 +1,27 @@
+<UserControl x:Class="OptiPaie.Desktop.Views.PlaceholderView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Margin="28">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0">
+            <TextBlock Style="{StaticResource H1}" Text="{Binding Title}" />
+            <TextBlock Style="{StaticResource Caption}" Margin="0,5,0,0" Text="{Binding Subtitle}" />
+        </StackPanel>
+
+        <Border Grid.Row="1" Margin="0,20,0,0" Style="{StaticResource Card}">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Border Width="64" Height="64" CornerRadius="16" Background="{StaticResource BrandSoft}" HorizontalAlignment="Center">
+                    <Path Width="30" Height="30" Stretch="Uniform" Fill="{StaticResource Brand}"
+                          Data="{StaticResource IconWallet}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <TextBlock Style="{StaticResource H2}" Margin="0,16,0,0" HorizontalAlignment="Center" Text="{Binding Title}" />
+                <TextBlock Style="{StaticResource Caption}" Margin="0,6,0,0" HorizontalAlignment="Center"
+                           Text="Ce module est en cours de finalisation." />
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

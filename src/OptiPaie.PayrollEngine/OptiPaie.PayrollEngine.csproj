@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    OptiPaie.PayrollEngine - the calculation heart.
+    Pure, deterministic, I/O-free implementation of the approved Algerian Payroll
+    Engine Specification (CNAS, Base Imposable, IRG barème, Abattement, Lissage).
+    REFERENCES CORE ONLY so it can be unit-tested against real payslips and can
+    never be broken by a UI or database change.
+  -->
+
+  <PropertyGroup>
+    <RootNamespace>OptiPaie.PayrollEngine</RootNamespace>
+    <AssemblyName>OptiPaie.PayrollEngine</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OptiPaie.Core\OptiPaie.Core.csproj" />
+  </ItemGroup>
+
+</Project>

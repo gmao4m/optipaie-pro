@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>OptiPaie DZ — Impression des licences</title>
+<style>
+  :root {
+    --cols: 4;
+    --cell-h: 55mm;      /* set by JS to fit 14–20 cells per A4 page */
+    --key-fs: 15px;
+    --ink: #101418;
+    --muted: #5b6672;
+    --line: #98a3b0;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+    color: var(--ink);
+    background: #eef1f4;
+  }
+
+  /* ---- Toolbar (screen only) ---- */
+  .toolbar {
+    position: sticky; top: 0; z-index: 10;
+    background: #0F6E56; color: #fff;
+    padding: 12px 18px;
+    display: flex; flex-wrap: wrap; gap: 14px 22px; align-items: flex-end;
+    box-shadow: 0 2px 8px rgba(0,0,0,.15);
+  }
+  .toolbar h1 { font-size: 15px; margin: 0 12px 0 0; font-weight: 600; align-self: center; }
+  .field { display: flex; flex-direction: column; gap: 4px; }
+  .field label { font-size: 11px; opacity: .9; }
+  .field input, .field select, .field textarea {
+    font: inherit; font-size: 13px; padding: 6px 8px;
+    border: 1px solid rgba(255,255,255,.5); border-radius: 6px;
+    background: #fff; color: #101418;
+  }
+  textarea { width: 320px; height: 60px; resize: vertical; font-family: Consolas, "Courier New", monospace; }
+  .btn {
+    font: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
+    padding: 8px 16px; border: 0; border-radius: 6px; color: #0F6E56; background: #fff;
+  }
+  .btn.secondary { background: rgba(255,255,255,.15); color: #fff; border: 1px solid rgba(255,255,255,.6); }
+  .count { align-self: center; font-size: 12px; opacity: .95; }
+
+  /* ---- Sheet ---- */
+  .sheet-wrap { padding: 16px; display: flex; justify-content: center; }
+  .sheet {
+    width: 210mm; min-height: 297mm; padding: 8mm; background: #fff;
+    box-shadow: 0 1px 6px rgba(0,0,0,.18);
+    display: grid;
+    grid-template-columns: repeat(var(--cols), 1fr);
+    grid-auto-rows: var(--cell-h);
+    gap: 0;
+  }
+
+  .cell {
+    border: 1px dashed var(--line);
+    margin: -0.5px;                 /* collapse adjacent borders */
+    padding: 6mm 4mm;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; gap: 3mm;
+    break-inside: avoid; page-break-inside: avoid;
+  }
+  .cell .brand { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  .cell .label { font-size: 11px; color: var(--muted); }
+  .cell .key {
+    font-family: Consolas, "Courier New", monospace; font-weight: 700;
+    font-size: var(--key-fs); letter-spacing: .04em; color: var(--ink);
+    white-space: nowrap;
+  }
+  .cell .hint { font-size: 9.5px; color: var(--muted); }
+  .cell .num { position: absolute; }
+  .cell-inner { position: relative; width: 100%; }
+  .seq { font-size: 9px; color: var(--line); }
+
+  .empty-note { color: var(--muted); font-size: 13px; padding: 40px; text-align: center; grid-column: 1 / -1; }
+
+  @media print {
+    .toolbar, .sheet-wrap { padding: 0; }
+    .toolbar { display: none !important; }
+    body { background: #fff; }
+    .sheet { box-shadow: none; width: auto; min-height: auto; margin: 0; }
+    @page { size: A4; margin: 8mm; }
+  }
+</style>
+</head>
+<body>
+  <div class="toolbar no-print">
+    <h1>OptiPaie DZ · Licences</h1>
+    <div class="field">
+      <label for="keys">Clés de licence (une par ligne)</label>
+      <textarea id="keys" placeholder="PAY-8X2Q-7A9L-5D3K&#10;PAY-3M7H-9QK2-4T6P&#10;..."></textarea>
+    </div>
+    <div class="field">
+      <label for="product">Libellé produit</label>
+      <input id="product" type="text" value="OptiPaie DZ — Paie" />
+    </div>
+    <div class="field">
+      <label for="cols">Colonnes (par page)</label>
+      <select id="cols">
+        <option value="2">2 colonnes — 14 / page</option>
+        <option value="3">3 colonnes — 18 / page</option>
+        <option value="4" selected>4 colonnes — 20 / page</option>
+      </select>
+    </div>
+    <button class="btn" id="render">Générer l'aperçu</button>
+    <button class="btn secondary" id="print">Imprimer / PDF</button>
+    <span class="count" id="count"></span>
+  </div>
+
+  <div class="sheet-wrap">
+    <div class="sheet" id="sheet"></div>
+  </div>
+
+<script>
+  // Rows chosen so each column count lands inside the requested 14–20 per page.
+  var LAYOUT = {
+    2: { rows: 7, cellH: "38mm", keyFs: "24px" }, // 14 / page
+    3: { rows: 6, cellH: "45mm", keyFs: "19px" }, // 18 / page
+    4: { rows: 5, cellH: "54mm", keyFs: "15px" }  // 20 / page
+  };
+
+  var sheet = document.getElementById("sheet");
+  var keysEl = document.getElementById("keys");
+  var productEl = document.getElementById("product");
+  var colsEl = document.getElementById("cols");
+  var countEl = document.getElementById("count");
+
+  function parseKeys() {
+    return keysEl.value
+      .split(/\r?\n/)
+      .map(function (s) { return s.trim().toUpperCase(); })
+      .filter(function (s) { return s.length > 0; });
+  }
+
+  function render() {
+    var cols = parseInt(colsEl.value, 10) || 4;
+    var cfg = LAYOUT[cols];
+    var product = (productEl.value || "").trim();
+    var keys = parseKeys();
+
+    document.documentElement.style.setProperty("--cols", cols);
+    document.documentElement.style.setProperty("--cell-h", cfg.cellH);
+    document.documentElement.style.setProperty("--key-fs", cfg.keyFs);
+
+    sheet.innerHTML = "";
+
+    if (keys.length === 0) {
+      var note = document.createElement("div");
+      note.className = "empty-note";
+      note.textContent = "Collez les clés générées (fonction generate_licenses) ci-dessus, puis cliquez « Générer l'aperçu ».";
+      sheet.appendChild(note);
+      countEl.textContent = "";
+      return;
+    }
+
+    keys.forEach(function (key, i) {
+      var cell = document.createElement("div");
+      cell.className = "cell";
+      cell.innerHTML =
+        '<div class="brand">Licence</div>' +
+        (product ? '<div class="label">' + escapeHtml(product) + '</div>' : '') +
+        '<div class="key">' + escapeHtml(key) + '</div>' +
+        '<div class="hint">À saisir lors de l\'activation</div>' +
+        '<div class="seq">' + (i + 1) + ' / ' + keys.length + '</div>';
+      sheet.appendChild(cell);
+    });
+
+    var perPage = cols * cfg.rows;
+    var pages = Math.ceil(keys.length / perPage);
+    countEl.textContent = keys.length + " licence(s) · " + perPage + "/page · " + pages + " page(s)";
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  document.getElementById("render").addEventListener("click", render);
+  document.getElementById("print").addEventListener("click", function () { render(); window.print(); });
+  colsEl.addEventListener("change", render);
+
+  render();
+</script>
+</body>
+</html>

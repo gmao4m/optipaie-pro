@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    OptiPaie PRO — Admin Desktop (WPF). A native console for the licensing platform.
+    Talks to Supabase over REST (owner login) with the publishable key only — the
+    service-role key is never used here. Inherits net48/x86/version from
+    Directory.Build.props.
+  -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>OptiPaie.Admin</RootNamespace>
+    <AssemblyName>OptiPaie PRO Admin</AssemblyName>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <ApplicationIcon>..\..\build\OptiPaie.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Configuration" />
+  </ItemGroup>
+
+</Project>

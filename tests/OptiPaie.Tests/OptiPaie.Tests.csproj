@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    OptiPaie.Tests - QA suite.
+    Primary purpose: prove the Payroll Engine against the worked examples in the
+    approved specification (legal accuracy). Also covers repositories and
+    migrations. Not shipped with the product.
+  -->
+
+  <PropertyGroup>
+    <RootNamespace>OptiPaie.Tests</RootNamespace>
+    <AssemblyName>OptiPaie.Tests</AssemblyName>
+    <IsPackable>false</IsPackable>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.10.0" />
+    <PackageReference Include="NUnit" Version="3.14.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\OptiPaie.Core\OptiPaie.Core.csproj" />
+    <ProjectReference Include="..\..\src\OptiPaie.Common\OptiPaie.Common.csproj" />
+    <ProjectReference Include="..\..\src\OptiPaie.Data\OptiPaie.Data.csproj" />
+    <ProjectReference Include="..\..\src\OptiPaie.PayrollEngine\OptiPaie.PayrollEngine.csproj" />
+    <ProjectReference Include="..\..\src\OptiPaie.Services\OptiPaie.Services.csproj" />
+  </ItemGroup>
+
+</Project>

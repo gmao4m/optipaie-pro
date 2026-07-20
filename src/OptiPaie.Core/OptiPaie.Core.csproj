@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    OptiPaie.Core - the domain heart.
+    Entities, enums, DTOs, contracts (interfaces) and domain primitives
+    (Result, Money, RoundingPolicy). DEPENDS ON NOTHING.
+    No DevExpress, no SQLite, no WinForms. This is the stable centre of the
+    Clean Architecture: every other project depends inward on Core.
+  -->
+
+  <PropertyGroup>
+    <RootNamespace>OptiPaie.Core</RootNamespace>
+    <AssemblyName>OptiPaie.Core</AssemblyName>
+  </PropertyGroup>
+
+</Project>

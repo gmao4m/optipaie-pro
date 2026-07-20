@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Weavers xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="FodyWeavers.xsd">
+  <!--
+    Costura packs all managed dependencies (DevExpress, Dapper, System.Data.SQLite,
+    Newtonsoft.Json, ...) into the single OptiPaieDZ.exe.
+    The native SQLite interop is embedded too so the product ships as one file.
+  -->
+  <Costura>
+    <Unmanaged32Assemblies>SQLite.Interop</Unmanaged32Assemblies>
+  </Costura>
+</Weavers>

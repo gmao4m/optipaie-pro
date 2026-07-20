@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OptiPaie PRO - MSI installer definition (WiX v5).
+  Produces a professional wizard (Welcome -> License -> Install location ->
+  Install -> Finish) with Desktop + Start Menu shortcuts, an uninstaller and the
+  product icon. The whole application payload is harvested from the Release build.
+
+  Data safety: the app stores its SQLite database, backups and license cache under
+  %AppData%\OptiPaie DZ - OUTSIDE the install folder - so install, upgrade and
+  uninstall never touch the customer's data.
+-->
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+
+  <Package Name="OptiPaie PRO"
+           Manufacturer="OptiPaie"
+           Version="1.0.0.0"
+           UpgradeCode="B4318537-7007-4E89-AFE5-148F2A869C99"
+           Scope="perMachine"
+           Compressed="yes">
+
+    <SummaryInformation Description="OptiPaie PRO - Logiciel de paie" Manufacturer="OptiPaie" />
+
+    <!-- Upgrades replace binaries only; user data lives in %AppData% and is preserved. -->
+    <MajorUpgrade AllowSameVersionUpgrades="yes"
+                  DowngradeErrorMessage="Une version plus récente d'OptiPaie PRO est déjà installée." />
+
+    <MediaTemplate EmbedCab="yes" />
+
+    <Icon Id="AppIcon.ico" SourceFile="OptiPaie.ico" />
+    <Property Id="ARPPRODUCTICON" Value="AppIcon.ico" />
+    <Property Id="ARPHELPLINK" Value="https://optipaie.dz" />
+
+    <!-- License shown by the wizard -->
+    <WixVariable Id="WixUILicenseRtf" Value="License.rtf" />
+
+    <!-- Install directories -->
+    <StandardDirectory Id="ProgramFiles6432Folder">
+      <Directory Id="INSTALLFOLDER" Name="OptiPaie PRO" />
+    </StandardDirectory>
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="AppProgramMenuDir" Name="OptiPaie PRO" />
+    </StandardDirectory>
+    <StandardDirectory Id="DesktopFolder" />
+
+    <!-- Application payload (harvested from the Release output) -->
+    <ComponentGroup Id="AppFiles" Directory="INSTALLFOLDER">
+      <Files Include="$(var.PublishDir)\**" />
+    </ComponentGroup>
+
+    <!-- Desktop + Start Menu shortcuts -->
+    <Component Id="AppShortcuts" Directory="AppProgramMenuDir"
+               Guid="1A49CF20-A923-4351-80B6-31C92984F5A8">
+      <Shortcut Id="StartMenuShortcut"
+                Name="OptiPaie PRO"
+                Description="Logiciel de paie OptiPaie PRO"
+                Target="[INSTALLFOLDER]OptiPaie PRO.exe"
+                WorkingDirectory="INSTALLFOLDER"
+                Icon="AppIcon.ico" />
+      <Shortcut Id="DesktopShortcut"
+                Directory="DesktopFolder"
+                Name="OptiPaie PRO"
+                Description="Logiciel de paie OptiPaie PRO"
+                Target="[INSTALLFOLDER]OptiPaie PRO.exe"
+                WorkingDirectory="INSTALLFOLDER"
+                Icon="AppIcon.ico" />
+      <RemoveFolder Id="RemoveProgramMenuDir" Directory="AppProgramMenuDir" On="uninstall" />
+      <RegistryValue Root="HKLM" Key="Software\OptiPaie\OptiPaie PRO"
+                     Name="Installed" Type="integer" Value="1" KeyPath="yes" />
+    </Component>
+
+    <Feature Id="Main" Title="OptiPaie PRO" Level="1">
+      <ComponentGroupRef Id="AppFiles" />
+      <ComponentRef Id="AppShortcuts" />
+    </Feature>
+
+    <!-- Wizard with install-location selection -->
+    <ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLFOLDER" />
+
+  </Package>
+</Wix>

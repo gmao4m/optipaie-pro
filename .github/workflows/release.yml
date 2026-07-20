@@ -1,0 +1,56 @@
+name: Release
+
+# Publishes a GitHub Release with the OptiPaie PRO installer whenever a version
+# tag (e.g. v1.0.1) is pushed. The desktop client checks this repository's latest
+# release, compares versions, and offers the update. Uses the built-in GITHUB_TOKEN
+# — no extra secrets required for a public repository.
+
+on:
+  push:
+    tags: [ 'v*' ]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version (e.g. 1.0.1)'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Install Velopack CLI (vpk)
+        run: dotnet tool install -g vpk --version 1.2.0
+
+      - name: Resolve version
+        id: ver
+        shell: pwsh
+        run: |
+          $v = if ($env:GITHUB_REF_NAME -like 'v*') { $env:GITHUB_REF_NAME.TrimStart('v') } else { '${{ github.event.inputs.version }}' }
+          echo "value=$v" >> $env:GITHUB_OUTPUT
+
+      - name: Build + pack (Velopack)
+        shell: pwsh
+        run: powershell -ExecutionPolicy Bypass -File release/pack.ps1 -Version ${{ steps.ver.outputs.value }}
+
+      - name: Create GitHub Release + upload installer
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: OptiPaie PRO ${{ steps.ver.outputs.value }}
+          generate_release_notes: true
+          files: |
+            release/output/*Setup.exe
+            release/output/*.nupkg
+            release/output/RELEASES
+            release/output/*.json

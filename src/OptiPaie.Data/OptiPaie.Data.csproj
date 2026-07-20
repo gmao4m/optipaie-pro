@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    OptiPaie.Data - SQLite persistence.
+    Repositories (Dapper), Unit of Work / transactions, migration runner, seed
+    data and the SQLite online-backup provider. Implements the repository
+    interfaces declared in Core (Dependency Inversion).
+  -->
+
+  <PropertyGroup>
+    <RootNamespace>OptiPaie.Data</RootNamespace>
+    <AssemblyName>OptiPaie.Data</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.118" />
+    <PackageReference Include="Dapper" Version="2.1.35" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OptiPaie.Core\OptiPaie.Core.csproj" />
+    <ProjectReference Include="..\OptiPaie.Common\OptiPaie.Common.csproj" />
+  </ItemGroup>
+
+  <!-- Embedded SQL scripts (schema, migrations, seed) shipped inside the assembly. -->
+  <ItemGroup>
+    <None Remove="Sql\**\*.sql" />
+    <EmbeddedResource Include="Sql\**\*.sql" />
+  </ItemGroup>
+
+</Project>

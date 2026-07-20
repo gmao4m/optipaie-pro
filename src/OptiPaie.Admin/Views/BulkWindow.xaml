@@ -1,0 +1,26 @@
+<Window x:Class="OptiPaie.Admin.Views.BulkWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Génération de licences en lot" Height="480" Width="520" ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner" FontFamily="Segoe UI" Background="{StaticResource Canvas}">
+    <StackPanel Margin="24">
+        <TextBlock Text="Génération de licences en lot" Style="{StaticResource H2}" />
+        <TextBlock Text="Quantité" Style="{StaticResource Caption}" Margin="0,16,0,6" />
+        <WrapPanel>
+            <Button Content="10" Style="{StaticResource SecondaryButton}" Width="70" Margin="0,0,8,8" Command="{Binding GenerateCommand}" CommandParameter="10" />
+            <Button Content="50" Style="{StaticResource SecondaryButton}" Width="70" Margin="0,0,8,8" Command="{Binding GenerateCommand}" CommandParameter="50" />
+            <Button Content="100" Style="{StaticResource SecondaryButton}" Width="70" Margin="0,0,8,8" Command="{Binding GenerateCommand}" CommandParameter="100" />
+            <Button Content="500" Style="{StaticResource SecondaryButton}" Width="70" Margin="0,0,8,8" Command="{Binding GenerateCommand}" CommandParameter="500" />
+            <Button Content="1000" Style="{StaticResource SecondaryButton}" Width="70" Margin="0,0,8,8" Command="{Binding GenerateCommand}" CommandParameter="1000" />
+        </WrapPanel>
+        <TextBlock Text="Note (lot)" Style="{StaticResource Caption}" Margin="0,8,0,6" />
+        <TextBox Style="{StaticResource AppTextBox}" Text="{Binding Note}" />
+        <DockPanel Margin="0,14,0,6">
+            <Button DockPanel.Dock="Right" Content="Exporter en CSV" Style="{StaticResource PrimaryButton}" Command="{Binding ExportCommand}" />
+            <TextBlock Text="Clés générées" Style="{StaticResource Caption}" VerticalAlignment="Center" />
+        </DockPanel>
+        <TextBox Text="{Binding Output, Mode=OneWay}" IsReadOnly="True" Height="180" FontFamily="Consolas" FontSize="12"
+                 VerticalScrollBarVisibility="Auto" TextWrapping="NoWrap" HorizontalScrollBarVisibility="Auto"
+                 Background="White" BorderBrush="{StaticResource BorderStrong}" BorderThickness="1" Padding="8" />
+    </StackPanel>
+</Window>

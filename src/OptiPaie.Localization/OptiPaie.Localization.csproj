@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    OptiPaie.Localization - bilingual support (Arabic RTL / French LTR).
+    Culture switching, RTL/LTR application, resource access and the embedded
+    Arabic-capable font(s) used on screen and in printed payslips.
+  -->
+
+  <PropertyGroup>
+    <RootNamespace>OptiPaie.Localization</RootNamespace>
+    <AssemblyName>OptiPaie.Localization</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OptiPaie.Core\OptiPaie.Core.csproj" />
+    <ProjectReference Include="..\OptiPaie.Common\OptiPaie.Common.csproj" />
+  </ItemGroup>
+
+  <!-- Embedded fonts (deployed/loaded at runtime so Windows 7 needs nothing installed). -->
+  <ItemGroup>
+    <None Remove="Fonts\**\*.ttf" />
+    <EmbeddedResource Include="Fonts\**\*.ttf" />
+  </ItemGroup>
+
+</Project>

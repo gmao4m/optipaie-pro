@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    OptiPaie.Services - application / business layer.
+    Use-case orchestration: loads data via repositories, builds the payroll
+    engine context, invokes the engine, persists results in a transaction and
+    coordinates archiving. Contains entity validators. Holds no SQL and no math.
+  -->
+
+  <PropertyGroup>
+    <RootNamespace>OptiPaie.Services</RootNamespace>
+    <AssemblyName>OptiPaie.Services</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OptiPaie.Core\OptiPaie.Core.csproj" />
+    <ProjectReference Include="..\OptiPaie.Common\OptiPaie.Common.csproj" />
+    <ProjectReference Include="..\OptiPaie.Data\OptiPaie.Data.csproj" />
+    <ProjectReference Include="..\OptiPaie.PayrollEngine\OptiPaie.PayrollEngine.csproj" />
+  </ItemGroup>
+
+  <!-- Licensing: Ed25519 token verification (net48 has no built-in Ed25519). -->
+  <ItemGroup>
+    <PackageReference Include="BouncyCastle.Cryptography" Version="2.4.0" />
+  </ItemGroup>
+
+  <!-- Framework assemblies used by the licensing layer:
+         System.Management -> WMI hardware device id
+         System.Net.Http   -> HttpClient calls to the licensing Edge Functions -->
+  <ItemGroup>
+    <Reference Include="System.Management" />
+    <Reference Include="System.Net.Http" />
+    <!-- DPAPI (ProtectedData) for the encrypted local license/trial cache. -->
+    <Reference Include="System.Security" />
+  </ItemGroup>
+
+</Project>

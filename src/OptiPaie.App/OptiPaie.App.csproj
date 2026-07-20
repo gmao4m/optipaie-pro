@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    OptiPaie.App - the WinForms executable and composition root.
+    DevExpress UI shell, the four modules (Companies, Employees, Payroll, Archive)
+    and the Settings utility. Wires all dependencies in CompositionRoot, and is
+    packaged into a single EXE via Costura.Fody.
+  -->
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>OptiPaie.App</RootNamespace>
+    <!-- Final shipped executable name -->
+    <AssemblyName>OptiPaieDZ</AssemblyName>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- ApplicationIcon (Assets\OptiPaie.ico) and StartupObject are set in the
+         UI step, once the icon asset and Program entry point exist. -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- DevExpress WinForms controls (Grid, Editors, Bars, Skins, etc.). -->
+    <PackageReference Include="DevExpress.Win" Version="$(DevExpressVersion)" />
+
+    <!-- Single-EXE packaging: embed managed deps + the native SQLite interop. -->
+    <PackageReference Include="Costura.Fody" Version="5.7.0" />
+    <PackageReference Include="Fody" Version="6.8.0">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OptiPaie.Core\OptiPaie.Core.csproj" />
+    <ProjectReference Include="..\OptiPaie.Common\OptiPaie.Common.csproj" />
+    <ProjectReference Include="..\OptiPaie.Data\OptiPaie.Data.csproj" />
+    <ProjectReference Include="..\OptiPaie.PayrollEngine\OptiPaie.PayrollEngine.csproj" />
+    <ProjectReference Include="..\OptiPaie.Services\OptiPaie.Services.csproj" />
+    <ProjectReference Include="..\OptiPaie.Localization\OptiPaie.Localization.csproj" />
+    <ProjectReference Include="..\OptiPaie.Reporting\OptiPaie.Reporting.csproj" />
+  </ItemGroup>
+
+</Project>

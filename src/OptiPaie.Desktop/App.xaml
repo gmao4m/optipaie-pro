@@ -1,0 +1,25 @@
+<Application x:Class="OptiPaie.Desktop.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:conv="clr-namespace:OptiPaie.Desktop.Converters">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Theme/Colors.xaml" />
+                <ResourceDictionary Source="Theme/Typography.xaml" />
+                <ResourceDictionary Source="Theme/Icons.xaml" />
+                <ResourceDictionary Source="Theme/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <conv:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVis" />
+            <conv:BooleanToVisibilityConverter x:Key="BoolToVis" />
+            <conv:EnumToFrenchConverter x:Key="EnumFr" />
+            <conv:EmptyStringToVisibilityConverter x:Key="EmptyToVis" />
+            <conv:BytesToImageConverter x:Key="BytesToImage" />
+            <conv:BoolToFontWeightConverter x:Key="BoolToWeight" />
+            <conv:GainToBrushConverter x:Key="GainBrush" />
+            <conv:InitialsConverter x:Key="Initials" />
+            <conv:ElementNatureConverter x:Key="ElementNature" />
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

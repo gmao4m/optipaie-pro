@@ -1,0 +1,34 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Brand -->
+    <Color x:Key="BrandColor">#0F6E56</Color>
+    <Color x:Key="BrandHoverColor">#12805F</Color>
+    <Color x:Key="BrandPressedColor">#0B5B47</Color>
+    <Color x:Key="BrandSoftColor">#E1F5EE</Color>
+
+    <SolidColorBrush x:Key="Brand" Color="{StaticResource BrandColor}" />
+    <SolidColorBrush x:Key="BrandHover" Color="{StaticResource BrandHoverColor}" />
+    <SolidColorBrush x:Key="BrandPressed" Color="{StaticResource BrandPressedColor}" />
+    <SolidColorBrush x:Key="BrandSoft" Color="{StaticResource BrandSoftColor}" />
+
+    <!-- Surfaces -->
+    <SolidColorBrush x:Key="Canvas" Color="#F4F6F8" />
+    <SolidColorBrush x:Key="Surface" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="SurfaceMuted" Color="#F7F9FB" />
+    <SolidColorBrush x:Key="Border" Color="#E7EBF0" />
+    <SolidColorBrush x:Key="BorderStrong" Color="#D5DBE2" />
+
+    <!-- Text -->
+    <SolidColorBrush x:Key="TextPrimary" Color="#1B2430" />
+    <SolidColorBrush x:Key="TextSecondary" Color="#4E5A69" />
+    <SolidColorBrush x:Key="TextMuted" Color="#8A94A2" />
+    <SolidColorBrush x:Key="TextOnBrand" Color="#FFFFFF" />
+
+    <!-- Semantic (payroll) -->
+    <SolidColorBrush x:Key="Salary" Color="#137B50" />
+    <SolidColorBrush x:Key="Deduction" Color="#C0453B" />
+    <SolidColorBrush x:Key="Employer" Color="#2B57A1" />
+    <SolidColorBrush x:Key="Warning" Color="#C97A10" />
+
+</ResourceDictionary>

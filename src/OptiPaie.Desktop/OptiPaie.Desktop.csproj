@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    OptiPaie DZ — new premium WPF client (2026 rebuild). Targets .NET Framework 4.8
+    (inherited from Directory.Build.props) so it runs on Windows 7 SP1 → 11 and can
+    reference the existing net48 engine/services directly. It deliberately does NOT
+    reference OptiPaie.App (WinForms) or OptiPaie.Reporting (DevExpress) — the payroll
+    ENGINE and services are reused untouched; the UI and documents are brand new.
+  -->
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>OptiPaie.Desktop</RootNamespace>
+    <!-- Customer-facing executable name: "OptiPaie PRO.exe". RootNamespace stays
+         OptiPaie.Desktop so no source/namespace changes are needed. -->
+    <AssemblyName>OptiPaie PRO</AssemblyName>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <ApplicationIcon>..\..\build\OptiPaie.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OptiPaie.Core\OptiPaie.Core.csproj" />
+    <ProjectReference Include="..\OptiPaie.Common\OptiPaie.Common.csproj" />
+    <ProjectReference Include="..\OptiPaie.Services\OptiPaie.Services.csproj" />
+    <ProjectReference Include="..\OptiPaie.Data\OptiPaie.Data.csproj" />
+    <ProjectReference Include="..\OptiPaie.PayrollEngine\OptiPaie.PayrollEngine.csproj" />
+    <ProjectReference Include="..\OptiPaie.Localization\OptiPaie.Localization.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Declarative, fixed-layout PDF engine for the Fiche de Paie (A4, print-identical).
+         2022.12.x targets netstandard2.0 and is consumable from .NET Framework 4.8. -->
+    <PackageReference Include="QuestPDF" Version="2022.12.1" />
+    <!-- Auto-update framework (Setup.exe + full/delta packages + RELEASES). Matches the vpk CLI. -->
+    <PackageReference Include="Velopack" Version="1.2.0" />
+  </ItemGroup>
+
+  <!-- Reads licensing endpoints/anon key from App.config (ConfigurationManager). -->
+  <ItemGroup>
+    <Reference Include="System.Configuration" />
+  </ItemGroup>
+
+</Project>

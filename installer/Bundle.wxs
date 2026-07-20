@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OptiPaie PRO - Setup.exe bootstrapper (WiX Burn).
+  A single Setup.exe that:
+    1. Silently installs .NET Framework 4.8 if it is missing (present already on
+       Windows 10 1903+ and Windows 11, so it is skipped there).
+    2. Runs the OptiPaie PRO MSI, showing its full install wizard (welcome,
+       license, install-location selection, shortcuts, finish).
+  The customer never installs .NET or downloads anything manually.
+-->
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:bal="http://wixtoolset.org/schemas/v4/wxs/bal"
+     xmlns:netfx="http://wixtoolset.org/schemas/v4/wxs/netfx">
+
+  <Bundle Name="OptiPaie PRO"
+          Manufacturer="OptiPaie"
+          Version="1.0.0.0"
+          UpgradeCode="6AE0E675-CD4B-487A-94EE-A7C84B91B2C2"
+          IconSourceFile="OptiPaie.ico">
+
+    <BootstrapperApplication>
+      <bal:WixStandardBootstrapperApplication
+          LicenseFile="License.rtf"
+          Theme="rtfLicense" />
+    </BootstrapperApplication>
+
+    <Chain>
+      <!-- Prerequisite: .NET Framework 4.8 (installed only if absent) -->
+      <PackageGroupRef Id="NetFx48Web" />
+
+      <!-- The application (installed to the default location, like Chrome/Discord). -->
+      <MsiPackage Id="OptiPaiePro"
+                  SourceFile="output\OptiPaie PRO.msi"
+                  Compressed="yes"
+                  Vital="yes" />
+    </Chain>
+  </Bundle>
+</Wix>

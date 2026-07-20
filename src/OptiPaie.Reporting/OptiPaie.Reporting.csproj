@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    OptiPaie.Reporting - printing engine.
+    DevExpress XtraReports payslips (Arabic RTL / French LTR), PDF export, printer
+    output and a report factory that lets future documents be added without
+    touching callers (Open/Closed). Depends on Localization for bilingual labels.
+  -->
+
+  <PropertyGroup>
+    <RootNamespace>OptiPaie.Reporting</RootNamespace>
+    <AssemblyName>OptiPaie.Reporting</AssemblyName>
+    <UseWindowsForms>true</UseWindowsForms>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- DevExpress Reporting for WinForms. Version comes from Directory.Build.props. -->
+    <PackageReference Include="DevExpress.Win.Reporting" Version="$(DevExpressVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OptiPaie.Core\OptiPaie.Core.csproj" />
+    <ProjectReference Include="..\OptiPaie.Common\OptiPaie.Common.csproj" />
+    <ProjectReference Include="..\OptiPaie.Localization\OptiPaie.Localization.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,383 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+
+  <data name="App_Title" xml:space="preserve"><value>OptiPaie DZ</value></data>
+  <data name="App_Subtitle" xml:space="preserve"><value>Logiciel de paie algérien</value></data>
+
+  <data name="Common_Save" xml:space="preserve"><value>Enregistrer</value></data>
+  <data name="Common_Cancel" xml:space="preserve"><value>Annuler</value></data>
+  <data name="Common_Add" xml:space="preserve"><value>Ajouter</value></data>
+  <data name="Common_Edit" xml:space="preserve"><value>Modifier</value></data>
+  <data name="Common_Delete" xml:space="preserve"><value>Supprimer</value></data>
+  <data name="Common_Search" xml:space="preserve"><value>Rechercher</value></data>
+  <data name="Common_Close" xml:space="preserve"><value>Fermer</value></data>
+  <data name="Common_Print" xml:space="preserve"><value>Imprimer</value></data>
+  <data name="Common_ExportPdf" xml:space="preserve"><value>Exporter PDF</value></data>
+  <data name="Common_Refresh" xml:space="preserve"><value>Actualiser</value></data>
+  <data name="Common_Confirm" xml:space="preserve"><value>Confirmation</value></data>
+  <data name="Common_Error" xml:space="preserve"><value>Erreur</value></data>
+  <data name="Common_Success" xml:space="preserve"><value>Succès</value></data>
+  <data name="Common_Information" xml:space="preserve"><value>Information</value></data>
+  <data name="Common_Language" xml:space="preserve"><value>Langue</value></data>
+  <data name="Common_Currency" xml:space="preserve"><value>DA</value></data>
+
+  <data name="Module_Dashboard" xml:space="preserve"><value>Accueil</value></data>
+  <data name="Module_Companies" xml:space="preserve"><value>Entreprises</value></data>
+  <data name="Module_Employees" xml:space="preserve"><value>Employés</value></data>
+  <data name="Module_Payroll" xml:space="preserve"><value>Paie</value></data>
+  <data name="Module_Archive" xml:space="preserve"><value>Archive</value></data>
+  <data name="Module_Settings" xml:space="preserve"><value>Paramètres</value></data>
+  <data name="Companies_Subtitle" xml:space="preserve"><value>Gérez les entreprises et leurs informations légales</value></data>
+  <data name="Employees_Subtitle" xml:space="preserve"><value>Gérez les employés et leurs rubriques de paie</value></data>
+  <data name="Archive_Subtitle" xml:space="preserve"><value>Consultez, réimprimez et exportez les bulletins archivés</value></data>
+  <data name="Company_GroupIdentity" xml:space="preserve"><value>Identité</value></data>
+  <data name="Company_GroupContact" xml:space="preserve"><value>Coordonnées</value></data>
+  <data name="Company_GroupLegal" xml:space="preserve"><value>Identifiants légaux</value></data>
+  <data name="Company_GroupBank" xml:space="preserve"><value>Banque &amp; logo</value></data>
+  <data name="Employee_GroupIdentity" xml:space="preserve"><value>Identité</value></data>
+  <data name="Employee_GroupContract" xml:space="preserve"><value>Dates &amp; contrat</value></data>
+  <data name="Employee_GroupJob" xml:space="preserve"><value>Poste &amp; rémunération</value></data>
+  <data name="Employee_GroupPayment" xml:space="preserve"><value>Paiement</value></data>
+  <data name="Settings_Subtitle" xml:space="preserve"><value>Préférences de l'application et sécurité des données</value></data>
+  <data name="Settings_GroupPreferences" xml:space="preserve"><value>Préférences générales</value></data>
+  <data name="Settings_GroupData" xml:space="preserve"><value>Données &amp; sécurité</value></data>
+
+  <data name="Dashboard_Companies" xml:space="preserve"><value>Entreprises</value></data>
+  <data name="Dashboard_Employees" xml:space="preserve"><value>Employés</value></data>
+  <data name="Dashboard_CurrentMonth" xml:space="preserve"><value>Mois de paie courant</value></data>
+  <data name="Dashboard_ArchivedRuns" xml:space="preserve"><value>Paies archivées</value></data>
+  <data name="Dashboard_QuickNewCompany" xml:space="preserve"><value>Nouvelle entreprise</value></data>
+  <data name="Dashboard_QuickNewEmployee" xml:space="preserve"><value>Nouvel employé</value></data>
+  <data name="Dashboard_QuickPayroll" xml:space="preserve"><value>Calculer une paie</value></data>
+  <data name="Dashboard_RecentPayslips" xml:space="preserve"><value>Derniers bulletins</value></data>
+
+  <data name="Company_NameFr" xml:space="preserve"><value>Nom (FR)</value></data>
+  <data name="Company_NameAr" xml:space="preserve"><value>Nom (AR)</value></data>
+  <data name="Company_LegalForm" xml:space="preserve"><value>Forme juridique</value></data>
+  <data name="Company_AddressFr" xml:space="preserve"><value>Adresse (FR)</value></data>
+  <data name="Company_AddressAr" xml:space="preserve"><value>Adresse (AR)</value></data>
+  <data name="Company_Phone" xml:space="preserve"><value>Téléphone</value></data>
+  <data name="Company_Email" xml:space="preserve"><value>Email</value></data>
+  <data name="Company_Nif" xml:space="preserve"><value>NIF</value></data>
+  <data name="Company_Nis" xml:space="preserve"><value>NIS</value></data>
+  <data name="Company_Rc" xml:space="preserve"><value>RC</value></data>
+  <data name="Company_ArticleImposition" xml:space="preserve"><value>Article d'imposition</value></data>
+  <data name="Company_CnasEmployerNumber" xml:space="preserve"><value>N° CNAS employeur</value></data>
+  <data name="Company_Logo" xml:space="preserve"><value>Logo</value></data>
+
+  <data name="Employee_FirstName" xml:space="preserve"><value>Prénom</value></data>
+  <data name="Employee_LastName" xml:space="preserve"><value>Nom</value></data>
+  <data name="Employee_Gender" xml:space="preserve"><value>Sexe</value></data>
+  <data name="Employee_BirthDate" xml:space="preserve"><value>Date de naissance</value></data>
+  <data name="Employee_HireDate" xml:space="preserve"><value>Date de recrutement</value></data>
+  <data name="Employee_ExitDate" xml:space="preserve"><value>Date de sortie</value></data>
+  <data name="Employee_ContractType" xml:space="preserve"><value>Type de contrat</value></data>
+  <data name="Employee_Category" xml:space="preserve"><value>Catégorie</value></data>
+  <data name="Employee_Poste" xml:space="preserve"><value>Poste</value></data>
+  <data name="Employee_Nss" xml:space="preserve"><value>N° sécurité sociale</value></data>
+  <data name="Employee_NationalId" xml:space="preserve"><value>NIN</value></data>
+  <data name="Employee_BaseSalary" xml:space="preserve"><value>Salaire de base</value></data>
+  <data name="Employee_PaymentMode" xml:space="preserve"><value>Mode de paiement</value></data>
+  <data name="Employee_Company" xml:space="preserve"><value>Entreprise</value></data>
+  <data name="Employee_Active" xml:space="preserve"><value>Actif</value></data>
+  <data name="Employee_MaritalStatus" xml:space="preserve"><value>Situation familiale</value></data>
+  <data name="Employee_Dependents" xml:space="preserve"><value>Personnes à charge</value></data>
+  <data name="Employee_Rib" xml:space="preserve"><value>RIB</value></data>
+
+  <data name="Gender_Male" xml:space="preserve"><value>Masculin</value></data>
+  <data name="Gender_Female" xml:space="preserve"><value>Féminin</value></data>
+
+  <data name="Payroll_Company" xml:space="preserve"><value>Entreprise</value></data>
+  <data name="Payroll_Employee" xml:space="preserve"><value>Employé</value></data>
+  <data name="Payroll_Month" xml:space="preserve"><value>Mois</value></data>
+  <data name="Payroll_Year" xml:space="preserve"><value>Année</value></data>
+  <data name="Payroll_WorkedDays" xml:space="preserve"><value>Jours travaillés</value></data>
+  <data name="Payroll_Load" xml:space="preserve"><value>Charger les rubriques</value></data>
+  <data name="Payroll_Calculate" xml:space="preserve"><value>Calculer</value></data>
+  <data name="Payroll_Save" xml:space="preserve"><value>Enregistrer la paie</value></data>
+  <data name="Payroll_Explain" xml:space="preserve"><value>Expliquer le calcul</value></data>
+  <data name="Payroll_Element" xml:space="preserve"><value>Rubrique</value></data>
+  <data name="Payroll_Type" xml:space="preserve"><value>Type</value></data>
+  <data name="Payroll_Base" xml:space="preserve"><value>Base</value></data>
+  <data name="Payroll_Rate" xml:space="preserve"><value>Taux</value></data>
+  <data name="Payroll_Quantity" xml:space="preserve"><value>Quantité</value></data>
+  <data name="Payroll_UnitPrice" xml:space="preserve"><value>Prix unitaire</value></data>
+  <data name="Payroll_Amount" xml:space="preserve"><value>Montant</value></data>
+
+  <data name="Totals_Gross" xml:space="preserve"><value>Salaire brut</value></data>
+  <data name="Totals_Cotisable" xml:space="preserve"><value>Base cotisable</value></data>
+  <data name="Totals_Cnas" xml:space="preserve"><value>CNAS (9%)</value></data>
+  <data name="Totals_Taxable" xml:space="preserve"><value>Base imposable</value></data>
+  <data name="Totals_IrgBrut" xml:space="preserve"><value>IRG brut</value></data>
+  <data name="Totals_Abattement" xml:space="preserve"><value>Abattement</value></data>
+  <data name="Totals_Irg" xml:space="preserve"><value>IRG</value></data>
+  <data name="Totals_Net" xml:space="preserve"><value>Salaire net</value></data>
+  <data name="Payroll_AddElement" xml:space="preserve"><value>Ajouter un élément de paie</value></data>
+  <data name="Payroll_BaseSalary" xml:space="preserve"><value>Salaire de base</value></data>
+  <data name="Payroll_SelectElement" xml:space="preserve"><value>Choisir un élément…</value></data>
+  <data name="Payroll_Elements" xml:space="preserve"><value>Éléments de paie</value></data>
+  <data name="Payroll_GroupEmployee" xml:space="preserve"><value>Retenues salarié</value></data>
+  <data name="Payroll_GroupEmployer" xml:space="preserve"><value>Charges patronales</value></data>
+  <data name="Payroll_Gain" xml:space="preserve"><value>Gain</value></data>
+  <data name="Payroll_Retenue" xml:space="preserve"><value>Retenue</value></data>
+  <data name="Payroll_Observations" xml:space="preserve"><value>Observations</value></data>
+  <data name="Payroll_CalcReady" xml:space="preserve"><value>Sélectionnez un employé pour commencer la paie.</value></data>
+  <data name="Payroll_CalcDone" xml:space="preserve"><value>Calcul à jour.</value></data>
+  <data name="Payslip_EmployerSignature" xml:space="preserve"><value>Signature et cachet de l'employeur</value></data>
+  <data name="Payslip_EmployeeSignature" xml:space="preserve"><value>Signature de l'employé</value></data>
+  <data name="Payslip_Title" xml:space="preserve"><value>FICHE DE PAIE</value></data>
+  <data name="Payslip_Matricule" xml:space="preserve"><value>Matricule</value></data>
+  <data name="Payslip_AmountInWords" xml:space="preserve"><value>Arrêté la présente fiche de paie à la somme de</value></data>
+  <data name="Payslip_Dinars" xml:space="preserve"><value>dinars algériens</value></data>
+  <data name="Payslip_Code" xml:space="preserve"><value>Code</value></data>
+  <data name="Payslip_Label" xml:space="preserve"><value>Libellé</value></data>
+  <data name="Payslip_Gains" xml:space="preserve"><value>Gains</value></data>
+  <data name="Payslip_Retenues" xml:space="preserve"><value>Retenues</value></data>
+  <data name="Payslip_NetToPay" xml:space="preserve"><value>Salaire net à payer</value></data>
+  <data name="Payslip_CompanyStamp" xml:space="preserve"><value>Cachet de l'entreprise</value></data>
+  <data name="Payslip_Details" xml:space="preserve"><value>Détails du bulletin</value></data>
+  <data name="Payslip_IssuedOn" xml:space="preserve"><value>Établi le</value></data>
+  <data name="Nav_Workspace" xml:space="preserve"><value>GESTION</value></data>
+  <data name="Nav_System" xml:space="preserve"><value>SYSTÈME</value></data>
+  <data name="Totals_Gains" xml:space="preserve"><value>Total des gains</value></data>
+  <data name="Totals_Retenues" xml:space="preserve"><value>Total des retenues</value></data>
+  <data name="Payroll_Reset" xml:space="preserve"><value>Réinitialiser</value></data>
+  <data name="Payroll_StatusSaved" xml:space="preserve"><value>Paie enregistrée.</value></data>
+  <data name="Payroll_StatusPrinted" xml:space="preserve"><value>Fiche de paie générée.</value></data>
+  <data name="Payroll_SelectCompanyFirst" xml:space="preserve"><value>Veuillez sélectionner une entreprise, puis un employé.</value></data>
+  <data name="Dashboard_Subtitle" xml:space="preserve"><value>Vue d'ensemble de votre activité de paie</value></data>
+  <data name="Dashboard_QuickActions" xml:space="preserve"><value>Actions rapides</value></data>
+  <data name="Payroll_Hours" xml:space="preserve"><value>Heures supp.</value></data>
+  <data name="Payroll_NoEmployee" xml:space="preserve"><value>Aucun employé sélectionné</value></data>
+  <data name="Payroll_StatusReady" xml:space="preserve"><value>Prêt</value></data>
+  <data name="Payroll_AddFree" xml:space="preserve"><value>Élément libre</value></data>
+  <data name="Payroll_NewElement" xml:space="preserve"><value>Nouvelle rubrique</value></data>
+  <data name="Payroll_NewType" xml:space="preserve"><value>Nouveau type</value></data>
+  <data name="Element_Title" xml:space="preserve"><value>Type d'élément de paie</value></data>
+  <data name="Element_Name" xml:space="preserve"><value>Nom</value></data>
+  <data name="Element_DefaultBase" xml:space="preserve"><value>Base par défaut</value></data>
+  <data name="Element_DefaultTaux" xml:space="preserve"><value>Taux par défaut (×)</value></data>
+  <data name="Element_Cotisable" xml:space="preserve"><value>Cotisable (CNAS)</value></data>
+  <data name="Element_Imposable" xml:space="preserve"><value>Imposable (IRG)</value></data>
+  <data name="Element_Percent" xml:space="preserve"><value>Pourcentage (%)</value></data>
+  <data name="Element_Partial" xml:space="preserve"><value>Partiel (%)</value></data>
+  <data name="Element_PercentRequired" xml:space="preserve"><value>Veuillez saisir un pourcentage entre 1 et 99 pour le mode « Partiel ».</value></data>
+  <data name="Element_CatalogTitle" xml:space="preserve"><value>Types d'éléments de paie</value></data>
+  <data name="Element_Status" xml:space="preserve"><value>Statut</value></data>
+  <data name="Element_ToggleActive" xml:space="preserve"><value>Activer / Désactiver</value></data>
+  <data name="Payroll_ManageTypes" xml:space="preserve"><value>Gérer les types</value></data>
+  <data name="Common_Active" xml:space="preserve"><value>Actif</value></data>
+  <data name="Common_Inactive" xml:space="preserve"><value>Inactif</value></data>
+  <data name="Common_Yes" xml:space="preserve"><value>Oui</value></data>
+  <data name="Common_No" xml:space="preserve"><value>Non</value></data>
+
+  <data name="ElementType_Gain" xml:space="preserve"><value>Gain</value></data>
+  <data name="ElementType_Deduction" xml:space="preserve"><value>Retenue</value></data>
+
+  <data name="Archive_Period" xml:space="preserve"><value>Période</value></data>
+  <data name="Archive_Company" xml:space="preserve"><value>Entreprise</value></data>
+  <data name="Archive_Employee" xml:space="preserve"><value>Employé</value></data>
+  <data name="Archive_Net" xml:space="preserve"><value>Net à payer</value></data>
+  <data name="Archive_Reprint" xml:space="preserve"><value>Réimprimer</value></data>
+
+  <data name="Explain_Title" xml:space="preserve"><value>Détail du calcul de la paie</value></data>
+  <data name="Explain_Step" xml:space="preserve"><value>Étape</value></data>
+  <data name="Explain_Amount" xml:space="preserve"><value>Montant</value></data>
+  <data name="Explain_Formula" xml:space="preserve"><value>Formule</value></data>
+  <data name="Explain_Rule" xml:space="preserve"><value>Règle légale</value></data>
+  <data name="Explain_Description" xml:space="preserve"><value>Explication</value></data>
+
+  <data name="Diagnostic_Title" xml:space="preserve"><value>Diagnostic développeur</value></data>
+  <data name="Diagnostic_EngineVersion" xml:space="preserve"><value>Version moteur</value></data>
+  <data name="Diagnostic_LegalVersion" xml:space="preserve"><value>Version profil légal</value></data>
+  <data name="Diagnostic_CalcVersion" xml:space="preserve"><value>Version calcul</value></data>
+  <data name="Diagnostic_DbVersion" xml:space="preserve"><value>Version base de données</value></data>
+  <data name="Diagnostic_CnasRate" xml:space="preserve"><value>Taux CNAS</value></data>
+  <data name="Diagnostic_IrgBrackets" xml:space="preserve"><value>Tranches IRG</value></data>
+  <data name="Diagnostic_Abattement" xml:space="preserve"><value>Abattement</value></data>
+  <data name="Diagnostic_Lissage" xml:space="preserve"><value>Lissage</value></data>
+  <data name="Diagnostic_RuleOrder" xml:space="preserve"><value>Ordre d'exécution des règles</value></data>
+  <data name="Diagnostic_CalcTime" xml:space="preserve"><value>Temps de calcul</value></data>
+  <data name="Diagnostic_Memory" xml:space="preserve"><value>Mémoire utilisée</value></data>
+  <data name="Diagnostic_ElementCount" xml:space="preserve"><value>Nombre de rubriques</value></data>
+  <data name="Diagnostic_Validation" xml:space="preserve"><value>État de validation</value></data>
+
+  <data name="Settings_Title" xml:space="preserve"><value>Paramètres</value></data>
+  <data name="Settings_Language" xml:space="preserve"><value>Langue de l'interface</value></data>
+  <data name="Settings_Theme" xml:space="preserve"><value>Thème</value></data>
+  <data name="Settings_Backup" xml:space="preserve"><value>Sauvegarder la base</value></data>
+  <data name="Settings_Restore" xml:space="preserve"><value>Restaurer la base</value></data>
+
+  <data name="Msg_SavedSuccess" xml:space="preserve"><value>Enregistrement réussi.</value></data>
+  <data name="Msg_DeleteConfirm" xml:space="preserve"><value>Confirmer la suppression de cet élément ?</value></data>
+  <data name="Msg_SelectCompany" xml:space="preserve"><value>Veuillez sélectionner une entreprise.</value></data>
+  <data name="Msg_SelectEmployee" xml:space="preserve"><value>Veuillez sélectionner un employé.</value></data>
+  <data name="Msg_PayrollSaved" xml:space="preserve"><value>Paie enregistrée avec succès.</value></data>
+  <data name="Msg_PayrollCalculated" xml:space="preserve"><value>Paie calculée. Vérifiez puis enregistrez.</value></data>
+  <data name="Msg_NoData" xml:space="preserve"><value>Aucune donnée à afficher.</value></data>
+  <data name="Msg_RestoreConfirm" xml:space="preserve"><value>La restauration remplacera la base actuelle. Continuer ?</value></data>
+  <data name="Msg_RestartAfterRestore" xml:space="preserve"><value>Restauration effectuée. Veuillez redémarrer l'application.</value></data>
+  <data name="Msg_NoSelection" xml:space="preserve"><value>Veuillez sélectionner un élément.</value></data>
+  <data name="Msg_ElementDuplicate" xml:space="preserve"><value>Cette rubrique est déjà affectée à l'employé.</value></data>
+
+  <data name="Employee_Elements" xml:space="preserve"><value>Rubriques de paie</value></data>
+  <data name="Employee_ElementsTitle" xml:space="preserve"><value>Rubriques de paie de l'employé</value></data>
+
+  <data name="Dashboard_BackupStatus" xml:space="preserve"><value>Dernière sauvegarde</value></data>
+  <data name="Dashboard_NoBackup" xml:space="preserve"><value>Aucune sauvegarde</value></data>
+  <data name="Dashboard_LegalProfile" xml:space="preserve"><value>Profil légal en vigueur</value></data>
+  <data name="Common_None" xml:space="preserve"><value>—</value></data>
+  <data name="Common_Loading" xml:space="preserve"><value>Chargement…</value></data>
+
+  <data name="Enum_ContractType_Cdi" xml:space="preserve"><value>CDI</value></data>
+  <data name="Enum_ContractType_Cdd" xml:space="preserve"><value>CDD</value></data>
+  <data name="Enum_ContractType_Apprenticeship" xml:space="preserve"><value>Apprentissage</value></data>
+  <data name="Enum_ContractType_Internship" xml:space="preserve"><value>Stage</value></data>
+  <data name="Enum_ContractType_Other" xml:space="preserve"><value>Autre</value></data>
+
+  <data name="Enum_MaritalStatus_Single" xml:space="preserve"><value>Célibataire</value></data>
+  <data name="Enum_MaritalStatus_Married" xml:space="preserve"><value>Marié(e)</value></data>
+  <data name="Enum_MaritalStatus_Divorced" xml:space="preserve"><value>Divorcé(e)</value></data>
+  <data name="Enum_MaritalStatus_Widowed" xml:space="preserve"><value>Veuf/Veuve</value></data>
+
+  <data name="Enum_PaymentMode_BankTransfer" xml:space="preserve"><value>Virement bancaire</value></data>
+  <data name="Enum_PaymentMode_Cash" xml:space="preserve"><value>Espèces</value></data>
+  <data name="Enum_PaymentMode_Cheque" xml:space="preserve"><value>Chèque</value></data>
+
+  <data name="Enum_RunStatus_Draft" xml:space="preserve"><value>Brouillon</value></data>
+  <data name="Enum_RunStatus_Generated" xml:space="preserve"><value>Générée</value></data>
+  <data name="Enum_RunStatus_Archived" xml:space="preserve"><value>Archivée</value></data>
+  <data name="Enum_RunStatus_Cancelled" xml:space="preserve"><value>Annulée</value></data>
+
+  <data name="Enum_BackupType_Manual" xml:space="preserve"><value>Manuelle</value></data>
+  <data name="Enum_BackupType_Automatic" xml:space="preserve"><value>Automatique</value></data>
+
+  <data name="Common_Apply" xml:space="preserve"><value>Appliquer</value></data>
+  <data name="Common_Next" xml:space="preserve"><value>Suivant</value></data>
+  <data name="Common_Previous" xml:space="preserve"><value>Précédent</value></data>
+  <data name="Common_Finish" xml:space="preserve"><value>Terminer</value></data>
+  <data name="Common_Browse" xml:space="preserve"><value>Parcourir…</value></data>
+
+  <data name="Menu_Tools" xml:space="preserve"><value>Outils</value></data>
+  <data name="Menu_About" xml:space="preserve"><value>À propos</value></data>
+  <data name="Menu_License" xml:space="preserve"><value>Licence</value></data>
+  <data name="Menu_Backup" xml:space="preserve"><value>Sauvegardes</value></data>
+  <data name="Menu_Diagnostic" xml:space="preserve"><value>Diagnostic</value></data>
+
+  <data name="Status_Database" xml:space="preserve"><value>Base</value></data>
+  <data name="Status_Language" xml:space="preserve"><value>Langue</value></data>
+  <data name="Status_Company" xml:space="preserve"><value>Entreprise</value></data>
+  <data name="Status_Legal" xml:space="preserve"><value>Profil légal</value></data>
+  <data name="Status_Version" xml:space="preserve"><value>Version</value></data>
+
+  <data name="Dashboard_Today" xml:space="preserve"><value>Date du jour</value></data>
+  <data name="Dashboard_DbSize" xml:space="preserve"><value>Taille de la base</value></data>
+  <data name="Dashboard_Version" xml:space="preserve"><value>Version</value></data>
+  <data name="Dashboard_RecentCompanies" xml:space="preserve"><value>Entreprises récentes</value></data>
+
+  <data name="Wizard_Title" xml:space="preserve"><value>Assistant de première configuration</value></data>
+  <data name="Wizard_Welcome" xml:space="preserve"><value>Bienvenue dans OptiPaie DZ</value></data>
+  <data name="Wizard_Intro" xml:space="preserve"><value>Configurons votre première entreprise pour commencer.</value></data>
+  <data name="Wizard_Currency" xml:space="preserve"><value>Devise</value></data>
+  <data name="Wizard_Cacobatph" xml:space="preserve"><value>N° CACOBATPH</value></data>
+  <data name="Wizard_Bank" xml:space="preserve"><value>Banque</value></data>
+  <data name="Wizard_BankAccount" xml:space="preserve"><value>Compte bancaire (RIB)</value></data>
+  <data name="Wizard_DefaultLanguage" xml:space="preserve"><value>Langue par défaut</value></data>
+
+  <data name="About_Title" xml:space="preserve"><value>À propos d'OptiPaie DZ</value></data>
+  <data name="About_Version" xml:space="preserve"><value>Version</value></data>
+  <data name="About_Build" xml:space="preserve"><value>Build</value></data>
+  <data name="About_LegalProfile" xml:space="preserve"><value>Profil légal</value></data>
+  <data name="About_Copyright" xml:space="preserve"><value>© 2026 OptiPaie DZ. Tous droits réservés.</value></data>
+  <data name="About_Support" xml:space="preserve"><value>Support</value></data>
+  <data name="About_Website" xml:space="preserve"><value>Site web</value></data>
+
+  <data name="License_Title" xml:space="preserve"><value>Gestionnaire de licence</value></data>
+  <data name="License_Status" xml:space="preserve"><value>État</value></data>
+  <data name="License_Expiration" xml:space="preserve"><value>Expiration</value></data>
+  <data name="License_MachineId" xml:space="preserve"><value>Identifiant machine</value></data>
+  <data name="License_Customer" xml:space="preserve"><value>Client</value></data>
+  <data name="License_Serial" xml:space="preserve"><value>Numéro de série</value></data>
+  <data name="License_Activate" xml:space="preserve"><value>Activer</value></data>
+  <data name="License_Active" xml:space="preserve"><value>Activée</value></data>
+  <data name="License_Inactive" xml:space="preserve"><value>Non activée</value></data>
+  <data name="License_Trial" xml:space="preserve"><value>Version d'évaluation</value></data>
+  <data name="License_Expired" xml:space="preserve"><value>Expirée</value></data>
+  <data name="License_Activated" xml:space="preserve"><value>Licence activée avec succès.</value></data>
+  <data name="License_InvalidSerial" xml:space="preserve"><value>Numéro de série invalide.</value></data>
+
+  <data name="Backup_Title" xml:space="preserve"><value>Gestion des sauvegardes</value></data>
+  <data name="Backup_Manual" xml:space="preserve"><value>Sauvegarde manuelle</value></data>
+  <data name="Backup_Date" xml:space="preserve"><value>Date</value></data>
+  <data name="Backup_Size" xml:space="preserve"><value>Taille</value></data>
+  <data name="Backup_Type" xml:space="preserve"><value>Type</value></data>
+
+  <data name="Theme_Light" xml:space="preserve"><value>Clair</value></data>
+  <data name="Theme_Dark" xml:space="preserve"><value>Sombre</value></data>
+  <data name="Theme_Office" xml:space="preserve"><value>Office</value></data>
+
+  <data name="Company_UploadLogo" xml:space="preserve"><value>Choisir un logo…</value></data>
+  <data name="Company_ClearLogo" xml:space="preserve"><value>Retirer le logo</value></data>
+
+  <data name="Empty_NoCompanies" xml:space="preserve"><value>Aucune entreprise enregistrée.</value></data>
+  <data name="Empty_NoEmployees" xml:space="preserve"><value>Aucun employé pour cette entreprise.</value></data>
+  <data name="Empty_NoArchive" xml:space="preserve"><value>Aucune paie archivée.</value></data>
+  <data name="Empty_CreateFirst" xml:space="preserve"><value>Créer maintenant</value></data>
+
+  <data name="Splash_Loading" xml:space="preserve"><value>Démarrage en cours…</value></data>
+
+  <data name="Dashboard_RecentItems" xml:space="preserve"><value>Éléments récents</value></data>
+  <data name="Recent_Kind" xml:space="preserve"><value>Type</value></data>
+  <data name="Recent_Label" xml:space="preserve"><value>Élément</value></data>
+  <data name="Recent_Date" xml:space="preserve"><value>Date</value></data>
+</root>
