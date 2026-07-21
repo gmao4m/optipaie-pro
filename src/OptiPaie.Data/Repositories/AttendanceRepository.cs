@@ -30,7 +30,7 @@ namespace OptiPaie.Data.Repositories
             return Connection.QuerySingleOrDefault<AttendanceRecord>(
                 "SELECT * FROM AttendanceRecords " +
                 "WHERE EmployeeId = @employeeId AND WorkDate = @workDate AND IsDeleted = 0;",
-                new { employeeId, workDate = workDate.Date }, Transaction);
+                new { employeeId, workDate = SqliteDate.Day(workDate) }, Transaction);
         }
 
         public IEnumerable<AttendanceRecord> GetByEmployeeRange(long employeeId, DateTime from, DateTime to)
@@ -40,7 +40,7 @@ namespace OptiPaie.Data.Repositories
                 "WHERE EmployeeId = @employeeId AND IsDeleted = 0 " +
                 "  AND WorkDate >= @from AND WorkDate <= @to " +
                 "ORDER BY WorkDate;",
-                new { employeeId, from = from.Date, to = to.Date }, Transaction);
+                new { employeeId, from = SqliteDate.Day(from), to = SqliteDate.Day(to) }, Transaction);
         }
 
         public IEnumerable<AttendanceRecord> GetByCompanyRange(long companyId, DateTime from, DateTime to)
@@ -51,13 +51,13 @@ namespace OptiPaie.Data.Repositories
                 "WHERE e.CompanyId = @companyId AND e.IsDeleted = 0 AND a.IsDeleted = 0 " +
                 "  AND a.WorkDate >= @from AND a.WorkDate <= @to " +
                 "ORDER BY a.WorkDate, e.LastNameFr, e.FirstNameFr;",
-                new { companyId, from = from.Date, to = to.Date }, Transaction);
+                new { companyId, from = SqliteDate.Day(from), to = SqliteDate.Day(to) }, Transaction);
         }
 
         public long Insert(AttendanceRecord record)
         {
             record.CreatedAtUtc = DateTime.UtcNow;
-            record.WorkDate = record.WorkDate.Date;
+            record.WorkDate = SqliteDate.Day(record.WorkDate);
 
             const string sql =
                 "INSERT INTO AttendanceRecords " +
@@ -76,7 +76,7 @@ namespace OptiPaie.Data.Repositories
         public void Update(AttendanceRecord record)
         {
             record.UpdatedAtUtc = DateTime.UtcNow;
-            record.WorkDate = record.WorkDate.Date;
+            record.WorkDate = SqliteDate.Day(record.WorkDate);
 
             const string sql =
                 "UPDATE AttendanceRecords SET " +

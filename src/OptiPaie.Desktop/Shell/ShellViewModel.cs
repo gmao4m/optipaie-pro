@@ -30,6 +30,7 @@ namespace OptiPaie.Desktop.Shell
         private ArchiveViewModel _archive;
         private SettingsViewModel _settings;
         private AttendanceViewModel _attendance;
+        private LeaveViewModel _leave;
 
         private readonly Dictionary<string, PremiumModuleViewModel> _premium =
             new Dictionary<string, PremiumModuleViewModel>();
@@ -183,6 +184,11 @@ namespace OptiPaie.Desktop.Shell
                 if (string.Equals(key, ModuleKeys.Attendance, StringComparison.Ordinal))
                 {
                     return _attendance ?? (_attendance = new AttendanceViewModel(_services));
+                }
+
+                if (string.Equals(key, ModuleKeys.Leave, StringComparison.Ordinal))
+                {
+                    return _leave ?? (_leave = new LeaveViewModel(_services));
                 }
 
                 if (!_ready.TryGetValue(key, out ModuleReadyViewModel ready))

@@ -30,6 +30,7 @@ namespace OptiPaie.Data.Context
         private ILanguageRepository _languages;
         private IBackupRecordRepository _backupRecords;
         private IAttendanceRepository _attendance;
+        private ILeaveRepository _leave;
 
         public UnitOfWork(SQLiteConnection connection)
         {
@@ -55,6 +56,8 @@ namespace OptiPaie.Data.Context
         public ILanguageRepository Languages => _languages ?? (_languages = new LanguageRepository(this));
         public IBackupRecordRepository BackupRecords => _backupRecords ?? (_backupRecords = new BackupRecordRepository(this));
         public IAttendanceRepository Attendance => _attendance ?? (_attendance = new AttendanceRepository(this));
+
+        public ILeaveRepository Leave => _leave ?? (_leave = new LeaveRepository(this));
 
         public void BeginTransaction()
         {

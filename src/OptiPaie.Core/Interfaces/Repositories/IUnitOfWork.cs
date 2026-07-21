@@ -48,6 +48,9 @@ namespace OptiPaie.Core.Interfaces.Repositories
         /// <summary>Attendance repository (premium module, shares Employees).</summary>
         IAttendanceRepository Attendance { get; }
 
+        /// <summary>Leave repository (premium module, shares Employees).</summary>
+        ILeaveRepository Leave { get; }
+
         /// <summary>Begins a database transaction for the subsequent repository calls.</summary>
         void BeginTransaction();
 

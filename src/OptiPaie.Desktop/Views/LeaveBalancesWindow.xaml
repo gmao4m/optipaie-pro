@@ -1,0 +1,70 @@
+<Window x:Class="OptiPaie.Desktop.Views.LeaveBalancesWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Soldes de congés" Height="600" Width="920"
+        WindowStartupLocation="CenterOwner" Background="{StaticResource Canvas}">
+    <Window.Resources>
+        <Style x:Key="GridHeader" TargetType="DataGridColumnHeader">
+            <Setter Property="Background" Value="{StaticResource SurfaceMuted}" />
+            <Setter Property="Foreground" Value="{StaticResource TextSecondary}" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Height" Value="34" />
+            <Setter Property="Padding" Value="8,0" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="BorderBrush" Value="{StaticResource Border}" />
+            <Setter Property="BorderThickness" Value="0,0,1,1" />
+        </Style>
+        <Style x:Key="RightText" TargetType="TextBlock">
+            <Setter Property="TextAlignment" Value="Right" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Margin" Value="0,0,8,0" />
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="22,18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <StackPanel HorizontalAlignment="Left">
+                <TextBlock Style="{StaticResource H2}" Text="{Binding CompanyName}" />
+                <TextBlock Style="{StaticResource Caption}" Margin="0,4,0,0" Text="Soldes de congés annuels" />
+            </StackPanel>
+            <ComboBox Style="{StaticResource AppComboBox}" Width="90" Height="32"
+                      HorizontalAlignment="Right" VerticalAlignment="Top"
+                      ItemsSource="{Binding Years}" SelectedItem="{Binding Year}" />
+        </Grid>
+
+        <DataGrid Grid.Row="1" Margin="0,16,0,0" ItemsSource="{Binding Rows}" AutoGenerateColumns="False"
+                  HeadersVisibility="Column" IsReadOnly="True" CanUserAddRows="False" CanUserResizeRows="False"
+                  GridLinesVisibility="All" RowHeight="30" FontFamily="Segoe UI" FontSize="12.5"
+                  Background="{StaticResource Surface}" RowBackground="{StaticResource Surface}"
+                  AlternatingRowBackground="{StaticResource SurfaceMuted}"
+                  BorderBrush="{StaticResource Border}" BorderThickness="1"
+                  HorizontalGridLinesBrush="{StaticResource Border}" VerticalGridLinesBrush="{StaticResource Border}"
+                  ColumnHeaderStyle="{StaticResource GridHeader}">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Employé" Binding="{Binding EmployeeName}" Width="*" />
+                <DataGridTextColumn Header="Droit annuel" Binding="{Binding Entitlement, StringFormat=N1}" Width="105" ElementStyle="{StaticResource RightText}" />
+                <DataGridTextColumn Header="Pris" Binding="{Binding Taken, StringFormat=N1}" Width="90" ElementStyle="{StaticResource RightText}" />
+                <DataGridTextColumn Header="En attente" Binding="{Binding Pending, StringFormat=N1}" Width="100" ElementStyle="{StaticResource RightText}" />
+                <DataGridTextColumn Header="Restant" Binding="{Binding Remaining, StringFormat=N1}" Width="95" ElementStyle="{StaticResource RightText}" />
+                <DataGridTextColumn Header="Autres congés" Binding="{Binding OtherLeaveDays, StringFormat=N1}" Width="115" ElementStyle="{StaticResource RightText}" />
+                <DataGridTextColumn Header="Sans solde" Binding="{Binding UnpaidDays, StringFormat=N1}" Width="105" ElementStyle="{StaticResource RightText}" />
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <Grid Grid.Row="2" Margin="0,14,0,0">
+            <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Center" HorizontalAlignment="Left" Text="{Binding StatusMessage}" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Style="{StaticResource SecondaryButton}" Content="Exporter CSV" Command="{Binding ExportCsvCommand}" />
+                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="Exporter PDF" Command="{Binding ExportPdfCommand}" />
+                <Button Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Content="Fermer" Command="{Binding CloseCommand}" />
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>

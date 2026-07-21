@@ -46,6 +46,7 @@ namespace OptiPaie.Desktop.Composition
             var settingsService = new SettingsService(unitOfWorkFactory);
             var archiveService = new ArchiveService(unitOfWorkFactory);
             var attendanceService = new AttendanceService(unitOfWorkFactory);
+            var leaveService = new LeaveService(unitOfWorkFactory);
             var backupService = new BackupService(backupProvider, unitOfWorkFactory, configuration, logger);
             var localizationService = new LocalizationService();
 
@@ -100,7 +101,8 @@ namespace OptiPaie.Desktop.Composition
                 trialService,
                 accessController,
                 updateService,
-                attendanceService);
+                attendanceService,
+                leaveService);
         }
     }
 }

@@ -32,7 +32,8 @@ namespace OptiPaie.Desktop.Composition
             ITrialService trial,
             IAccessController access,
             IUpdateService update,
-            IAttendanceService attendance)
+            IAttendanceService attendance,
+            ILeaveService leave)
         {
             Configuration = configuration;
             Logger = logger;
@@ -52,6 +53,7 @@ namespace OptiPaie.Desktop.Composition
             Access = access;
             Update = update;
             Attendance = attendance;
+            Leave = leave;
         }
 
         public AppConfiguration Configuration { get; }
@@ -86,5 +88,8 @@ namespace OptiPaie.Desktop.Composition
 
         /// <summary>Attendance module (premium) — shares Employees/Companies.</summary>
         public IAttendanceService Attendance { get; }
+
+        /// <summary>Leave module (premium) — writes approved days into Attendance.</summary>
+        public ILeaveService Leave { get; }
     }
 }

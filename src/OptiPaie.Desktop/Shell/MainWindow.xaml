@@ -32,6 +32,9 @@
         <DataTemplate DataType="{x:Type vm:AttendanceViewModel}">
             <views:AttendanceView />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:LeaveViewModel}">
+            <views:LeaveView />
+        </DataTemplate>
         <DataTemplate DataType="{x:Type vm:PremiumModuleViewModel}">
             <views:PremiumModuleView />
         </DataTemplate>

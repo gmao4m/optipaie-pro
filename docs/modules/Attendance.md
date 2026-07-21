@@ -92,6 +92,10 @@ With no records (or a locked module) the request is byte-for-byte the previous o
 existing payslips are unaffected. There is no import/export step: the data is already
 shared.
 
+Days are bound through `OptiPaie.Data/Context/SqliteDate.cs` so one calendar day has
+exactly one stored representation whichever module writes it — see
+[Leave](Leave.md) §4 for the bug that made this necessary.
+
 ## 5. UI / navigation
 
 - Locked: the nav entry shows 🔒 and opens the premium (upsell) page.

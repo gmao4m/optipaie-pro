@@ -1,0 +1,35 @@
+<Window x:Class="OptiPaie.Desktop.Views.LeaveSettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Paramètres des congés" Height="300" Width="440"
+        ResizeMode="NoResize" WindowStartupLocation="CenterOwner" Background="{StaticResource Canvas}">
+    <Grid Margin="24,20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0">
+            <TextBlock Style="{StaticResource H2}" Text="Paramètres des congés" />
+            <TextBlock Style="{StaticResource Caption}" Margin="0,4,0,0" TextWrapping="Wrap"
+                       Text="Valeurs par défaut conformes à la loi 90-11 : 2,5 jours par mois travaillé, plafonnés à 30 jours." />
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" Margin="0,18,0,0">
+            <TextBlock Style="{StaticResource Caption}" Text="Jours acquis par mois travaillé" />
+            <TextBox Style="{StaticResource AppTextBox}" Margin="0,4,0,0" Text="{Binding DaysPerMonth, UpdateSourceTrigger=PropertyChanged}" />
+
+            <TextBlock Style="{StaticResource Caption}" Margin="0,12,0,0" Text="Plafond annuel (jours)" />
+            <TextBox Style="{StaticResource AppTextBox}" Margin="0,4,0,0" Text="{Binding AnnualCap, UpdateSourceTrigger=PropertyChanged}" />
+
+            <CheckBox Margin="0,16,0,0" IsChecked="{Binding ExcludeRestDays}"
+                      Content="Exclure les jours de repos (vendredi et samedi) du décompte" />
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">
+            <Button Style="{StaticResource SecondaryButton}" Content="Annuler" Command="{Binding CancelCommand}" />
+            <Button Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Content="Enregistrer" Command="{Binding SaveCommand}" />
+        </StackPanel>
+    </Grid>
+</Window>
