@@ -112,26 +112,35 @@ namespace OptiPaie.Desktop.ViewModels
         }
 
         /// <summary>Support phone from configuration (shown when the trial has ended).</summary>
-        public string SupportPhone => Setting("Support.Phone", "+213 000 00 00 00");
+        public string SupportPhone => Setting("Support.Phone");
 
-        /// <summary>Support email from configuration.</summary>
-        public string SupportEmail => Setting("Support.Email", "contact@optipaie.dz");
+        /// <summary>Support email from configuration (blank = not shown).</summary>
+        public string SupportEmail => Setting("Support.Email");
 
-        public string SupportText =>
-            "Besoin d'aide ou d'une licence ? Contactez le support :" + Environment.NewLine +
-            "Tél. : " + SupportPhone + Environment.NewLine +
-            "Email : " + SupportEmail;
+        public string SupportText
+        {
+            get
+            {
+                string text = "Besoin d'aide ou d'une licence ? Contactez le support :" + Environment.NewLine +
+                              "Tél. : " + SupportPhone;
+                if (!string.IsNullOrWhiteSpace(SupportEmail))
+                {
+                    text += Environment.NewLine + "Email : " + SupportEmail;
+                }
 
-        private static string Setting(string key, string fallback)
+                return text;
+            }
+        }
+
+        private static string Setting(string key)
         {
             try
             {
-                string v = ConfigurationManager.AppSettings[key];
-                return string.IsNullOrWhiteSpace(v) ? fallback : v;
+                return ConfigurationManager.AppSettings[key] ?? string.Empty;
             }
             catch
             {
-                return fallback;
+                return string.Empty;
             }
         }
 
