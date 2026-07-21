@@ -36,7 +36,8 @@ namespace OptiPaie.Desktop.Composition
             ILeaveService leave,
             ILoanService loans,
             IContractService contracts,
-            IPerformanceService performance)
+            IPerformanceService performance,
+            IAssetService assets)
         {
             Configuration = configuration;
             Logger = logger;
@@ -60,6 +61,7 @@ namespace OptiPaie.Desktop.Composition
             Loans = loans;
             Contracts = contracts;
             Performance = performance;
+            Assets = assets;
         }
 
         public AppConfiguration Configuration { get; }
@@ -106,5 +108,8 @@ namespace OptiPaie.Desktop.Composition
 
         /// <summary>Performance module (premium) — pulls attendance context live.</summary>
         public IPerformanceService Performance { get; }
+
+        /// <summary>Assets module (premium) — company property assigned to shared employees.</summary>
+        public IAssetService Assets { get; }
     }
 }
