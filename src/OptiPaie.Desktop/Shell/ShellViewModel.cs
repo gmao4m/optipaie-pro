@@ -33,6 +33,7 @@ namespace OptiPaie.Desktop.Shell
         private LeaveViewModel _leave;
         private LoanViewModel _loans;
         private ContractViewModel _contracts;
+        private PerformanceViewModel _performance;
 
         private readonly Dictionary<string, PremiumModuleViewModel> _premium =
             new Dictionary<string, PremiumModuleViewModel>();
@@ -201,6 +202,11 @@ namespace OptiPaie.Desktop.Shell
                 if (string.Equals(key, ModuleKeys.Contracts, StringComparison.Ordinal))
                 {
                     return _contracts ?? (_contracts = new ContractViewModel(_services));
+                }
+
+                if (string.Equals(key, ModuleKeys.Performance, StringComparison.Ordinal))
+                {
+                    return _performance ?? (_performance = new PerformanceViewModel(_services));
                 }
 
                 if (!_ready.TryGetValue(key, out ModuleReadyViewModel ready))

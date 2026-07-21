@@ -33,6 +33,7 @@ namespace OptiPaie.Data.Context
         private ILeaveRepository _leave;
         private ILoanRepository _loans;
         private IContractRepository _contracts;
+        private IPerformanceRepository _performance;
 
         public UnitOfWork(SQLiteConnection connection)
         {
@@ -64,6 +65,8 @@ namespace OptiPaie.Data.Context
         public ILoanRepository Loans => _loans ?? (_loans = new LoanRepository(this));
 
         public IContractRepository Contracts => _contracts ?? (_contracts = new ContractRepository(this));
+
+        public IPerformanceRepository Performance => _performance ?? (_performance = new PerformanceRepository(this));
 
         public void BeginTransaction()
         {
