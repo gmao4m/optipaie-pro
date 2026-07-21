@@ -51,6 +51,9 @@ namespace OptiPaie.Core.Interfaces.Repositories
         /// <summary>Leave repository (premium module, shares Employees).</summary>
         ILeaveRepository Leave { get; }
 
+        /// <summary>Loan repository (premium module, shares Employees).</summary>
+        ILoanRepository Loans { get; }
+
         /// <summary>Begins a database transaction for the subsequent repository calls.</summary>
         void BeginTransaction();
 

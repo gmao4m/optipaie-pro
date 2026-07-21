@@ -33,7 +33,8 @@ namespace OptiPaie.Desktop.Composition
             IAccessController access,
             IUpdateService update,
             IAttendanceService attendance,
-            ILeaveService leave)
+            ILeaveService leave,
+            ILoanService loans)
         {
             Configuration = configuration;
             Logger = logger;
@@ -54,6 +55,7 @@ namespace OptiPaie.Desktop.Composition
             Update = update;
             Attendance = attendance;
             Leave = leave;
+            Loans = loans;
         }
 
         public AppConfiguration Configuration { get; }
@@ -91,5 +93,8 @@ namespace OptiPaie.Desktop.Composition
 
         /// <summary>Leave module (premium) — writes approved days into Attendance.</summary>
         public ILeaveService Leave { get; }
+
+        /// <summary>Loans module (premium) — feeds instalments into payroll as deductions.</summary>
+        public ILoanService Loans { get; }
     }
 }

@@ -27,6 +27,14 @@ namespace OptiPaie.Desktop.ViewModels
 
         public bool IsBaseSalary { get; set; }
         public bool IsManual { get; set; }
+
+        /// <summary>
+        /// True for the automatic "Remboursement prêt" line added by the Loans module.
+        /// The engine still treats it as an ordinary manual deduction; this flag only
+        /// tells the worksheet to record the recovery against the loan when payroll is
+        /// saved.
+        /// </summary>
+        public bool IsLoan { get; set; }
         public long ElementId { get; set; }
         public bool IsGain { get; set; }
 

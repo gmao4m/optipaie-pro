@@ -1,0 +1,106 @@
+<Window x:Class="OptiPaie.Desktop.Views.LoanDetailWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Détail du prêt" Height="560" Width="640"
+        WindowStartupLocation="CenterOwner" Background="{StaticResource Canvas}">
+    <Window.Resources>
+        <Style x:Key="GridHeader" TargetType="DataGridColumnHeader">
+            <Setter Property="Background" Value="{StaticResource SurfaceMuted}" />
+            <Setter Property="Foreground" Value="{StaticResource TextSecondary}" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Height" Value="32" />
+            <Setter Property="Padding" Value="8,0" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="BorderBrush" Value="{StaticResource Border}" />
+            <Setter Property="BorderThickness" Value="0,0,1,1" />
+        </Style>
+        <Style x:Key="RightText" TargetType="TextBlock">
+            <Setter Property="TextAlignment" Value="Right" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Margin" Value="0,0,8,0" />
+        </Style>
+        <Style x:Key="Stat" TargetType="StackPanel">
+            <Setter Property="Margin" Value="0,0,26,0" />
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="22,18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Style="{StaticResource H2}" Text="{Binding EmployeeName}" />
+
+        <!-- Balance summary -->
+        <Border Grid.Row="1" Style="{StaticResource Card}" Margin="0,14,0,0" Padding="16,12">
+            <StackPanel Orientation="Horizontal">
+                <StackPanel Style="{StaticResource Stat}">
+                    <TextBlock Style="{StaticResource Caption}" Text="Montant" />
+                    <TextBlock FontWeight="SemiBold" FontSize="14" Text="{Binding PrincipalText}" />
+                </StackPanel>
+                <StackPanel Style="{StaticResource Stat}">
+                    <TextBlock Style="{StaticResource Caption}" Text="Remboursé" />
+                    <TextBlock FontWeight="SemiBold" FontSize="14" Foreground="{StaticResource Salary}" Text="{Binding RepaidText}" />
+                </StackPanel>
+                <StackPanel Style="{StaticResource Stat}">
+                    <TextBlock Style="{StaticResource Caption}" Text="Reste dû" />
+                    <TextBlock FontWeight="SemiBold" FontSize="14" Foreground="{StaticResource Deduction}" Text="{Binding OutstandingText}" />
+                </StackPanel>
+                <StackPanel Style="{StaticResource Stat}">
+                    <TextBlock Style="{StaticResource Caption}" Text="Mensualité" />
+                    <TextBlock FontWeight="SemiBold" FontSize="14" Text="{Binding InstallmentText}" />
+                </StackPanel>
+                <StackPanel Style="{StaticResource Stat}">
+                    <TextBlock Style="{StaticResource Caption}" Text="Statut" />
+                    <TextBlock FontWeight="SemiBold" FontSize="14" Text="{Binding StatusText}" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- Manual repayment -->
+        <Border Grid.Row="2" Style="{StaticResource Card}" Margin="0,12,0,0" Padding="14,10">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Remboursement manuel :" VerticalAlignment="Center" Foreground="{StaticResource TextSecondary}" FontSize="12.5" />
+                <ComboBox Style="{StaticResource AppComboBox}" Width="110" Height="30" Margin="10,0,0,0"
+                          ItemsSource="{Binding Months}" SelectedValue="{Binding ManualMonth}"
+                          SelectedValuePath="Value" DisplayMemberPath="Label" />
+                <ComboBox Style="{StaticResource AppComboBox}" Width="80" Height="30" Margin="6,0,0,0"
+                          ItemsSource="{Binding Years}" SelectedItem="{Binding ManualYear}" />
+                <TextBox Style="{StaticResource AppTextBox}" Width="120" Height="30" Margin="6,0,0,0"
+                         Text="{Binding ManualAmount, UpdateSourceTrigger=PropertyChanged}" />
+                <Button Style="{StaticResource SecondaryButton}" Height="30" Margin="8,0,0,0"
+                        Content="Ajouter" Command="{Binding AddRepaymentCommand}" />
+            </StackPanel>
+        </Border>
+
+        <!-- Ledger -->
+        <DataGrid Grid.Row="3" Margin="0,12,0,0" ItemsSource="{Binding Repayments}" SelectedItem="{Binding SelectedRepayment}"
+                  AutoGenerateColumns="False" HeadersVisibility="Column" IsReadOnly="True"
+                  CanUserAddRows="False" CanUserResizeRows="False" GridLinesVisibility="All"
+                  RowHeight="30" FontFamily="Segoe UI" FontSize="12.5" Background="{StaticResource Surface}"
+                  RowBackground="{StaticResource Surface}" AlternatingRowBackground="{StaticResource SurfaceMuted}"
+                  BorderBrush="{StaticResource Border}" BorderThickness="1"
+                  HorizontalGridLinesBrush="{StaticResource Border}" VerticalGridLinesBrush="{StaticResource Border}"
+                  ColumnHeaderStyle="{StaticResource GridHeader}">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Période" Binding="{Binding Period}" Width="120" />
+                <DataGridTextColumn Header="Montant (DA)" Binding="{Binding AmountText}" Width="160" ElementStyle="{StaticResource RightText}" />
+                <DataGridTextColumn Header="Source" Binding="{Binding Source}" Width="*" />
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- Actions -->
+        <Grid Grid.Row="4" Margin="0,12,0,0">
+            <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Center" HorizontalAlignment="Left" Text="{Binding StatusMessage}" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Style="{StaticResource SecondaryButton}" Content="Supprimer le remboursement" Command="{Binding RemoveRepaymentCommand}" />
+                <Button Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Content="Fermer" Command="{Binding CloseCommand}" />
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>

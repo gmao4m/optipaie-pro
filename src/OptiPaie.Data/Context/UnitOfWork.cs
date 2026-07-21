@@ -31,6 +31,7 @@ namespace OptiPaie.Data.Context
         private IBackupRecordRepository _backupRecords;
         private IAttendanceRepository _attendance;
         private ILeaveRepository _leave;
+        private ILoanRepository _loans;
 
         public UnitOfWork(SQLiteConnection connection)
         {
@@ -58,6 +59,8 @@ namespace OptiPaie.Data.Context
         public IAttendanceRepository Attendance => _attendance ?? (_attendance = new AttendanceRepository(this));
 
         public ILeaveRepository Leave => _leave ?? (_leave = new LeaveRepository(this));
+
+        public ILoanRepository Loans => _loans ?? (_loans = new LoanRepository(this));
 
         public void BeginTransaction()
         {

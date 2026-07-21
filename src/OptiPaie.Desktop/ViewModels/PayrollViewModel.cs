@@ -224,6 +224,26 @@ namespace OptiPaie.Desktop.ViewModels
                 });
             }
 
+            // Loans integration — automatic, input only. When the Loans module is
+            // licensed and the employee has an instalment due this period, it appears as
+            // a deduction line. Removing the line before saving skips the recovery for
+            // the month; the loan schedule itself is only touched when payroll is saved.
+            if (_services.LicenseGate.IsEnabled(ModuleKeys.Loans))
+            {
+                decimal loanDue = _services.Loans.GetMonthlyDeduction(SelectedEmployee.Id, SelectedYear, SelectedMonth);
+                if (loanDue > 0m)
+                {
+                    Lines.Add(new PayrollLineVM(Recompute)
+                    {
+                        IsManual = true,
+                        IsLoan = true,
+                        IsGain = false,
+                        Rubrique = "Remboursement prêt",
+                        Base = loanDue
+                    });
+                }
+            }
+
             _loading = false;
             Recompute();
         }
@@ -419,15 +439,39 @@ namespace OptiPaie.Desktop.ViewModels
             }
 
             Result<long> result = _services.Payroll.Generate(_lastRequest);
-            if (result.IsSuccess)
-            {
-                Status = "Paie enregistrée";
-                Dialogs.Info("La paie a été enregistrée dans l'archive.");
-            }
-            else
+            if (!result.IsSuccess)
             {
                 Dialogs.Error(result.Error);
+                return;
             }
+
+            // The payslip is archived — now, and only now, record the loan recovery so
+            // the instalment shown on this payslip is deducted from the balance exactly
+            // once. Recording is idempotent per period, so re-saving is safe. The payroll
+            // engine is untouched: this runs entirely in the Loans module.
+            string loanNote = RecordLoanRecovery();
+
+            Status = "Paie enregistrée";
+            Dialogs.Info("La paie a été enregistrée dans l'archive." + loanNote);
+        }
+
+        /// <summary>
+        /// Records this period's loan recovery when the worksheet still carries the
+        /// automatic "Remboursement prêt" line. Returns a short note for the dialog, or
+        /// an empty string when nothing was recorded.
+        /// </summary>
+        private string RecordLoanRecovery()
+        {
+            if (!_services.LicenseGate.IsEnabled(ModuleKeys.Loans)) return string.Empty;
+            if (!Lines.Any(l => l.IsLoan)) return string.Empty;
+
+            Result<decimal> recorded =
+                _services.Loans.RecordPayrollDeductions(SelectedEmployee.Id, SelectedYear, SelectedMonth);
+
+            if (recorded.IsFailure || recorded.Value <= 0m) return string.Empty;
+
+            return Environment.NewLine + "Remboursement de prêt enregistré : " +
+                   recorded.Value.ToString("N2", Fr) + " DA.";
         }
 
         private void ExportPdf()
