@@ -38,7 +38,8 @@ namespace OptiPaie.Desktop.Composition
             IContractService contracts,
             IPerformanceService performance,
             IAssetService assets,
-            ITrainingService training)
+            ITrainingService training,
+            IAtsService ats)
         {
             Configuration = configuration;
             Logger = logger;
@@ -64,6 +65,7 @@ namespace OptiPaie.Desktop.Composition
             Performance = performance;
             Assets = assets;
             Training = training;
+            Ats = ats;
         }
 
         public AppConfiguration Configuration { get; }
@@ -116,5 +118,8 @@ namespace OptiPaie.Desktop.Composition
 
         /// <summary>Training module (premium) — sessions with shared-employee enrolments.</summary>
         public ITrainingService Training { get; }
+
+        /// <summary>Recruitment/ATS module (premium) — creates the shared employee on hire.</summary>
+        public IAtsService Ats { get; }
     }
 }

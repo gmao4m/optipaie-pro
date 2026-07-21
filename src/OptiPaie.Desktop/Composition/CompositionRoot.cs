@@ -52,6 +52,7 @@ namespace OptiPaie.Desktop.Composition
             var performanceService = new PerformanceService(unitOfWorkFactory, attendanceService);
             var assetService = new AssetService(unitOfWorkFactory);
             var trainingService = new TrainingService(unitOfWorkFactory);
+            var atsService = new AtsService(unitOfWorkFactory);
             var backupService = new BackupService(backupProvider, unitOfWorkFactory, configuration, logger);
             var localizationService = new LocalizationService();
 
@@ -112,7 +113,8 @@ namespace OptiPaie.Desktop.Composition
                 contractService,
                 performanceService,
                 assetService,
-                trainingService);
+                trainingService,
+                atsService);
         }
     }
 }

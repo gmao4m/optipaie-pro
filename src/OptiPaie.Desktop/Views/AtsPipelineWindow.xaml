@@ -1,0 +1,71 @@
+<Window x:Class="OptiPaie.Desktop.Views.AtsPipelineWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Candidats" Height="540" Width="820"
+        WindowStartupLocation="CenterOwner" Background="{StaticResource Canvas}">
+    <Window.Resources>
+        <Style x:Key="GridHeader" TargetType="DataGridColumnHeader">
+            <Setter Property="Background" Value="{StaticResource SurfaceMuted}" />
+            <Setter Property="Foreground" Value="{StaticResource TextSecondary}" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Height" Value="32" />
+            <Setter Property="Padding" Value="8,0" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="BorderBrush" Value="{StaticResource Border}" />
+            <Setter Property="BorderThickness" Value="0,0,1,1" />
+        </Style>
+        <Style x:Key="CenterText" TargetType="TextBlock">
+            <Setter Property="TextAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="22,18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <StackPanel HorizontalAlignment="Left">
+                <TextBlock Style="{StaticResource H2}" Text="{Binding PostingTitle}" />
+                <TextBlock Style="{StaticResource Caption}" Margin="0,4,0,0" Text="Pipeline des candidats" />
+            </StackPanel>
+            <Button Style="{StaticResource PrimaryButton}" HorizontalAlignment="Right" VerticalAlignment="Top"
+                    Content="Ajouter un candidat" Command="{Binding AddCommand}" />
+        </Grid>
+
+        <DataGrid Grid.Row="1" Margin="0,14,0,0" ItemsSource="{Binding Candidates}" SelectedItem="{Binding SelectedCandidate}"
+                  AutoGenerateColumns="False" HeadersVisibility="Column" IsReadOnly="True"
+                  CanUserAddRows="False" CanUserResizeRows="False" GridLinesVisibility="All"
+                  RowHeight="32" FontFamily="Segoe UI" FontSize="12.5" Background="{StaticResource Surface}"
+                  RowBackground="{StaticResource Surface}" AlternatingRowBackground="{StaticResource SurfaceMuted}"
+                  BorderBrush="{StaticResource Border}" BorderThickness="1"
+                  HorizontalGridLinesBrush="{StaticResource Border}" VerticalGridLinesBrush="{StaticResource Border}"
+                  ColumnHeaderStyle="{StaticResource GridHeader}">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Candidat" Binding="{Binding FullName}" Width="*" />
+                <DataGridTextColumn Header="Téléphone" Binding="{Binding Phone}" Width="120" />
+                <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="180" />
+                <DataGridTextColumn Header="Note" Binding="{Binding RatingText}" Width="70" ElementStyle="{StaticResource CenterText}" />
+                <DataGridTextColumn Header="Reçu le" Binding="{Binding AppliedText}" Width="100" ElementStyle="{StaticResource CenterText}" />
+                <DataGridTextColumn Header="Étape" Binding="{Binding StageLabel}" Width="120" ElementStyle="{StaticResource CenterText}" />
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <Grid Grid.Row="2" Margin="0,12,0,0">
+            <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Center" HorizontalAlignment="Left" Text="{Binding StatusMessage}" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <ComboBox Style="{StaticResource AppComboBox}" Width="140" Height="32" VerticalAlignment="Center"
+                          ItemsSource="{Binding Stages}" SelectedItem="{Binding SelectedStage}" DisplayMemberPath="Label" />
+                <Button Style="{StaticResource SecondaryButton}" Height="32" Margin="6,0,0,0" Content="Déplacer" Command="{Binding MoveCommand}" />
+                <Button Style="{StaticResource SecondaryButton}" Height="32" Margin="6,0,0,0" Content="Écarter" Command="{Binding RejectCommand}" />
+                <Button Style="{StaticResource SecondaryButton}" Height="32" Margin="6,0,0,0" Content="Supprimer" Command="{Binding DeleteCommand}" />
+                <Button Style="{StaticResource PrimaryButton}" Height="32" Margin="6,0,0,0" Content="Recruter" Command="{Binding HireCommand}" />
+                <Button Style="{StaticResource SecondaryButton}" Height="32" Margin="6,0,0,0" Content="Fermer" Command="{Binding CloseCommand}" />
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>
