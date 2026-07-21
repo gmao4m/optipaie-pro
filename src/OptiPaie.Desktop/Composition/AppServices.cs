@@ -34,7 +34,8 @@ namespace OptiPaie.Desktop.Composition
             IUpdateService update,
             IAttendanceService attendance,
             ILeaveService leave,
-            ILoanService loans)
+            ILoanService loans,
+            IContractService contracts)
         {
             Configuration = configuration;
             Logger = logger;
@@ -56,6 +57,7 @@ namespace OptiPaie.Desktop.Composition
             Attendance = attendance;
             Leave = leave;
             Loans = loans;
+            Contracts = contracts;
         }
 
         public AppConfiguration Configuration { get; }
@@ -96,5 +98,8 @@ namespace OptiPaie.Desktop.Composition
 
         /// <summary>Loans module (premium) — feeds instalments into payroll as deductions.</summary>
         public ILoanService Loans { get; }
+
+        /// <summary>Contracts module (premium) — syncs the shared employee's terms.</summary>
+        public IContractService Contracts { get; }
     }
 }

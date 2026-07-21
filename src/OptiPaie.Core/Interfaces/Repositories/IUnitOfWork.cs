@@ -54,6 +54,9 @@ namespace OptiPaie.Core.Interfaces.Repositories
         /// <summary>Loan repository (premium module, shares Employees).</summary>
         ILoanRepository Loans { get; }
 
+        /// <summary>Contract repository (premium module, shares Employees).</summary>
+        IContractRepository Contracts { get; }
+
         /// <summary>Begins a database transaction for the subsequent repository calls.</summary>
         void BeginTransaction();
 
