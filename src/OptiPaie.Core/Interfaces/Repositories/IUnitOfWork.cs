@@ -63,6 +63,9 @@ namespace OptiPaie.Core.Interfaces.Repositories
         /// <summary>Asset repository (premium module, shares Employees/Companies).</summary>
         IAssetRepository Assets { get; }
 
+        /// <summary>Training repository (premium module, shares Employees/Companies).</summary>
+        ITrainingRepository Training { get; }
+
         /// <summary>Begins a database transaction for the subsequent repository calls.</summary>
         void BeginTransaction();
 

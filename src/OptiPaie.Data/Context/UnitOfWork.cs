@@ -35,6 +35,7 @@ namespace OptiPaie.Data.Context
         private IContractRepository _contracts;
         private IPerformanceRepository _performance;
         private IAssetRepository _assets;
+        private ITrainingRepository _training;
 
         public UnitOfWork(SQLiteConnection connection)
         {
@@ -70,6 +71,8 @@ namespace OptiPaie.Data.Context
         public IPerformanceRepository Performance => _performance ?? (_performance = new PerformanceRepository(this));
 
         public IAssetRepository Assets => _assets ?? (_assets = new AssetRepository(this));
+
+        public ITrainingRepository Training => _training ?? (_training = new TrainingRepository(this));
 
         public void BeginTransaction()
         {

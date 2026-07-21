@@ -1,0 +1,103 @@
+<UserControl x:Class="OptiPaie.Desktop.Views.TrainingView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <Style x:Key="GridHeader" TargetType="DataGridColumnHeader">
+            <Setter Property="Background" Value="{StaticResource SurfaceMuted}" />
+            <Setter Property="Foreground" Value="{StaticResource TextSecondary}" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Height" Value="34" />
+            <Setter Property="Padding" Value="8,0" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="BorderBrush" Value="{StaticResource Border}" />
+            <Setter Property="BorderThickness" Value="0,0,1,1" />
+        </Style>
+        <Style x:Key="RightText" TargetType="TextBlock">
+            <Setter Property="TextAlignment" Value="Right" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Margin" Value="0,0,8,0" />
+        </Style>
+        <Style x:Key="CenterText" TargetType="TextBlock">
+            <Setter Property="TextAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="Kpi" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource Surface}" />
+            <Setter Property="BorderBrush" Value="{StaticResource Border}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="Padding" Value="16,11" />
+            <Setter Property="Margin" Value="0,0,12,0" />
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="24,20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <StackPanel HorizontalAlignment="Left">
+                <TextBlock Style="{StaticResource H1}" Text="Formation" />
+                <TextBlock Style="{StaticResource Caption}" Margin="0,5,0,0"
+                           Text="Organisez les formations et suivez les participants et leurs attestations." />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
+                <ComboBox Style="{StaticResource AppComboBox}" Width="200" Height="32" VerticalAlignment="Center"
+                          ItemsSource="{Binding Companies}" SelectedItem="{Binding SelectedCompany}" DisplayMemberPath="NameFr" />
+                <Button Style="{StaticResource PrimaryButton}" Height="32" Margin="10,0,0,0"
+                        Content="Nouvelle formation" Command="{Binding NewCommand}" />
+            </StackPanel>
+        </Grid>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,18,0,0">
+            <Border Style="{StaticResource Kpi}">
+                <StackPanel>
+                    <TextBlock Style="{StaticResource Caption}" Text="Planifiées / en cours" />
+                    <TextBlock FontSize="20" FontWeight="SemiBold" Foreground="{StaticResource Employer}" Text="{Binding PlannedText}" />
+                </StackPanel>
+            </Border>
+            <Border Style="{StaticResource Kpi}">
+                <StackPanel>
+                    <TextBlock Style="{StaticResource Caption}" Text="Budget total (DA)" />
+                    <TextBlock FontSize="20" FontWeight="SemiBold" Text="{Binding TotalCostText}" />
+                </StackPanel>
+            </Border>
+        </StackPanel>
+
+        <DataGrid Grid.Row="2" Margin="0,18,0,0" ItemsSource="{Binding Sessions}" SelectedItem="{Binding SelectedSession}"
+                  AutoGenerateColumns="False" HeadersVisibility="Column" IsReadOnly="True"
+                  CanUserAddRows="False" CanUserResizeRows="False" GridLinesVisibility="All"
+                  RowHeight="32" FontFamily="Segoe UI" FontSize="12.5" Background="{StaticResource Surface}"
+                  RowBackground="{StaticResource Surface}" AlternatingRowBackground="{StaticResource SurfaceMuted}"
+                  BorderBrush="{StaticResource Border}" BorderThickness="1"
+                  HorizontalGridLinesBrush="{StaticResource Border}" VerticalGridLinesBrush="{StaticResource Border}"
+                  ColumnHeaderStyle="{StaticResource GridHeader}">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Intitulé" Binding="{Binding Title}" Width="*" />
+                <DataGridTextColumn Header="Domaine" Binding="{Binding Category}" Width="130" />
+                <DataGridTextColumn Header="Organisme" Binding="{Binding Provider}" Width="150" />
+                <DataGridTextColumn Header="Dates" Binding="{Binding DatesText}" Width="180" ElementStyle="{StaticResource CenterText}" />
+                <DataGridTextColumn Header="Coût" Binding="{Binding CostText}" Width="110" ElementStyle="{StaticResource RightText}" />
+                <DataGridTextColumn Header="Réussis" Binding="{Binding ParticipantsText}" Width="80" ElementStyle="{StaticResource CenterText}" />
+                <DataGridTextColumn Header="Statut" Binding="{Binding StatusLabel}" Width="100" ElementStyle="{StaticResource CenterText}" />
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <Grid Grid.Row="3" Margin="0,14,0,0">
+            <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Center" HorizontalAlignment="Left" Text="{Binding StatusMessage}" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Style="{StaticResource SecondaryButton}" Content="Modifier" Command="{Binding EditCommand}" />
+                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="Démarrer" Command="{Binding OngoingCommand}" />
+                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="Terminer" Command="{Binding CompleteCommand}" />
+                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="Annuler" Command="{Binding CancelSessionCommand}" />
+                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="Supprimer" Command="{Binding DeleteCommand}" />
+                <Button Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Content="Participants" Command="{Binding ParticipantsCommand}" />
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>

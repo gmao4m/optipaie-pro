@@ -37,7 +37,8 @@ namespace OptiPaie.Desktop.Composition
             ILoanService loans,
             IContractService contracts,
             IPerformanceService performance,
-            IAssetService assets)
+            IAssetService assets,
+            ITrainingService training)
         {
             Configuration = configuration;
             Logger = logger;
@@ -62,6 +63,7 @@ namespace OptiPaie.Desktop.Composition
             Contracts = contracts;
             Performance = performance;
             Assets = assets;
+            Training = training;
         }
 
         public AppConfiguration Configuration { get; }
@@ -111,5 +113,8 @@ namespace OptiPaie.Desktop.Composition
 
         /// <summary>Assets module (premium) — company property assigned to shared employees.</summary>
         public IAssetService Assets { get; }
+
+        /// <summary>Training module (premium) — sessions with shared-employee enrolments.</summary>
+        public ITrainingService Training { get; }
     }
 }
