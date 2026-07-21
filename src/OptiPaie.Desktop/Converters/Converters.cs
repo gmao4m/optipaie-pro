@@ -121,6 +121,17 @@ namespace OptiPaie.Desktop.Converters
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => Binding.DoNothing;
     }
 
+    /// <summary>Non-empty string → Visible, otherwise Collapsed (for optional badges).</summary>
+    public sealed class NonEmptyStringToVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return string.IsNullOrWhiteSpace(value as string) ? Visibility.Collapsed : Visibility.Visible;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => Binding.DoNothing;
+    }
+
     /// <summary>true → Collapsed, false → Visible (for empty-state text).</summary>
     public sealed class InverseBooleanToVisibilityConverter : IValueConverter
     {

@@ -31,7 +31,8 @@ namespace OptiPaie.Desktop.Composition
             ILicenseGate licenseGate,
             ITrialService trial,
             IAccessController access,
-            IUpdateService update)
+            IUpdateService update,
+            IAttendanceService attendance)
         {
             Configuration = configuration;
             Logger = logger;
@@ -50,6 +51,7 @@ namespace OptiPaie.Desktop.Composition
             Trial = trial;
             Access = access;
             Update = update;
+            Attendance = attendance;
         }
 
         public AppConfiguration Configuration { get; }
@@ -79,7 +81,10 @@ namespace OptiPaie.Desktop.Composition
         /// <summary>Combined access decision (license + trial) for startup gating.</summary>
         public IAccessController Access { get; }
 
-        /// <summary>Auto-update service (Velopack).</summary>
+        /// <summary>Auto-update service (Velopack / GitHub Releases).</summary>
         public IUpdateService Update { get; }
+
+        /// <summary>Attendance module (premium) — shares Employees/Companies.</summary>
+        public IAttendanceService Attendance { get; }
     }
 }

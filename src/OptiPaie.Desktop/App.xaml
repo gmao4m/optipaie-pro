@@ -15,6 +15,7 @@
             <conv:BooleanToVisibilityConverter x:Key="BoolToVis" />
             <conv:EnumToFrenchConverter x:Key="EnumFr" />
             <conv:EmptyStringToVisibilityConverter x:Key="EmptyToVis" />
+            <conv:NonEmptyStringToVisibilityConverter x:Key="NonEmptyToVis" />
             <conv:BytesToImageConverter x:Key="BytesToImage" />
             <conv:BoolToFontWeightConverter x:Key="BoolToWeight" />
             <conv:GainToBrushConverter x:Key="GainBrush" />

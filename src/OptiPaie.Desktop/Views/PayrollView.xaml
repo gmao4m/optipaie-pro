@@ -67,8 +67,15 @@
 
         <!-- Element toolbar -->
         <Grid Grid.Row="1" Margin="0,16,0,8">
-            <TextBlock Style="{StaticResource H2}" FontSize="14" Text="Éléments de paie" VerticalAlignment="Center" HorizontalAlignment="Left"
-                       Visibility="{Binding HasEmployee, Converter={StaticResource BoolToVis}}" />
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left"
+                        Visibility="{Binding HasEmployee, Converter={StaticResource BoolToVis}}">
+                <TextBlock Style="{StaticResource H2}" FontSize="14" Text="Éléments de paie" VerticalAlignment="Center" />
+                <!-- Filled automatically by the Attendance module when the month has pointage -->
+                <Border Background="{StaticResource BrandSoft}" CornerRadius="6" Padding="9,4" Margin="12,0,0,0" VerticalAlignment="Center"
+                        Visibility="{Binding AttendanceNote, Converter={StaticResource NonEmptyToVis}}">
+                    <TextBlock FontSize="11.5" Foreground="{StaticResource TextSecondary}" Text="{Binding AttendanceNote}" />
+                </Border>
+            </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Visibility="{Binding HasEmployee, Converter={StaticResource BoolToVis}}">
                 <ComboBox Style="{StaticResource AppComboBox}" Width="200" Height="32" ItemsSource="{Binding Catalog}" SelectedItem="{Binding SelectedCatalogElement}" DisplayMemberPath="NameFr" />
                 <Button Style="{StaticResource SecondaryButton}" Height="32" Margin="8,0,0,0" Content="Ajouter" Command="{Binding AddElementCommand}" />

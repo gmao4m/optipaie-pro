@@ -8,6 +8,7 @@ using Microsoft.Win32;
 using OptiPaie.Core.Dtos;
 using OptiPaie.Core.Entities;
 using OptiPaie.Core.Enums;
+using OptiPaie.Core.Licensing;
 using OptiPaie.Core.Primitives;
 using OptiPaie.Desktop.Common;
 using OptiPaie.Desktop.Composition;
@@ -34,6 +35,7 @@ namespace OptiPaie.Desktop.ViewModels
         private int _selectedYear = DateTime.Now.Year;
         private PayrollElement _selectedCatalog;
         private string _status = string.Empty;
+        private string _attendanceNote;
         private bool _recomputing;
         private bool _loading;
 
@@ -63,6 +65,17 @@ namespace OptiPaie.Desktop.ViewModels
         public ObservableCollection<Employee> Employees { get; }
         public ObservableCollection<PayrollElement> Catalog { get; }
         public ObservableCollection<PayrollLineVM> Lines { get; }
+
+        /// <summary>
+        /// What the Attendance module contributed to this calculation, or null when the
+        /// module is locked or the month has no pointage. Shown in the worksheet so the
+        /// figures are never a black box.
+        /// </summary>
+        public string AttendanceNote
+        {
+            get => _attendanceNote;
+            private set => Set(ref _attendanceNote, value);
+        }
 
         public List<EnumOption> Months { get; } = BuildMonths();
         public List<int> Years { get; } = BuildYears();
@@ -322,6 +335,28 @@ namespace OptiPaie.Desktop.ViewModels
             }
 
             decimal monthDays = DateTime.DaysInMonth(SelectedYear, SelectedMonth);
+            decimal workedDays = monthDays;
+            decimal workedHours = 0m;
+
+            // Attendance integration — automatic, no import/export. When the Attendance
+            // module is licensed AND the period has recorded days, absences reduce the
+            // worked days and the recorded hours feed hour-based elements. Without
+            // records the behaviour is byte-for-byte the previous one. This only changes
+            // the ENGINE INPUTS: no formula, rate or legal rule is touched.
+            AttendanceNote = null;
+            if (_services.LicenseGate.IsEnabled(ModuleKeys.Attendance))
+            {
+                AttendanceSummary summary =
+                    _services.Attendance.GetMonthlySummary(SelectedEmployee.Id, SelectedYear, SelectedMonth);
+                if (summary != null && summary.RecordedDays > 0)
+                {
+                    workedDays = Math.Max(0m, monthDays - summary.AbsentDays);
+                    workedHours = summary.WorkedHours;
+                    AttendanceNote = "Présence : " + summary.AbsentDays + " absence(s) · "
+                        + summary.WorkedHours.ToString("0.##", Fr) + " h travaillées · "
+                        + summary.OvertimeHours.ToString("0.##", Fr) + " h supplémentaires";
+                }
+            }
 
             return new PayrollGenerationRequest
             {
@@ -329,8 +364,9 @@ namespace OptiPaie.Desktop.ViewModels
                 EmployeeId = SelectedEmployee.Id,
                 Year = SelectedYear,
                 Month = SelectedMonth,
-                WorkedDays = monthDays,
+                WorkedDays = workedDays,
                 WorkableDays = monthDays,
+                WorkedHours = workedHours,
                 BaseSalaryOverride = baseOverride,
                 Elements = elements
             };

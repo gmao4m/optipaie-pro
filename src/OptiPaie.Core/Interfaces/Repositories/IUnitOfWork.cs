@@ -45,6 +45,9 @@ namespace OptiPaie.Core.Interfaces.Repositories
         /// <summary>Backup record repository.</summary>
         IBackupRecordRepository BackupRecords { get; }
 
+        /// <summary>Attendance repository (premium module, shares Employees).</summary>
+        IAttendanceRepository Attendance { get; }
+
         /// <summary>Begins a database transaction for the subsequent repository calls.</summary>
         void BeginTransaction();
 

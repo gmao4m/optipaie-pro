@@ -29,6 +29,7 @@ namespace OptiPaie.Desktop.Shell
         private PayrollViewModel _payroll;
         private ArchiveViewModel _archive;
         private SettingsViewModel _settings;
+        private AttendanceViewModel _attendance;
 
         private readonly Dictionary<string, PremiumModuleViewModel> _premium =
             new Dictionary<string, PremiumModuleViewModel>();
@@ -172,13 +173,18 @@ namespace OptiPaie.Desktop.Shell
 
         /// <summary>
         /// For a premium module: show its real screen when the license enables it,
-        /// otherwise the premium (upsell) page. Real screens are not built yet, so an
-        /// enabled module shows a "module activé" placeholder until its screen exists.
+        /// otherwise the premium (upsell) page. Modules whose screen is not built yet
+        /// show a "module activé" placeholder once enabled.
         /// </summary>
         private object ResolveModule(string key)
         {
             if (_gate.IsEnabled(key))
             {
+                if (string.Equals(key, ModuleKeys.Attendance, StringComparison.Ordinal))
+                {
+                    return _attendance ?? (_attendance = new AttendanceViewModel(_services));
+                }
+
                 if (!_ready.TryGetValue(key, out ModuleReadyViewModel ready))
                 {
                     ModuleDescriptor descriptor = _registry.Find(key);

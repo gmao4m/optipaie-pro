@@ -45,6 +45,7 @@ namespace OptiPaie.Desktop.Composition
             var configurationService = new ConfigurationService(unitOfWorkFactory);
             var settingsService = new SettingsService(unitOfWorkFactory);
             var archiveService = new ArchiveService(unitOfWorkFactory);
+            var attendanceService = new AttendanceService(unitOfWorkFactory);
             var backupService = new BackupService(backupProvider, unitOfWorkFactory, configuration, logger);
             var localizationService = new LocalizationService();
 
@@ -98,7 +99,8 @@ namespace OptiPaie.Desktop.Composition
                 licenseGate,
                 trialService,
                 accessController,
-                updateService);
+                updateService,
+                attendanceService);
         }
     }
 }

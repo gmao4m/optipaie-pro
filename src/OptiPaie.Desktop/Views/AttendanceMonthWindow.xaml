@@ -1,0 +1,79 @@
+<Window x:Class="OptiPaie.Desktop.Views.AttendanceMonthWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Synthèse mensuelle des présences" Height="620" Width="1000"
+        WindowStartupLocation="CenterOwner" Background="{StaticResource Canvas}">
+    <Window.Resources>
+        <Style x:Key="GridHeader" TargetType="DataGridColumnHeader">
+            <Setter Property="Background" Value="{StaticResource SurfaceMuted}" />
+            <Setter Property="Foreground" Value="{StaticResource TextSecondary}" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Height" Value="34" />
+            <Setter Property="Padding" Value="8,0" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="BorderBrush" Value="{StaticResource Border}" />
+            <Setter Property="BorderThickness" Value="0,0,1,1" />
+        </Style>
+        <Style x:Key="CenterText" TargetType="TextBlock">
+            <Setter Property="TextAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="RightText" TargetType="TextBlock">
+            <Setter Property="TextAlignment" Value="Right" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Margin" Value="0,0,8,0" />
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="22,18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <StackPanel HorizontalAlignment="Left">
+                <TextBlock Style="{StaticResource H2}" Text="{Binding CompanyName}" />
+                <TextBlock Style="{StaticResource Caption}" Margin="0,4,0,0" Text="{Binding PeriodLabel}" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
+                <ComboBox Style="{StaticResource AppComboBox}" Width="130" Height="32" ItemsSource="{Binding Months}"
+                          SelectedValue="{Binding Month}" SelectedValuePath="Value" DisplayMemberPath="Label" />
+                <ComboBox Style="{StaticResource AppComboBox}" Width="90" Height="32" Margin="8,0,0,0"
+                          ItemsSource="{Binding Years}" SelectedItem="{Binding Year}" />
+            </StackPanel>
+        </Grid>
+
+        <DataGrid Grid.Row="1" Margin="0,16,0,0" ItemsSource="{Binding Rows}" AutoGenerateColumns="False" HeadersVisibility="Column"
+                  IsReadOnly="True" CanUserAddRows="False" CanUserResizeRows="False" GridLinesVisibility="All"
+                  RowHeight="30" FontFamily="Segoe UI" FontSize="12.5" Background="{StaticResource Surface}"
+                  RowBackground="{StaticResource Surface}" AlternatingRowBackground="{StaticResource SurfaceMuted}"
+                  BorderBrush="{StaticResource Border}" BorderThickness="1"
+                  HorizontalGridLinesBrush="{StaticResource Border}" VerticalGridLinesBrush="{StaticResource Border}"
+                  ColumnHeaderStyle="{StaticResource GridHeader}">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Employé" Binding="{Binding EmployeeName}" Width="*" />
+                <DataGridTextColumn Header="Présents" Binding="{Binding PresentDays}" Width="85" ElementStyle="{StaticResource CenterText}" />
+                <DataGridTextColumn Header="Absents" Binding="{Binding AbsentDays}" Width="85" ElementStyle="{StaticResource CenterText}" />
+                <DataGridTextColumn Header="Congés" Binding="{Binding LeaveDays}" Width="80" ElementStyle="{StaticResource CenterText}" />
+                <DataGridTextColumn Header="Fériés" Binding="{Binding HolidayDays}" Width="75" ElementStyle="{StaticResource CenterText}" />
+                <DataGridTextColumn Header="Repos" Binding="{Binding RestDays}" Width="75" ElementStyle="{StaticResource CenterText}" />
+                <DataGridTextColumn Header="Retards" Binding="{Binding LateCount}" Width="80" ElementStyle="{StaticResource CenterText}" />
+                <DataGridTextColumn Header="Min. retard" Binding="{Binding LateMinutes}" Width="95" ElementStyle="{StaticResource RightText}" />
+                <DataGridTextColumn Header="Heures" Binding="{Binding WorkedHours, StringFormat=N2}" Width="90" ElementStyle="{StaticResource RightText}" />
+                <DataGridTextColumn Header="H. supp." Binding="{Binding OvertimeHours, StringFormat=N2}" Width="90" ElementStyle="{StaticResource RightText}" />
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <Grid Grid.Row="2" Margin="0,14,0,0">
+            <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Center" HorizontalAlignment="Left" Text="{Binding StatusMessage}" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Style="{StaticResource SecondaryButton}" Content="Exporter CSV" Command="{Binding ExportCsvCommand}" />
+                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="Exporter PDF" Command="{Binding ExportPdfCommand}" />
+                <Button Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Content="Fermer" Command="{Binding CloseCommand}" />
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>

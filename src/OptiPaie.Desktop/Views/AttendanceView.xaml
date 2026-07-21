@@ -1,0 +1,138 @@
+<UserControl x:Class="OptiPaie.Desktop.Views.AttendanceView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <Style x:Key="GridHeader" TargetType="DataGridColumnHeader">
+            <Setter Property="Background" Value="{StaticResource SurfaceMuted}" />
+            <Setter Property="Foreground" Value="{StaticResource TextSecondary}" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Height" Value="34" />
+            <Setter Property="Padding" Value="8,0" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="BorderBrush" Value="{StaticResource Border}" />
+            <Setter Property="BorderThickness" Value="0,0,1,1" />
+        </Style>
+        <Style x:Key="CenterText" TargetType="TextBlock">
+            <Setter Property="TextAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="CellEdit" TargetType="TextBox">
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="6,0" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="Kpi" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource Surface}" />
+            <Setter Property="BorderBrush" Value="{StaticResource Border}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="Padding" Value="16,11" />
+            <Setter Property="Margin" Value="0,0,12,0" />
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="24,20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Title + selectors -->
+        <Grid Grid.Row="0">
+            <StackPanel HorizontalAlignment="Left">
+                <TextBlock Style="{StaticResource H1}" Text="Présence" />
+                <TextBlock Style="{StaticResource Caption}" Margin="0,5,0,0" Text="{Binding DateLabel}" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
+                <ComboBox Style="{StaticResource AppComboBox}" Width="200" Height="32" VerticalAlignment="Center"
+                          ItemsSource="{Binding Companies}" SelectedItem="{Binding SelectedCompany}" DisplayMemberPath="NameFr" />
+                <DatePicker Width="140" Height="32" Margin="10,0,0,0" VerticalAlignment="Center"
+                            SelectedDate="{Binding SelectedDate}" />
+                <Button Style="{StaticResource SecondaryButton}" Height="32" Margin="8,0,0,0"
+                        Content="Aujourd'hui" Command="{Binding TodayCommand}" />
+            </StackPanel>
+        </Grid>
+
+        <!-- KPI strip -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,18,0,0">
+                <Border Style="{StaticResource Kpi}">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource Caption}" Text="Présents" />
+                        <TextBlock FontSize="20" FontWeight="SemiBold" Foreground="{StaticResource Salary}" Text="{Binding PresentText}" />
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource Kpi}">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource Caption}" Text="Absents" />
+                        <TextBlock FontSize="20" FontWeight="SemiBold" Foreground="{StaticResource Deduction}" Text="{Binding AbsentText}" />
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource Kpi}">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource Caption}" Text="Retards" />
+                        <TextBlock FontSize="20" FontWeight="SemiBold" Foreground="{StaticResource Warning}" Text="{Binding LateText}" />
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource Kpi}">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource Caption}" Text="Heures supp." />
+                        <TextBlock FontSize="20" FontWeight="SemiBold" Text="{Binding OvertimeText}" />
+                    </StackPanel>
+                </Border>
+        </StackPanel>
+
+        <!-- Day sheet -->
+        <DataGrid Grid.Row="2" Margin="0,18,0,0" ItemsSource="{Binding Rows}" AutoGenerateColumns="False" HeadersVisibility="Column"
+                  CanUserAddRows="False" CanUserDeleteRows="False" CanUserResizeRows="False" GridLinesVisibility="All"
+                  RowHeight="32" FontFamily="Segoe UI" FontSize="12.5" Background="{StaticResource Surface}"
+                  RowBackground="{StaticResource Surface}" AlternatingRowBackground="{StaticResource SurfaceMuted}"
+                  BorderBrush="{StaticResource Border}" BorderThickness="1"
+                  HorizontalGridLinesBrush="{StaticResource Border}" VerticalGridLinesBrush="{StaticResource Border}"
+                  ColumnHeaderStyle="{StaticResource GridHeader}">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Employé" Binding="{Binding EmployeeName}" Width="*" IsReadOnly="True" />
+                <DataGridTextColumn Header="Poste" Binding="{Binding Poste}" Width="150" IsReadOnly="True" />
+                <DataGridComboBoxColumn Header="Statut" Width="120"
+                                        SelectedValueBinding="{Binding Status, UpdateSourceTrigger=PropertyChanged}"
+                                        SelectedValuePath="Value" DisplayMemberPath="Label">
+                    <DataGridComboBoxColumn.ElementStyle>
+                        <Style TargetType="ComboBox">
+                            <Setter Property="ItemsSource" Value="{Binding DataContext.StatusOptions, RelativeSource={RelativeSource AncestorType=DataGrid}}" />
+                        </Style>
+                    </DataGridComboBoxColumn.ElementStyle>
+                    <DataGridComboBoxColumn.EditingElementStyle>
+                        <Style TargetType="ComboBox">
+                            <Setter Property="ItemsSource" Value="{Binding DataContext.StatusOptions, RelativeSource={RelativeSource AncestorType=DataGrid}}" />
+                        </Style>
+                    </DataGridComboBoxColumn.EditingElementStyle>
+                </DataGridComboBoxColumn>
+                <DataGridTextColumn Header="Arrivée" Binding="{Binding CheckIn, UpdateSourceTrigger=PropertyChanged}" Width="80"
+                                    ElementStyle="{StaticResource CenterText}" EditingElementStyle="{StaticResource CellEdit}" />
+                <DataGridTextColumn Header="Sortie" Binding="{Binding CheckOut, UpdateSourceTrigger=PropertyChanged}" Width="80"
+                                    ElementStyle="{StaticResource CenterText}" EditingElementStyle="{StaticResource CellEdit}" />
+                <DataGridTextColumn Header="Heures" Binding="{Binding WorkedHoursText}" Width="80" IsReadOnly="True"
+                                    ElementStyle="{StaticResource CenterText}" />
+                <DataGridTextColumn Header="Retard" Binding="{Binding LateText}" Width="80" IsReadOnly="True"
+                                    ElementStyle="{StaticResource CenterText}" />
+                <DataGridTextColumn Header="H. supp." Binding="{Binding OvertimeText}" Width="80" IsReadOnly="True"
+                                    ElementStyle="{StaticResource CenterText}" />
+                <DataGridTextColumn Header="Note" Binding="{Binding Notes, UpdateSourceTrigger=PropertyChanged}" Width="180"
+                                    EditingElementStyle="{StaticResource CellEdit}" />
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- Actions -->
+        <Grid Grid.Row="3" Margin="0,14,0,0">
+            <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Center" HorizontalAlignment="Left" Text="{Binding StatusMessage}" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Style="{StaticResource SecondaryButton}" Content="Paramètres" Command="{Binding SettingsCommand}" />
+                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="Marquer tous présents" Command="{Binding MarkAllPresentCommand}" />
+                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="Synthèse du mois" Command="{Binding MonthSummaryCommand}" />
+                <Button Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Content="Enregistrer" Command="{Binding SaveCommand}" />
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>
