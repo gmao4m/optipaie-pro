@@ -25,7 +25,9 @@ namespace OptiPaie.Desktop
 
         private DispatcherTimer _licenseSyncTimer;
         private DispatcherTimer _updateTimer;
+        private DispatcherTimer _trialWatchdog;
         private bool _updateDialogOpen;
+        private bool _accessBlocked;
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -75,6 +77,50 @@ namespace OptiPaie.Desktop
 
             StartBackgroundLicenseSync();
             StartUpdateChecks();
+            StartTrialWatchdog();
+        }
+
+        /// <summary>
+        /// Enforces the 48-hour trial while the app runs: every 5 minutes it re-checks
+        /// access, and the moment the trial lapses (with no license) it blocks the app,
+        /// shows the activation window with the support contact, and closes if the user
+        /// still cannot proceed. A licensed app is unaffected.
+        /// </summary>
+        private void StartTrialWatchdog()
+        {
+            _trialWatchdog = new DispatcherTimer { Interval = TimeSpan.FromMinutes(5) };
+            _trialWatchdog.Tick += (s, e) => EnforceAccessStillValid();
+            _trialWatchdog.Start();
+        }
+
+        private void EnforceAccessStillValid()
+        {
+            if (_accessBlocked || Services == null)
+            {
+                return;
+            }
+
+            if (Services.Access.Evaluate().CanUseApp)
+            {
+                return;
+            }
+
+            _accessBlocked = true;
+            _trialWatchdog?.Stop();
+
+            // The trial lapsed mid-session — require activation before continuing.
+            bool restored = EnsureAccess();
+            if (restored)
+            {
+                _accessBlocked = false;
+                _trialWatchdog?.Start();
+                return;
+            }
+
+            MessageBox.Show(
+                "Votre essai gratuit de 48 heures est terminé. Veuillez activer une licence pour continuer.",
+                "OptiPaie PRO", MessageBoxButton.OK, MessageBoxImage.Warning);
+            Shutdown();
         }
 
         /// <summary>

@@ -88,6 +88,17 @@
                             Visibility="{Binding CanStartTrial, Converter={StaticResource BoolToVis}}" />
                 </StackPanel>
             </Border>
+
+            <!-- Support contact (shown once the trial has ended) -->
+            <Border Margin="0,16,0,0" CornerRadius="8" Padding="16" Background="#FCE8E6"
+                    Visibility="{Binding IsTrialExpired, Converter={StaticResource BoolToVis}}">
+                <StackPanel>
+                    <TextBlock Text="Essai terminé" FontWeight="SemiBold" Foreground="{StaticResource Deduction}"
+                               FontSize="14" Margin="0,0,0,6" />
+                    <TextBlock Text="{Binding SupportText}" TextWrapping="Wrap"
+                               Foreground="{StaticResource TextSecondary}" FontSize="13" />
+                </StackPanel>
+            </Border>
         </StackPanel>
     </Grid>
 </Window>

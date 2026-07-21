@@ -1,4 +1,5 @@
 using System;
+using System.Configuration;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -10,8 +11,10 @@ namespace OptiPaie.Desktop.ViewModels
 {
     /// <summary>
     /// The activation window: enter a license key to activate, or start / continue the
-    /// 30-day trial. The key box auto-formats to XXXXX-XXXXX-XXXXX-XXXXX and Activate is
-    /// only enabled once a complete key is present.
+    /// free 48-hour trial (all modules unlocked). The key box auto-formats to
+    /// XXXXX-XXXXX-XXXXX-XXXXX and Activate is only enabled once a complete key is
+    /// present. When the trial has ended, the window shows the support contact and no
+    /// longer offers a trial — activation is then required.
     /// </summary>
     public sealed class ActivationViewModel : ObservableObject
     {
@@ -84,8 +87,11 @@ namespace OptiPaie.Desktop.ViewModels
         /// <summary>True unless the trial was started and has already expired.</summary>
         public bool CanStartTrial => !_trial.IsExpired;
 
+        /// <summary>True once the trial has been used up — the support block is shown instead.</summary>
+        public bool IsTrialExpired => _trial.IsExpired;
+
         public string TrialButtonText =>
-            _trial.IsActive ? "Continuer l'essai" : "Démarrer l'essai gratuit (30 jours)";
+            _trial.IsActive ? "Continuer l'essai" : "Démarrer l'essai gratuit (48 h — tous les modules)";
 
         public string TrialInfoText
         {
@@ -93,15 +99,39 @@ namespace OptiPaie.Desktop.ViewModels
             {
                 if (_trial.IsActive)
                 {
-                    return "Essai en cours — " + _trial.DaysRemaining + " jour(s) restant(s).";
+                    return "Essai en cours — " + _trial.RemainingText + " restant. Tous les modules sont débloqués.";
                 }
 
                 if (_trial.IsExpired)
                 {
-                    return "Votre période d'essai est terminée. Veuillez activer une licence pour continuer.";
+                    return "Votre essai gratuit de 48 heures est terminé. Veuillez activer une licence pour continuer.";
                 }
 
-                return "Vous pouvez évaluer OptiPaie PRO gratuitement pendant 30 jours.";
+                return "Évaluez OptiPaie PRO gratuitement pendant 48 heures, avec TOUS les modules activés.";
+            }
+        }
+
+        /// <summary>Support phone from configuration (shown when the trial has ended).</summary>
+        public string SupportPhone => Setting("Support.Phone", "+213 000 00 00 00");
+
+        /// <summary>Support email from configuration.</summary>
+        public string SupportEmail => Setting("Support.Email", "contact@optipaie.dz");
+
+        public string SupportText =>
+            "Besoin d'aide ou d'une licence ? Contactez le support :" + Environment.NewLine +
+            "Tél. : " + SupportPhone + Environment.NewLine +
+            "Email : " + SupportEmail;
+
+        private static string Setting(string key, string fallback)
+        {
+            try
+            {
+                string v = ConfigurationManager.AppSettings[key];
+                return string.IsNullOrWhiteSpace(v) ? fallback : v;
+            }
+            catch
+            {
+                return fallback;
             }
         }
 

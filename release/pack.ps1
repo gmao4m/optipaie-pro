@@ -43,6 +43,7 @@ Write-Host "==> Velopack pack..." -ForegroundColor Cyan
     --packTitle "OptiPaie PRO" `
     --packAuthors "OptiPaie" `
     --icon $icon `
+    --shortcuts "Desktop,StartMenuRoot" `
     --outputDir $out
 if ($LASTEXITCODE -ne 0) { throw "vpk pack failed." }
 

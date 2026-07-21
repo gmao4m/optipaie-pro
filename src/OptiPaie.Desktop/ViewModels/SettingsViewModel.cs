@@ -122,7 +122,7 @@ namespace OptiPaie.Desktop.ViewModels
                     AccessStateText = "Sous licence — active";
                     break;
                 case AccessState.Trial:
-                    AccessStateText = "Période d'essai — " + trial.DaysRemaining + " jour(s) restant(s)";
+                    AccessStateText = "Essai gratuit (48 h) — " + trial.RemainingText + " restant · tous les modules";
                     break;
                 case AccessState.TrialExpired:
                     AccessStateText = "Essai expiré";

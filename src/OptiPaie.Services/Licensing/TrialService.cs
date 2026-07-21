@@ -7,14 +7,16 @@ using OptiPaie.Core.Licensing;
 namespace OptiPaie.Services.Licensing
 {
     /// <summary>
-    /// Local, offline 30-day trial. The state (start/expiry/last-seen) is stored
+    /// Local, offline 48-hour trial. The state (start/expiry/last-seen) is stored
     /// encrypted (DPAPI) and guarded against clock-rollback: the effective time never
     /// goes below the highest time ever observed, so setting the clock back cannot
-    /// extend the trial. A trial can be started only once per machine.
+    /// extend the trial. A trial can be started only once per machine — every computer
+    /// gets exactly one 48-hour evaluation with all modules unlocked.
     /// </summary>
     public sealed class TrialService : ITrialService
     {
-        public const int TrialDays = 30;
+        /// <summary>Trial length: 48 hours per computer.</summary>
+        public const int TrialHours = 48;
 
         private static readonly JsonSerializerSettings JsonSettings = new JsonSerializerSettings
         {
@@ -62,7 +64,7 @@ namespace OptiPaie.Services.Licensing
             }
 
             DateTime now = DateTime.UtcNow;
-            DateTime expires = now.AddDays(TrialDays);
+            DateTime expires = now.AddHours(TrialHours);
             Save(now, expires, now);
             _logger.Info("Trial started; expires " + expires.ToString("o"));
             return new TrialInfo(true, now, expires, now);

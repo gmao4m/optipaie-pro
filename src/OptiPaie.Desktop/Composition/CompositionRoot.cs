@@ -75,7 +75,7 @@ namespace OptiPaie.Desktop.Composition
             ITrialService trialService = new TrialService(trialStore, cipher, logger);
             ILicensingService licensingService = new LicensingService(
                 licenseBackend, verifier, deviceIdentity, licenseStore, cipher, licensingOptions, logger);
-            ILicenseGate licenseGate = new LicenseGate(licensingService);
+            ILicenseGate licenseGate = new LicenseGate(licensingService, trialService);
             IAccessController accessController = new AccessGate(licensingService, trialService);
 
             // Auto-update (Velopack). The channel is the only Velopack-aware piece; the

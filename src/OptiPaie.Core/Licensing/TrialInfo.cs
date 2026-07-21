@@ -13,12 +13,14 @@ namespace OptiPaie.Core.Licensing
 
             if (hasStarted && expiresUtc.HasValue)
             {
-                double days = (expiresUtc.Value - asOfUtc).TotalDays;
-                DaysRemaining = days <= 0 ? 0 : (int)Math.Ceiling(days);
+                double totalHours = (expiresUtc.Value - asOfUtc).TotalHours;
+                HoursRemaining = totalHours <= 0 ? 0 : (int)Math.Ceiling(totalHours);
+                DaysRemaining = HoursRemaining <= 0 ? 0 : (int)Math.Ceiling(HoursRemaining / 24.0);
                 IsActive = asOfUtc < expiresUtc.Value;
             }
             else
             {
+                HoursRemaining = 0;
                 DaysRemaining = 0;
                 IsActive = false;
             }
@@ -32,6 +34,23 @@ namespace OptiPaie.Core.Licensing
 
         /// <summary>Whole days left (0 when expired).</summary>
         public int DaysRemaining { get; }
+
+        /// <summary>Whole hours left (0 when expired). This is the primary countdown for the 48 h trial.</summary>
+        public int HoursRemaining { get; }
+
+        /// <summary>Human-friendly remaining time, e.g. "1 j 6 h" or "9 h".</summary>
+        public string RemainingText
+        {
+            get
+            {
+                if (HoursRemaining <= 0) return "0 h";
+                int days = HoursRemaining / 24;
+                int hours = HoursRemaining % 24;
+                if (days > 0 && hours > 0) return days + " j " + hours + " h";
+                if (days > 0) return days + " j";
+                return hours + " h";
+            }
+        }
 
         /// <summary>True while the trial is still valid.</summary>
         public bool IsActive { get; }
