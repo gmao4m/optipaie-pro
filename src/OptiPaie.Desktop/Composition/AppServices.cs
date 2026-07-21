@@ -39,7 +39,8 @@ namespace OptiPaie.Desktop.Composition
             IPerformanceService performance,
             IAssetService assets,
             ITrainingService training,
-            IAtsService ats)
+            IAtsService ats,
+            IWorkCertificateService certificates)
         {
             Configuration = configuration;
             Logger = logger;
@@ -66,6 +67,7 @@ namespace OptiPaie.Desktop.Composition
             Assets = assets;
             Training = training;
             Ats = ats;
+            Certificates = certificates;
         }
 
         public AppConfiguration Configuration { get; }
@@ -121,5 +123,8 @@ namespace OptiPaie.Desktop.Composition
 
         /// <summary>Recruitment/ATS module (premium) — creates the shared employee on hire.</summary>
         public IAtsService Ats { get; }
+
+        /// <summary>Work-certificates module (premium) — renders live from the shared records.</summary>
+        public IWorkCertificateService Certificates { get; }
     }
 }

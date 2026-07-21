@@ -69,6 +69,9 @@ namespace OptiPaie.Core.Interfaces.Repositories
         /// <summary>Recruitment/ATS repository (premium module; creates shared Employees on hire).</summary>
         IAtsRepository Ats { get; }
 
+        /// <summary>Work-certificate repository (premium module, shares Employees).</summary>
+        IWorkCertificateRepository Certificates { get; }
+
         /// <summary>Begins a database transaction for the subsequent repository calls.</summary>
         void BeginTransaction();
 
