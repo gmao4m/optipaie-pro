@@ -63,7 +63,7 @@
                 <Button Style="{StaticResource SecondaryButton}" Height="32" Margin="6,0,0,0" Content="Déplacer" Command="{Binding MoveCommand}" />
                 <Button Style="{StaticResource SecondaryButton}" Height="32" Margin="6,0,0,0" Content="Écarter" Command="{Binding RejectCommand}" />
                 <Button Style="{StaticResource SecondaryButton}" Height="32" Margin="6,0,0,0" Content="Supprimer" Command="{Binding DeleteCommand}" />
-                <Button Style="{StaticResource PrimaryButton}" Height="32" Margin="6,0,0,0" Content="Recruter" Command="{Binding HireCommand}" />
+                <Button Style="{StaticResource AccentButton}" Height="32" Margin="6,0,0,0" Content="Recruter" Command="{Binding HireCommand}" />
                 <Button Style="{StaticResource SecondaryButton}" Height="32" Margin="6,0,0,0" Content="Fermer" Command="{Binding CloseCommand}" />
             </StackPanel>
         </Grid>

@@ -6,14 +6,34 @@
         <ResourceDictionary Source="Colors.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
-    <FontFamily x:Key="AppFont">Segoe UI</FontFamily>
+    <!--
+        Font family. A bilingual (Arabic/French) fallback stack: IBM Plex Sans + its
+        Arabic sibling are used when installed, otherwise the system Segoe UI (excellent
+        Latin + Arabic coverage) so the app always renders cleanly. Ship the IBM Plex
+        font files with the installer to realise the exact intended type identity.
+    -->
+    <FontFamily x:Key="AppFont">IBM Plex Sans, IBM Plex Sans Arabic, Segoe UI</FontFamily>
+
+    <!-- Monospace face for tabular numeric data (salaries, ids, amounts) so figures
+         align in precise, financial-grade columns. -->
+    <FontFamily x:Key="MonoFont">IBM Plex Mono, Consolas, Courier New</FontFamily>
+
     <sys:Double x:Key="RadiusCard">12</sys:Double>
     <sys:Double x:Key="RadiusControl">8</sys:Double>
+
+    <!-- 7-step type scale (single source of sizes) -->
+    <sys:Double x:Key="FontSizeXxs">12</sys:Double>
+    <sys:Double x:Key="FontSizeXs">14</sys:Double>
+    <sys:Double x:Key="FontSizeSm">16</sys:Double>
+    <sys:Double x:Key="FontSizeMd">18</sys:Double>
+    <sys:Double x:Key="FontSizeLg">22</sys:Double>
+    <sys:Double x:Key="FontSizeXl">28</sys:Double>
+    <sys:Double x:Key="FontSizeXxl">36</sys:Double>
 
     <!-- Page title -->
     <Style x:Key="H1" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource AppFont}" />
-        <Setter Property="FontSize" Value="23" />
+        <Setter Property="FontSize" Value="26" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Foreground" Value="{StaticResource TextPrimary}" />
         <Setter Property="TextOptions.TextFormattingMode" Value="Ideal" />
@@ -22,14 +42,16 @@
     <!-- Section heading -->
     <Style x:Key="H2" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource AppFont}" />
-        <Setter Property="FontSize" Value="16" />
+        <Setter Property="FontSize" Value="18" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Foreground" Value="{StaticResource TextPrimary}" />
     </Style>
 
     <Style x:Key="Body" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource AppFont}" />
-        <Setter Property="FontSize" Value="13.5" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="LineHeight" Value="22" />
+        <Setter Property="LineStackingStrategy" Value="BlockLineHeight" />
         <Setter Property="Foreground" Value="{StaticResource TextPrimary}" />
     </Style>
 
@@ -42,15 +64,22 @@
     <!-- Big figures (KPIs / net) -->
     <Style x:Key="Figure" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource AppFont}" />
-        <Setter Property="FontSize" Value="22" />
+        <Setter Property="FontSize" Value="28" />
         <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{StaticResource TextPrimary}" />
+    </Style>
+
+    <!-- Tabular numeric figure (monospace) -->
+    <Style x:Key="MonoFigure" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource MonoFont}" />
+        <Setter Property="FontSize" Value="14" />
         <Setter Property="Foreground" Value="{StaticResource TextPrimary}" />
     </Style>
 
     <!-- Default look for every TextBlock -->
     <Style TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource AppFont}" />
-        <Setter Property="FontSize" Value="13.5" />
+        <Setter Property="FontSize" Value="14" />
         <Setter Property="Foreground" Value="{StaticResource TextPrimary}" />
         <Setter Property="TextOptions.TextFormattingMode" Value="Ideal" />
     </Style>

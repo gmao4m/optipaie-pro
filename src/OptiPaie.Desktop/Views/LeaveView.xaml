@@ -112,7 +112,7 @@
                 <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="Refuser" Command="{Binding RejectCommand}" />
                 <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="Annuler le congé" Command="{Binding CancelCommand}" />
                 <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="Supprimer" Command="{Binding DeleteCommand}" />
-                <Button Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Content="Approuver" Command="{Binding ApproveCommand}" />
+                <Button Style="{StaticResource AccentButton}" Margin="8,0,0,0" Content="Approuver" Command="{Binding ApproveCommand}" />
             </StackPanel>
         </Grid>
     </Grid>

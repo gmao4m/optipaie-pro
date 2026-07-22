@@ -97,7 +97,7 @@
                 <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="Résilier" Command="{Binding TerminateCommand}" />
                 <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="Renouveler" Command="{Binding RenewCommand}" />
                 <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="Supprimer" Command="{Binding DeleteCommand}" />
-                <Button Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Content="Activer" Command="{Binding ActivateCommand}" />
+                <Button Style="{StaticResource AccentButton}" Margin="8,0,0,0" Content="Activer" Command="{Binding ActivateCommand}" />
             </StackPanel>
         </Grid>
     </Grid>
