@@ -1,6 +1,7 @@
 <Window x:Class="OptiPaie.Desktop.Views.PerformanceEditWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="clr-namespace:OptiPaie.Desktop.Localization"
         Title="{Binding Title}" Height="620" Width="720"
         WindowStartupLocation="CenterOwner" Background="{DynamicResource Canvas}">
     <Window.Resources>
@@ -40,7 +41,7 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0">
-                <TextBlock Style="{StaticResource Caption}" Text="Employé" />
+                <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Payroll_Employee}" />
                 <ComboBox Style="{StaticResource AppComboBox}" Height="32" Margin="0,4,0,0"
                           ItemsSource="{Binding Employees}" SelectedItem="{Binding SelectedEmployee}"
                           IsEnabled="{Binding CanChooseEmployee}">
@@ -55,17 +56,17 @@
                 </ComboBox>
             </StackPanel>
             <StackPanel Grid.Column="2">
-                <TextBlock Style="{StaticResource Caption}" Text="Période" />
+                <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Leave_Period}" />
                 <TextBox Style="{StaticResource AppTextBox}" Margin="0,4,0,0" Text="{Binding PeriodLabel, UpdateSourceTrigger=PropertyChanged}" />
             </StackPanel>
             <StackPanel Grid.Column="4">
-                <TextBlock Style="{StaticResource Caption}" Text="Date" />
+                <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Recent_Date}" />
                 <DatePicker Height="32" Margin="0,4,0,0" SelectedDate="{Binding ReviewDate}" />
             </StackPanel>
         </Grid>
 
         <StackPanel Grid.Row="2" Margin="0,12,0,0">
-            <TextBlock Style="{StaticResource Caption}" Text="Évaluateur" />
+            <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Perf_Reviewer}" />
             <TextBox Style="{StaticResource AppTextBox}" Margin="0,4,0,0" Text="{Binding Reviewer, UpdateSourceTrigger=PropertyChanged}" />
             <Border Margin="0,10,0,0" Background="{DynamicResource BrandSoft}" CornerRadius="8" Padding="10,7"
                     Visibility="{Binding HasAttendance, Converter={StaticResource BoolVis}}">
@@ -83,10 +84,10 @@
                   HorizontalGridLinesBrush="{DynamicResource Border}" VerticalGridLinesBrush="{DynamicResource Border}"
                   ColumnHeaderStyle="{StaticResource GridHeader}">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Critère" Binding="{Binding Label, UpdateSourceTrigger=PropertyChanged}" Width="*" />
-                <DataGridTextColumn Header="Poids" Binding="{Binding Weight, UpdateSourceTrigger=PropertyChanged}" Width="80" />
-                <DataGridTextColumn Header="Note /20" Binding="{Binding Score, UpdateSourceTrigger=PropertyChanged}" Width="90" />
-                <DataGridTextColumn Header="Commentaire" Binding="{Binding Comment, UpdateSourceTrigger=PropertyChanged}" Width="240" />
+                <DataGridTextColumn Header="{loc:Loc Perf_Criterion}" Binding="{Binding Label, UpdateSourceTrigger=PropertyChanged}" Width="*" />
+                <DataGridTextColumn Header="{loc:Loc PerfEdit_Weight}" Binding="{Binding Weight, UpdateSourceTrigger=PropertyChanged}" Width="80" />
+                <DataGridTextColumn Header="{loc:Loc PerfEdit_ScoreCol}" Binding="{Binding Score, UpdateSourceTrigger=PropertyChanged}" Width="90" />
+                <DataGridTextColumn Header="{loc:Loc PerfEdit_Comment}" Binding="{Binding Comment, UpdateSourceTrigger=PropertyChanged}" Width="240" />
                 <DataGridTemplateColumn Width="40" CanUserResize="False">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
@@ -102,11 +103,11 @@
         <!-- Score + comments -->
         <Grid Grid.Row="4" Margin="0,12,0,0">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                <Button Style="{StaticResource SecondaryButton}" Content="Ajouter un critère" Command="{Binding AddCriterionCommand}"
+                <Button Style="{StaticResource SecondaryButton}" Content="{loc:Loc Perf_AddCriterion}" Command="{Binding AddCriterionCommand}"
                         IsEnabled="{Binding IsEditable}" />
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <TextBlock Text="Note globale : " VerticalAlignment="Center" Foreground="{DynamicResource TextSecondary}" />
+                <TextBlock Text="{loc:Loc PerfEdit_GlobalScore}" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondary}" />
                 <TextBlock Text="{Binding OverallText}" VerticalAlignment="Center" FontWeight="SemiBold" FontSize="15" />
                 <TextBlock Text="{Binding RatingText}" VerticalAlignment="Center" Margin="12,0,0,0"
                            Foreground="{DynamicResource Salary}" FontWeight="SemiBold" />
@@ -115,15 +116,15 @@
 
         <Grid Grid.Row="5" Margin="0,14,0,0">
             <StackPanel HorizontalAlignment="Left" Width="380">
-                <TextBlock Style="{StaticResource Caption}" Text="Observations" />
+                <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc PerfEdit_Observations}" />
                 <TextBox Style="{StaticResource AppTextBox}" Height="56" Margin="0,4,0,0"
                          AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top"
                          Text="{Binding Comments, UpdateSourceTrigger=PropertyChanged}" />
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
                 <Button Style="{StaticResource SecondaryButton}" Content="PDF" Command="{Binding PdfCommand}" />
-                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="Fermer" Command="{Binding CancelCommand}" />
-                <Button Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Content="Enregistrer" Command="{Binding SaveCommand}"
+                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="{loc:Loc Common_Close}" Command="{Binding CancelCommand}" />
+                <Button Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Content="{loc:Loc Common_Save}" Command="{Binding SaveCommand}"
                         IsEnabled="{Binding IsEditable}" />
             </StackPanel>
         </Grid>

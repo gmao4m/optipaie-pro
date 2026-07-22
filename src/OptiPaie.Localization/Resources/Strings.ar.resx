@@ -770,6 +770,123 @@
   <data name="AssetReturn_Condition" xml:space="preserve"><value>الحالة عند الإرجاع</value></data>
   <data name="AssetReturn_Save" xml:space="preserve"><value>حفظ الإرجاع</value></data>
 
+  <!-- Performance dialogs -->
+  <data name="Common_PercentSuffix" xml:space="preserve"><value> ٪</value></data>
+  <data name="Perf_Criterion" xml:space="preserve"><value>المعيار</value></data>
+  <data name="Perf_AddCriterion" xml:space="preserve"><value>إضافة معيار</value></data>
+  <data name="GoalEdit_Title" xml:space="preserve"><value>عنوان الهدف</value></data>
+  <data name="GoalEdit_Target" xml:space="preserve"><value>الهدف المحدد / المقياس</value></data>
+  <data name="GoalEdit_ProgressLabel" xml:space="preserve"><value>التقدّم: </value></data>
+  <data name="Career_OldPosition" xml:space="preserve"><value>المنصب السابق</value></data>
+  <data name="Career_NewPosition" xml:space="preserve"><value>المنصب الجديد</value></data>
+  <data name="Cycle_NewTitle" xml:space="preserve"><value>حملة جديدة</value></data>
+  <data name="Cycle_Name" xml:space="preserve"><value>اسم الحملة</value></data>
+  <data name="Cycle_PeriodLabel" xml:space="preserve"><value>تسمية الفترة</value></data>
+  <data name="Cycle_SelfAssessment" xml:space="preserve"><value>التقييم الذاتي</value></data>
+  <data name="Cycle_DefaultTemplate" xml:space="preserve"><value>النموذج الافتراضي (إذا لم يكن للقسم نموذج)</value></data>
+  <data name="Cycle_IncludedDepts" xml:space="preserve"><value>الأقسام المشمولة</value></data>
+  <data name="Cycle_Launch" xml:space="preserve"><value>إطلاق الحملة</value></data>
+  <data name="Tmpl_Name" xml:space="preserve"><value>اسم النموذج</value></data>
+  <data name="Tmpl_Scale" xml:space="preserve"><value>السلّم /</value></data>
+  <data name="Tmpl_Weight" xml:space="preserve"><value>الوزن ٪</value></data>
+  <data name="PerfEdit_Weight" xml:space="preserve"><value>الوزن</value></data>
+  <data name="PerfEdit_ScoreCol" xml:space="preserve"><value>العلامة /20</value></data>
+  <data name="PerfEdit_Comment" xml:space="preserve"><value>تعليق</value></data>
+  <data name="PerfEdit_GlobalScore" xml:space="preserve"><value>العلامة الإجمالية: </value></data>
+  <data name="PerfEdit_Observations" xml:space="preserve"><value>ملاحظات</value></data>
+  <data name="PerfReview_PeriodLabel" xml:space="preserve"><value>الفترة:</value></data>
+  <data name="PerfReview_GlobalScore" xml:space="preserve"><value>العلامة الإجمالية</value></data>
+  <data name="PerfReview_CriteriaHeader" xml:space="preserve"><value>معايير التقييم</value></data>
+  <data name="PerfReview_ObsHeader" xml:space="preserve"><value>الملاحظات والأهداف</value></data>
+  <data name="PerfReview_SelfHeader" xml:space="preserve"><value>التقييم الذاتي (يُدخله قسم الموارد البشرية)</value></data>
+  <data name="PerfReview_EmpScore" xml:space="preserve"><value>علامة الموظف</value></data>
+  <data name="PerfReview_EmpComment" xml:space="preserve"><value>تعليق الموظف</value></data>
+  <data name="PerfReview_Finalize" xml:space="preserve"><value>إنهاء</value></data>
+
+  <!-- Remaining dialogs -->
+  <data name="Common_ExportCsv" xml:space="preserve"><value>تصدير CSV</value></data>
+  <data name="Common_AmountDa" xml:space="preserve"><value>المبلغ (دج)</value></data>
+  <data name="Common_Nature" xml:space="preserve"><value>الطبيعة</value></data>
+  <data name="LoanDetail_Repaid" xml:space="preserve"><value>المُسدَّد</value></data>
+  <data name="LoanDetail_ManualRepay" xml:space="preserve"><value>تسديد يدوي:</value></data>
+  <data name="LoanDetail_DeleteRepay" xml:space="preserve"><value>حذف التسديد</value></data>
+  <data name="LeaveSet_Title" xml:space="preserve"><value>إعدادات العطل</value></data>
+  <data name="LeaveSet_Hint" xml:space="preserve"><value>القيم الافتراضية وفق القانون 90-11: 2.5 يوم لكل شهر عمل، بحد أقصى 30 يوماً.</value></data>
+  <data name="LeaveSet_DaysPerMonth" xml:space="preserve"><value>الأيام المكتسبة لكل شهر عمل</value></data>
+  <data name="LeaveSet_AnnualCap" xml:space="preserve"><value>الحد الأقصى السنوي (أيام)</value></data>
+  <data name="LeaveSet_ExcludeRest" xml:space="preserve"><value>استبعاد أيام الراحة (الجمعة والسبت) من الحساب</value></data>
+  <data name="LeaveBal_Title" xml:space="preserve"><value>أرصدة العطل السنوية</value></data>
+  <data name="LeaveBal_AnnualRight" xml:space="preserve"><value>الحق السنوي</value></data>
+  <data name="LeaveBal_Taken" xml:space="preserve"><value>المأخوذة</value></data>
+  <data name="LeaveBal_Other" xml:space="preserve"><value>عطل أخرى</value></data>
+  <data name="PayItem_Title" xml:space="preserve"><value>عناصر الأجر</value></data>
+  <data name="PayItem_Contributable" xml:space="preserve"><value>خاضع للاشتراك</value></data>
+  <data name="PayItem_Taxable" xml:space="preserve"><value>خاضع للضريبة</value></data>
+  <data name="PayItem_Order" xml:space="preserve"><value>الترتيب</value></data>
+  <data name="PayItem_ContributableCnas" xml:space="preserve"><value>خاضع للاشتراك (CNAS)</value></data>
+  <data name="PayItem_TaxableIrg" xml:space="preserve"><value>خاضع للضريبة (IRG)</value></data>
+  <data name="TrainPart_Title" xml:space="preserve"><value>المشاركون والنتائج</value></data>
+  <data name="TrainPart_EnrollLabel" xml:space="preserve"><value>تسجيل:</value></data>
+  <data name="TrainPart_Enroll" xml:space="preserve"><value>تسجيل</value></data>
+  <data name="TrainPart_Result" xml:space="preserve"><value>النتيجة</value></data>
+  <data name="TrainPart_Certificate" xml:space="preserve"><value>الشهادة</value></data>
+  <data name="TrainPart_Remove" xml:space="preserve"><value>إزالة</value></data>
+  <data name="AtsPipe_Title" xml:space="preserve"><value>مسار المترشحين</value></data>
+  <data name="AtsPipe_AddCandidate" xml:space="preserve"><value>إضافة مترشح</value></data>
+  <data name="AtsPipe_Candidate" xml:space="preserve"><value>المترشح</value></data>
+  <data name="AtsPipe_ReceivedOn" xml:space="preserve"><value>استُلم في</value></data>
+  <data name="AtsPipe_Stage" xml:space="preserve"><value>المرحلة</value></data>
+  <data name="AtsPipe_Move" xml:space="preserve"><value>نقل</value></data>
+  <data name="AtsPipe_Reject" xml:space="preserve"><value>استبعاد</value></data>
+  <data name="AtsPipe_Hire" xml:space="preserve"><value>توظيف</value></data>
+  <data name="AssetHist_Title" xml:space="preserve"><value>سجل التخصيصات</value></data>
+  <data name="AssetHist_AssignedOn" xml:space="preserve"><value>خُصِّص في</value></data>
+  <data name="AssetHist_ReturnedOn" xml:space="preserve"><value>أُرجع في</value></data>
+  <data name="AssetHist_CondOut" xml:space="preserve"><value>الحالة عند التسليم</value></data>
+  <data name="AssetHist_CondIn" xml:space="preserve"><value>الحالة عند الإرجاع</value></data>
+  <data name="ModAct_Title" xml:space="preserve"><value>تفعيل وحدة</value></data>
+  <data name="ModAct_Prompt" xml:space="preserve"><value>أدخل مفتاح تفعيل الوحدة</value></data>
+  <data name="ModAct_Key" xml:space="preserve"><value>مفتاح التفعيل</value></data>
+  <data name="ModAct_Format" xml:space="preserve"><value>الصيغة: MOD-XXXXX-XXXXX-XXXXX-XXXXX</value></data>
+  <data name="Act_Format" xml:space="preserve"><value>الصيغة: XXXXX-XXXXX-XXXXX-XXXXX</value></data>
+  <data name="Act_Activate" xml:space="preserve"><value>تفعيل الرخصة</value></data>
+  <data name="Act_Or" xml:space="preserve"><value>أو</value></data>
+  <data name="Act_TrialEnded" xml:space="preserve"><value>انتهت التجربة</value></data>
+  <data name="Upd_Title" xml:space="preserve"><value>يتوفر تحديث جديد</value></data>
+  <data name="Upd_CurrentVersion" xml:space="preserve"><value>الإصدار الحالي</value></data>
+  <data name="Upd_NewVersion" xml:space="preserve"><value>الإصدار الجديد</value></data>
+  <data name="Upd_ReleaseNotes" xml:space="preserve"><value>ملاحظات الإصدار</value></data>
+  <data name="Upd_Later" xml:space="preserve"><value>لاحقاً</value></data>
+  <data name="Upd_UpdateNow" xml:space="preserve"><value>التحديث الآن</value></data>
+  <data name="AttSet_Title" xml:space="preserve"><value>إعدادات الحضور</value></data>
+  <data name="AttSet_Hint" xml:space="preserve"><value>تحدد هذه القيم التأخيرات والساعات الإضافية المرسلة إلى كشف الأجور.</value></data>
+  <data name="AttSet_StartTime" xml:space="preserve"><value>وقت البداية (HH:mm)</value></data>
+  <data name="AttSet_StdHours" xml:space="preserve"><value>الساعات المعيارية في اليوم</value></data>
+  <data name="AttSet_LateTolerance" xml:space="preserve"><value>هامش التأخير (دقائق)</value></data>
+  <data name="AttDetail_MonthStats" xml:space="preserve"><value>إحصائيات الشهر</value></data>
+  <data name="AttMonth_Present" xml:space="preserve"><value>الحاضرون</value></data>
+  <data name="AttMonth_Absent" xml:space="preserve"><value>الغائبون</value></data>
+  <data name="AttMonth_Leave" xml:space="preserve"><value>العطل</value></data>
+  <data name="AttMonth_Holiday" xml:space="preserve"><value>الأعياد</value></data>
+  <data name="AttMonth_Rest" xml:space="preserve"><value>الراحة</value></data>
+  <data name="AttMonth_Late" xml:space="preserve"><value>التأخيرات</value></data>
+  <data name="AttMonth_LateMin" xml:space="preserve"><value>دقائق التأخير</value></data>
+  <data name="AttMonth_Hours" xml:space="preserve"><value>الساعات</value></data>
+  <data name="AttMonth_Overtime" xml:space="preserve"><value>س. إضافية</value></data>
+
+  <!-- Attendance matrix view -->
+  <data name="Att_Subtitle" xml:space="preserve"><value>شاشة واحدة للشهر بأكمله. اختر حالة وانقر على الخلايا — حفظ تلقائي.</value></data>
+  <data name="Att_CurrentMonth" xml:space="preserve"><value>الشهر الحالي</value></data>
+  <data name="Att_RatePresence" xml:space="preserve"><value>نسبة الحضور</value></data>
+  <data name="Att_RateAbsence" xml:space="preserve"><value>نسبة الغياب</value></data>
+  <data name="Att_RateLate" xml:space="preserve"><value>نسبة التأخير</value></data>
+  <data name="Att_WorkingDays" xml:space="preserve"><value>أيام العمل</value></data>
+  <data name="Att_StatusLabel" xml:space="preserve"><value>الحالة:</value></data>
+  <data name="Att_ApplyMonth" xml:space="preserve"><value>تطبيق على الشهر (المحدد)</value></data>
+  <data name="Att_SelectAll" xml:space="preserve"><value>تحديد الكل</value></data>
+  <data name="Att_ClearSelection" xml:space="preserve"><value>إلغاء التحديد</value></data>
+  <data name="Att_MonthReports" xml:space="preserve"><value>تقارير الشهر</value></data>
+
   <!-- Company edit window -->
   <data name="Cmp_AccountRib" xml:space="preserve"><value>الحساب / RIB</value></data>
 

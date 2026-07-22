@@ -1,6 +1,7 @@
 <Window x:Class="OptiPaie.Desktop.Views.PayrollItemsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="clr-namespace:OptiPaie.Desktop.Localization"
         Title="Rubriques de paie" Width="720" Height="540"
         WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
         FontFamily="Segoe UI" Background="{DynamicResource Canvas}" Language="fr-FR"
@@ -12,13 +13,13 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Style="{StaticResource H2}" Text="Rubriques de paie" />
+        <TextBlock Grid.Row="0" Style="{StaticResource H2}" Text="{loc:Loc PayItem_Title}" />
 
         <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,14,0,12">
-            <Button Style="{StaticResource PrimaryButton}" Height="34" Content="Ajouter" Command="{Binding NewCommand}" />
-            <Button Style="{StaticResource SecondaryButton}" Height="34" Margin="8,0,0,0" Content="Modifier" Command="{Binding EditCommand}" />
-            <Button Style="{StaticResource SecondaryButton}" Height="34" Margin="8,0,0,0" Content="Supprimer" Foreground="{DynamicResource Deduction}" Command="{Binding DeleteCommand}" />
-            <Button Style="{StaticResource SecondaryButton}" Height="34" Margin="8,0,0,0" Content="Fermer" Command="{Binding CloseCommand}" />
+            <Button Style="{StaticResource PrimaryButton}" Height="34" Content="{loc:Loc Common_Add}" Command="{Binding NewCommand}" />
+            <Button Style="{StaticResource SecondaryButton}" Height="34" Margin="8,0,0,0" Content="{loc:Loc Common_Edit}" Command="{Binding EditCommand}" />
+            <Button Style="{StaticResource SecondaryButton}" Height="34" Margin="8,0,0,0" Content="{loc:Loc Common_Delete}" Foreground="{DynamicResource Deduction}" Command="{Binding DeleteCommand}" />
+            <Button Style="{StaticResource SecondaryButton}" Height="34" Margin="8,0,0,0" Content="{loc:Loc Common_Close}" Command="{Binding CloseCommand}" />
         </StackPanel>
 
         <DataGrid Grid.Row="2" ItemsSource="{Binding Items}" SelectedItem="{Binding Selected}"
@@ -30,11 +31,11 @@
                   HorizontalGridLinesBrush="{DynamicResource Border}"
                   MouseDoubleClick="OnRowDoubleClick">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Libellé" Binding="{Binding NameFr}" Width="*" />
-                <DataGridTextColumn Header="Nature" Binding="{Binding ElementType, Converter={StaticResource ElementNature}}" Width="100" />
-                <DataGridCheckBoxColumn Header="Cotisable" Binding="{Binding IsCnasApplicable}" Width="90" />
-                <DataGridCheckBoxColumn Header="Imposable" Binding="{Binding IsIrgApplicable}" Width="90" />
-                <DataGridTextColumn Header="Ordre" Binding="{Binding DisplayOrder}" Width="70" />
+                <DataGridTextColumn Header="{loc:Loc Payroll_Col_Label}" Binding="{Binding NameFr}" Width="*" />
+                <DataGridTextColumn Header="{loc:Loc Common_Nature}" Binding="{Binding ElementType, Converter={StaticResource ElementNature}}" Width="100" />
+                <DataGridCheckBoxColumn Header="{loc:Loc PayItem_Contributable}" Binding="{Binding IsCnasApplicable}" Width="90" />
+                <DataGridCheckBoxColumn Header="{loc:Loc PayItem_Taxable}" Binding="{Binding IsIrgApplicable}" Width="90" />
+                <DataGridTextColumn Header="{loc:Loc PayItem_Order}" Binding="{Binding DisplayOrder}" Width="70" />
             </DataGrid.Columns>
         </DataGrid>
     </Grid>

@@ -1,6 +1,7 @@
 <Window x:Class="OptiPaie.Desktop.Views.LeaveBalancesWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="clr-namespace:OptiPaie.Desktop.Localization"
         Title="Soldes de congés" Height="600" Width="920"
         WindowStartupLocation="CenterOwner" Background="{DynamicResource Canvas}">
     <Window.Resources>
@@ -32,7 +33,7 @@
         <Grid Grid.Row="0">
             <StackPanel HorizontalAlignment="Left">
                 <TextBlock Style="{StaticResource H2}" Text="{Binding CompanyName}" />
-                <TextBlock Style="{StaticResource Caption}" Margin="0,4,0,0" Text="Soldes de congés annuels" />
+                <TextBlock Style="{StaticResource Caption}" Margin="0,4,0,0" Text="{loc:Loc LeaveBal_Title}" />
             </StackPanel>
             <ComboBox Style="{StaticResource AppComboBox}" Width="90" Height="32"
                       HorizontalAlignment="Right" VerticalAlignment="Top"
@@ -48,22 +49,22 @@
                   HorizontalGridLinesBrush="{DynamicResource Border}" VerticalGridLinesBrush="{DynamicResource Border}"
                   ColumnHeaderStyle="{StaticResource GridHeader}">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Employé" Binding="{Binding EmployeeName}" Width="*" />
-                <DataGridTextColumn Header="Droit annuel" Binding="{Binding Entitlement, StringFormat=N1}" Width="105" ElementStyle="{StaticResource RightText}" />
-                <DataGridTextColumn Header="Pris" Binding="{Binding Taken, StringFormat=N1}" Width="90" ElementStyle="{StaticResource RightText}" />
-                <DataGridTextColumn Header="En attente" Binding="{Binding Pending, StringFormat=N1}" Width="100" ElementStyle="{StaticResource RightText}" />
-                <DataGridTextColumn Header="Restant" Binding="{Binding Remaining, StringFormat=N1}" Width="95" ElementStyle="{StaticResource RightText}" />
-                <DataGridTextColumn Header="Autres congés" Binding="{Binding OtherLeaveDays, StringFormat=N1}" Width="115" ElementStyle="{StaticResource RightText}" />
-                <DataGridTextColumn Header="Sans solde" Binding="{Binding UnpaidDays, StringFormat=N1}" Width="105" ElementStyle="{StaticResource RightText}" />
+                <DataGridTextColumn Header="{loc:Loc Payroll_Employee}" Binding="{Binding EmployeeName}" Width="*" />
+                <DataGridTextColumn Header="{loc:Loc LeaveBal_AnnualRight}" Binding="{Binding Entitlement, StringFormat=N1}" Width="105" ElementStyle="{StaticResource RightText}" />
+                <DataGridTextColumn Header="{loc:Loc LeaveBal_Taken}" Binding="{Binding Taken, StringFormat=N1}" Width="90" ElementStyle="{StaticResource RightText}" />
+                <DataGridTextColumn Header="{loc:Loc Leave_Pending}" Binding="{Binding Pending, StringFormat=N1}" Width="100" ElementStyle="{StaticResource RightText}" />
+                <DataGridTextColumn Header="{loc:Loc Loan_Remaining}" Binding="{Binding Remaining, StringFormat=N1}" Width="95" ElementStyle="{StaticResource RightText}" />
+                <DataGridTextColumn Header="{loc:Loc LeaveBal_Other}" Binding="{Binding OtherLeaveDays, StringFormat=N1}" Width="115" ElementStyle="{StaticResource RightText}" />
+                <DataGridTextColumn Header="{loc:Loc Leave_Unpaid}" Binding="{Binding UnpaidDays, StringFormat=N1}" Width="105" ElementStyle="{StaticResource RightText}" />
             </DataGrid.Columns>
         </DataGrid>
 
         <Grid Grid.Row="2" Margin="0,14,0,0">
             <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Center" HorizontalAlignment="Left" Text="{Binding StatusMessage}" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Style="{StaticResource SecondaryButton}" Content="Exporter CSV" Command="{Binding ExportCsvCommand}" />
-                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="Exporter PDF" Command="{Binding ExportPdfCommand}" />
-                <Button Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Content="Fermer" Command="{Binding CloseCommand}" />
+                <Button Style="{StaticResource SecondaryButton}" Content="{loc:Loc Common_ExportCsv}" Command="{Binding ExportCsvCommand}" />
+                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="{loc:Loc Common_ExportPdf}" Command="{Binding ExportPdfCommand}" />
+                <Button Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Content="{loc:Loc Common_Close}" Command="{Binding CloseCommand}" />
             </StackPanel>
         </Grid>
     </Grid>

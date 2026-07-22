@@ -770,6 +770,123 @@
   <data name="AssetReturn_Condition" xml:space="preserve"><value>État au retour</value></data>
   <data name="AssetReturn_Save" xml:space="preserve"><value>Enregistrer le retour</value></data>
 
+  <!-- Performance dialogs -->
+  <data name="Common_PercentSuffix" xml:space="preserve"><value> %</value></data>
+  <data name="Perf_Criterion" xml:space="preserve"><value>Critère</value></data>
+  <data name="Perf_AddCriterion" xml:space="preserve"><value>Ajouter un critère</value></data>
+  <data name="GoalEdit_Title" xml:space="preserve"><value>Intitulé de l'objectif</value></data>
+  <data name="GoalEdit_Target" xml:space="preserve"><value>Cible / métrique</value></data>
+  <data name="GoalEdit_ProgressLabel" xml:space="preserve"><value>Progression : </value></data>
+  <data name="Career_OldPosition" xml:space="preserve"><value>Ancien poste</value></data>
+  <data name="Career_NewPosition" xml:space="preserve"><value>Nouveau poste</value></data>
+  <data name="Cycle_NewTitle" xml:space="preserve"><value>Nouvelle campagne</value></data>
+  <data name="Cycle_Name" xml:space="preserve"><value>Nom de la campagne</value></data>
+  <data name="Cycle_PeriodLabel" xml:space="preserve"><value>Libellé période</value></data>
+  <data name="Cycle_SelfAssessment" xml:space="preserve"><value>Auto-évaluation</value></data>
+  <data name="Cycle_DefaultTemplate" xml:space="preserve"><value>Modèle par défaut (si le département n'en a pas)</value></data>
+  <data name="Cycle_IncludedDepts" xml:space="preserve"><value>Départements inclus</value></data>
+  <data name="Cycle_Launch" xml:space="preserve"><value>Lancer la campagne</value></data>
+  <data name="Tmpl_Name" xml:space="preserve"><value>Nom du modèle</value></data>
+  <data name="Tmpl_Scale" xml:space="preserve"><value>Échelle /</value></data>
+  <data name="Tmpl_Weight" xml:space="preserve"><value>Poids %</value></data>
+  <data name="PerfEdit_Weight" xml:space="preserve"><value>Poids</value></data>
+  <data name="PerfEdit_ScoreCol" xml:space="preserve"><value>Note /20</value></data>
+  <data name="PerfEdit_Comment" xml:space="preserve"><value>Commentaire</value></data>
+  <data name="PerfEdit_GlobalScore" xml:space="preserve"><value>Note globale : </value></data>
+  <data name="PerfEdit_Observations" xml:space="preserve"><value>Observations</value></data>
+  <data name="PerfReview_PeriodLabel" xml:space="preserve"><value>Période :</value></data>
+  <data name="PerfReview_GlobalScore" xml:space="preserve"><value>Note globale</value></data>
+  <data name="PerfReview_CriteriaHeader" xml:space="preserve"><value>CRITÈRES D'ÉVALUATION</value></data>
+  <data name="PerfReview_ObsHeader" xml:space="preserve"><value>OBSERVATIONS &amp; OBJECTIFS</value></data>
+  <data name="PerfReview_SelfHeader" xml:space="preserve"><value>AUTO-ÉVALUATION (SAISIE PAR LES RH)</value></data>
+  <data name="PerfReview_EmpScore" xml:space="preserve"><value>Note de l'employé</value></data>
+  <data name="PerfReview_EmpComment" xml:space="preserve"><value>Commentaire de l'employé</value></data>
+  <data name="PerfReview_Finalize" xml:space="preserve"><value>Finaliser</value></data>
+
+  <!-- Remaining dialogs -->
+  <data name="Common_ExportCsv" xml:space="preserve"><value>Exporter CSV</value></data>
+  <data name="Common_AmountDa" xml:space="preserve"><value>Montant (DA)</value></data>
+  <data name="Common_Nature" xml:space="preserve"><value>Nature</value></data>
+  <data name="LoanDetail_Repaid" xml:space="preserve"><value>Remboursé</value></data>
+  <data name="LoanDetail_ManualRepay" xml:space="preserve"><value>Remboursement manuel :</value></data>
+  <data name="LoanDetail_DeleteRepay" xml:space="preserve"><value>Supprimer le remboursement</value></data>
+  <data name="LeaveSet_Title" xml:space="preserve"><value>Paramètres des congés</value></data>
+  <data name="LeaveSet_Hint" xml:space="preserve"><value>Valeurs par défaut conformes à la loi 90-11 : 2,5 jours par mois travaillé, plafonnés à 30 jours.</value></data>
+  <data name="LeaveSet_DaysPerMonth" xml:space="preserve"><value>Jours acquis par mois travaillé</value></data>
+  <data name="LeaveSet_AnnualCap" xml:space="preserve"><value>Plafond annuel (jours)</value></data>
+  <data name="LeaveSet_ExcludeRest" xml:space="preserve"><value>Exclure les jours de repos (vendredi et samedi) du décompte</value></data>
+  <data name="LeaveBal_Title" xml:space="preserve"><value>Soldes de congés annuels</value></data>
+  <data name="LeaveBal_AnnualRight" xml:space="preserve"><value>Droit annuel</value></data>
+  <data name="LeaveBal_Taken" xml:space="preserve"><value>Pris</value></data>
+  <data name="LeaveBal_Other" xml:space="preserve"><value>Autres congés</value></data>
+  <data name="PayItem_Title" xml:space="preserve"><value>Rubriques de paie</value></data>
+  <data name="PayItem_Contributable" xml:space="preserve"><value>Cotisable</value></data>
+  <data name="PayItem_Taxable" xml:space="preserve"><value>Imposable</value></data>
+  <data name="PayItem_Order" xml:space="preserve"><value>Ordre</value></data>
+  <data name="PayItem_ContributableCnas" xml:space="preserve"><value>Cotisable (CNAS)</value></data>
+  <data name="PayItem_TaxableIrg" xml:space="preserve"><value>Imposable (IRG)</value></data>
+  <data name="TrainPart_Title" xml:space="preserve"><value>Participants et résultats</value></data>
+  <data name="TrainPart_EnrollLabel" xml:space="preserve"><value>Inscrire :</value></data>
+  <data name="TrainPart_Enroll" xml:space="preserve"><value>Inscrire</value></data>
+  <data name="TrainPart_Result" xml:space="preserve"><value>Résultat</value></data>
+  <data name="TrainPart_Certificate" xml:space="preserve"><value>Attestation</value></data>
+  <data name="TrainPart_Remove" xml:space="preserve"><value>Retirer</value></data>
+  <data name="AtsPipe_Title" xml:space="preserve"><value>Pipeline des candidats</value></data>
+  <data name="AtsPipe_AddCandidate" xml:space="preserve"><value>Ajouter un candidat</value></data>
+  <data name="AtsPipe_Candidate" xml:space="preserve"><value>Candidat</value></data>
+  <data name="AtsPipe_ReceivedOn" xml:space="preserve"><value>Reçu le</value></data>
+  <data name="AtsPipe_Stage" xml:space="preserve"><value>Étape</value></data>
+  <data name="AtsPipe_Move" xml:space="preserve"><value>Déplacer</value></data>
+  <data name="AtsPipe_Reject" xml:space="preserve"><value>Écarter</value></data>
+  <data name="AtsPipe_Hire" xml:space="preserve"><value>Recruter</value></data>
+  <data name="AssetHist_Title" xml:space="preserve"><value>Historique des attributions</value></data>
+  <data name="AssetHist_AssignedOn" xml:space="preserve"><value>Attribué le</value></data>
+  <data name="AssetHist_ReturnedOn" xml:space="preserve"><value>Retourné le</value></data>
+  <data name="AssetHist_CondOut" xml:space="preserve"><value>État remise</value></data>
+  <data name="AssetHist_CondIn" xml:space="preserve"><value>État retour</value></data>
+  <data name="ModAct_Title" xml:space="preserve"><value>Activer un module</value></data>
+  <data name="ModAct_Prompt" xml:space="preserve"><value>Saisissez votre clé d'activation de module</value></data>
+  <data name="ModAct_Key" xml:space="preserve"><value>Clé d'activation</value></data>
+  <data name="ModAct_Format" xml:space="preserve"><value>Format : MOD-XXXXX-XXXXX-XXXXX-XXXXX</value></data>
+  <data name="Act_Format" xml:space="preserve"><value>Format : XXXXX-XXXXX-XXXXX-XXXXX</value></data>
+  <data name="Act_Activate" xml:space="preserve"><value>Activer la licence</value></data>
+  <data name="Act_Or" xml:space="preserve"><value>OU</value></data>
+  <data name="Act_TrialEnded" xml:space="preserve"><value>Essai terminé</value></data>
+  <data name="Upd_Title" xml:space="preserve"><value>Nouvelle mise à jour disponible</value></data>
+  <data name="Upd_CurrentVersion" xml:space="preserve"><value>Version actuelle</value></data>
+  <data name="Upd_NewVersion" xml:space="preserve"><value>Nouvelle version</value></data>
+  <data name="Upd_ReleaseNotes" xml:space="preserve"><value>Notes de version</value></data>
+  <data name="Upd_Later" xml:space="preserve"><value>Plus tard</value></data>
+  <data name="Upd_UpdateNow" xml:space="preserve"><value>Mettre à jour maintenant</value></data>
+  <data name="AttSet_Title" xml:space="preserve"><value>Paramètres de présence</value></data>
+  <data name="AttSet_Hint" xml:space="preserve"><value>Ces valeurs déterminent les retards et les heures supplémentaires transmises à la paie.</value></data>
+  <data name="AttSet_StartTime" xml:space="preserve"><value>Heure de début (HH:mm)</value></data>
+  <data name="AttSet_StdHours" xml:space="preserve"><value>Heures standard par jour</value></data>
+  <data name="AttSet_LateTolerance" xml:space="preserve"><value>Tolérance de retard (minutes)</value></data>
+  <data name="AttDetail_MonthStats" xml:space="preserve"><value>Statistiques du mois</value></data>
+  <data name="AttMonth_Present" xml:space="preserve"><value>Présents</value></data>
+  <data name="AttMonth_Absent" xml:space="preserve"><value>Absents</value></data>
+  <data name="AttMonth_Leave" xml:space="preserve"><value>Congés</value></data>
+  <data name="AttMonth_Holiday" xml:space="preserve"><value>Fériés</value></data>
+  <data name="AttMonth_Rest" xml:space="preserve"><value>Repos</value></data>
+  <data name="AttMonth_Late" xml:space="preserve"><value>Retards</value></data>
+  <data name="AttMonth_LateMin" xml:space="preserve"><value>Min. retard</value></data>
+  <data name="AttMonth_Hours" xml:space="preserve"><value>Heures</value></data>
+  <data name="AttMonth_Overtime" xml:space="preserve"><value>H. supp.</value></data>
+
+  <!-- Attendance matrix view -->
+  <data name="Att_Subtitle" xml:space="preserve"><value>Un seul écran pour tout le mois. Choisissez un statut, cliquez les cellules — enregistrement automatique.</value></data>
+  <data name="Att_CurrentMonth" xml:space="preserve"><value>Mois courant</value></data>
+  <data name="Att_RatePresence" xml:space="preserve"><value>Taux de présence</value></data>
+  <data name="Att_RateAbsence" xml:space="preserve"><value>Taux d'absence</value></data>
+  <data name="Att_RateLate" xml:space="preserve"><value>Taux de retard</value></data>
+  <data name="Att_WorkingDays" xml:space="preserve"><value>Jours ouvrés</value></data>
+  <data name="Att_StatusLabel" xml:space="preserve"><value>Statut :</value></data>
+  <data name="Att_ApplyMonth" xml:space="preserve"><value>Appliquer au mois (sélection)</value></data>
+  <data name="Att_SelectAll" xml:space="preserve"><value>Tout cocher</value></data>
+  <data name="Att_ClearSelection" xml:space="preserve"><value>Décocher</value></data>
+  <data name="Att_MonthReports" xml:space="preserve"><value>Rapports du mois</value></data>
+
   <!-- Company edit window -->
   <data name="Cmp_AccountRib" xml:space="preserve"><value>Compte / RIB</value></data>
 

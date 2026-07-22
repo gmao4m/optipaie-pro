@@ -1,6 +1,7 @@
 <Window x:Class="OptiPaie.Desktop.Views.PerformanceReviewWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="clr-namespace:OptiPaie.Desktop.Localization"
         Title="{Binding Title}" Height="740" Width="800"
         MinHeight="560" MinWidth="680"
         WindowStartupLocation="CenterOwner" Background="{DynamicResource Canvas}">
@@ -22,13 +23,13 @@
                     <TextBlock Text="{Binding EmployeeName}" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource TextOnBrand}" />
                     <TextBlock Text="{Binding EmployeeMeta}" FontSize="12.5" Margin="0,3,0,0" Foreground="#B9C2D6" />
                     <TextBlock Margin="0,2,0,0" FontSize="12" Foreground="#B9C2D6">
-                        <Run Text="Période :" />
+                        <Run Text="{loc:Loc PerfReview_PeriodLabel}" />
                         <Run Text="{Binding PeriodLabel}" FontWeight="SemiBold" />
                     </TextBlock>
                 </StackPanel>
                 <Border HorizontalAlignment="Right" VerticalAlignment="Center" Background="#22FFFFFF" CornerRadius="12" Padding="20,10">
                     <StackPanel>
-                        <TextBlock Text="Note globale" FontSize="11" Foreground="#B9C2D6" HorizontalAlignment="Right" />
+                        <TextBlock Text="{loc:Loc PerfReview_GlobalScore}" FontSize="11" Foreground="#B9C2D6" HorizontalAlignment="Right" />
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,2,0,0">
                             <TextBlock Text="{Binding OverallText}" FontSize="30" FontWeight="Bold" Foreground="{DynamicResource TextOnBrand}" />
                         </StackPanel>
@@ -51,7 +52,7 @@
                         <ColumnDefinition Width="1.4*" />
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0">
-                        <TextBlock Style="{StaticResource Caption}" Text="Évaluateur" />
+                        <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Perf_Reviewer}" />
                         <TextBox Style="{StaticResource AppTextBox}" Margin="0,4,0,0" IsEnabled="{Binding IsEditable}"
                                  Text="{Binding Reviewer, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
@@ -73,7 +74,7 @@
                     </StackPanel>
                 </Border>
 
-                <TextBlock Margin="0,20,0,8" Style="{StaticResource Caption}" Text="CRITÈRES D'ÉVALUATION" FontWeight="SemiBold" />
+                <TextBlock Margin="0,20,0,8" Style="{StaticResource Caption}" Text="{loc:Loc PerfReview_CriteriaHeader}" FontWeight="SemiBold" />
 
                 <!-- Criterion cards -->
                 <ItemsControl ItemsSource="{Binding Criteria}">
@@ -111,13 +112,13 @@
                 </ItemsControl>
 
                 <!-- Observations -->
-                <TextBlock Margin="0,10,0,8" Style="{StaticResource Caption}" Text="OBSERVATIONS &amp; OBJECTIFS" FontWeight="SemiBold" />
+                <TextBlock Margin="0,10,0,8" Style="{StaticResource Caption}" Text="{loc:Loc PerfReview_ObsHeader}" FontWeight="SemiBold" />
                 <TextBox Style="{StaticResource AppTextBox}" Height="70" AcceptsReturn="True" TextWrapping="Wrap"
                          VerticalContentAlignment="Top" IsEnabled="{Binding IsEditable}"
                          Text="{Binding Comments, UpdateSourceTrigger=PropertyChanged}" />
 
                 <!-- Self-assessment -->
-                <TextBlock Margin="0,18,0,8" Style="{StaticResource Caption}" Text="AUTO-ÉVALUATION (SAISIE PAR LES RH)" FontWeight="SemiBold" />
+                <TextBlock Margin="0,18,0,8" Style="{StaticResource Caption}" Text="{loc:Loc PerfReview_SelfHeader}" FontWeight="SemiBold" />
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="160" />
@@ -125,12 +126,12 @@
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0">
-                        <TextBlock Style="{StaticResource Caption}" Text="Note de l'employé" />
+                        <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc PerfReview_EmpScore}" />
                         <TextBox Style="{StaticResource AppTextBox}" Margin="0,4,0,0" IsEnabled="{Binding IsEditable}"
                                  Text="{Binding SelfScoreText, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                     <StackPanel Grid.Column="2">
-                        <TextBlock Style="{StaticResource Caption}" Text="Commentaire de l'employé" />
+                        <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc PerfReview_EmpComment}" />
                         <TextBox Style="{StaticResource AppTextBox}" Margin="0,4,0,0" IsEnabled="{Binding IsEditable}"
                                  Text="{Binding SelfComments, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
@@ -142,14 +143,14 @@
         <Border Grid.Row="2" Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="0,1,0,0" Padding="24,12">
             <Grid>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                    <Button Style="{StaticResource SecondaryButton}" Content="Exporter PDF" Command="{Binding PdfCommand}" />
-                    <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="Rouvrir" Command="{Binding ReopenCommand}" />
+                    <Button Style="{StaticResource SecondaryButton}" Content="{loc:Loc Common_ExportPdf}" Command="{Binding PdfCommand}" />
+                    <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="{loc:Loc Ats_Reopen}" Command="{Binding ReopenCommand}" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button Style="{StaticResource SecondaryButton}" Content="Fermer" Command="{Binding CancelCommand}" />
-                    <Button Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Content="Enregistrer" Command="{Binding SaveCommand}"
+                    <Button Style="{StaticResource SecondaryButton}" Content="{loc:Loc Common_Close}" Command="{Binding CancelCommand}" />
+                    <Button Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Content="{loc:Loc Common_Save}" Command="{Binding SaveCommand}"
                             IsEnabled="{Binding IsEditable}" />
-                    <Button Style="{StaticResource AccentButton}" Margin="8,0,0,0" Content="Finaliser" Command="{Binding CompleteCommand}"
+                    <Button Style="{StaticResource AccentButton}" Margin="8,0,0,0" Content="{loc:Loc PerfReview_Finalize}" Command="{Binding CompleteCommand}"
                             IsEnabled="{Binding IsEditable}" />
                 </StackPanel>
             </Grid>

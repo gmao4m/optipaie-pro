@@ -1,6 +1,7 @@
 <Window x:Class="OptiPaie.Desktop.Views.PayrollItemEditWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="clr-namespace:OptiPaie.Desktop.Localization"
         Title="{Binding Title}" Width="480" SizeToContent="Height"
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize" ShowInTaskbar="False"
         FontFamily="Segoe UI" Background="{DynamicResource Canvas}" Language="fr-FR"
@@ -24,29 +25,29 @@
 
         <StackPanel Grid.Row="1" Margin="22,18">
             <StackPanel Margin="0,0,0,14">
-                <TextBlock Style="{StaticResource Fl}" Text="Libellé" />
+                <TextBlock Style="{StaticResource Fl}" Text="{loc:Loc Payroll_Col_Label}" />
                 <TextBox Style="{StaticResource AppTextBox}" Text="{Binding Libelle, UpdateSourceTrigger=PropertyChanged}" />
             </StackPanel>
 
             <StackPanel Margin="0,0,0,14">
-                <TextBlock Style="{StaticResource Fl}" Text="Nature" />
+                <TextBlock Style="{StaticResource Fl}" Text="{loc:Loc Common_Nature}" />
                 <ComboBox Style="{StaticResource AppComboBox}" ItemsSource="{Binding Natures}" SelectedValue="{Binding IsGain}" SelectedValuePath="Value" DisplayMemberPath="Label" />
             </StackPanel>
 
             <Border Background="{DynamicResource SurfaceMuted}" CornerRadius="8" Padding="14,12" Margin="0,0,0,14">
-                <CheckBox Content="Cotisable (CNAS)" IsChecked="{Binding Cotisable}" />
+                <CheckBox Content="{loc:Loc PayItem_ContributableCnas}" IsChecked="{Binding Cotisable}" />
             </Border>
 
             <StackPanel>
-                <TextBlock Style="{StaticResource Fl}" Text="Imposable (IRG)" />
+                <TextBlock Style="{StaticResource Fl}" Text="{loc:Loc PayItem_TaxableIrg}" />
                 <ComboBox Style="{StaticResource AppComboBox}" ItemsSource="{Binding ImposableOptions}" SelectedValue="{Binding ImposablePercent}" SelectedValuePath="Value" DisplayMemberPath="Label" />
             </StackPanel>
         </StackPanel>
 
         <Border Grid.Row="2" Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="0,1,0,0" Padding="22,14">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Style="{StaticResource SecondaryButton}" Content="Annuler" Command="{Binding CancelCommand}" />
-                <Button Style="{StaticResource PrimaryButton}" Margin="12,0,0,0" Content="Enregistrer" Command="{Binding SaveCommand}" />
+                <Button Style="{StaticResource SecondaryButton}" Content="{loc:Loc Common_Cancel}" Command="{Binding CancelCommand}" />
+                <Button Style="{StaticResource PrimaryButton}" Margin="12,0,0,0" Content="{loc:Loc Common_Save}" Command="{Binding SaveCommand}" />
             </StackPanel>
         </Border>
     </Grid>
