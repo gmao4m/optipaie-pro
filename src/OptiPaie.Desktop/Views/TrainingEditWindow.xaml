@@ -1,6 +1,7 @@
 <Window x:Class="OptiPaie.Desktop.Views.TrainingEditWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="clr-namespace:OptiPaie.Desktop.Localization"
         Title="{Binding Title}" Height="470" Width="460"
         ResizeMode="NoResize" WindowStartupLocation="CenterOwner" Background="{DynamicResource Canvas}">
     <Grid Margin="24,20">
@@ -13,7 +14,7 @@
         <TextBlock Grid.Row="0" Style="{StaticResource H2}" Text="{Binding Title}" />
 
         <StackPanel Grid.Row="1" Margin="0,16,0,0">
-            <TextBlock Style="{StaticResource Caption}" Text="Intitulé" />
+            <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Training_Col_Title}" />
             <TextBox Style="{StaticResource AppTextBox}" Margin="0,4,0,0" Text="{Binding SessionTitle, UpdateSourceTrigger=PropertyChanged}" />
 
             <Grid Margin="0,12,0,0">
@@ -23,11 +24,11 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0">
-                    <TextBlock Style="{StaticResource Caption}" Text="Domaine" />
+                    <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Training_Domain}" />
                     <TextBox Style="{StaticResource AppTextBox}" Margin="0,4,0,0" Text="{Binding Category, UpdateSourceTrigger=PropertyChanged}" />
                 </StackPanel>
                 <StackPanel Grid.Column="2">
-                    <TextBlock Style="{StaticResource Caption}" Text="Organisme" />
+                    <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Training_Provider}" />
                     <TextBox Style="{StaticResource AppTextBox}" Margin="0,4,0,0" Text="{Binding Provider, UpdateSourceTrigger=PropertyChanged}" />
                 </StackPanel>
             </Grid>
@@ -39,11 +40,11 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0">
-                    <TextBlock Style="{StaticResource Caption}" Text="Date de début" />
+                    <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Common_StartDate}" />
                     <DatePicker Height="32" Margin="0,4,0,0" SelectedDate="{Binding StartDate}" />
                 </StackPanel>
                 <StackPanel Grid.Column="2">
-                    <TextBlock Style="{StaticResource Caption}" Text="Date de fin" />
+                    <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Common_EndDate}" />
                     <DatePicker Height="32" Margin="0,4,0,0" SelectedDate="{Binding EndDate}" />
                 </StackPanel>
             </Grid>
@@ -55,24 +56,24 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0">
-                    <TextBlock Style="{StaticResource Caption}" Text="Lieu" />
+                    <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Common_Location}" />
                     <TextBox Style="{StaticResource AppTextBox}" Margin="0,4,0,0" Text="{Binding Location, UpdateSourceTrigger=PropertyChanged}" />
                 </StackPanel>
                 <StackPanel Grid.Column="2">
-                    <TextBlock Style="{StaticResource Caption}" Text="Coût (DA)" />
+                    <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Training_Cost}" />
                     <TextBox Style="{StaticResource AppTextBox}" Margin="0,4,0,0" Text="{Binding Cost, UpdateSourceTrigger=PropertyChanged}" />
                 </StackPanel>
             </Grid>
 
-            <TextBlock Style="{StaticResource Caption}" Margin="0,12,0,0" Text="Notes" />
+            <TextBlock Style="{StaticResource Caption}" Margin="0,12,0,0" Text="{loc:Loc Common_Notes}" />
             <TextBox Style="{StaticResource AppTextBox}" Height="48" Margin="0,4,0,0"
                      AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top"
                      Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}" />
         </StackPanel>
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
-            <Button Style="{StaticResource SecondaryButton}" Content="Annuler" Command="{Binding CancelCommand}" />
-            <Button Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Content="Enregistrer" Command="{Binding SaveCommand}" />
+            <Button Style="{StaticResource SecondaryButton}" Content="{loc:Loc Common_Cancel}" Command="{Binding CancelCommand}" />
+            <Button Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Content="{loc:Loc Common_Save}" Command="{Binding SaveCommand}" />
         </StackPanel>
     </Grid>
 </Window>

@@ -727,6 +727,49 @@
   <data name="Perf_RewardBtn" xml:space="preserve"><value>+ Récompense</value></data>
   <data name="Perf_PromotionBtn" xml:space="preserve"><value>+ Promotion</value></data>
 
+  <!-- Module edit dialogs -->
+  <data name="Common_From" xml:space="preserve"><value>Du</value></data>
+  <data name="Common_To" xml:space="preserve"><value>Au</value></data>
+  <data name="Common_StartDate" xml:space="preserve"><value>Date de début</value></data>
+  <data name="Common_EndDate" xml:space="preserve"><value>Date de fin</value></data>
+  <data name="Common_Notes" xml:space="preserve"><value>Notes</value></data>
+  <data name="Leave_TypeField" xml:space="preserve"><value>Type de congé</value></data>
+  <data name="LoanEdit_FirstDebit" xml:space="preserve"><value>Premier prélèvement</value></data>
+  <data name="LoanEdit_Reason" xml:space="preserve"><value>Motif / référence</value></data>
+  <data name="ContractEdit_Probation" xml:space="preserve"><value>Période d'essai (jours)</value></data>
+  <data name="ContractEdit_SignDate" xml:space="preserve"><value>Date de signature</value></data>
+  <data name="AssetEdit_Name" xml:space="preserve"><value>Nom du matériel</value></data>
+  <data name="AssetEdit_AcquisitionDate" xml:space="preserve"><value>Date d'acquisition</value></data>
+  <data name="CertEdit_Type" xml:space="preserve"><value>Type d'attestation</value></data>
+  <data name="CertEdit_Reference" xml:space="preserve"><value>Référence (laisser vide pour numérotation auto)</value></data>
+  <data name="CertEdit_Purpose" xml:space="preserve"><value>Objet / destinataire</value></data>
+  <data name="CertEdit_Body" xml:space="preserve"><value>Corps du document (document libre)</value></data>
+
+  <!-- More module dialogs -->
+  <data name="Common_Description" xml:space="preserve"><value>Description</value></data>
+  <data name="Common_Source" xml:space="preserve"><value>Source</value></data>
+  <data name="Common_Location" xml:space="preserve"><value>Lieu</value></data>
+  <data name="Common_EffectiveDate" xml:space="preserve"><value>Date d'effet</value></data>
+  <data name="AtsEdit_OpenDate" xml:space="preserve"><value>Date d'ouverture</value></data>
+  <data name="AtsEdit_JobTitle" xml:space="preserve"><value>Intitulé du poste</value></data>
+  <data name="AtsEdit_PositionCount" xml:space="preserve"><value>Nombre de postes</value></data>
+  <data name="AtsEdit_NewCandidate" xml:space="preserve"><value>Nouveau candidat</value></data>
+  <data name="AtsEdit_Rating" xml:space="preserve"><value>Note (0-5)</value></data>
+  <data name="ContractRenew_Title" xml:space="preserve"><value>Renouveler le contrat</value></data>
+  <data name="ContractRenew_Hint" xml:space="preserve"><value>Un nouveau contrat en vigueur sera créé et lié au précédent.</value></data>
+  <data name="ContractRenew_NewStart" xml:space="preserve"><value>Nouveau début</value></data>
+  <data name="ContractRenew_NewEnd" xml:space="preserve"><value>Nouvelle fin</value></data>
+  <data name="ContractRenew_NewSalary" xml:space="preserve"><value>Nouveau salaire de base (DA)</value></data>
+  <data name="ContractTerm_Title" xml:space="preserve"><value>Résilier le contrat</value></data>
+  <data name="ContractTerm_Hint" xml:space="preserve"><value>La date de sortie sera enregistrée sur la fiche de l'employé.</value></data>
+  <data name="AssetAssign_Title" xml:space="preserve"><value>Attribuer le matériel</value></data>
+  <data name="AssetAssign_Date" xml:space="preserve"><value>Date d'attribution</value></data>
+  <data name="AssetAssign_Condition" xml:space="preserve"><value>État à la remise</value></data>
+  <data name="AssetReturn_Title" xml:space="preserve"><value>Retour du matériel</value></data>
+  <data name="AssetReturn_Date" xml:space="preserve"><value>Date de retour</value></data>
+  <data name="AssetReturn_Condition" xml:space="preserve"><value>État au retour</value></data>
+  <data name="AssetReturn_Save" xml:space="preserve"><value>Enregistrer le retour</value></data>
+
   <!-- Company edit window -->
   <data name="Cmp_AccountRib" xml:space="preserve"><value>Compte / RIB</value></data>
 

@@ -727,6 +727,49 @@
   <data name="Perf_RewardBtn" xml:space="preserve"><value>+ مكافأة</value></data>
   <data name="Perf_PromotionBtn" xml:space="preserve"><value>+ ترقية</value></data>
 
+  <!-- Module edit dialogs -->
+  <data name="Common_From" xml:space="preserve"><value>من</value></data>
+  <data name="Common_To" xml:space="preserve"><value>إلى</value></data>
+  <data name="Common_StartDate" xml:space="preserve"><value>تاريخ البداية</value></data>
+  <data name="Common_EndDate" xml:space="preserve"><value>تاريخ النهاية</value></data>
+  <data name="Common_Notes" xml:space="preserve"><value>ملاحظات</value></data>
+  <data name="Leave_TypeField" xml:space="preserve"><value>نوع العطلة</value></data>
+  <data name="LoanEdit_FirstDebit" xml:space="preserve"><value>أول اقتطاع</value></data>
+  <data name="LoanEdit_Reason" xml:space="preserve"><value>السبب / المرجع</value></data>
+  <data name="ContractEdit_Probation" xml:space="preserve"><value>فترة التجربة (أيام)</value></data>
+  <data name="ContractEdit_SignDate" xml:space="preserve"><value>تاريخ التوقيع</value></data>
+  <data name="AssetEdit_Name" xml:space="preserve"><value>اسم المعدات</value></data>
+  <data name="AssetEdit_AcquisitionDate" xml:space="preserve"><value>تاريخ الاقتناء</value></data>
+  <data name="CertEdit_Type" xml:space="preserve"><value>نوع الشهادة</value></data>
+  <data name="CertEdit_Reference" xml:space="preserve"><value>المرجع (اتركه فارغاً للترقيم التلقائي)</value></data>
+  <data name="CertEdit_Purpose" xml:space="preserve"><value>الغرض / المُرسل إليه</value></data>
+  <data name="CertEdit_Body" xml:space="preserve"><value>نص الوثيقة (وثيقة حرة)</value></data>
+
+  <!-- More module dialogs -->
+  <data name="Common_Description" xml:space="preserve"><value>الوصف</value></data>
+  <data name="Common_Source" xml:space="preserve"><value>المصدر</value></data>
+  <data name="Common_Location" xml:space="preserve"><value>المكان</value></data>
+  <data name="Common_EffectiveDate" xml:space="preserve"><value>تاريخ السريان</value></data>
+  <data name="AtsEdit_OpenDate" xml:space="preserve"><value>تاريخ الفتح</value></data>
+  <data name="AtsEdit_JobTitle" xml:space="preserve"><value>عنوان المنصب</value></data>
+  <data name="AtsEdit_PositionCount" xml:space="preserve"><value>عدد المناصب</value></data>
+  <data name="AtsEdit_NewCandidate" xml:space="preserve"><value>مترشح جديد</value></data>
+  <data name="AtsEdit_Rating" xml:space="preserve"><value>العلامة (0-5)</value></data>
+  <data name="ContractRenew_Title" xml:space="preserve"><value>تجديد العقد</value></data>
+  <data name="ContractRenew_Hint" xml:space="preserve"><value>سيُنشأ عقد ساري جديد ويُربط بالسابق.</value></data>
+  <data name="ContractRenew_NewStart" xml:space="preserve"><value>بداية جديدة</value></data>
+  <data name="ContractRenew_NewEnd" xml:space="preserve"><value>نهاية جديدة</value></data>
+  <data name="ContractRenew_NewSalary" xml:space="preserve"><value>الأجر القاعدي الجديد (دج)</value></data>
+  <data name="ContractTerm_Title" xml:space="preserve"><value>فسخ العقد</value></data>
+  <data name="ContractTerm_Hint" xml:space="preserve"><value>سيُسجَّل تاريخ الخروج في بطاقة الموظف.</value></data>
+  <data name="AssetAssign_Title" xml:space="preserve"><value>تخصيص المعدات</value></data>
+  <data name="AssetAssign_Date" xml:space="preserve"><value>تاريخ التخصيص</value></data>
+  <data name="AssetAssign_Condition" xml:space="preserve"><value>الحالة عند التسليم</value></data>
+  <data name="AssetReturn_Title" xml:space="preserve"><value>إرجاع المعدات</value></data>
+  <data name="AssetReturn_Date" xml:space="preserve"><value>تاريخ الإرجاع</value></data>
+  <data name="AssetReturn_Condition" xml:space="preserve"><value>الحالة عند الإرجاع</value></data>
+  <data name="AssetReturn_Save" xml:space="preserve"><value>حفظ الإرجاع</value></data>
+
   <!-- Company edit window -->
   <data name="Cmp_AccountRib" xml:space="preserve"><value>الحساب / RIB</value></data>
 
