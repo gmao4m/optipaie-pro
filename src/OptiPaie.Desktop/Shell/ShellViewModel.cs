@@ -250,6 +250,13 @@ namespace OptiPaie.Desktop.Shell
                 UpdateSelection(_activeKey ?? "dashboard");
                 Raise(nameof(ThemeToggleText));
                 Raise(nameof(SessionUserText));
+
+                // Re-activate the current module so its own (VM-built) labels re-read
+                // in the new language, not just the shell chrome.
+                if (_current is IActivable activable)
+                {
+                    activable.OnActivated();
+                }
             };
 
             System.Windows.Threading.Dispatcher dispatcher = Application.Current != null ? Application.Current.Dispatcher : null;

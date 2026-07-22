@@ -40,8 +40,10 @@ namespace OptiPaie.Desktop.ViewModels
             LeaveCommand = new RelayCommand(() => _navigate("leave"));
         }
 
-        public string Greeting => "Tableau de bord";
+        public string Greeting => _services.Localization.GetString("Shell_Nav_Dashboard");
         public string DateLabel { get => _dateLabel; private set => Set(ref _dateLabel, value); }
+
+        private string L(string key) => _services.Localization.GetString(key);
 
         public string Companies { get => _companies; private set => Set(ref _companies, value); }
         public string Employees { get => _employees; private set => Set(ref _employees, value); }
@@ -80,7 +82,9 @@ namespace OptiPaie.Desktop.ViewModels
 
         private void Load()
         {
-            DateLabel = Capitalize(DateTime.Now.ToString("dddd d MMMM yyyy", Fr));
+            Raise(nameof(Greeting));
+            CultureInfo culture = _services.Localization.CurrentCulture;
+            DateLabel = Capitalize(DateTime.Now.ToString("dddd d MMMM yyyy", culture));
 
             DashboardSnapshot s = _services.Dashboard.Build(30);
 
@@ -116,8 +120,8 @@ namespace OptiPaie.Desktop.ViewModels
                 });
             }
 
-            ApprovalsHeader = "À traiter" + (Approvals.Count > 0 ? " (" + Approvals.Count + ")" : string.Empty);
-            DeadlinesHeader = "Échéances à venir" + (Deadlines.Count > 0 ? " (" + Deadlines.Count + ")" : string.Empty);
+            ApprovalsHeader = L("Dashboard_Approvals") + (Approvals.Count > 0 ? " (" + Approvals.Count + ")" : string.Empty);
+            DeadlinesHeader = L("Dashboard_Deadlines") + (Deadlines.Count > 0 ? " (" + Deadlines.Count + ")" : string.Empty);
             Raise(nameof(HasApprovals));
             Raise(nameof(HasDeadlines));
             Raise(nameof(HasActivity));

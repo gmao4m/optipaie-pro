@@ -445,6 +445,30 @@
   <data name="Company_Address" xml:space="preserve"><value>العنوان</value></data>
   <data name="Company_Bank" xml:space="preserve"><value>البنك</value></data>
 
+  <!-- Dashboard view -->
+  <data name="Dashboard_NewPayroll" xml:space="preserve"><value>إعداد كشف الأجور</value></data>
+  <data name="Dashboard_Approvals" xml:space="preserve"><value>للمعالجة</value></data>
+  <data name="Dashboard_Deadlines" xml:space="preserve"><value>المواعيد القادمة</value></data>
+  <data name="Dashboard_Process" xml:space="preserve"><value>معالجة ←</value></data>
+  <data name="Dashboard_NoApprovals" xml:space="preserve"><value>لا شيء للمعالجة — كل شيء محدَّث.</value></data>
+  <data name="Dashboard_NoDeadlines" xml:space="preserve"><value>لا مواعيد خلال 30 يوماً.</value></data>
+  <data name="Dashboard_ActivityLog" xml:space="preserve"><value>سجل النشاط</value></data>
+  <data name="Dashboard_NoActivity" xml:space="preserve"><value>لا يوجد نشاط مسجل حالياً.</value></data>
+  <data name="Dashboard_AttendanceMatrix" xml:space="preserve"><value>مصفوفة الحضور</value></data>
+  <data name="Dashboard_Leave" xml:space="preserve"><value>العطل</value></data>
+  <data name="Dashboard_Kpi_Headcount" xml:space="preserve"><value>التعداد</value></data>
+  <data name="Dashboard_Kpi_PresentToday" xml:space="preserve"><value>الحاضرون اليوم</value></data>
+  <data name="Dashboard_Kpi_OnLeave" xml:space="preserve"><value>في عطلة</value></data>
+  <data name="Dashboard_Kpi_OnMission" xml:space="preserve"><value>في مهمة</value></data>
+  <data name="Dashboard_Kpi_ActiveContracts" xml:space="preserve"><value>العقود السارية</value></data>
+  <data name="Dashboard_Kpi_ExpiringContracts" xml:space="preserve"><value>عقود قرب الانتهاء</value></data>
+  <data name="Dashboard_Kpi_PendingLeave" xml:space="preserve"><value>عطل قيد الانتظار</value></data>
+  <data name="Dashboard_Kpi_LoanOutstanding" xml:space="preserve"><value>أرصدة القروض (دج)</value></data>
+  <data name="Dashboard_Kpi_OpenPostings" xml:space="preserve"><value>مناصب مفتوحة</value></data>
+  <data name="Dashboard_Kpi_Candidates" xml:space="preserve"><value>المترشحون</value></data>
+  <data name="Dashboard_Kpi_AssetsAssigned" xml:space="preserve"><value>المعدات المخصصة</value></data>
+  <data name="Dashboard_Kpi_TrainingUpcoming" xml:space="preserve"><value>تكوينات قادمة</value></data>
+
   <!-- User service errors -->
   <data name="User_UsernameRequired" xml:space="preserve"><value>اسم المستخدم مطلوب.</value></data>
   <data name="User_PasswordTooShort" xml:space="preserve"><value>يجب أن تحتوي كلمة المرور على 4 أحرف على الأقل.</value></data>

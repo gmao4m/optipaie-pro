@@ -445,6 +445,30 @@
   <data name="Company_Address" xml:space="preserve"><value>Adresse</value></data>
   <data name="Company_Bank" xml:space="preserve"><value>Banque</value></data>
 
+  <!-- Dashboard view -->
+  <data name="Dashboard_NewPayroll" xml:space="preserve"><value>Établir une paie</value></data>
+  <data name="Dashboard_Approvals" xml:space="preserve"><value>À traiter</value></data>
+  <data name="Dashboard_Deadlines" xml:space="preserve"><value>Échéances à venir</value></data>
+  <data name="Dashboard_Process" xml:space="preserve"><value>Traiter →</value></data>
+  <data name="Dashboard_NoApprovals" xml:space="preserve"><value>Rien à traiter — tout est à jour.</value></data>
+  <data name="Dashboard_NoDeadlines" xml:space="preserve"><value>Aucune échéance dans les 30 jours.</value></data>
+  <data name="Dashboard_ActivityLog" xml:space="preserve"><value>Journal d'activité</value></data>
+  <data name="Dashboard_NoActivity" xml:space="preserve"><value>Aucune activité enregistrée pour l'instant.</value></data>
+  <data name="Dashboard_AttendanceMatrix" xml:space="preserve"><value>Matrice de présence</value></data>
+  <data name="Dashboard_Leave" xml:space="preserve"><value>Congés</value></data>
+  <data name="Dashboard_Kpi_Headcount" xml:space="preserve"><value>Effectif</value></data>
+  <data name="Dashboard_Kpi_PresentToday" xml:space="preserve"><value>Présents aujourd'hui</value></data>
+  <data name="Dashboard_Kpi_OnLeave" xml:space="preserve"><value>En congé</value></data>
+  <data name="Dashboard_Kpi_OnMission" xml:space="preserve"><value>En mission</value></data>
+  <data name="Dashboard_Kpi_ActiveContracts" xml:space="preserve"><value>Contrats en vigueur</value></data>
+  <data name="Dashboard_Kpi_ExpiringContracts" xml:space="preserve"><value>Contrats à échéance</value></data>
+  <data name="Dashboard_Kpi_PendingLeave" xml:space="preserve"><value>Congés en attente</value></data>
+  <data name="Dashboard_Kpi_LoanOutstanding" xml:space="preserve"><value>Encours prêts (DA)</value></data>
+  <data name="Dashboard_Kpi_OpenPostings" xml:space="preserve"><value>Postes ouverts</value></data>
+  <data name="Dashboard_Kpi_Candidates" xml:space="preserve"><value>Candidats</value></data>
+  <data name="Dashboard_Kpi_AssetsAssigned" xml:space="preserve"><value>Matériel attribué</value></data>
+  <data name="Dashboard_Kpi_TrainingUpcoming" xml:space="preserve"><value>Formations à venir</value></data>
+
   <!-- User service errors -->
   <data name="User_UsernameRequired" xml:space="preserve"><value>Le nom d'utilisateur est requis.</value></data>
   <data name="User_PasswordTooShort" xml:space="preserve"><value>Le mot de passe doit contenir au moins 4 caractères.</value></data>
