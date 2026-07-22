@@ -166,5 +166,54 @@ namespace OptiPaie.Tests
             Assert.That(t, Is.Not.Null);
             Assert.That(t.Rows.Count, Is.EqualTo(0));
         }
+
+        [Test]
+        public void Cacobatph_Declarations_AppearOnlyForAnEnabledBtphCompany()
+        {
+            // The seeded company is not BTPH — the declarations must not be offered.
+            Assert.That(_reports.GetReports(_companyId).Any(r => r.Key == ReportService.DasCacobatph), Is.False);
+            Assert.That(_reports.GetReports(_companyId).Any(r => r.Key == ReportService.DacCacobatph), Is.False);
+
+            long btph = _companies.Create(new Company
+            {
+                NameFr = "SARL BTP", Nif = "111111111111111", BtphSector = true, CacobatphEnabled = true
+            }).Value;
+
+            var offered = _reports.GetReports(btph);
+            Assert.That(offered.Any(r => r.Key == ReportService.DasCacobatph && r.Category == "Déclarations CACOBATPH"), Is.True);
+            Assert.That(offered.Any(r => r.Key == ReportService.DacCacobatph && r.Category == "Déclarations CACOBATPH"), Is.True);
+            Assert.That(_reports.GetReports().Count, Is.EqualTo(8), "the base library is unchanged");
+        }
+
+        [Test]
+        public void Cacobatph_DasAndDac_ProjectTheAnnualBaseAndRates()
+        {
+            long btph = _companies.Create(new Company
+            {
+                NameFr = "SARL BTP", Nif = "111111111111111", BtphSector = true, CacobatphEnabled = true
+            }).Value;
+            _employees.Create(new Employee
+            {
+                CompanyId = btph, LastNameFr = "MEZIANE", FirstNameFr = "Ali", Poste = "Maçon",
+                Gender = Gender.Male, MaritalStatus = MaritalStatus.Single, PaymentMode = PaymentMode.Cash,
+                ContractType = ContractType.Cdi, HireDate = new DateTime(Year, 1, 1), BaseSalary = 60000m, IsActive = true
+            });
+
+            // DAS — salary declaration: annual base = 60000 × 12 = 720 000, plus a TOTAL row.
+            ReportTable das = _reports.Build(ReportService.DasCacobatph, btph, Year, 1);
+            Assert.That(das.Rows.Count, Is.EqualTo(2), "one employee + TOTAL");
+            Assert.That(das.Rows[0][4], Is.EqualTo(720000m.ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("fr-FR"))));
+            Assert.That(das.Rows[1][1], Is.EqualTo("TOTAL"), "TOTAL sits in the Employé column");
+
+            // DAC — contributions declaration on the same 720 000 base.
+            ReportTable dac = _reports.Build(ReportService.DacCacobatph, btph, Year, 1);
+            var fr = System.Globalization.CultureInfo.GetCultureInfo("fr-FR");
+            Assert.That(dac.Rows.Count, Is.EqualTo(2));
+            Assert.That(dac.Rows[0][2], Is.EqualTo(87912m.ToString("N2", fr)), "Congé Payé 12,21 % of 720 000");
+            Assert.That(dac.Rows[0][3], Is.EqualTo(2700m.ToString("N2", fr)), "Chômage employeur 0,375 %");
+            Assert.That(dac.Rows[0][4], Is.EqualTo(2700m.ToString("N2", fr)), "Chômage salarié 0,375 %");
+            Assert.That(dac.Rows[0][5], Is.EqualTo(90612m.ToString("N2", fr)), "employer total");
+            Assert.That(dac.Rows[1][0], Is.EqualTo("TOTAL"));
+        }
     }
 }

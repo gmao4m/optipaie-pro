@@ -17,8 +17,17 @@ namespace OptiPaie.Core.Interfaces.Services
         /// <summary>Hands an available asset to an employee.</summary>
         Result Assign(long assetId, long employeeId, DateTime date, string conditionOut, string notes);
 
-        /// <summary>Records the return of the currently held asset.</summary>
+        /// <summary>
+        /// Records the return of an exclusively-held asset. For a shared asset with several
+        /// holders it fails (Asset_MultipleHolders) — use <see cref="ReturnFrom"/> instead.
+        /// </summary>
         Result Return(long assetId, DateTime date, string conditionIn);
+
+        /// <summary>
+        /// Records the return of a specific employee's assignment (the way to return one
+        /// holder of a shared asset without ending the others' active assignments).
+        /// </summary>
+        Result ReturnFrom(long assetId, long employeeId, DateTime date, string conditionIn);
 
         /// <summary>Marks an asset under repair or retired (must not be assigned).</summary>
         Result SetStatus(long assetId, Core.Enums.AssetStatus status);

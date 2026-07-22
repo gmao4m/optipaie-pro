@@ -38,10 +38,10 @@ namespace OptiPaie.Data.Repositories
 
             const string sql =
                 "INSERT INTO Assets " +
-                "(CompanyId, Name, Category, Status, SerialNumber, PurchaseDate, PurchaseValue, Notes, " +
+                "(CompanyId, Name, Category, Status, SerialNumber, PurchaseDate, PurchaseValue, Notes, IsShared, " +
                 " CreatedAtUtc, UpdatedAtUtc, IsDeleted) " +
                 "VALUES " +
-                "(@CompanyId, @Name, @Category, @Status, @SerialNumber, @PurchaseDate, @PurchaseValue, @Notes, " +
+                "(@CompanyId, @Name, @Category, @Status, @SerialNumber, @PurchaseDate, @PurchaseValue, @Notes, @IsShared, " +
                 " @CreatedAtUtc, @UpdatedAtUtc, @IsDeleted); " +
                 "SELECT last_insert_rowid();";
 
@@ -59,7 +59,7 @@ namespace OptiPaie.Data.Repositories
                 "UPDATE Assets SET " +
                 "CompanyId = @CompanyId, Name = @Name, Category = @Category, Status = @Status, " +
                 "SerialNumber = @SerialNumber, PurchaseDate = @PurchaseDate, PurchaseValue = @PurchaseValue, " +
-                "Notes = @Notes, UpdatedAtUtc = @UpdatedAtUtc, IsDeleted = @IsDeleted " +
+                "Notes = @Notes, IsShared = @IsShared, UpdatedAtUtc = @UpdatedAtUtc, IsDeleted = @IsDeleted " +
                 "WHERE Id = @Id;";
 
             Connection.Execute(sql, asset, Transaction);

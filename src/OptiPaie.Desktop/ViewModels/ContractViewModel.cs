@@ -56,6 +56,42 @@ namespace OptiPaie.Desktop.ViewModels
         public bool IsActive => Summary.Status == ContractStatus.Active;
         public bool IsDraft => Summary.Status == ContractStatus.Draft;
         public bool CanRenew => Summary.Status == ContractStatus.Active || Summary.Status == ContractStatus.Expired;
+
+        /// <summary>An active fixed-term contract entering its last 30 days (but not yet overdue).</summary>
+        public bool IsExpiringSoon =>
+            Summary.Status == ContractStatus.Active && !Summary.IsOverdue &&
+            Summary.DaysUntilExpiry.HasValue && Summary.DaysUntilExpiry.Value <= 30;
+
+        public bool IsOverdue => Summary.IsOverdue;
+
+        /// <summary>Semantic colour bucket for the status pill (drives the DataGrid template).</summary>
+        public string StatusKind
+        {
+            get
+            {
+                switch (Summary.Status)
+                {
+                    case ContractStatus.Active: return "success";
+                    case ContractStatus.Expired: return "danger";
+                    case ContractStatus.Renewed: return "accent";
+                    default: return "neutral"; // Draft, Terminated
+                }
+            }
+        }
+
+        /// <summary>Semantic colour bucket for the CDI/CDD type badge.</summary>
+        public string TypeKind
+        {
+            get
+            {
+                switch (Summary.Type)
+                {
+                    case ContractType.Cdi: return "accent";   // permanent — the stable contract
+                    case ContractType.Cdd: return "pending";  // fixed-term — watch the end date
+                    default: return "neutral";                // apprenticeship, internship, …
+                }
+            }
+        }
     }
 
     /// <summary>Localized labels for the contract status enum (resolved for the active language).</summary>

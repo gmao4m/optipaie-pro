@@ -31,6 +31,65 @@
             <Setter Property="Padding" Value="16,11" />
             <Setter Property="Margin" Value="0,0,12,0" />
         </Style>
+
+        <!-- Text inside a coloured pill (white on the status colour, both themes). -->
+        <Style x:Key="PillText" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <!-- Status pill: colour driven by the row's StatusKind bucket. -->
+        <Style x:Key="StatusPill" TargetType="Border">
+            <Setter Property="CornerRadius" Value="9" />
+            <Setter Property="Padding" Value="10,2" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Background" Value="{DynamicResource StatusNeutral}" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding StatusKind}" Value="success">
+                    <Setter Property="Background" Value="{DynamicResource StatusSuccess}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding StatusKind}" Value="danger">
+                    <Setter Property="Background" Value="{DynamicResource StatusDanger}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding StatusKind}" Value="accent">
+                    <Setter Property="Background" Value="{DynamicResource Accent}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- CDI/CDD type badge: teal for permanent, amber for fixed-term. -->
+        <Style x:Key="TypePill" TargetType="Border">
+            <Setter Property="CornerRadius" Value="9" />
+            <Setter Property="Padding" Value="10,2" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Background" Value="{DynamicResource StatusNeutral}" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding TypeKind}" Value="accent">
+                    <Setter Property="Background" Value="{DynamicResource Accent}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding TypeKind}" Value="pending">
+                    <Setter Property="Background" Value="{DynamicResource StatusPending}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Row emphasis: overdue fixed-terms glow red, soon-to-expire glow amber. -->
+        <Style x:Key="ContractRow" TargetType="DataGridRow">
+            <Setter Property="Background" Value="{DynamicResource Surface}" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsExpiringSoon}" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource StatusPendingSoft}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsOverdue}" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource StatusDangerSoft}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
     </UserControl.Resources>
 
     <Grid Margin="24,20">
@@ -72,20 +131,36 @@
         <DataGrid Grid.Row="2" Margin="0,18,0,0" ItemsSource="{Binding Contracts}" SelectedItem="{Binding SelectedContract}"
                   AutoGenerateColumns="False" HeadersVisibility="Column" IsReadOnly="True"
                   CanUserAddRows="False" CanUserResizeRows="False" GridLinesVisibility="All"
-                  RowHeight="32" FontFamily="Segoe UI" FontSize="12.5" Background="{DynamicResource Surface}"
-                  RowBackground="{DynamicResource Surface}" AlternatingRowBackground="{DynamicResource SurfaceMuted}"
+                  RowHeight="34" FontFamily="Segoe UI" FontSize="12.5" Background="{DynamicResource Surface}"
+                  RowBackground="{DynamicResource Surface}" RowStyle="{StaticResource ContractRow}"
                   BorderBrush="{DynamicResource Border}" BorderThickness="1"
                   HorizontalGridLinesBrush="{DynamicResource Border}" VerticalGridLinesBrush="{DynamicResource Border}"
                   ColumnHeaderStyle="{StaticResource GridHeader}">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="{loc:Loc Payroll_Employee}" Binding="{Binding EmployeeName}" Width="*" />
-                <DataGridTextColumn Header="{loc:Loc Common_Type}" Binding="{Binding TypeLabel}" Width="90" ElementStyle="{StaticResource CenterText}" />
+                <DataGridTemplateColumn Header="{loc:Loc Common_Type}" Width="90">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Border Style="{StaticResource TypePill}">
+                                <TextBlock Style="{StaticResource PillText}" Text="{Binding TypeLabel}" />
+                            </Border>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
                 <DataGridTextColumn Header="{loc:Loc Employee_Poste}" Binding="{Binding Position}" Width="150" />
                 <DataGridTextColumn Header="{loc:Loc Contract_Salary}" Binding="{Binding SalaryText}" Width="110" ElementStyle="{StaticResource RightText}" />
                 <DataGridTextColumn Header="{loc:Loc Loan_Start}" Binding="{Binding StartText}" Width="95" ElementStyle="{StaticResource CenterText}" />
                 <DataGridTextColumn Header="{loc:Loc Contract_End}" Binding="{Binding EndText}" Width="95" ElementStyle="{StaticResource CenterText}" />
                 <DataGridTextColumn Header="{loc:Loc Contract_Expiry}" Binding="{Binding ExpiryText}" Width="110" ElementStyle="{StaticResource CenterText}" />
-                <DataGridTextColumn Header="{loc:Loc Common_Status}" Binding="{Binding StatusLabel}" Width="105" ElementStyle="{StaticResource CenterText}" />
+                <DataGridTemplateColumn Header="{loc:Loc Common_Status}" Width="115">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Border Style="{StaticResource StatusPill}">
+                                <TextBlock Style="{StaticResource PillText}" Text="{Binding StatusLabel}" />
+                            </Border>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
 

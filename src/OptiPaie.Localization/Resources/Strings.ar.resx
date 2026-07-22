@@ -769,6 +769,8 @@
   <data name="AssetReturn_Date" xml:space="preserve"><value>تاريخ الإرجاع</value></data>
   <data name="AssetReturn_Condition" xml:space="preserve"><value>الحالة عند الإرجاع</value></data>
   <data name="AssetReturn_Save" xml:space="preserve"><value>حفظ الإرجاع</value></data>
+  <data name="Asset_SharedToggle" xml:space="preserve"><value>معدات مشتركة (عدة حائزين في آن واحد)</value></data>
+  <data name="AssetReturn_Holder" xml:space="preserve"><value>الحائز المُراد إرجاعه</value></data>
 
   <!-- Performance dialogs -->
   <data name="Common_PercentSuffix" xml:space="preserve"><value> ٪</value></data>

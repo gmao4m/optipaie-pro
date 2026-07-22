@@ -217,14 +217,29 @@ namespace OptiPaie.Desktop.ViewModels
 
         private void Return()
         {
-            var vm = new AssetReturnViewModel();
+            // Current holders (an exclusive asset has one; a shared asset can have several).
+            var holders = _services.Assets.GetHistory(_selectedAsset.Id)
+                .Where(a => a.ReturnedDate == null).ToList();
+            if (holders.Count == 0)
+            {
+                Dialogs.Info("Ce matériel n'est attribué à personne.");
+                return;
+            }
+
+            var vm = new AssetReturnViewModel(holders);
             var window = new AssetReturnWindow { DataContext = vm, Owner = Application.Current.MainWindow };
             App.ApplyFlowDirection(window);
             vm.RequestClose = ok => window.DialogResult = ok;
 
             if (window.ShowDialog() != true) return;
 
-            Run(_services.Assets.Return(_selectedAsset.Id, vm.Date, vm.Condition), "Retour enregistré.");
+            // A shared asset with several holders returns only the chosen one; otherwise
+            // the single holder is implied.
+            Result result = holders.Count > 1 && vm.SelectedHolder != null
+                ? _services.Assets.ReturnFrom(_selectedAsset.Id, vm.SelectedHolder.EmployeeId, vm.Date, vm.Condition)
+                : _services.Assets.Return(_selectedAsset.Id, vm.Date, vm.Condition);
+
+            Run(result, "Retour enregistré.");
         }
 
         private void OpenHistory()

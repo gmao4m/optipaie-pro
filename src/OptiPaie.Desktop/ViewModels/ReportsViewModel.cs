@@ -90,7 +90,28 @@ namespace OptiPaie.Desktop.ViewModels
             // The active company comes from the single global selector in the header.
             _selectedCompany = _services.CompanyContext.Active;
             Raise(nameof(SelectedCompany));
+            RefreshCatalog();
             Generate();
+        }
+
+        /// <summary>
+        /// Rebuilds the report library for the active company, so company-specific sections
+        /// (like the CACOBATPH declarations) appear only where they apply. The current
+        /// selection is preserved when the same report is still available.
+        /// </summary>
+        private void RefreshCatalog()
+        {
+            string previousKey = _selectedReport != null ? _selectedReport.Key : null;
+
+            Reports.Clear();
+            var catalog = _selectedCompany != null
+                ? _services.Reports.GetReports(_selectedCompany.Id)
+                : _services.Reports.GetReports();
+            foreach (ReportDescriptor r in catalog) Reports.Add(r);
+
+            _selectedReport = Reports.FirstOrDefault(r => r.Key == previousKey) ?? Reports.FirstOrDefault();
+            Raise(nameof(SelectedReport));
+            Raise(nameof(MonthEnabled));
         }
 
         private void Generate()

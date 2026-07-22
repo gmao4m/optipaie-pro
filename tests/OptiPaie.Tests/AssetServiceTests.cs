@@ -244,6 +244,54 @@ namespace OptiPaie.Tests
             Assert.That(assets.Count(x => x.HolderId != null), Is.EqualTo(1));
         }
 
+        // -------------------------------------------------- shared vs exclusive (2.2)
+
+        [Test]
+        public void Exclusive_BlocksASecondHolder_UntilReturned()
+        {
+            long id = _service.Save(NewAsset("Laptop", AssetCategory.Laptop, 100000m)).Value; // exclusive by default
+            Assert.That(_service.Assign(id, _employeeId, DateTime.Today, "Neuf", null).IsSuccess, Is.True);
+
+            Result blocked = _service.Assign(id, _otherEmployeeId, DateTime.Today, "Neuf", null);
+            Assert.That(blocked.IsFailure, Is.True);
+            Assert.That(blocked.ErrorCode, Is.EqualTo("Asset_AlreadyAssigned"));
+        }
+
+        [Test]
+        public void Shared_AllowsSeveralConcurrentHolders_AndReturningOneKeepsTheOthers()
+        {
+            long id = _service.Save(SharedAsset("Véhicule de pool")).Value;
+
+            Assert.That(_service.Assign(id, _employeeId, DateTime.Today, "RAS", null).IsSuccess, Is.True);
+            Assert.That(_service.Assign(id, _otherEmployeeId, DateTime.Today, "RAS", null).IsSuccess, Is.True, "shared allows a 2nd holder");
+
+            // The same employee cannot hold it twice at once.
+            Assert.That(_service.Assign(id, _employeeId, DateTime.Today, "RAS", null).ErrorCode, Is.EqualTo("Asset_AlreadyHeldByEmployee"));
+
+            // Both currently hold it.
+            Assert.That(_service.GetHeldByEmployee(_employeeId).Any(a => a.AssetId == id), Is.True);
+            Assert.That(_service.GetHeldByEmployee(_otherEmployeeId).Any(a => a.AssetId == id), Is.True);
+
+            // Ambiguous return is refused; per-holder return only ends that holder.
+            Assert.That(_service.Return(id, DateTime.Today, "RAS").ErrorCode, Is.EqualTo("Asset_MultipleHolders"));
+
+            Assert.That(_service.ReturnFrom(id, _employeeId, DateTime.Today, "RAS").IsSuccess, Is.True);
+            Assert.That(_service.GetHeldByEmployee(_employeeId).Any(a => a.AssetId == id), Is.False, "first holder returned");
+            Assert.That(_service.GetHeldByEmployee(_otherEmployeeId).Any(a => a.AssetId == id), Is.True, "second holder still holds it");
+            Assert.That(_service.GetSummary(id).Status, Is.EqualTo(AssetStatus.Assigned), "still Assigned while a holder remains");
+
+            // Returning the last holder frees the asset.
+            Assert.That(_service.ReturnFrom(id, _otherEmployeeId, DateTime.Today, "RAS").IsSuccess, Is.True);
+            Assert.That(_service.GetSummary(id).Status, Is.EqualTo(AssetStatus.Available));
+        }
+
+        private Asset SharedAsset(string name)
+        {
+            Asset a = NewAsset(name, AssetCategory.Vehicle, 2000000m);
+            a.IsShared = true;
+            return a;
+        }
+
         private Asset NewAsset(string name, AssetCategory category, decimal value)
         {
             return new Asset

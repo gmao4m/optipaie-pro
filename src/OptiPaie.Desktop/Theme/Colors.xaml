@@ -76,4 +76,9 @@
     <SolidColorBrush x:Key="StatusDanger" Color="#C24444" />
     <SolidColorBrush x:Key="StatusNeutral" Color="#8B8F99" />
 
+    <!-- Soft status tints for row emphasis / gentle highlights. -->
+    <SolidColorBrush x:Key="StatusSuccessSoft" Color="#EAF6F0" />
+    <SolidColorBrush x:Key="StatusPendingSoft" Color="#FBF3E2" />
+    <SolidColorBrush x:Key="StatusDangerSoft" Color="#FBECEC" />
+
 </ResourceDictionary>

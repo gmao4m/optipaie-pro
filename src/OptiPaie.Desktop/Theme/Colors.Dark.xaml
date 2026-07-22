@@ -47,6 +47,11 @@
     <SolidColorBrush x:Key="StatusDanger" Color="#D97A7A" />
     <SolidColorBrush x:Key="StatusNeutral" Color="#7F8796" />
 
+    <!-- Soft status tints for row emphasis / gentle highlights (dark-tuned). -->
+    <SolidColorBrush x:Key="StatusSuccessSoft" Color="#1E3A2E" />
+    <SolidColorBrush x:Key="StatusPendingSoft" Color="#3A3320" />
+    <SolidColorBrush x:Key="StatusDangerSoft" Color="#3A2626" />
+
     <!-- Destructive (filled) button: red with white text, tuned for dark. -->
     <SolidColorBrush x:Key="ButtonDanger" Color="#C0504E" />
     <SolidColorBrush x:Key="ButtonDangerHover" Color="#AD4644" />

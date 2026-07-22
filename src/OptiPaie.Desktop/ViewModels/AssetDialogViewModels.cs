@@ -35,6 +35,7 @@ namespace OptiPaie.Desktop.ViewModels
         private DateTime? _purchaseDate;
         private string _value;
         private string _notes;
+        private bool _isShared;
 
         public AssetEditViewModel(AppServices services, long companyId, Asset existing)
         {
@@ -52,6 +53,7 @@ namespace OptiPaie.Desktop.ViewModels
                 _purchaseDate = existing.PurchaseDate;
                 _value = existing.PurchaseValue.ToString(CultureInfo.InvariantCulture);
                 _notes = existing.Notes;
+                _isShared = existing.IsShared;
                 Title = "Modifier le matériel";
             }
             else
@@ -78,6 +80,9 @@ namespace OptiPaie.Desktop.ViewModels
         public string PurchaseValue { get => _value; set => Set(ref _value, value); }
         public string Notes { get => _notes; set => Set(ref _notes, value); }
 
+        /// <summary>Shared: several employees may hold this asset at once (e.g. a pool vehicle).</summary>
+        public bool IsShared { get => _isShared; set => Set(ref _isShared, value); }
+
         public ICommand SaveCommand { get; }
         public ICommand CancelCommand { get; }
 
@@ -97,6 +102,7 @@ namespace OptiPaie.Desktop.ViewModels
             _asset.PurchaseDate = _purchaseDate;
             _asset.PurchaseValue = value;
             _asset.Notes = _notes;
+            _asset.IsShared = _isShared;
 
             Result<long> result = _services.Assets.Save(_asset);
             if (result.IsFailure)
@@ -139,19 +145,38 @@ namespace OptiPaie.Desktop.ViewModels
         public ICommand CancelCommand { get; }
     }
 
-    /// <summary>Dialog for recording an asset return.</summary>
+    /// <summary>
+    /// Dialog for recording an asset return. For a shared asset held by several employees
+    /// it shows a holder picker so exactly one holder is returned; otherwise the single
+    /// holder is implied.
+    /// </summary>
     public sealed class AssetReturnViewModel : ObservableObject
     {
         private DateTime _date = DateTime.Today;
         private string _condition;
+        private AssetAssignmentSummary _selectedHolder;
 
-        public AssetReturnViewModel()
+        public AssetReturnViewModel(IReadOnlyList<AssetAssignmentSummary> holders = null)
         {
+            if (holders != null)
+            {
+                foreach (AssetAssignmentSummary h in holders) Holders.Add(h);
+                _selectedHolder = Holders.Count > 0 ? Holders[0] : null;
+            }
+
             ConfirmCommand = new RelayCommand(() => RequestClose?.Invoke(true));
             CancelCommand = new RelayCommand(() => RequestClose?.Invoke(false));
         }
 
         public Action<bool> RequestClose { get; set; }
+
+        /// <summary>The current holders (populated only when a choice is needed).</summary>
+        public ObservableCollection<AssetAssignmentSummary> Holders { get; } = new ObservableCollection<AssetAssignmentSummary>();
+
+        /// <summary>True when several employees hold the asset and one must be chosen.</summary>
+        public bool HasHolderChoice => Holders.Count > 1;
+
+        public AssetAssignmentSummary SelectedHolder { get => _selectedHolder; set => Set(ref _selectedHolder, value); }
 
         public DateTime Date { get => _date; set => Set(ref _date, value); }
         public string Condition { get => _condition; set => Set(ref _condition, value); }

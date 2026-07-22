@@ -29,6 +29,14 @@ namespace OptiPaie.Core.Entities
 
         public string Notes { get; set; }
 
+        /// <summary>
+        /// Ownership mode. Exclusive (default): one holder at a time — a second assignment
+        /// is blocked until the current one is returned. Shared: several employees can hold
+        /// it at once, each with an independent assignment, and returning one leaves the
+        /// others untouched (e.g. a pool vehicle, a shared tool).
+        /// </summary>
+        public bool IsShared { get; set; }
+
         public DateTime? UpdatedAtUtc { get; set; }
 
         public bool IsDeleted { get; set; }

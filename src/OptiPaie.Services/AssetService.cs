@@ -83,11 +83,6 @@ namespace OptiPaie.Services
                     return Result.Fail("Matériel introuvable.", "Asset_NotFound");
                 }
 
-                if (asset.Status == AssetStatus.Assigned || uow.Assets.GetOpenAssignment(assetId) != null)
-                {
-                    return Result.Fail("Ce matériel est déjà attribué — enregistrez d'abord son retour.", "Asset_AlreadyAssigned");
-                }
-
                 if (asset.Status == AssetStatus.Retired)
                 {
                     return Result.Fail("Un matériel réformé ne peut pas être attribué.", "Asset_Retired");
@@ -96,6 +91,26 @@ namespace OptiPaie.Services
                 if (!uow.Employees.ExistsById(employeeId))
                 {
                     return Result.Fail("Employé introuvable.", "Asset_EmployeeNotFound");
+                }
+
+                var openAssignments = uow.Assets.GetAssignmentsByAsset(assetId)
+                    .Where(a => a.ReturnedDate == null).ToList();
+
+                if (asset.IsShared)
+                {
+                    // Shared: several holders at once, but never the same employee twice.
+                    if (openAssignments.Any(a => a.EmployeeId == employeeId))
+                    {
+                        return Result.Fail("Cet employé détient déjà ce matériel partagé.", "Asset_AlreadyHeldByEmployee");
+                    }
+                }
+                else
+                {
+                    // Exclusive: one holder at a time.
+                    if (asset.Status == AssetStatus.Assigned || openAssignments.Count > 0)
+                    {
+                        return Result.Fail("Ce matériel est déjà attribué — enregistrez d'abord son retour.", "Asset_AlreadyAssigned");
+                    }
                 }
 
                 uow.BeginTransaction();
@@ -135,36 +150,78 @@ namespace OptiPaie.Services
                     return Result.Fail("Matériel introuvable.", "Asset_NotFound");
                 }
 
-                AssetAssignment open = uow.Assets.GetOpenAssignment(assetId);
-                if (open == null)
+                var open = uow.Assets.GetAssignmentsByAsset(assetId).Where(a => a.ReturnedDate == null).ToList();
+                if (open.Count == 0)
                 {
                     return Result.Fail("Ce matériel n'est pas attribué.", "Asset_NotAssigned");
                 }
 
-                if (date.Date < open.AssignedDate.Date)
+                if (open.Count > 1)
                 {
-                    return Result.Fail("La date de retour ne peut pas précéder l'attribution.", "Asset_ReturnBeforeAssign");
+                    // A shared asset with several holders — the caller must say which one.
+                    return Result.Fail("Ce matériel partagé a plusieurs détenteurs : indiquez lequel retourne.", "Asset_MultipleHolders");
                 }
 
-                uow.BeginTransaction();
-                try
-                {
-                    open.ReturnedDate = date.Date;
-                    open.ConditionIn = conditionIn;
-                    uow.Assets.UpdateAssignment(open);
+                return CloseAssignment(uow, asset, open[0], date, conditionIn);
+            }
+        }
 
+        public Result ReturnFrom(long assetId, long employeeId, DateTime date, string conditionIn)
+        {
+            using (IUnitOfWork uow = _unitOfWorkFactory.Create())
+            {
+                Asset asset = uow.Assets.GetById(assetId);
+                if (asset == null)
+                {
+                    return Result.Fail("Matériel introuvable.", "Asset_NotFound");
+                }
+
+                AssetAssignment open = uow.Assets.GetAssignmentsByAsset(assetId)
+                    .FirstOrDefault(a => a.ReturnedDate == null && a.EmployeeId == employeeId);
+                if (open == null)
+                {
+                    return Result.Fail("Cet employé ne détient pas ce matériel.", "Asset_NotHeldByEmployee");
+                }
+
+                return CloseAssignment(uow, asset, open, date, conditionIn);
+            }
+        }
+
+        /// <summary>
+        /// Closes one assignment and only frees the asset (status → Disponible) once NO
+        /// open assignment remains — so returning one holder of a shared asset never ends
+        /// another holder's still-active assignment.
+        /// </summary>
+        private Result CloseAssignment(IUnitOfWork uow, Asset asset, AssetAssignment open, DateTime date, string conditionIn)
+        {
+            if (date.Date < open.AssignedDate.Date)
+            {
+                return Result.Fail("La date de retour ne peut pas précéder l'attribution.", "Asset_ReturnBeforeAssign");
+            }
+
+            uow.BeginTransaction();
+            try
+            {
+                open.ReturnedDate = date.Date;
+                open.ConditionIn = conditionIn;
+                uow.Assets.UpdateAssignment(open);
+
+                bool stillHeld = uow.Assets.GetAssignmentsByAsset(asset.Id).Any(a => a.ReturnedDate == null);
+                if (!stillHeld)
+                {
                     asset.Status = AssetStatus.Available;
                     uow.Assets.Update(asset);
+                }
 
-                    uow.Commit();
-                    Audit.Record("Asset", assetId, AuditAction.Returned, "Matériel retourné", "Attribué", "Disponible");
-                    return Result.Ok();
-                }
-                catch
-                {
-                    uow.Rollback();
-                    throw;
-                }
+                uow.Commit();
+                Audit.Record("Asset", asset.Id, AuditAction.Returned, "Matériel retourné",
+                    "Attribué", stillHeld ? "Attribué (autres détenteurs)" : "Disponible");
+                return Result.Ok();
+            }
+            catch
+            {
+                uow.Rollback();
+                throw;
             }
         }
 

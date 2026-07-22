@@ -7,6 +7,7 @@ using OptiPaie.Core.Dtos;
 using OptiPaie.Core.Entities;
 using OptiPaie.Core.Enums;
 using OptiPaie.Core.Interfaces.Services;
+using OptiPaie.Core.Payroll;
 
 namespace OptiPaie.Services
 {
@@ -28,6 +29,12 @@ namespace OptiPaie.Services
         public const string Training = "training";
         public const string Assets = "assets";
         public const string Recruitment = "recruitment";
+
+        // Optional CACOBATPH declarations — only offered when the active company is a
+        // BTPH-sector employer with CACOBATPH enabled. Deliberately a section of their
+        // own, never merged with the general HR reports.
+        public const string DasCacobatph = "das_cacobatph";
+        public const string DacCacobatph = "dac_cacobatph";
 
         private readonly ICompanyService _companies;
         private readonly IEmployeeService _employees;
@@ -73,6 +80,23 @@ namespace OptiPaie.Services
             };
         }
 
+        public IReadOnlyList<ReportDescriptor> GetReports(long companyId)
+        {
+            var reports = new List<ReportDescriptor>(GetReports());
+
+            // The CACOBATPH declarations are a separate section shown only for a BTPH
+            // company that has switched the caisse on — never mixed in with the CNAS
+            // declarations or the general HR reports.
+            Company company = _companies.Get(companyId);
+            if (company != null && company.BtphSector && company.CacobatphEnabled)
+            {
+                reports.Add(new ReportDescriptor(DasCacobatph, "DAS-CACOBATPH — déclaration des salaires", "Déclarations CACOBATPH", false));
+                reports.Add(new ReportDescriptor(DacCacobatph, "DAC-CACOBATPH — déclaration des cotisations", "Déclarations CACOBATPH", false));
+            }
+
+            return reports;
+        }
+
         public ReportTable Build(string reportKey, long companyId, int year, int month)
         {
             Company company = _companies.Get(companyId);
@@ -88,6 +112,8 @@ namespace OptiPaie.Services
                 case Training: return TrainingReport(companyId, companyName);
                 case Assets: return AssetsReport(companyId, companyName);
                 case Recruitment: return RecruitmentReport(companyId, companyName);
+                case DasCacobatph: return DasCacobatphReport(companyId, companyName, year);
+                case DacCacobatph: return DacCacobatphReport(companyId, companyName, year);
                 default: return new ReportTable { Title = "Rapport inconnu", Subtitle = companyName };
             }
         }
@@ -315,6 +341,105 @@ namespace OptiPaie.Services
                 Subtitle = companyName + " · " + totalCandidates + " candidat(s), " + totalHired + " recruté(s)",
                 Columns = new[] { "Poste", "Statut", "Postes", "Candidats", "Recrutés" },
                 NumericColumns = new[] { 2, 3, 4 },
+                Rows = rows
+            };
+        }
+
+        // ------------------------------------------------------ CACOBATPH declarations
+
+        /// <summary>
+        /// DAS-CACOBATPH — the annual salary declaration. Lists, per active employee, the
+        /// annual cotisable base (the salaire de base projected over twelve months, the same
+        /// base the CACOBATPH is levied on). It reads only the personnel register; it never
+        /// touches the payroll engine or its computed values.
+        /// </summary>
+        private ReportTable DasCacobatphReport(long companyId, string companyName, int year)
+        {
+            var rows = new List<IReadOnlyList<string>>();
+            decimal totalAnnual = 0m;
+            foreach (Employee e in _employees.GetByCompany(companyId, false).OrderBy(x => x.LastNameFr))
+            {
+                decimal annualBase = e.BaseSalary * 12m;
+                totalAnnual += annualBase;
+                rows.Add(new[]
+                {
+                    e.Id.ToString("0000", CultureInfo.InvariantCulture),
+                    (e.LastNameFr + " " + e.FirstNameFr).Trim(),
+                    Blank(e.Poste),
+                    e.BaseSalary.ToString("N2", Fr),
+                    annualBase.ToString("N2", Fr)
+                });
+            }
+
+            if (rows.Count > 0)
+            {
+                rows.Add(new[] { "", "TOTAL", "", "", totalAnnual.ToString("N2", Fr) });
+            }
+
+            return new ReportTable
+            {
+                Title = "DAS-CACOBATPH — déclaration annuelle des salaires " + year,
+                Subtitle = companyName + " · base annuelle projetée (salaire de base × 12) · " +
+                           totalAnnual.ToString("N2", Fr) + " DA",
+                Columns = new[] { "N°", "Employé", "Poste", "Base mensuelle", "Base annuelle cotisable" },
+                NumericColumns = new[] { 3, 4 },
+                Rows = rows
+            };
+        }
+
+        /// <summary>
+        /// DAC-CACOBATPH — the annual contributions declaration. For each active employee it
+        /// applies the CACOBATPH rates (Congé Payé 12,21 %, Chômage-Intempéries 0,375 % employer
+        /// + 0,375 % employee) to the annual cotisable base via <see cref="CacobatphCalculator"/>.
+        /// A read-only projection over the register — the payroll engine is never involved.
+        /// </summary>
+        private ReportTable DacCacobatphReport(long companyId, string companyName, int year)
+        {
+            var rows = new List<IReadOnlyList<string>>();
+            decimal totalBase = 0m, totalConge = 0m, totalChomEmp = 0m, totalChomSal = 0m, totalEmployer = 0m, totalEmployee = 0m;
+            foreach (Employee e in _employees.GetByCompany(companyId, false).OrderBy(x => x.LastNameFr))
+            {
+                decimal annualBase = e.BaseSalary * 12m;
+                CacobatphResult c = CacobatphCalculator.Compute(annualBase);
+                totalBase += c.Base;
+                totalConge += c.CongePaye;
+                totalChomEmp += c.ChomageEmployer;
+                totalChomSal += c.ChomageEmployee;
+                totalEmployer += c.EmployerTotal;
+                totalEmployee += c.EmployeeTotal;
+                rows.Add(new[]
+                {
+                    (e.LastNameFr + " " + e.FirstNameFr).Trim(),
+                    c.Base.ToString("N2", Fr),
+                    c.CongePaye.ToString("N2", Fr),
+                    c.ChomageEmployer.ToString("N2", Fr),
+                    c.ChomageEmployee.ToString("N2", Fr),
+                    c.EmployerTotal.ToString("N2", Fr),
+                    c.EmployeeTotal.ToString("N2", Fr)
+                });
+            }
+
+            if (rows.Count > 0)
+            {
+                rows.Add(new[]
+                {
+                    "TOTAL",
+                    totalBase.ToString("N2", Fr),
+                    totalConge.ToString("N2", Fr),
+                    totalChomEmp.ToString("N2", Fr),
+                    totalChomSal.ToString("N2", Fr),
+                    totalEmployer.ToString("N2", Fr),
+                    totalEmployee.ToString("N2", Fr)
+                });
+            }
+
+            return new ReportTable
+            {
+                Title = "DAC-CACOBATPH — déclaration annuelle des cotisations " + year,
+                Subtitle = companyName + " · cotisation totale employeur " + totalEmployer.ToString("N2", Fr) +
+                           " DA · salarié " + totalEmployee.ToString("N2", Fr) + " DA",
+                Columns = new[] { "Employé", "Base annuelle", "Congé Payé 12,21%", "Chôm.-Int. patr. 0,375%", "Chôm.-Int. sal. 0,375%", "Total employeur", "Total salarié" },
+                NumericColumns = new[] { 1, 2, 3, 4, 5, 6 },
                 Rows = rows
             };
         }
