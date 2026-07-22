@@ -117,6 +117,83 @@ namespace OptiPaie.Services
             }
         }
 
+        public Result SetDayStatus(long employeeId, DateTime workDate, AttendanceStatus status)
+        {
+            return SetDayStatusBulk(new[] { new AttendanceDayStatus(employeeId, workDate, status) });
+        }
+
+        public Result SetDayStatusBulk(IEnumerable<AttendanceDayStatus> entries)
+        {
+            List<AttendanceDayStatus> list = (entries ?? Enumerable.Empty<AttendanceDayStatus>())
+                .Where(e => e != null && e.EmployeeId > 0)
+                .ToList();
+            if (list.Count == 0)
+            {
+                return Result.Ok();
+            }
+
+            using (IUnitOfWork uow = _unitOfWorkFactory.Create())
+            {
+                AttendanceSettings settings = ReadSettings(uow);
+                DateTime today = DateTime.Today;
+
+                uow.BeginTransaction();
+                try
+                {
+                    foreach (AttendanceDayStatus entry in list)
+                    {
+                        DateTime day = entry.WorkDate.Date;
+                        if (day > today)
+                        {
+                            // A matrix never records the future; silently skip such cells.
+                            continue;
+                        }
+
+                        AttendanceRecord existing = uow.Attendance.GetByEmployeeAndDate(entry.EmployeeId, day);
+                        var record = existing ?? new AttendanceRecord { EmployeeId = entry.EmployeeId, WorkDate = day };
+                        record.WorkDate = day;
+                        record.Status = entry.Status;
+                        ApplyStatusOnly(record, settings);
+
+                        if (existing == null)
+                        {
+                            uow.Attendance.Insert(record);
+                        }
+                        else
+                        {
+                            uow.Attendance.Update(record);
+                        }
+                    }
+
+                    uow.Commit();
+                    return Result.Ok();
+                }
+                catch
+                {
+                    uow.Rollback();
+                    throw;
+                }
+            }
+        }
+
+        public IReadOnlyList<AttendanceRecord> GetCompanyMonth(long companyId, int year, int month)
+        {
+            DateTime from = FirstDay(year, month);
+            using (IUnitOfWork uow = _unitOfWorkFactory.Create())
+            {
+                return uow.Attendance.GetByCompanyRange(companyId, from, LastDay(from)).ToList();
+            }
+        }
+
+        public IReadOnlyList<AttendanceRecord> GetEmployeeMonth(long employeeId, int year, int month)
+        {
+            DateTime from = FirstDay(year, month);
+            using (IUnitOfWork uow = _unitOfWorkFactory.Create())
+            {
+                return uow.Attendance.GetByEmployeeRange(employeeId, from, LastDay(from)).ToList();
+            }
+        }
+
         public Result Delete(long id)
         {
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
@@ -245,7 +322,7 @@ namespace OptiPaie.Services
                 return Result.Fail("La date de pointage ne peut pas être dans le futur.", "Attendance_FutureDate");
             }
 
-            bool worked = record.Status == AttendanceStatus.Present || record.Status == AttendanceStatus.Late;
+            bool worked = IsWorked(record.Status);
 
             if (!string.IsNullOrWhiteSpace(record.CheckIn) && !TryParseTime(record.CheckIn, out _))
             {
@@ -272,10 +349,44 @@ namespace OptiPaie.Services
             return Result.Ok();
         }
 
+        /// <summary>A status that counts as a worked, paid day.</summary>
+        private static bool IsWorked(AttendanceStatus status)
+        {
+            return status == AttendanceStatus.Present
+                || status == AttendanceStatus.Late
+                || status == AttendanceStatus.Mission;
+        }
+
+        /// <summary>
+        /// Fast status-only application (matrix / bulk). A worked status counts as one
+        /// standard day; everything else carries no hours. Times are cleared — precise
+        /// hour entry is done through <see cref="Save"/> in the employee detail view.
+        /// </summary>
+        private static void ApplyStatusOnly(AttendanceRecord record, AttendanceSettings settings)
+        {
+            record.WorkDate = record.WorkDate.Date;
+            record.CheckIn = null;
+            record.CheckOut = null;
+            record.LateMinutes = 0;
+            record.OvertimeHours = 0m;
+            record.WorkedHours = IsWorked(record.Status) ? settings.StandardHours : 0m;
+        }
+
         /// <summary>Recomputes the derived values and normalises the status.</summary>
         private static void Apply(AttendanceRecord record, AttendanceSettings settings)
         {
             record.WorkDate = record.WorkDate.Date;
+
+            // Mission keeps its status (worked, paid) but is not time-tracked here.
+            if (record.Status == AttendanceStatus.Mission)
+            {
+                record.WorkedHours = settings.StandardHours;
+                record.CheckIn = null;
+                record.CheckOut = null;
+                record.LateMinutes = 0;
+                record.OvertimeHours = 0m;
+                return;
+            }
 
             bool worked = record.Status == AttendanceStatus.Present || record.Status == AttendanceStatus.Late;
             if (!worked)
@@ -330,6 +441,7 @@ namespace OptiPaie.Services
                 {
                     case AttendanceStatus.Present: summary.PresentDays++; break;
                     case AttendanceStatus.Late: summary.PresentDays++; break;
+                    case AttendanceStatus.Mission: summary.PresentDays++; break;
                     case AttendanceStatus.Absent: summary.AbsentDays++; break;
                     case AttendanceStatus.Leave: summary.LeaveDays++; break;
                     case AttendanceStatus.Holiday: summary.HolidayDays++; break;

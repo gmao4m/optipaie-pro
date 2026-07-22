@@ -18,7 +18,10 @@ namespace OptiPaie.Core.Enums
         /// <summary>Jour férié — public holiday.</summary>
         Holiday = 5,
 
-        /// <summary>Repos — weekly rest day.</summary>
-        Rest = 6
+        /// <summary>Repos — weekly rest day (weekend).</summary>
+        Rest = 6,
+
+        /// <summary>Mission — en déplacement / mission professionnelle (worked, paid).</summary>
+        Mission = 7
     }
 }

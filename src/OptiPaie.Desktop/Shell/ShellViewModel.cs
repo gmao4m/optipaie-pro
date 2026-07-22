@@ -7,6 +7,7 @@ using OptiPaie.Core.Licensing;
 using OptiPaie.Desktop.Composition;
 using OptiPaie.Desktop.Mvvm;
 using OptiPaie.Desktop.ViewModels;
+using OptiPaie.Desktop.ViewModels.Attendance;
 
 namespace OptiPaie.Desktop.Shell
 {
@@ -29,7 +30,7 @@ namespace OptiPaie.Desktop.Shell
         private PayrollViewModel _payroll;
         private ArchiveViewModel _archive;
         private SettingsViewModel _settings;
-        private AttendanceViewModel _attendance;
+        private AttendanceMatrixViewModel _attendance;
         private LeaveViewModel _leave;
         private LoanViewModel _loans;
         private ContractViewModel _contracts;
@@ -190,7 +191,7 @@ namespace OptiPaie.Desktop.Shell
             {
                 if (string.Equals(key, ModuleKeys.Attendance, StringComparison.Ordinal))
                 {
-                    return _attendance ?? (_attendance = new AttendanceViewModel(_services));
+                    return _attendance ?? (_attendance = new AttendanceMatrixViewModel(_services));
                 }
 
                 if (string.Equals(key, ModuleKeys.Leave, StringComparison.Ordinal))

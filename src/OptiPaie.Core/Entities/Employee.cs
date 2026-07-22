@@ -45,6 +45,9 @@ namespace OptiPaie.Core.Entities
         /// <summary>Professional category / classification.</summary>
         public string Category { get; set; }
 
+        /// <summary>Department / service the employee belongs to (used by the Attendance matrix).</summary>
+        public string Department { get; set; }
+
         /// <summary>Job position (poste).</summary>
         public string Poste { get; set; }
 

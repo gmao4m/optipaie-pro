@@ -1,133 +1,110 @@
-# Module 1 — Présence (Attendance)
+# Module 1 — Présence (Attendance Matrix)
 
-Premium module, module key `attendance`. First module of the HR ecosystem built on top
-of the payroll core. It is **not** a standalone application: it reads the same
-`Employees` and `Companies` tables as payroll and feeds its monthly totals straight
-back into the payslip calculation.
+Premium module, module key `attendance`. Redesigned from a day-sheet CRUD into a
+professional, Excel-like **Attendance Matrix**: one screen to run a whole company's
+month. Employees are rows; every day of the month is a colour-coded column. Pick a status
+"brush", click cells — it auto-saves. Payroll consumes the same records.
 
 ---
 
-## 1. What it does
+## 1. The Matrix screen
 
-| Capability | Where |
-|---|---|
-| Daily attendance sheet for a whole company | `Présence` screen |
-| Status per employee (Présent / Absent / Retard / Congé / Jour férié / Repos) | day grid |
-| Check-in / check-out, worked hours, late minutes, overtime | computed by the service |
-| "Marquer tous présents" bulk action | day grid |
-| Live KPIs (présents, absents, retards, heures supp.) | KPI strip |
-| Monthly synthesis per employee | `Synthèse du mois` dialog |
-| Export PDF (A4) and CSV (Excel-ready, UTF-8 BOM) | synthesis dialog |
-| Module parameters (start time, standard hours, tolerance) | `Paramètres` dialog |
-| Automatic payroll feed | `Établir une paie` screen |
+**Filters (toolbar):** Company · Department · Month · Year · status quick-filter · instant
+search. **KPI strip:** attendance rate, absence rate, late rate, working days, present
+today, on leave, on mission, head-count.
 
-## 2. Business rules (single source of truth)
+**Grid:** frozen identity columns — ✓ (select), N°, Employé, Département, Poste — then one
+column per day of the month. Columns and rows are **virtualised** (recycling), so the grid
+stays responsive for large head-counts. The identity columns are frozen while the days
+scroll horizontally.
 
-All rules live in `OptiPaie.Services/AttendanceService.cs`. No screen computes anything
-itself, so the grid, the report and payroll can never disagree.
+### Cell colours (understand the month at a glance)
 
-- **One record per employee per day.** Saving the same day twice updates the existing
-  row. Enforced twice: by the service (upsert) and by the database
-  (`UX_Attendance_Employee_Date` unique index).
-- **Worked hours** = check-out − check-in, rounded to 2 decimals (away from zero).
-- **Late minutes** = arrival − (standard start + tolerance), never negative, rounded up.
-- **Overtime** = worked hours above the standard day, 0 when at or below.
-- **Status normalisation**: a worked day with lateness is stored as `Retard`; without
-  lateness as `Présent`. Non-worked statuses (Absent / Congé / Férié / Repos) clear the
-  times and zero the hours, lateness and overtime.
-- **Validation**: employee must exist, date is required and cannot be in the future,
-  times must parse as `HH:mm`, check-out must not precede check-in, and a worked day
-  requires a check-in.
-
-### Parameters
-
-Stored in the shared `AppSettings` table, so they survive updates and backups.
-
-| Key | Default | Meaning |
+| Colour | Status | Payroll effect |
 |---|---|---|
-| `Attendance.StandardStart` | `08:00` | Official start of the working day |
-| `Attendance.StandardHours` | `8` | Standard hours per day (overtime threshold) |
-| `Attendance.LateToleranceMinutes` | `10` | Grace period before an arrival counts as late |
+| 🟩 Green | Présent (P) | worked, paid |
+| 🟥 Red | Absent (A) | reduces worked days (deducted) |
+| 🟧 Orange | Retard (R) | worked, paid (flagged late) |
+| 🟦 Blue | Mission (M) | worked, paid |
+| 🟪 Purple | Congé payé (C) | paid, not worked |
+| 🟨 Yellow | Jour férié (F) | paid |
+| ⬜ Gray | Repos / week-end (W) | not worked — Friday/Saturday auto-gray |
 
-## 3. Data model
+## 2. Fast data entry (no Save button)
 
-Migration `src/OptiPaie.Data/Sql/Migrations/0008_Attendance.sql` — **additive only**, no
-existing table is altered.
+- **Paint brush:** pick a status in the palette, then **click any cell** to set it —
+  saved immediately (`SetDayStatus`).
+- **Fill a whole day:** click a **day header** → the status is applied to every displayed
+  employee for that day (`SetDayStatusBulk`).
+- **Bulk over selected employees:** check rows, click **“Appliquer au mois (sélection)”** →
+  the status fills every working day of the month (weekends skipped).
+- **Select all / clear** helpers; the status quick-filter and search narrow the visible
+  rows instantly.
 
-```
-AttendanceRecords
-  Id            INTEGER PK
-  EmployeeId    INTEGER  → FK Employees(Id)      -- the SHARED employee table
-  WorkDate      TEXT (date)
-  Status        INTEGER  (1 Present, 2 Absent, 3 Late, 4 Leave, 5 Holiday, 6 Rest)
-  CheckIn       TEXT "HH:mm"      CheckOut TEXT "HH:mm"
-  WorkedHours   TEXT (invariant decimal)   LateMinutes INTEGER   OvertimeHours TEXT
-  Notes         TEXT
-  CreatedAtUtc / UpdatedAtUtc / IsDeleted
-  UNIQUE INDEX UX_Attendance_Employee_Date (EmployeeId, WorkDate) WHERE IsDeleted = 0
-```
+Every change is auto-saved and the KPIs update live. Future days are read-only (the matrix
+never records the future). Past months stay fully accessible through the month/year
+selectors — the archive is automatic (records are simply kept per month).
 
-Migration `0009_AttendanceSoftDeleteIndex.sql` makes that index **partial**. 0008 made
-the pair unique across all rows including soft-deleted ones, so deleting a day and
-recording it again hit the constraint (caught by `Delete_ThenRecordTheSameDayAgain_Succeeds`).
-The rule enforced is "one *live* record per employee and day"; deleted rows remain as history.
+## 3. Employee history
 
-There is **no** company column: a company's attendance is obtained by joining
-`Employees`. Moving an employee between companies therefore needs no attendance
-migration, and company data exists in exactly one place.
+**Double-click an employee's name** → a dialog with the month **calendar** (same colours),
+the month **statistics** (present/absent/late/leave/holiday, worked & overtime hours,
+late minutes) and the **late / absence day lists**, with month navigation.
 
 ## 4. Payroll integration (engine untouched)
 
-`PayrollViewModel.BuildRequest()` enriches the **inputs** of the payroll request; the
-payroll engine, its formulas, its rates and the legal rules are not modified.
+The matrix writes the same `AttendanceRecords` payroll already reads (see
+`PayrollViewModel`): absences reduce `WorkedDays`; Present/Late/Mission count as worked
+days; paid leave and holidays are paid, not deducted. A worked status entered from the
+matrix counts as one standard day (`StandardHours`); precise per-day hour entry remains
+available. The payroll engine, licensing and module-activation systems are unchanged.
 
-When — and only when — the module is licensed **and** the period has recorded days:
+## 5. Business rules & data
 
-- `WorkedDays` = days in month − absences
-- `WorkedHours` = the month's recorded hours
-- a badge in the worksheet states what attendance contributed, so the figures are never
-  a black box.
+All rules live in `OptiPaie.Services/AttendanceService.cs`:
+- one record per employee per day (upsert; partial unique index);
+- status-only entry (`SetDayStatus` / `SetDayStatusBulk`) needs no times — a worked status
+  is one standard day, non-worked statuses carry no hours;
+- **Mission** (status 7) is a worked, paid day and never an absence;
+- monthly summaries and the payroll feed treat Present/Late/Mission as present.
 
-With no records (or a locked module) the request is byte-for-byte the previous one, so
-existing payslips are unaffected. There is no import/export step: the data is already
-shared.
-
-Days are bound through `OptiPaie.Data/Context/SqliteDate.cs` so one calendar day has
-exactly one stored representation whichever module writes it — see
-[Leave](Leave.md) §4 for the bug that made this necessary.
-
-## 5. UI / navigation
-
-- Locked: the nav entry shows 🔒 and opens the premium (upsell) page.
-- Licensed: `ShellViewModel.ResolveModule` routes `attendance` to `AttendanceViewModel`
-  → `AttendanceView`. No reinstall, no migration — activation alone flips it.
+Schema (additive migrations):
+- `0019_EmployeeDepartment.sql` — adds `Employees.Department` (filter/column source).
+- `0020_AttendanceMissionStatus.sql` — widens the `AttendanceRecords.Status` CHECK to
+  include 7 (Mission) via a safe table rebuild; data preserved, indexes recreated.
 
 ## 6. Files
 
 | Layer | File |
 |---|---|
-| Core | `Enums/AttendanceStatus.cs`, `Entities/AttendanceRecord.cs`, `Dtos/AttendanceSummary.cs` |
-| Core | `Interfaces/Repositories/IAttendanceRepository.cs`, `Interfaces/Services/IAttendanceService.cs` |
-| Data | `Sql/Migrations/0008_Attendance.sql`, `0009_AttendanceSoftDeleteIndex.sql`, `Repositories/AttendanceRepository.cs`, `Context/UnitOfWork.cs` |
-| Services | `AttendanceService.cs` |
-| Desktop | `ViewModels/AttendanceViewModel.cs`, `AttendanceMonthViewModel.cs`, `AttendanceSettingsViewModel.cs` |
-| Desktop | `Views/AttendanceView.xaml`, `AttendanceMonthWindow.xaml`, `AttendanceSettingsWindow.xaml` |
-| Desktop | `Documents/AttendanceReportDocument.cs` (QuestPDF A4 report) |
-| Tests | `tests/OptiPaie.Tests/AttendanceServiceTests.cs` |
+| Core | `Enums/AttendanceStatus.cs` (+Mission), `Entities/Employee.cs` (+Department), `Dtos/AttendanceSummary.cs` (+`AttendanceDayStatus`, `AttendanceKpis`) |
+| Data | `Sql/Migrations/0019_*.sql`, `0020_*.sql`, `Repositories/EmployeeRepository.cs` (Department), `AttendanceRepository.cs` |
+| Services | `AttendanceService.cs` (status-only + bulk + month fetch + Mission) |
+| Desktop VMs | `ViewModels/Attendance/AttendanceMatrixViewModel.cs`, `MatrixRowViewModel`, `MatrixCellViewModel`, `StatusBrushViewModel`, `AttendanceAppearance`, `AttendanceEmployeeDetailViewModel` |
+| Desktop Views | `Views/AttendanceMatrixView.xaml(.cs)` (dynamic day columns), `AttendanceEmployeeDetailWindow.xaml` |
+| Reuse | `AttendanceMonthWindow` (reports/PDF/CSV), `AttendanceSettingsWindow` |
 
-## 7. Tests
+## 7. Tests & verification
 
-`AttendanceServiceTests` — 17 integration tests against a **real SQLite file** with the
-real migrations, repositories and service:
+`AttendanceMatrixServiceTests` — 9 integration tests on real SQLite (also exercise the
+0020 table rebuild): status-only Present needs no times and counts a standard day; Mission
+persists and is worked-not-absent; Absent feeds the count; overwrite = no duplicate; future
+skipped; bulk writes atomically; `GetCompanyMonth`/`GetEmployeeMonth` scope by month;
+Department round-trips.
 
-- worked hours + overtime, lateness within/beyond tolerance, absent day carries no hours
-- same day saved twice updates instead of duplicating; `SaveMany` writes a whole day
-- company scoping goes through the shared `Employees` table
-- monthly summary aggregation, month isolation, per-company summary, empty month
-- delete removes the day from the summary, and the day can then be recorded again
-- settings round-trip and immediately change the calculation
-- rejections: invalid time, future date, unknown employee
+The generated day-cell / name / checkbox `XamlReader` templates were parsed and validated.
+Full suite **1340/1340**; `OptiPaie.Desktop` builds **0 errors / 0 warnings**.
 
-Status: **17/17 passing**, full suite **1193/1193 passing**. `OptiPaie.Desktop` builds
-0 errors / 0 warnings (the solution's 5 remaining warnings are pre-existing, in the
-legacy WinForms `OptiPaie.App` / `OptiPaie.Reporting` projects that are not shipped).
+## 8. Honest scope notes (follow-ups)
+
+- **Keyboard**: arrow-key navigation is native to the grid; full Excel-style
+  copy/paste/fill-down-right and 2-D cell multi-selection are **not** implemented — the
+  paint-brush + day-header + row-bulk cover the same speed. Planned enhancement.
+- **Export**: reports export PDF and **CSV** (opens in Excel); native `.xlsx` is a
+  follow-up.
+- **Dark mode**: not yet — the app currently uses static-resource theming; a live
+  light/dark toggle needs a theming pass.
+- **Public holidays**: weekends (Fri/Sat) auto-gray; national holidays are paintable
+  (yellow) but not yet auto-filled from a calendar.
+- The matrix could not be click-tested in this environment; it is verified by a clean
+  build, the parsed runtime templates, and the service test suite.

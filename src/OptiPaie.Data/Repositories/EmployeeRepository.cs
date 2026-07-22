@@ -37,11 +37,11 @@ namespace OptiPaie.Data.Repositories
             const string sql =
                 "INSERT INTO Employees " +
                 "(CompanyId, LastNameFr, LastNameAr, FirstNameFr, FirstNameAr, Gender, Nss, NationalId, " +
-                " BirthDate, HireDate, ExitDate, Category, Poste, ContractType, MaritalStatus, Dependents, " +
+                " BirthDate, HireDate, ExitDate, Category, Department, Poste, ContractType, MaritalStatus, Dependents, " +
                 " BaseSalary, PaymentMode, Rib, IsActive, CreatedAtUtc, UpdatedAtUtc, IsDeleted) " +
                 "VALUES " +
                 "(@CompanyId, @LastNameFr, @LastNameAr, @FirstNameFr, @FirstNameAr, @Gender, @Nss, @NationalId, " +
-                " @BirthDate, @HireDate, @ExitDate, @Category, @Poste, @ContractType, @MaritalStatus, @Dependents, " +
+                " @BirthDate, @HireDate, @ExitDate, @Category, @Department, @Poste, @ContractType, @MaritalStatus, @Dependents, " +
                 " @BaseSalary, @PaymentMode, @Rib, @IsActive, @CreatedAtUtc, @UpdatedAtUtc, @IsDeleted); " +
                 "SELECT last_insert_rowid();";
 
@@ -59,7 +59,7 @@ namespace OptiPaie.Data.Repositories
                 "CompanyId = @CompanyId, LastNameFr = @LastNameFr, LastNameAr = @LastNameAr, " +
                 "FirstNameFr = @FirstNameFr, FirstNameAr = @FirstNameAr, Gender = @Gender, Nss = @Nss, " +
                 "NationalId = @NationalId, BirthDate = @BirthDate, HireDate = @HireDate, ExitDate = @ExitDate, " +
-                "Category = @Category, Poste = @Poste, ContractType = @ContractType, MaritalStatus = @MaritalStatus, " +
+                "Category = @Category, Department = @Department, Poste = @Poste, ContractType = @ContractType, MaritalStatus = @MaritalStatus, " +
                 "Dependents = @Dependents, BaseSalary = @BaseSalary, " +
                 "PaymentMode = @PaymentMode, Rib = @Rib, IsActive = @IsActive, UpdatedAtUtc = @UpdatedAtUtc, " +
                 "IsDeleted = @IsDeleted " +

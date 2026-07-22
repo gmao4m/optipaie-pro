@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using OptiPaie.Core.Dtos;
 using OptiPaie.Core.Entities;
+using OptiPaie.Core.Enums;
 using OptiPaie.Core.Primitives;
 
 namespace OptiPaie.Core.Interfaces.Services
@@ -21,6 +22,22 @@ namespace OptiPaie.Core.Interfaces.Services
 
         /// <summary>Saves a whole day for several employees atomically.</summary>
         Result SaveMany(IEnumerable<AttendanceRecord> records);
+
+        /// <summary>
+        /// Fast status-only entry for the matrix: sets one employee's status on one day
+        /// without requiring check-in/out times. Worked statuses (Present/Late/Mission)
+        /// count as a standard day; non-worked statuses carry no hours. Auto-save friendly.
+        /// </summary>
+        Result SetDayStatus(long employeeId, DateTime workDate, AttendanceStatus status);
+
+        /// <summary>Applies many status-only entries atomically (bulk matrix operations).</summary>
+        Result SetDayStatusBulk(IEnumerable<AttendanceDayStatus> entries);
+
+        /// <summary>Every attendance record of a company for a whole month (matrix source).</summary>
+        IReadOnlyList<AttendanceRecord> GetCompanyMonth(long companyId, int year, int month);
+
+        /// <summary>Every attendance record of one employee for a whole month (detail calendar).</summary>
+        IReadOnlyList<AttendanceRecord> GetEmployeeMonth(long employeeId, int year, int month);
 
         /// <summary>Removes a record (soft delete).</summary>
         Result Delete(long id);

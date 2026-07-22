@@ -36,6 +36,48 @@ namespace OptiPaie.Core.Dtos
         public int RecordedDays { get; set; }
     }
 
+    /// <summary>A single status-only entry for the fast matrix / bulk operations.</summary>
+    public sealed class AttendanceDayStatus
+    {
+        public AttendanceDayStatus() { }
+
+        public AttendanceDayStatus(long employeeId, System.DateTime workDate, OptiPaie.Core.Enums.AttendanceStatus status)
+        {
+            EmployeeId = employeeId;
+            WorkDate = workDate;
+            Status = status;
+        }
+
+        public long EmployeeId { get; set; }
+        public System.DateTime WorkDate { get; set; }
+        public OptiPaie.Core.Enums.AttendanceStatus Status { get; set; }
+    }
+
+    /// <summary>Company-wide attendance KPIs for a month (derived).</summary>
+    public sealed class AttendanceKpis
+    {
+        public int Employees { get; set; }
+        public int WorkingDays { get; set; }
+
+        public int PresentCount { get; set; }
+        public int AbsentCount { get; set; }
+        public int LateCount { get; set; }
+        public int LeaveCount { get; set; }
+        public int MissionCount { get; set; }
+
+        /// <summary>Present ÷ (working days × employees), as a percentage 0–100.</summary>
+        public decimal AttendanceRate { get; set; }
+        public decimal AbsenceRate { get; set; }
+        public decimal LateRate { get; set; }
+
+        public decimal OvertimeHours { get; set; }
+
+        /// <summary>Today's snapshot (only meaningful when the month contains today).</summary>
+        public int PresentToday { get; set; }
+        public int OnLeaveToday { get; set; }
+        public int OnMissionToday { get; set; }
+    }
+
     /// <summary>Module settings driving the attendance calculations.</summary>
     public sealed class AttendanceSettings
     {

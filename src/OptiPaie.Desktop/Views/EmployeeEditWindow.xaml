@@ -99,14 +99,18 @@
                                 <TextBox Style="{StaticResource AppTextBox}" Text="{Binding Employee.Poste}" />
                             </StackPanel>
                             <StackPanel Margin="8,0,0,14">
+                                <TextBlock Style="{StaticResource FieldLabel}" Text="Département / Service" />
+                                <TextBox Style="{StaticResource AppTextBox}" Text="{Binding Employee.Department}" />
+                            </StackPanel>
+                            <StackPanel Margin="0,0,8,14">
                                 <TextBlock Style="{StaticResource FieldLabel}" Text="Catégorie" />
                                 <TextBox Style="{StaticResource AppTextBox}" Text="{Binding Employee.Category}" />
                             </StackPanel>
-                            <StackPanel Margin="0,0,8,0">
+                            <StackPanel Margin="8,0,0,14">
                                 <TextBlock Style="{StaticResource FieldLabel}" Text="Salaire de base (DA)" />
                                 <TextBox Style="{StaticResource AppTextBox}" Text="{Binding Employee.BaseSalary}" />
                             </StackPanel>
-                            <StackPanel Margin="8,0,0,0">
+                            <StackPanel Margin="0,0,8,0">
                                 <TextBlock Style="{StaticResource FieldLabel}" Text="Personnes à charge" />
                                 <TextBox Style="{StaticResource AppTextBox}" Text="{Binding Employee.Dependents}" />
                             </StackPanel>
