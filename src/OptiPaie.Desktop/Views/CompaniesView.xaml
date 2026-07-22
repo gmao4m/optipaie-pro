@@ -14,7 +14,7 @@
             </StackPanel>
             <Button Style="{StaticResource PrimaryButton}" HorizontalAlignment="Right" VerticalAlignment="Top" Command="{Binding NewCommand}">
                 <StackPanel Orientation="Horizontal">
-                    <Path Width="15" Height="15" Stretch="Uniform" Fill="{StaticResource TextOnBrand}" Data="{StaticResource IconPlus}" VerticalAlignment="Center" />
+                    <Path Width="15" Height="15" Stretch="Uniform" Fill="{DynamicResource TextOnBrand}" Data="{StaticResource IconPlus}" VerticalAlignment="Center" />
                     <TextBlock Text="Nouvelle entreprise" Margin="8,0,0,0" VerticalAlignment="Center" />
                 </StackPanel>
             </Button>
@@ -35,9 +35,9 @@
 
                     <Grid Grid.Row="0" Margin="12">
                         <TextBox Style="{StaticResource AppTextBox}" Text="{Binding Search, UpdateSourceTrigger=PropertyChanged}" Padding="34,0,10,0" />
-                        <Path Width="16" Height="16" Stretch="Uniform" Fill="{StaticResource TextMuted}" Data="{StaticResource IconSearch}"
+                        <Path Width="16" Height="16" Stretch="Uniform" Fill="{DynamicResource TextMuted}" Data="{StaticResource IconSearch}"
                               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="11,0,0,0" IsHitTestVisible="False" />
-                        <TextBlock Text="Rechercher une entreprise" Foreground="{StaticResource TextMuted}" VerticalAlignment="Center" Margin="34,0,0,0"
+                        <TextBlock Text="Rechercher une entreprise" Foreground="{DynamicResource TextMuted}" VerticalAlignment="Center" Margin="34,0,0,0"
                                    IsHitTestVisible="False" Visibility="{Binding Search, Converter={StaticResource EmptyToVis}}" />
                     </Grid>
 
@@ -55,10 +55,10 @@
                                             </Border>
                                             <ControlTemplate.Triggers>
                                                 <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter TargetName="b" Property="Background" Value="{StaticResource SurfaceMuted}" />
+                                                    <Setter TargetName="b" Property="Background" Value="{DynamicResource SurfaceMuted}" />
                                                 </Trigger>
                                                 <Trigger Property="IsSelected" Value="True">
-                                                    <Setter TargetName="b" Property="Background" Value="{StaticResource BrandSoft}" />
+                                                    <Setter TargetName="b" Property="Background" Value="{DynamicResource BrandSoft}" />
                                                 </Trigger>
                                             </ControlTemplate.Triggers>
                                         </ControlTemplate>
@@ -81,8 +81,8 @@
             <Grid Grid.Column="1" Margin="16,0,0,0">
                 <Border Style="{StaticResource Card}" Visibility="{Binding HasSelection, Converter={StaticResource InverseBoolToVis}}">
                     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <Border Width="60" Height="60" CornerRadius="16" Background="{StaticResource SurfaceMuted}" HorizontalAlignment="Center">
-                            <Path Width="28" Height="28" Stretch="Uniform" Fill="{StaticResource TextMuted}" Data="{StaticResource IconBuilding}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        <Border Width="60" Height="60" CornerRadius="16" Background="{DynamicResource SurfaceMuted}" HorizontalAlignment="Center">
+                            <Path Width="28" Height="28" Stretch="Uniform" Fill="{DynamicResource TextMuted}" Data="{StaticResource IconBuilding}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
                         <TextBlock Style="{StaticResource Caption}" Margin="0,14,0,0" HorizontalAlignment="Center" Text="Sélectionnez une entreprise." />
                     </StackPanel>
@@ -90,13 +90,13 @@
 
                 <DockPanel Visibility="{Binding HasSelection, Converter={StaticResource BoolToVis}}">
                     <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
-                        <Button Style="{StaticResource SecondaryButton}" Command="{Binding DeleteCommand}" Content="Supprimer" Foreground="{StaticResource Deduction}" />
+                        <Button Style="{StaticResource SecondaryButton}" Command="{Binding DeleteCommand}" Content="Supprimer" Foreground="{DynamicResource Deduction}" />
                         <Button Style="{StaticResource PrimaryButton}" Margin="12,0,0,0" Command="{Binding EditCommand}" Content="Modifier" />
                     </StackPanel>
                     <Border Style="{StaticResource Card}" Padding="24" VerticalAlignment="Top">
                         <StackPanel DataContext="{Binding SelectedCompany}">
                             <StackPanel Orientation="Horizontal">
-                                <Border Width="60" Height="60" CornerRadius="12" Background="{StaticResource SurfaceMuted}" ClipToBounds="True">
+                                <Border Width="60" Height="60" CornerRadius="12" Background="{DynamicResource SurfaceMuted}" ClipToBounds="True">
                                     <Image Source="{Binding Logo, Converter={StaticResource BytesToImage}}" Stretch="Uniform" Margin="6" />
                                 </Border>
                                 <StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
@@ -105,7 +105,7 @@
                                 </StackPanel>
                             </StackPanel>
 
-                            <Border Height="1" Background="{StaticResource Border}" Margin="0,18" />
+                            <Border Height="1" Background="{DynamicResource Border}" Margin="0,18" />
 
                             <UniformGrid Columns="2">
                                 <StackPanel Margin="0,0,16,16">

@@ -3,8 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <UserControl.Resources>
         <Style x:Key="Kpi" TargetType="Border">
-            <Setter Property="Background" Value="{StaticResource Surface}" />
-            <Setter Property="BorderBrush" Value="{StaticResource Border}" />
+            <Setter Property="Background" Value="{DynamicResource Surface}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource Border}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="CornerRadius" Value="12" />
             <Setter Property="Padding" Value="16,13" />
@@ -48,15 +48,15 @@
                 </Border>
                 <Border Style="{StaticResource Kpi}">
                     <StackPanel><TextBlock Style="{StaticResource Caption}" Text="Présents aujourd'hui" />
-                        <TextBlock Style="{StaticResource KpiValue}" Foreground="{StaticResource Salary}" Text="{Binding PresentToday}" /></StackPanel>
+                        <TextBlock Style="{StaticResource KpiValue}" Foreground="{DynamicResource Salary}" Text="{Binding PresentToday}" /></StackPanel>
                 </Border>
                 <Border Style="{StaticResource Kpi}">
                     <StackPanel><TextBlock Style="{StaticResource Caption}" Text="En congé" />
-                        <TextBlock Style="{StaticResource KpiValue}" Foreground="{StaticResource Employer}" Text="{Binding OnLeave}" /></StackPanel>
+                        <TextBlock Style="{StaticResource KpiValue}" Foreground="{DynamicResource Employer}" Text="{Binding OnLeave}" /></StackPanel>
                 </Border>
                 <Border Style="{StaticResource Kpi}">
                     <StackPanel><TextBlock Style="{StaticResource Caption}" Text="En mission" />
-                        <TextBlock Style="{StaticResource KpiValue}" Foreground="{StaticResource Employer}" Text="{Binding OnMission}" /></StackPanel>
+                        <TextBlock Style="{StaticResource KpiValue}" Foreground="{DynamicResource Employer}" Text="{Binding OnMission}" /></StackPanel>
                 </Border>
                 <Border Style="{StaticResource Kpi}">
                     <StackPanel><TextBlock Style="{StaticResource Caption}" Text="Contrats en vigueur" />
@@ -64,15 +64,15 @@
                 </Border>
                 <Border Style="{StaticResource Kpi}">
                     <StackPanel><TextBlock Style="{StaticResource Caption}" Text="Contrats à échéance" />
-                        <TextBlock Style="{StaticResource KpiValue}" Foreground="{StaticResource Warning}" Text="{Binding Expiring}" /></StackPanel>
+                        <TextBlock Style="{StaticResource KpiValue}" Foreground="{DynamicResource Warning}" Text="{Binding Expiring}" /></StackPanel>
                 </Border>
                 <Border Style="{StaticResource Kpi}">
                     <StackPanel><TextBlock Style="{StaticResource Caption}" Text="Congés en attente" />
-                        <TextBlock Style="{StaticResource KpiValue}" Foreground="{StaticResource Warning}" Text="{Binding PendingLeave}" /></StackPanel>
+                        <TextBlock Style="{StaticResource KpiValue}" Foreground="{DynamicResource Warning}" Text="{Binding PendingLeave}" /></StackPanel>
                 </Border>
                 <Border Style="{StaticResource Kpi}">
                     <StackPanel><TextBlock Style="{StaticResource Caption}" Text="Encours prêts (DA)" />
-                        <TextBlock Style="{StaticResource KpiValue}" Foreground="{StaticResource Deduction}" Text="{Binding LoanOutstanding}" /></StackPanel>
+                        <TextBlock Style="{StaticResource KpiValue}" Foreground="{DynamicResource Deduction}" Text="{Binding LoanOutstanding}" /></StackPanel>
                 </Border>
                 <Border Style="{StaticResource Kpi}">
                     <StackPanel><TextBlock Style="{StaticResource Caption}" Text="Postes ouverts" />
@@ -114,21 +114,21 @@
                                     <Button HorizontalContentAlignment="Stretch" Cursor="Hand" BorderThickness="0" Background="Transparent"
                                             Command="{Binding DataContext.OpenCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                             CommandParameter="{Binding ModuleKey}">
-                                        <Border Background="{StaticResource SurfaceMuted}" CornerRadius="8" Padding="12,9" Margin="0,2">
+                                        <Border Background="{DynamicResource SurfaceMuted}" CornerRadius="8" Padding="12,9" Margin="0,2">
                                             <Grid>
                                                 <StackPanel HorizontalAlignment="Left">
                                                     <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="12.5" />
-                                                    <TextBlock Text="{Binding Detail}" Foreground="{StaticResource TextSecondary}" FontSize="11.5" Margin="0,2,0,0" />
+                                                    <TextBlock Text="{Binding Detail}" Foreground="{DynamicResource TextSecondary}" FontSize="11.5" Margin="0,2,0,0" />
                                                 </StackPanel>
                                                 <TextBlock Text="Traiter →" HorizontalAlignment="Right" VerticalAlignment="Center"
-                                                           Foreground="{StaticResource Brand}" FontWeight="SemiBold" FontSize="12" />
+                                                           Foreground="{DynamicResource Brand}" FontWeight="SemiBold" FontSize="12" />
                                             </Grid>
                                         </Border>
                                     </Button>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
-                        <TextBlock Grid.Row="1" Text="Rien à traiter — tout est à jour." Foreground="{StaticResource TextMuted}"
+                        <TextBlock Grid.Row="1" Text="Rien à traiter — tout est à jour." Foreground="{DynamicResource TextMuted}"
                                    HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,20"
                                    Visibility="{Binding HasApprovals, Converter={StaticResource InverseBoolToVis}}" />
                     </Grid>
@@ -148,17 +148,17 @@
                                     <Button HorizontalContentAlignment="Stretch" Cursor="Hand" BorderThickness="0" Background="Transparent"
                                             Command="{Binding DataContext.OpenCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                             CommandParameter="{Binding ModuleKey}">
-                                        <Border Background="{StaticResource SurfaceMuted}" CornerRadius="8" Padding="12,9" Margin="0,2">
+                                        <Border Background="{DynamicResource SurfaceMuted}" CornerRadius="8" Padding="12,9" Margin="0,2">
                                             <StackPanel>
                                                 <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="12.5" />
-                                                <TextBlock Text="{Binding Detail}" Foreground="{StaticResource TextSecondary}" FontSize="11.5" Margin="0,2,0,0" />
+                                                <TextBlock Text="{Binding Detail}" Foreground="{DynamicResource TextSecondary}" FontSize="11.5" Margin="0,2,0,0" />
                                             </StackPanel>
                                         </Border>
                                     </Button>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
-                        <TextBlock Grid.Row="1" Text="Aucune échéance dans les 30 jours." Foreground="{StaticResource TextMuted}"
+                        <TextBlock Grid.Row="1" Text="Aucune échéance dans les 30 jours." Foreground="{DynamicResource TextMuted}"
                                    HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,20"
                                    Visibility="{Binding HasDeadlines, Converter={StaticResource InverseBoolToVis}}" />
                     </Grid>
@@ -174,13 +174,13 @@
                             <DataTemplate>
                                 <Grid Margin="0,3">
                                     <TextBlock Text="{Binding Text}" FontSize="12.5" HorizontalAlignment="Left" VerticalAlignment="Center" />
-                                    <TextBlock Text="{Binding Detail}" FontSize="11.5" Foreground="{StaticResource TextSecondary}"
+                                    <TextBlock Text="{Binding Detail}" FontSize="11.5" Foreground="{DynamicResource TextSecondary}"
                                                HorizontalAlignment="Right" VerticalAlignment="Center" />
                                 </Grid>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
-                    <TextBlock Text="Aucune activité enregistrée pour l'instant." Foreground="{StaticResource TextMuted}"
+                    <TextBlock Text="Aucune activité enregistrée pour l'instant." Foreground="{DynamicResource TextMuted}"
                                Margin="16,0,0,14" Visibility="{Binding HasActivity, Converter={StaticResource InverseBoolToVis}}" />
                 </StackPanel>
             </Border>

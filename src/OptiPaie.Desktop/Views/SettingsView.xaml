@@ -54,8 +54,8 @@
                 <Border Style="{StaticResource Card}" Padding="24" Margin="0,0,0,16">
                     <StackPanel>
                         <DockPanel>
-                            <Border DockPanel.Dock="Right" Background="{StaticResource BrandSoft}" CornerRadius="6" Padding="10,4" VerticalAlignment="Center">
-                                <TextBlock Text="{Binding AccessStateText}" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource Brand}" />
+                            <Border DockPanel.Dock="Right" Background="{DynamicResource BrandSoft}" CornerRadius="6" Padding="10,4" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding AccessStateText}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource Brand}" />
                             </Border>
                             <TextBlock Style="{StaticResource H2}" Text="Licence" VerticalAlignment="Center" />
                         </DockPanel>

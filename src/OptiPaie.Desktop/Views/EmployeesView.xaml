@@ -18,7 +18,7 @@
 
                 <Button Style="{StaticResource PrimaryButton}" Margin="12,0,0,0" Command="{Binding NewCommand}">
                     <StackPanel Orientation="Horizontal">
-                        <Path Width="15" Height="15" Stretch="Uniform" Fill="{StaticResource TextOnBrand}" Data="{StaticResource IconPlus}" VerticalAlignment="Center" />
+                        <Path Width="15" Height="15" Stretch="Uniform" Fill="{DynamicResource TextOnBrand}" Data="{StaticResource IconPlus}" VerticalAlignment="Center" />
                         <TextBlock Text="Nouvel employé" Margin="8,0,0,0" VerticalAlignment="Center" />
                     </StackPanel>
                 </Button>
@@ -42,9 +42,9 @@
 
                     <Grid Grid.Row="0" Margin="12">
                         <TextBox Style="{StaticResource AppTextBox}" Text="{Binding Search, UpdateSourceTrigger=PropertyChanged}" Padding="34,0,10,0" />
-                        <Path Width="16" Height="16" Stretch="Uniform" Fill="{StaticResource TextMuted}" Data="{StaticResource IconSearch}"
+                        <Path Width="16" Height="16" Stretch="Uniform" Fill="{DynamicResource TextMuted}" Data="{StaticResource IconSearch}"
                               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="11,0,0,0" IsHitTestVisible="False" />
-                        <TextBlock Text="Rechercher un employé" Foreground="{StaticResource TextMuted}" VerticalAlignment="Center" Margin="34,0,0,0"
+                        <TextBlock Text="Rechercher un employé" Foreground="{DynamicResource TextMuted}" VerticalAlignment="Center" Margin="34,0,0,0"
                                    IsHitTestVisible="False" Visibility="{Binding Search, Converter={StaticResource EmptyToVis}}" />
                     </Grid>
 
@@ -64,10 +64,10 @@
                                             </Border>
                                             <ControlTemplate.Triggers>
                                                 <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter TargetName="b" Property="Background" Value="{StaticResource SurfaceMuted}" />
+                                                    <Setter TargetName="b" Property="Background" Value="{DynamicResource SurfaceMuted}" />
                                                 </Trigger>
                                                 <Trigger Property="IsSelected" Value="True">
-                                                    <Setter TargetName="b" Property="Background" Value="{StaticResource BrandSoft}" />
+                                                    <Setter TargetName="b" Property="Background" Value="{DynamicResource BrandSoft}" />
                                                 </Trigger>
                                             </ControlTemplate.Triggers>
                                         </ControlTemplate>
@@ -89,7 +89,7 @@
                                         </TextBlock>
                                         <TextBlock Style="{StaticResource Caption}" Text="{Binding Poste}" />
                                     </StackPanel>
-                                    <TextBlock VerticalAlignment="Center" HorizontalAlignment="Right" Foreground="{StaticResource TextSecondary}" FontSize="12.5"
+                                    <TextBlock VerticalAlignment="Center" HorizontalAlignment="Right" Foreground="{DynamicResource TextSecondary}" FontSize="12.5"
                                                Text="{Binding BaseSalary, StringFormat={}{0:N0} DA}" />
                                 </Grid>
                             </DataTemplate>
@@ -103,8 +103,8 @@
                 <!-- Empty state -->
                 <Border Style="{StaticResource Card}" Visibility="{Binding HasSelection, Converter={StaticResource InverseBoolToVis}}">
                     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <Border Width="60" Height="60" CornerRadius="16" Background="{StaticResource SurfaceMuted}" HorizontalAlignment="Center">
-                            <Path Width="28" Height="28" Stretch="Uniform" Fill="{StaticResource TextMuted}" Data="{StaticResource IconUsers}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        <Border Width="60" Height="60" CornerRadius="16" Background="{DynamicResource SurfaceMuted}" HorizontalAlignment="Center">
+                            <Path Width="28" Height="28" Stretch="Uniform" Fill="{DynamicResource TextMuted}" Data="{StaticResource IconUsers}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
                         <TextBlock Style="{StaticResource Caption}" Margin="0,14,0,0" HorizontalAlignment="Center" Text="Sélectionnez un employé pour voir son profil." />
                     </StackPanel>
@@ -113,14 +113,14 @@
                 <!-- Profile + actions -->
                 <DockPanel Visibility="{Binding HasSelection, Converter={StaticResource BoolToVis}}">
                     <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
-                        <Button Style="{StaticResource SecondaryButton}" Command="{Binding DeleteCommand}" Content="Supprimer" Foreground="{StaticResource Deduction}" />
+                        <Button Style="{StaticResource SecondaryButton}" Command="{Binding DeleteCommand}" Content="Supprimer" Foreground="{DynamicResource Deduction}" />
                         <Button Style="{StaticResource PrimaryButton}" Margin="12,0,0,0" Command="{Binding EditCommand}" Content="Modifier" />
                     </StackPanel>
                     <Border Style="{StaticResource Card}" Padding="24" VerticalAlignment="Top">
                     <StackPanel DataContext="{Binding SelectedEmployee}">
                         <StackPanel Orientation="Horizontal">
-                            <Border Width="52" Height="52" CornerRadius="26" Background="{StaticResource BrandSoft}">
-                                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource Brand}"
+                            <Border Width="52" Height="52" CornerRadius="26" Background="{DynamicResource BrandSoft}">
+                                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource Brand}"
                                            Text="{Binding Converter={StaticResource Initials}}" />
                             </Border>
                             <StackPanel Margin="14,0,0,0" VerticalAlignment="Center">
@@ -136,7 +136,7 @@
                             </StackPanel>
                         </StackPanel>
 
-                        <Border Height="1" Background="{StaticResource Border}" Margin="0,18" />
+                        <Border Height="1" Background="{DynamicResource Border}" Margin="0,18" />
 
                         <UniformGrid Columns="2">
                             <StackPanel Margin="0,0,16,16">
@@ -157,7 +157,7 @@
                             </StackPanel>
                             <StackPanel Margin="0,0,16,16">
                                 <TextBlock Style="{StaticResource Caption}" Text="Salaire de base" />
-                                <TextBlock Margin="0,3,0,0" FontWeight="SemiBold" Foreground="{StaticResource Salary}" Text="{Binding BaseSalary, StringFormat={}{0:N2} DA}" />
+                                <TextBlock Margin="0,3,0,0" FontWeight="SemiBold" Foreground="{DynamicResource Salary}" Text="{Binding BaseSalary, StringFormat={}{0:N2} DA}" />
                             </StackPanel>
                             <StackPanel Margin="0,0,0,16">
                                 <TextBlock Style="{StaticResource Caption}" Text="Mode de paiement" />

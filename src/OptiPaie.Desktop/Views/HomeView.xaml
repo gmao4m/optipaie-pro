@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <UserControl.Resources>
         <Style x:Key="StatCard" TargetType="Border">
-            <Setter Property="Background" Value="{StaticResource SurfaceMuted}" />
+            <Setter Property="Background" Value="{DynamicResource SurfaceMuted}" />
             <Setter Property="CornerRadius" Value="10" />
             <Setter Property="Padding" Value="16,14" />
         </Style>
@@ -16,13 +16,13 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="b" Background="{StaticResource Surface}" BorderBrush="{StaticResource Border}" BorderThickness="1" CornerRadius="12" Padding="16">
+                        <Border x:Name="b" Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="1" CornerRadius="12" Padding="16">
                             <ContentPresenter />
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="b" Property="Background" Value="{StaticResource SurfaceMuted}" />
-                                <Setter TargetName="b" Property="BorderBrush" Value="{StaticResource BorderStrong}" />
+                                <Setter TargetName="b" Property="Background" Value="{DynamicResource SurfaceMuted}" />
+                                <Setter TargetName="b" Property="BorderBrush" Value="{DynamicResource BorderStrong}" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -38,15 +38,15 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="b" Background="{StaticResource Brand}" CornerRadius="12" Padding="16">
+                        <Border x:Name="b" Background="{DynamicResource Brand}" CornerRadius="12" Padding="16">
                             <ContentPresenter />
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="b" Property="Background" Value="{StaticResource BrandHover}" />
+                                <Setter TargetName="b" Property="Background" Value="{DynamicResource BrandHover}" />
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="b" Property="Background" Value="{StaticResource BrandPressed}" />
+                                <Setter TargetName="b" Property="Background" Value="{DynamicResource BrandPressed}" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -69,10 +69,10 @@
                 <TextBlock Style="{StaticResource H1}" Text="{Binding Greeting}" />
                 <TextBlock Style="{StaticResource Caption}" Margin="0,5,0,0" Text="{Binding Subtitle}" />
             </StackPanel>
-            <Border HorizontalAlignment="Right" VerticalAlignment="Top" Background="{StaticResource Surface}" BorderBrush="{StaticResource Border}" BorderThickness="1" CornerRadius="8" Padding="12,8">
+            <Border HorizontalAlignment="Right" VerticalAlignment="Top" Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="1" CornerRadius="8" Padding="12,8">
                 <StackPanel Orientation="Horizontal">
-                    <Path Width="16" Height="16" Stretch="Uniform" Fill="{StaticResource TextSecondary}" Data="{StaticResource IconCalendar}" VerticalAlignment="Center" />
-                    <TextBlock Margin="8,0,0,0" VerticalAlignment="Center" Foreground="{StaticResource TextSecondary}" Text="{Binding MonthLabel}" />
+                    <Path Width="16" Height="16" Stretch="Uniform" Fill="{DynamicResource TextSecondary}" Data="{StaticResource IconCalendar}" VerticalAlignment="Center" />
+                    <TextBlock Margin="8,0,0,0" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondary}" Text="{Binding MonthLabel}" />
                 </StackPanel>
             </Border>
         </Grid>
@@ -105,22 +105,22 @@
             <UniformGrid Rows="1" Columns="3">
                 <Button Style="{StaticResource TilePrimary}" Command="{Binding NewPayrollCommand}" Margin="0,0,6,0">
                     <Grid>
-                        <Path Width="24" Height="24" Stretch="Uniform" Fill="{StaticResource TextOnBrand}" Data="{StaticResource IconFile}" HorizontalAlignment="Left" VerticalAlignment="Top" />
+                        <Path Width="24" Height="24" Stretch="Uniform" Fill="{DynamicResource TextOnBrand}" Data="{StaticResource IconFile}" HorizontalAlignment="Left" VerticalAlignment="Top" />
                         <DockPanel VerticalAlignment="Bottom">
-                            <Path DockPanel.Dock="Right" Width="18" Height="18" Stretch="Uniform" Fill="{StaticResource TextOnBrand}" Data="{StaticResource IconArrowRight}" VerticalAlignment="Center" />
-                            <TextBlock Text="Établir une paie" FontWeight="SemiBold" Foreground="{StaticResource TextOnBrand}" VerticalAlignment="Center" />
+                            <Path DockPanel.Dock="Right" Width="18" Height="18" Stretch="Uniform" Fill="{DynamicResource TextOnBrand}" Data="{StaticResource IconArrowRight}" VerticalAlignment="Center" />
+                            <TextBlock Text="Établir une paie" FontWeight="SemiBold" Foreground="{DynamicResource TextOnBrand}" VerticalAlignment="Center" />
                         </DockPanel>
                     </Grid>
                 </Button>
                 <Button Style="{StaticResource Tile}" Command="{Binding NewEmployeeCommand}" Margin="6,0,6,0">
                     <Grid>
-                        <Path Width="24" Height="24" Stretch="Uniform" Fill="{StaticResource Brand}" Data="{StaticResource IconUserPlus}" HorizontalAlignment="Left" VerticalAlignment="Top" />
+                        <Path Width="24" Height="24" Stretch="Uniform" Fill="{DynamicResource Brand}" Data="{StaticResource IconUserPlus}" HorizontalAlignment="Left" VerticalAlignment="Top" />
                         <TextBlock Text="Nouvel employé" FontWeight="SemiBold" VerticalAlignment="Bottom" />
                     </Grid>
                 </Button>
                 <Button Style="{StaticResource Tile}" Command="{Binding ArchiveCommand}" Margin="6,0,0,0">
                     <Grid>
-                        <Path Width="24" Height="24" Stretch="Uniform" Fill="{StaticResource Brand}" Data="{StaticResource IconArchive}" HorizontalAlignment="Left" VerticalAlignment="Top" />
+                        <Path Width="24" Height="24" Stretch="Uniform" Fill="{DynamicResource Brand}" Data="{StaticResource IconArchive}" HorizontalAlignment="Left" VerticalAlignment="Top" />
                         <TextBlock Text="Archive des paies" FontWeight="SemiBold" VerticalAlignment="Bottom" />
                     </Grid>
                 </Button>
@@ -137,8 +137,8 @@
                             <DataTemplate>
                                 <Grid Height="52">
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="14,0">
-                                        <Border Width="30" Height="30" CornerRadius="8" Background="{StaticResource BrandSoft}" VerticalAlignment="Center">
-                                            <Path Width="16" Height="16" Stretch="Uniform" Fill="{StaticResource Brand}" Data="{StaticResource IconFileCheck}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        <Border Width="30" Height="30" CornerRadius="8" Background="{DynamicResource BrandSoft}" VerticalAlignment="Center">
+                                            <Path Width="16" Height="16" Stretch="Uniform" Fill="{DynamicResource Brand}" Data="{StaticResource IconFileCheck}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         </Border>
                                         <StackPanel Margin="11,0,0,0" VerticalAlignment="Center">
                                             <TextBlock Text="{Binding Title}" />
@@ -146,7 +146,7 @@
                                         </StackPanel>
                                     </StackPanel>
                                     <TextBlock Style="{StaticResource Caption}" Text="{Binding When}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,14,0" />
-                                    <Border Height="1" VerticalAlignment="Bottom" Background="{StaticResource Border}" />
+                                    <Border Height="1" VerticalAlignment="Bottom" Background="{DynamicResource Border}" />
                                 </Grid>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>

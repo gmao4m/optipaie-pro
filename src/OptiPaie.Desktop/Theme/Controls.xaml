@@ -8,16 +8,16 @@
 
     <!-- Card -->
     <Style x:Key="Card" TargetType="Border">
-        <Setter Property="Background" Value="{StaticResource Surface}" />
-        <Setter Property="BorderBrush" Value="{StaticResource Border}" />
+        <Setter Property="Background" Value="{DynamicResource Surface}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Border}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="CornerRadius" Value="12" />
     </Style>
 
     <!-- Primary (brand) button -->
     <Style x:Key="PrimaryButton" TargetType="Button">
-        <Setter Property="Foreground" Value="{StaticResource TextOnBrand}" />
-        <Setter Property="Background" Value="{StaticResource Brand}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextOnBrand}" />
+        <Setter Property="Background" Value="{DynamicResource Brand}" />
         <Setter Property="FontFamily" Value="{StaticResource AppFont}" />
         <Setter Property="FontSize" Value="13.5" />
         <Setter Property="FontWeight" Value="SemiBold" />
@@ -28,18 +28,18 @@
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
                     <Border x:Name="b" Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
-                        <TextBlock x:Name="cp" Text="{TemplateBinding Content}" FontFamily="{TemplateBinding FontFamily}" FontSize="{TemplateBinding FontSize}" FontWeight="{TemplateBinding FontWeight}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{StaticResource TextOnBrand}" />
+                        <TextBlock x:Name="cp" Text="{TemplateBinding Content}" FontFamily="{TemplateBinding FontFamily}" FontSize="{TemplateBinding FontSize}" FontWeight="{TemplateBinding FontWeight}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource TextOnBrand}" />
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="b" Property="Background" Value="{StaticResource BrandHover}" />
+                            <Setter TargetName="b" Property="Background" Value="{DynamicResource BrandHover}" />
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="b" Property="Background" Value="{StaticResource BrandPressed}" />
+                            <Setter TargetName="b" Property="Background" Value="{DynamicResource BrandPressed}" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
-                            <Setter TargetName="b" Property="Background" Value="{StaticResource ButtonDisabledFill}" />
-                            <Setter TargetName="cp" Property="Foreground" Value="{StaticResource ButtonDisabledText}" />
+                            <Setter TargetName="b" Property="Background" Value="{DynamicResource ButtonDisabledFill}" />
+                            <Setter TargetName="cp" Property="Foreground" Value="{DynamicResource ButtonDisabledText}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -50,8 +50,8 @@
     <!-- Accent (teal) button — the product's signature CTA, for the single standout
          positive action in a flow (e.g. "Approuver"). Use sparingly so it keeps impact. -->
     <Style x:Key="AccentButton" TargetType="Button">
-        <Setter Property="Foreground" Value="{StaticResource TextOnBrand}" />
-        <Setter Property="Background" Value="{StaticResource Accent}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextOnBrand}" />
+        <Setter Property="Background" Value="{DynamicResource Accent}" />
         <Setter Property="FontFamily" Value="{StaticResource AppFont}" />
         <Setter Property="FontSize" Value="13.5" />
         <Setter Property="FontWeight" Value="SemiBold" />
@@ -62,18 +62,18 @@
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
                     <Border x:Name="b" Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
-                        <TextBlock x:Name="cp" Text="{TemplateBinding Content}" FontFamily="{TemplateBinding FontFamily}" FontSize="{TemplateBinding FontSize}" FontWeight="{TemplateBinding FontWeight}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{StaticResource TextOnBrand}" />
+                        <TextBlock x:Name="cp" Text="{TemplateBinding Content}" FontFamily="{TemplateBinding FontFamily}" FontSize="{TemplateBinding FontSize}" FontWeight="{TemplateBinding FontWeight}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource TextOnBrand}" />
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="b" Property="Background" Value="{StaticResource AccentHover}" />
+                            <Setter TargetName="b" Property="Background" Value="{DynamicResource AccentHover}" />
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="b" Property="Background" Value="{StaticResource AccentPressed}" />
+                            <Setter TargetName="b" Property="Background" Value="{DynamicResource AccentPressed}" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
-                            <Setter TargetName="b" Property="Background" Value="{StaticResource ButtonDisabledFill}" />
-                            <Setter TargetName="cp" Property="Foreground" Value="{StaticResource ButtonDisabledText}" />
+                            <Setter TargetName="b" Property="Background" Value="{DynamicResource ButtonDisabledFill}" />
+                            <Setter TargetName="cp" Property="Foreground" Value="{DynamicResource ButtonDisabledText}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -84,8 +84,8 @@
     <!-- Destructive (filled red) button — for irreversible actions (e.g. "Supprimer").
          White label on a red dark enough to clear 4.5:1 contrast. -->
     <Style x:Key="DangerButton" TargetType="Button">
-        <Setter Property="Foreground" Value="{StaticResource TextOnBrand}" />
-        <Setter Property="Background" Value="{StaticResource ButtonDanger}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextOnBrand}" />
+        <Setter Property="Background" Value="{DynamicResource ButtonDanger}" />
         <Setter Property="FontFamily" Value="{StaticResource AppFont}" />
         <Setter Property="FontSize" Value="13.5" />
         <Setter Property="FontWeight" Value="SemiBold" />
@@ -96,18 +96,18 @@
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
                     <Border x:Name="b" Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
-                        <TextBlock x:Name="cp" Text="{TemplateBinding Content}" FontFamily="{TemplateBinding FontFamily}" FontSize="{TemplateBinding FontSize}" FontWeight="{TemplateBinding FontWeight}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{StaticResource TextOnBrand}" />
+                        <TextBlock x:Name="cp" Text="{TemplateBinding Content}" FontFamily="{TemplateBinding FontFamily}" FontSize="{TemplateBinding FontSize}" FontWeight="{TemplateBinding FontWeight}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource TextOnBrand}" />
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="b" Property="Background" Value="{StaticResource ButtonDangerHover}" />
+                            <Setter TargetName="b" Property="Background" Value="{DynamicResource ButtonDangerHover}" />
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="b" Property="Background" Value="{StaticResource ButtonDangerPressed}" />
+                            <Setter TargetName="b" Property="Background" Value="{DynamicResource ButtonDangerPressed}" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
-                            <Setter TargetName="b" Property="Background" Value="{StaticResource ButtonDisabledFill}" />
-                            <Setter TargetName="cp" Property="Foreground" Value="{StaticResource ButtonDisabledText}" />
+                            <Setter TargetName="b" Property="Background" Value="{DynamicResource ButtonDisabledFill}" />
+                            <Setter TargetName="cp" Property="Foreground" Value="{DynamicResource ButtonDisabledText}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -117,8 +117,8 @@
 
     <!-- Secondary (soft chip) button -->
     <Style x:Key="SecondaryButton" TargetType="Button">
-        <Setter Property="Foreground" Value="{StaticResource TextPrimary}" />
-        <Setter Property="Background" Value="{StaticResource Surface}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+        <Setter Property="Background" Value="{DynamicResource Surface}" />
         <Setter Property="FontFamily" Value="{StaticResource AppFont}" />
         <Setter Property="FontSize" Value="13.5" />
         <Setter Property="Height" Value="40" />
@@ -127,19 +127,19 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Border x:Name="b" Background="{TemplateBinding Background}" BorderBrush="{StaticResource BorderStrong}" BorderThickness="1" CornerRadius="8" Padding="{TemplateBinding Padding}">
-                        <TextBlock x:Name="cp" Text="{TemplateBinding Content}" FontFamily="{TemplateBinding FontFamily}" FontSize="{TemplateBinding FontSize}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{StaticResource TextPrimary}" />
+                    <Border x:Name="b" Background="{TemplateBinding Background}" BorderBrush="{DynamicResource BorderStrong}" BorderThickness="1" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                        <TextBlock x:Name="cp" Text="{TemplateBinding Content}" FontFamily="{TemplateBinding FontFamily}" FontSize="{TemplateBinding FontSize}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimary}" />
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="b" Property="Background" Value="{StaticResource SurfaceMuted}" />
+                            <Setter TargetName="b" Property="Background" Value="{DynamicResource SurfaceMuted}" />
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="b" Property="Background" Value="{StaticResource Border}" />
+                            <Setter TargetName="b" Property="Background" Value="{DynamicResource Border}" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
-                            <Setter TargetName="b" Property="Background" Value="{StaticResource ButtonDisabledFill}" />
-                            <Setter TargetName="cp" Property="Foreground" Value="{StaticResource ButtonDisabledText}" />
+                            <Setter TargetName="b" Property="Background" Value="{DynamicResource ButtonDisabledFill}" />
+                            <Setter TargetName="cp" Property="Foreground" Value="{DynamicResource ButtonDisabledText}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -149,7 +149,7 @@
 
     <!-- Navigation item (auto single-select via RadioButton) -->
     <Style x:Key="NavItem" TargetType="RadioButton">
-        <Setter Property="Foreground" Value="{StaticResource TextSecondary}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
         <Setter Property="FontFamily" Value="{StaticResource AppFont}" />
         <Setter Property="FontSize" Value="13.5" />
         <Setter Property="Height" Value="42" />
@@ -162,18 +162,18 @@
                     <Border x:Name="b" Background="Transparent" CornerRadius="8" Padding="12,0">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <Path x:Name="ic" Width="19" Height="19" Stretch="Uniform"
-                                  Fill="{StaticResource TextSecondary}" Data="{TemplateBinding Tag}" />
+                                  Fill="{DynamicResource TextSecondary}" Data="{TemplateBinding Tag}" />
                             <ContentPresenter Margin="12,0,0,0" VerticalAlignment="Center" />
                         </StackPanel>
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="b" Property="Background" Value="{StaticResource SurfaceMuted}" />
+                            <Setter TargetName="b" Property="Background" Value="{DynamicResource SurfaceMuted}" />
                         </Trigger>
                         <Trigger Property="IsChecked" Value="True">
-                            <Setter TargetName="b" Property="Background" Value="{StaticResource BrandSoft}" />
-                            <Setter TargetName="ic" Property="Fill" Value="{StaticResource Brand}" />
-                            <Setter Property="Foreground" Value="{StaticResource Brand}" />
+                            <Setter TargetName="b" Property="Background" Value="{DynamicResource BrandSoft}" />
+                            <Setter TargetName="ic" Property="Fill" Value="{DynamicResource Brand}" />
+                            <Setter Property="Foreground" Value="{DynamicResource Brand}" />
                             <Setter Property="FontWeight" Value="SemiBold" />
                         </Trigger>
                     </ControlTemplate.Triggers>
@@ -189,11 +189,11 @@
         <Setter Property="Height" Value="38" />
         <Setter Property="Padding" Value="10,0" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
-        <Setter Property="Background" Value="{StaticResource Surface}" />
-        <Setter Property="Foreground" Value="{StaticResource TextPrimary}" />
-        <Setter Property="BorderBrush" Value="{StaticResource BorderStrong}" />
+        <Setter Property="Background" Value="{DynamicResource Surface}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderStrong}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CaretBrush" Value="{StaticResource TextPrimary}" />
+        <Setter Property="CaretBrush" Value="{DynamicResource TextPrimary}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="TextBox">
@@ -202,7 +202,7 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsKeyboardFocused" Value="True">
-                            <Setter TargetName="b" Property="BorderBrush" Value="{StaticResource Brand}" />
+                            <Setter TargetName="b" Property="BorderBrush" Value="{DynamicResource Brand}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -230,7 +230,7 @@
          ============================================================================ -->
 
     <Style TargetType="ComboBoxItem">
-        <Setter Property="Foreground" Value="{StaticResource TextPrimary}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
         <Setter Property="FontFamily" Value="{StaticResource AppFont}" />
         <Setter Property="Padding" Value="10,7" />
         <Setter Property="Template">
@@ -241,15 +241,15 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="bd" Property="Background" Value="{StaticResource SurfaceMuted}" />
+                            <Setter TargetName="bd" Property="Background" Value="{DynamicResource SurfaceMuted}" />
                         </Trigger>
                         <Trigger Property="IsHighlighted" Value="True">
-                            <Setter TargetName="bd" Property="Background" Value="{StaticResource BrandSoft}" />
-                            <Setter Property="Foreground" Value="{StaticResource Brand}" />
+                            <Setter TargetName="bd" Property="Background" Value="{DynamicResource BrandSoft}" />
+                            <Setter Property="Foreground" Value="{DynamicResource Brand}" />
                         </Trigger>
                         <Trigger Property="IsSelected" Value="True">
-                            <Setter TargetName="bd" Property="Background" Value="{StaticResource BrandSoft}" />
-                            <Setter Property="Foreground" Value="{StaticResource Brand}" />
+                            <Setter TargetName="bd" Property="Background" Value="{DynamicResource BrandSoft}" />
+                            <Setter Property="Foreground" Value="{DynamicResource Brand}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -258,7 +258,7 @@
     </Style>
 
     <Style TargetType="ListBoxItem">
-        <Setter Property="Foreground" Value="{StaticResource TextPrimary}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
         <Setter Property="FontFamily" Value="{StaticResource AppFont}" />
         <Setter Property="Padding" Value="10,7" />
         <Setter Property="Template">
@@ -269,11 +269,11 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="bd" Property="Background" Value="{StaticResource SurfaceMuted}" />
+                            <Setter TargetName="bd" Property="Background" Value="{DynamicResource SurfaceMuted}" />
                         </Trigger>
                         <Trigger Property="IsSelected" Value="True">
-                            <Setter TargetName="bd" Property="Background" Value="{StaticResource BrandSoft}" />
-                            <Setter Property="Foreground" Value="{StaticResource Brand}" />
+                            <Setter TargetName="bd" Property="Background" Value="{DynamicResource BrandSoft}" />
+                            <Setter Property="Foreground" Value="{DynamicResource Brand}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -286,9 +286,9 @@
         <Setter Property="BorderBrush" Value="Transparent" />
         <Style.Triggers>
             <Trigger Property="IsSelected" Value="True">
-                <Setter Property="Background" Value="{StaticResource BrandSoft}" />
-                <Setter Property="Foreground" Value="{StaticResource TextPrimary}" />
-                <Setter Property="BorderBrush" Value="{StaticResource BrandSoft}" />
+                <Setter Property="Background" Value="{DynamicResource BrandSoft}" />
+                <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource BrandSoft}" />
             </Trigger>
         </Style.Triggers>
     </Style>

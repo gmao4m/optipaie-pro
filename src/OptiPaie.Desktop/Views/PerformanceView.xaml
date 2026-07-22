@@ -3,14 +3,14 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <UserControl.Resources>
         <Style x:Key="GridHeader" TargetType="DataGridColumnHeader">
-            <Setter Property="Background" Value="{StaticResource SurfaceMuted}" />
-            <Setter Property="Foreground" Value="{StaticResource TextSecondary}" />
+            <Setter Property="Background" Value="{DynamicResource SurfaceMuted}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
             <Setter Property="FontSize" Value="12" />
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="Height" Value="32" />
             <Setter Property="Padding" Value="8,0" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
-            <Setter Property="BorderBrush" Value="{StaticResource Border}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource Border}" />
             <Setter Property="BorderThickness" Value="0,0,1,1" />
         </Style>
         <Style x:Key="Center" TargetType="TextBlock">
@@ -27,20 +27,20 @@
             <Setter Property="RowHeight" Value="32" />
             <Setter Property="FontFamily" Value="Segoe UI" />
             <Setter Property="FontSize" Value="12.5" />
-            <Setter Property="Background" Value="{StaticResource Surface}" />
-            <Setter Property="RowBackground" Value="{StaticResource Surface}" />
-            <Setter Property="AlternatingRowBackground" Value="{StaticResource SurfaceMuted}" />
-            <Setter Property="BorderBrush" Value="{StaticResource Border}" />
+            <Setter Property="Background" Value="{DynamicResource Surface}" />
+            <Setter Property="RowBackground" Value="{DynamicResource Surface}" />
+            <Setter Property="AlternatingRowBackground" Value="{DynamicResource SurfaceMuted}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource Border}" />
             <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="HorizontalGridLinesBrush" Value="{StaticResource Border}" />
-            <Setter Property="VerticalGridLinesBrush" Value="{StaticResource Border}" />
+            <Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource Border}" />
+            <Setter Property="VerticalGridLinesBrush" Value="{DynamicResource Border}" />
             <Setter Property="ColumnHeaderStyle" Value="{StaticResource GridHeader}" />
         </Style>
         <Style x:Key="Bar" TargetType="ProgressBar">
             <Setter Property="Height" Value="7" />
             <Setter Property="Maximum" Value="100" />
-            <Setter Property="Foreground" Value="{StaticResource Accent}" />
-            <Setter Property="Background" Value="{StaticResource SurfaceMuted}" />
+            <Setter Property="Foreground" Value="{DynamicResource Accent}" />
+            <Setter Property="Background" Value="{DynamicResource SurfaceMuted}" />
             <Setter Property="BorderThickness" Value="0" />
         </Style>
         <Style x:Key="Chip" TargetType="Border">
@@ -65,7 +65,7 @@
                            Text="Campagnes d'évaluation, modèles, objectifs, calibrage et parcours des employés." />
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
-                <TextBlock Text="Année" VerticalAlignment="Center" Foreground="{StaticResource TextMuted}" FontSize="12" Margin="0,0,8,0" />
+                <TextBlock Text="Année" VerticalAlignment="Center" Foreground="{DynamicResource TextMuted}" FontSize="12" Margin="0,0,8,0" />
                 <ComboBox Style="{StaticResource AppComboBox}" Width="90" Height="32" ItemsSource="{Binding Years}" SelectedItem="{Binding SelectedYear}" />
             </StackPanel>
         </Grid>
@@ -90,7 +90,7 @@
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
                         <!-- Cycle list -->
-                        <ListBox Grid.Column="0" BorderThickness="1" BorderBrush="{StaticResource Border}" Background="{StaticResource Surface}"
+                        <ListBox Grid.Column="0" BorderThickness="1" BorderBrush="{DynamicResource Border}" Background="{DynamicResource Surface}"
                                  ItemsSource="{Binding Cycles}" SelectedItem="{Binding SelectedCycle}" HorizontalContentAlignment="Stretch">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
@@ -101,9 +101,9 @@
                                             </Border>
                                             <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="13.5" TextTrimming="CharacterEllipsis" />
                                         </DockPanel>
-                                        <TextBlock Text="{Binding TypeLabel}" FontSize="11.5" Foreground="{StaticResource TextMuted}" Margin="0,2,0,4" />
+                                        <TextBlock Text="{Binding TypeLabel}" FontSize="11.5" Foreground="{DynamicResource TextMuted}" Margin="0,2,0,4" />
                                         <ProgressBar Style="{StaticResource Bar}" Value="{Binding CompletionValue}" />
-                                        <TextBlock Text="{Binding CompletionText}" FontSize="11" Foreground="{StaticResource TextSecondary}" Margin="0,3,0,0" />
+                                        <TextBlock Text="{Binding CompletionText}" FontSize="11" Foreground="{DynamicResource TextSecondary}" Margin="0,3,0,0" />
                                     </StackPanel>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
@@ -124,7 +124,7 @@
                                             <StackPanel>
                                                 <TextBlock Text="{Binding Department}" FontWeight="SemiBold" FontSize="12.5" />
                                                 <ProgressBar Style="{StaticResource Bar}" Margin="0,5,0,3" Value="{Binding CompletionValue}" />
-                                                <TextBlock Text="{Binding CompletionText}" FontSize="11" Foreground="{StaticResource TextMuted}" />
+                                                <TextBlock Text="{Binding CompletionText}" FontSize="11" Foreground="{DynamicResource TextMuted}" />
                                             </StackPanel>
                                         </Border>
                                     </DataTemplate>
@@ -198,26 +198,26 @@
                                     <Setter Property="Template">
                                         <Setter.Value>
                                             <ControlTemplate TargetType="ListBoxItem">
-                                                <Border x:Name="bd" Width="240" Background="{StaticResource Surface}" BorderBrush="{StaticResource Border}"
+                                                <Border x:Name="bd" Width="240" Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}"
                                                         BorderThickness="1" CornerRadius="12" Padding="16" Cursor="Hand">
                                                     <StackPanel>
                                                         <DockPanel>
                                                             <Border DockPanel.Dock="Right" Style="{StaticResource Chip}" Background="{Binding OriginBrush}">
                                                                 <TextBlock Text="{Binding OriginText}" Foreground="White" FontSize="10.5" FontWeight="SemiBold" />
                                                             </Border>
-                                                            <Border Width="34" Height="34" CornerRadius="9" Background="{StaticResource BrandSoft}">
-                                                                <Path Width="17" Height="17" Stretch="Uniform" Fill="{StaticResource Brand}" Data="{StaticResource IconFileCheck}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                            <Border Width="34" Height="34" CornerRadius="9" Background="{DynamicResource BrandSoft}">
+                                                                <Path Width="17" Height="17" Stretch="Uniform" Fill="{DynamicResource Brand}" Data="{StaticResource IconFileCheck}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                                             </Border>
                                                         </DockPanel>
                                                         <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14" Margin="0,10,0,0" TextWrapping="Wrap" />
-                                                        <TextBlock Text="{Binding KindLabel}" FontSize="12" Foreground="{StaticResource TextSecondary}" Margin="0,3,0,0" />
-                                                        <TextBlock Text="{Binding DepartmentTag}" FontSize="11.5" Foreground="{StaticResource TextMuted}" Margin="0,2,0,0" />
-                                                        <TextBlock Text="{Binding CriteriaText}" FontSize="11.5" Foreground="{StaticResource TextMuted}" Margin="0,8,0,0" />
+                                                        <TextBlock Text="{Binding KindLabel}" FontSize="12" Foreground="{DynamicResource TextSecondary}" Margin="0,3,0,0" />
+                                                        <TextBlock Text="{Binding DepartmentTag}" FontSize="11.5" Foreground="{DynamicResource TextMuted}" Margin="0,2,0,0" />
+                                                        <TextBlock Text="{Binding CriteriaText}" FontSize="11.5" Foreground="{DynamicResource TextMuted}" Margin="0,8,0,0" />
                                                     </StackPanel>
                                                 </Border>
                                                 <ControlTemplate.Triggers>
                                                     <Trigger Property="IsSelected" Value="True">
-                                                        <Setter TargetName="bd" Property="BorderBrush" Value="{StaticResource Accent}" />
+                                                        <Setter TargetName="bd" Property="BorderBrush" Value="{DynamicResource Accent}" />
                                                         <Setter TargetName="bd" Property="BorderThickness" Value="2" />
                                                     </Trigger>
                                                 </ControlTemplate.Triggers>
@@ -251,14 +251,14 @@
                             </Grid.ColumnDefinitions>
                             <Border Grid.Column="0" Style="{StaticResource Card}" Padding="16">
                                 <StackPanel>
-                                    <TextBlock Text="Meilleurs 10 %" FontWeight="SemiBold" Foreground="{StaticResource Salary}" Margin="0,0,0,8" />
+                                    <TextBlock Text="Meilleurs 10 %" FontWeight="SemiBold" Foreground="{DynamicResource Salary}" Margin="0,0,0,8" />
                                     <ItemsControl ItemsSource="{Binding Top}">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
                                                 <Grid Height="34">
                                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                                         <TextBlock Text="{Binding EmployeeName}" FontWeight="SemiBold" FontSize="13" />
-                                                        <TextBlock Text="{Binding Department}" FontSize="11" Foreground="{StaticResource TextMuted}" Margin="8,0,0,0" VerticalAlignment="Center" />
+                                                        <TextBlock Text="{Binding Department}" FontSize="11" Foreground="{DynamicResource TextMuted}" Margin="8,0,0,0" VerticalAlignment="Center" />
                                                     </StackPanel>
                                                     <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center" FontFamily="Consolas" FontWeight="SemiBold" Foreground="{Binding Brush}" Text="{Binding PercentText}" />
                                                 </Grid>
@@ -269,14 +269,14 @@
                             </Border>
                             <Border Grid.Column="2" Style="{StaticResource Card}" Padding="16">
                                 <StackPanel>
-                                    <TextBlock Text="À accompagner (10 % les plus bas)" FontWeight="SemiBold" Foreground="{StaticResource Deduction}" Margin="0,0,0,8" />
+                                    <TextBlock Text="À accompagner (10 % les plus bas)" FontWeight="SemiBold" Foreground="{DynamicResource Deduction}" Margin="0,0,0,8" />
                                     <ItemsControl ItemsSource="{Binding Bottom}">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
                                                 <Grid Height="34">
                                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                                         <TextBlock Text="{Binding EmployeeName}" FontWeight="SemiBold" FontSize="13" />
-                                                        <TextBlock Text="{Binding Department}" FontSize="11" Foreground="{StaticResource TextMuted}" Margin="8,0,0,0" VerticalAlignment="Center" />
+                                                        <TextBlock Text="{Binding Department}" FontSize="11" Foreground="{DynamicResource TextMuted}" Margin="8,0,0,0" VerticalAlignment="Center" />
                                                     </StackPanel>
                                                     <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center" FontFamily="Consolas" FontWeight="SemiBold" Foreground="{Binding Brush}" Text="{Binding PercentText}" />
                                                 </Grid>
@@ -382,7 +382,7 @@
                                     <DataTemplate>
                                         <StackPanel VerticalAlignment="Center" Margin="8,0">
                                             <ProgressBar Style="{StaticResource Bar}" Value="{Binding ProgressValue}" />
-                                            <TextBlock Text="{Binding ProgressText}" FontSize="11" Foreground="{StaticResource TextMuted}" Margin="0,3,0,0" HorizontalAlignment="Center" />
+                                            <TextBlock Text="{Binding ProgressText}" FontSize="11" Foreground="{DynamicResource TextMuted}" Margin="0,3,0,0" HorizontalAlignment="Center" />
                                         </StackPanel>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
@@ -433,7 +433,7 @@
                                             <CheckBox Margin="0,3" IsChecked="{Binding IsChecked}">
                                                 <StackPanel>
                                                     <TextBlock Text="{Binding Name}" FontSize="12.5" />
-                                                    <TextBlock Text="{Binding Department}" FontSize="10.5" Foreground="{StaticResource TextMuted}" />
+                                                    <TextBlock Text="{Binding Department}" FontSize="10.5" Foreground="{DynamicResource TextMuted}" />
                                                 </StackPanel>
                                             </CheckBox>
                                         </DataTemplate>
@@ -454,16 +454,16 @@
                                     <Border Style="{StaticResource Card}" Width="220" Margin="0,0,12,0" Padding="16">
                                         <StackPanel>
                                             <TextBlock Text="{Binding EmployeeName}" FontWeight="SemiBold" FontSize="14" TextWrapping="Wrap" />
-                                            <TextBlock Text="{Binding Poste}" FontSize="11.5" Foreground="{StaticResource TextSecondary}" />
-                                            <TextBlock Text="{Binding Department}" FontSize="11" Foreground="{StaticResource TextMuted}" Margin="0,0,0,10" />
-                                            <TextBlock Text="Dernière note" FontSize="11" Foreground="{StaticResource TextMuted}" Margin="0,4,0,0" />
+                                            <TextBlock Text="{Binding Poste}" FontSize="11.5" Foreground="{DynamicResource TextSecondary}" />
+                                            <TextBlock Text="{Binding Department}" FontSize="11" Foreground="{DynamicResource TextMuted}" Margin="0,0,0,10" />
+                                            <TextBlock Text="Dernière note" FontSize="11" Foreground="{DynamicResource TextMuted}" Margin="0,4,0,0" />
                                             <TextBlock Text="{Binding LatestText}" FontFamily="Consolas" FontSize="20" FontWeight="Bold" Foreground="{Binding Brush}" />
-                                            <TextBlock Text="{Binding Rating}" FontSize="12" Foreground="{StaticResource TextSecondary}" />
-                                            <TextBlock Text="Moyenne" FontSize="11" Foreground="{StaticResource TextMuted}" Margin="0,10,0,0" />
+                                            <TextBlock Text="{Binding Rating}" FontSize="12" Foreground="{DynamicResource TextSecondary}" />
+                                            <TextBlock Text="Moyenne" FontSize="11" Foreground="{DynamicResource TextMuted}" Margin="0,10,0,0" />
                                             <TextBlock Text="{Binding AverageText}" FontFamily="Consolas" FontSize="14" FontWeight="SemiBold" />
-                                            <TextBlock Text="Évaluations" FontSize="11" Foreground="{StaticResource TextMuted}" Margin="0,8,0,0" />
+                                            <TextBlock Text="Évaluations" FontSize="11" Foreground="{DynamicResource TextMuted}" Margin="0,8,0,0" />
                                             <TextBlock Text="{Binding ReviewCountText}" FontSize="14" FontWeight="SemiBold" />
-                                            <TextBlock Text="Objectifs" FontSize="11" Foreground="{StaticResource TextMuted}" Margin="0,8,0,0" />
+                                            <TextBlock Text="Objectifs" FontSize="11" Foreground="{DynamicResource TextMuted}" Margin="0,8,0,0" />
                                             <TextBlock Text="{Binding GoalsText}" FontSize="12.5" />
                                         </StackPanel>
                                     </Border>
@@ -483,7 +483,7 @@
                     </Grid.RowDefinitions>
                     <Grid Grid.Row="0">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
-                            <TextBlock Text="Employé" VerticalAlignment="Center" Foreground="{StaticResource TextMuted}" FontSize="12" Margin="0,0,8,0" />
+                            <TextBlock Text="Employé" VerticalAlignment="Center" Foreground="{DynamicResource TextMuted}" FontSize="12" Margin="0,0,8,0" />
                             <ComboBox Style="{StaticResource AppComboBox}" Width="240" Height="34" ItemsSource="{Binding Employees}" SelectedItem="{Binding SelectedEmployee}" DisplayMemberPath="Name" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
@@ -502,12 +502,12 @@
                                                 <ColumnDefinition Width="Auto" />
                                                 <ColumnDefinition Width="*" />
                                             </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0" Text="{Binding DateText}" FontFamily="Consolas" FontSize="12" Foreground="{StaticResource TextMuted}" VerticalAlignment="Top" Margin="0,10,0,0" />
+                                            <TextBlock Grid.Column="0" Text="{Binding DateText}" FontFamily="Consolas" FontSize="12" Foreground="{DynamicResource TextMuted}" VerticalAlignment="Top" Margin="0,10,0,0" />
                                             <StackPanel Grid.Column="1" VerticalAlignment="Stretch" HorizontalAlignment="Center" Margin="6,0,14,0">
                                                 <Border Width="12" Height="12" CornerRadius="6" Background="{Binding KindBrush}" Margin="0,12,0,0" />
-                                                <Border Width="2" Background="{StaticResource Border}" HorizontalAlignment="Center" Height="40" />
+                                                <Border Width="2" Background="{DynamicResource Border}" HorizontalAlignment="Center" Height="40" />
                                             </StackPanel>
-                                            <Border Grid.Column="2" Background="{StaticResource SurfaceMuted}" CornerRadius="8" Padding="12,10" Margin="0,4,0,4">
+                                            <Border Grid.Column="2" Background="{DynamicResource SurfaceMuted}" CornerRadius="8" Padding="12,10" Margin="0,4,0,4">
                                                 <StackPanel>
                                                     <DockPanel>
                                                         <Border DockPanel.Dock="Right" Style="{StaticResource Chip}" Background="{Binding KindBrush}">
@@ -515,8 +515,8 @@
                                                         </Border>
                                                         <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="13.5" TextTrimming="CharacterEllipsis" />
                                                     </DockPanel>
-                                                    <TextBlock Text="{Binding Detail}" FontSize="12" Foreground="{StaticResource TextSecondary}" Margin="0,3,0,0" TextWrapping="Wrap" />
-                                                    <TextBlock Text="{Binding ValueText}" FontSize="12" Foreground="{StaticResource TextMuted}" Margin="0,2,0,0" />
+                                                    <TextBlock Text="{Binding Detail}" FontSize="12" Foreground="{DynamicResource TextSecondary}" Margin="0,3,0,0" TextWrapping="Wrap" />
+                                                    <TextBlock Text="{Binding ValueText}" FontSize="12" Foreground="{DynamicResource TextMuted}" Margin="0,2,0,0" />
                                                 </StackPanel>
                                             </Border>
                                         </Grid>

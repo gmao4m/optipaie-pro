@@ -53,6 +53,10 @@ namespace OptiPaie.Desktop
                 }
 
                 Services.Localization.SetLanguage(language);
+
+                // Apply the saved colour theme (light/dark) before any window is shown.
+                bool darkTheme = string.Equals(Services.Settings.Get("Ui.Theme", "light"), "dark", StringComparison.OrdinalIgnoreCase);
+                ThemeManager.Apply(darkTheme);
             }
             catch (Exception ex)
             {

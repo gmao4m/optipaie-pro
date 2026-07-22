@@ -43,10 +43,10 @@
         <DataGrid Grid.Row="3" Margin="0,12,0,0" ItemsSource="{Binding Preview}" AutoGenerateColumns="True"
                   IsReadOnly="True" CanUserAddRows="False" CanUserResizeRows="False" GridLinesVisibility="All"
                   EnableRowVirtualization="True" EnableColumnVirtualization="True"
-                  RowHeight="28" FontFamily="Segoe UI" FontSize="12" Background="{StaticResource Surface}"
-                  RowBackground="{StaticResource Surface}" AlternatingRowBackground="{StaticResource SurfaceMuted}"
-                  BorderBrush="{StaticResource Border}" BorderThickness="1"
-                  HorizontalGridLinesBrush="{StaticResource Border}" VerticalGridLinesBrush="{StaticResource Border}"
+                  RowHeight="28" FontFamily="Segoe UI" FontSize="12" Background="{DynamicResource Surface}"
+                  RowBackground="{DynamicResource Surface}" AlternatingRowBackground="{DynamicResource SurfaceMuted}"
+                  BorderBrush="{DynamicResource Border}" BorderThickness="1"
+                  HorizontalGridLinesBrush="{DynamicResource Border}" VerticalGridLinesBrush="{DynamicResource Border}"
                   ColumnHeaderHeight="34" />
 
         <!-- Actions -->

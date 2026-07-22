@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="{Binding Title}" Width="640" Height="780"
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize" ShowInTaskbar="False"
-        FontFamily="Segoe UI" Background="{StaticResource Canvas}" Language="fr-FR"
+        FontFamily="Segoe UI" Background="{DynamicResource Canvas}" Language="fr-FR"
         TextOptions.TextFormattingMode="Ideal" UseLayoutRounding="True">
 
     <Window.Resources>
@@ -13,7 +13,7 @@
         <Style x:Key="SectionTitle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="13" />
             <Setter Property="FontWeight" Value="SemiBold" />
-            <Setter Property="Foreground" Value="{StaticResource TextSecondary}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
             <Setter Property="Margin" Value="0,0,0,14" />
         </Style>
     </Window.Resources>
@@ -25,7 +25,7 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <Border Grid.Row="0" Background="{StaticResource Surface}" BorderBrush="{StaticResource Border}" BorderThickness="0,0,0,1" Padding="24,18">
+        <Border Grid.Row="0" Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="0,0,0,1" Padding="24,18">
             <TextBlock Style="{StaticResource H2}" Text="{Binding Title}" />
         </Border>
 
@@ -127,12 +127,12 @@
                     <StackPanel>
                         <TextBlock Style="{StaticResource SectionTitle}" Text="Logo" />
                         <StackPanel Orientation="Horizontal">
-                            <Border Width="90" Height="90" CornerRadius="12" Background="{StaticResource SurfaceMuted}" BorderBrush="{StaticResource Border}" BorderThickness="1" ClipToBounds="True">
+                            <Border Width="90" Height="90" CornerRadius="12" Background="{DynamicResource SurfaceMuted}" BorderBrush="{DynamicResource Border}" BorderThickness="1" ClipToBounds="True">
                                 <Image Source="{Binding Logo, Converter={StaticResource BytesToImage}}" Stretch="Uniform" Margin="8" />
                             </Border>
                             <StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
                                 <Button Style="{StaticResource SecondaryButton}" Content="Choisir un logo" Command="{Binding PickLogoCommand}" HorizontalAlignment="Left" />
-                                <Button Style="{StaticResource SecondaryButton}" Margin="0,8,0,0" Content="Retirer" Command="{Binding ClearLogoCommand}" HorizontalAlignment="Left" Foreground="{StaticResource Deduction}" />
+                                <Button Style="{StaticResource SecondaryButton}" Margin="0,8,0,0" Content="Retirer" Command="{Binding ClearLogoCommand}" HorizontalAlignment="Left" Foreground="{DynamicResource Deduction}" />
                             </StackPanel>
                         </StackPanel>
                     </StackPanel>
@@ -140,7 +140,7 @@
             </StackPanel>
         </ScrollViewer>
 
-        <Border Grid.Row="2" Background="{StaticResource Surface}" BorderBrush="{StaticResource Border}" BorderThickness="0,1,0,0" Padding="24,14">
+        <Border Grid.Row="2" Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="0,1,0,0" Padding="24,14">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Style="{StaticResource SecondaryButton}" Content="Annuler" Command="{Binding CancelCommand}" />
                 <Button Style="{StaticResource PrimaryButton}" Margin="12,0,0,0" Content="Enregistrer" Command="{Binding SaveCommand}" />

@@ -4,7 +4,7 @@
         Title="OptiPaie PRO — Activation"
         Height="640" Width="480" ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
-        FontFamily="Segoe UI" Background="{StaticResource Canvas}" Language="fr-FR"
+        FontFamily="Segoe UI" Background="{DynamicResource Canvas}" Language="fr-FR"
         TextOptions.TextFormattingMode="Ideal" UseLayoutRounding="True">
     <Grid>
         <Grid.RowDefinitions>
@@ -13,13 +13,13 @@
         </Grid.RowDefinitions>
 
         <!-- Brand header -->
-        <Border Grid.Row="0" Background="{StaticResource Brand}" Padding="28,26">
+        <Border Grid.Row="0" Background="{DynamicResource Brand}" Padding="28,26">
             <StackPanel>
                 <Border Width="52" Height="52" CornerRadius="14" Background="#22FFFFFF" HorizontalAlignment="Left">
-                    <Path Width="28" Height="28" Stretch="Uniform" Fill="{StaticResource TextOnBrand}"
+                    <Path Width="28" Height="28" Stretch="Uniform" Fill="{DynamicResource TextOnBrand}"
                           Data="{StaticResource IconWallet}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Border>
-                <TextBlock Text="{Binding ProductName}" Foreground="{StaticResource TextOnBrand}"
+                <TextBlock Text="{Binding ProductName}" Foreground="{DynamicResource TextOnBrand}"
                            FontSize="24" FontWeight="SemiBold" Margin="0,14,0,0" />
                 <TextBlock Text="{Binding Subtitle}" Foreground="#D8EFE7" Margin="0,3,0,0" FontSize="13.5" />
             </StackPanel>
@@ -36,7 +36,7 @@
                      MaxLength="23"
                      FontFamily="Consolas" FontSize="18" FontWeight="SemiBold"
                      Height="46" Padding="12,0" VerticalContentAlignment="Center"
-                     Background="{StaticResource Surface}" BorderBrush="{StaticResource BorderStrong}"
+                     Background="{DynamicResource Surface}" BorderBrush="{DynamicResource BorderStrong}"
                      BorderThickness="1" />
             <TextBlock Text="Format : XXXXX-XXXXX-XXXXX-XXXXX" Style="{StaticResource Caption}" Margin="2,6,0,0" />
 
@@ -48,7 +48,7 @@
                     Visibility="{Binding StatusMessage, Converter={StaticResource EmptyToVis}}">
                 <Border.Style>
                     <Style TargetType="Border">
-                        <Setter Property="Background" Value="{StaticResource BrandSoft}" />
+                        <Setter Property="Background" Value="{DynamicResource BrandSoft}" />
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding IsError}" Value="True">
                                 <Setter Property="Background" Value="#FCE8E6" />
@@ -59,10 +59,10 @@
                 <TextBlock Text="{Binding StatusMessage}" TextWrapping="Wrap" FontSize="12.5">
                     <TextBlock.Style>
                         <Style TargetType="TextBlock" BasedOn="{StaticResource Body}">
-                            <Setter Property="Foreground" Value="{StaticResource Salary}" />
+                            <Setter Property="Foreground" Value="{DynamicResource Salary}" />
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding IsError}" Value="True">
-                                    <Setter Property="Foreground" Value="{StaticResource Deduction}" />
+                                    <Setter Property="Foreground" Value="{DynamicResource Deduction}" />
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
@@ -72,17 +72,17 @@
 
             <!-- Divider -->
             <Grid Margin="0,22,0,18">
-                <Border Height="1" Background="{StaticResource Border}" VerticalAlignment="Center" />
-                <Border Background="{StaticResource Canvas}" HorizontalAlignment="Center" Padding="10,0">
+                <Border Height="1" Background="{DynamicResource Border}" VerticalAlignment="Center" />
+                <Border Background="{DynamicResource Canvas}" HorizontalAlignment="Center" Padding="10,0">
                     <TextBlock Text="OU" Style="{StaticResource Caption}" />
                 </Border>
             </Grid>
 
             <!-- Trial -->
-            <Border Style="{StaticResource Card}" Background="{StaticResource SurfaceMuted}" Padding="16">
+            <Border Style="{StaticResource Card}" Background="{DynamicResource SurfaceMuted}" Padding="16">
                 <StackPanel>
                     <TextBlock Text="{Binding TrialInfoText}" TextWrapping="Wrap"
-                               Foreground="{StaticResource TextSecondary}" />
+                               Foreground="{DynamicResource TextSecondary}" />
                     <Button Content="{Binding TrialButtonText}" Command="{Binding TrialCommand}"
                             Style="{StaticResource SecondaryButton}" Height="42" Margin="0,14,0,0"
                             Visibility="{Binding CanStartTrial, Converter={StaticResource BoolToVis}}" />
@@ -93,10 +93,10 @@
             <Border Margin="0,16,0,0" CornerRadius="8" Padding="16" Background="#FCE8E6"
                     Visibility="{Binding IsTrialExpired, Converter={StaticResource BoolToVis}}">
                 <StackPanel>
-                    <TextBlock Text="Essai terminé" FontWeight="SemiBold" Foreground="{StaticResource Deduction}"
+                    <TextBlock Text="Essai terminé" FontWeight="SemiBold" Foreground="{DynamicResource Deduction}"
                                FontSize="14" Margin="0,0,0,6" />
                     <TextBlock Text="{Binding SupportText}" TextWrapping="Wrap"
-                               Foreground="{StaticResource TextSecondary}" FontSize="13" />
+                               Foreground="{DynamicResource TextSecondary}" FontSize="13" />
                 </StackPanel>
             </Border>
         </StackPanel>

@@ -3,8 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <UserControl.Resources>
         <Style x:Key="Kpi" TargetType="Border">
-            <Setter Property="Background" Value="{StaticResource Surface}" />
-            <Setter Property="BorderBrush" Value="{StaticResource Border}" />
+            <Setter Property="Background" Value="{DynamicResource Surface}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource Border}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="CornerRadius" Value="10" />
             <Setter Property="Padding" Value="14,9" />
@@ -24,13 +24,13 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="b" CornerRadius="6" BorderBrush="{StaticResource BorderStrong}" BorderThickness="1"
+                        <Border x:Name="b" CornerRadius="6" BorderBrush="{DynamicResource BorderStrong}" BorderThickness="1"
                                 Background="{Binding Fill}" Padding="10,6">
                             <TextBlock Text="{Binding Label}" FontSize="12" FontWeight="SemiBold" Foreground="#1B2430" />
                         </Border>
                         <ControlTemplate.Triggers>
                             <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                                <Setter TargetName="b" Property="BorderBrush" Value="{StaticResource TextPrimary}" />
+                                <Setter TargetName="b" Property="BorderBrush" Value="{DynamicResource TextPrimary}" />
                                 <Setter TargetName="b" Property="BorderThickness" Value="2.5" />
                             </DataTrigger>
                         </ControlTemplate.Triggers>
@@ -84,15 +84,15 @@
         <WrapPanel Grid.Row="2" Orientation="Horizontal" Margin="0,12,0,0">
             <Border Style="{StaticResource Kpi}">
                 <StackPanel><TextBlock Style="{StaticResource Caption}" Text="Taux de présence" />
-                    <TextBlock Style="{StaticResource KpiValue}" Foreground="{StaticResource Salary}" Text="{Binding KpiAttendance}" /></StackPanel>
+                    <TextBlock Style="{StaticResource KpiValue}" Foreground="{DynamicResource Salary}" Text="{Binding KpiAttendance}" /></StackPanel>
             </Border>
             <Border Style="{StaticResource Kpi}">
                 <StackPanel><TextBlock Style="{StaticResource Caption}" Text="Taux d'absence" />
-                    <TextBlock Style="{StaticResource KpiValue}" Foreground="{StaticResource Deduction}" Text="{Binding KpiAbsence}" /></StackPanel>
+                    <TextBlock Style="{StaticResource KpiValue}" Foreground="{DynamicResource Deduction}" Text="{Binding KpiAbsence}" /></StackPanel>
             </Border>
             <Border Style="{StaticResource Kpi}">
                 <StackPanel><TextBlock Style="{StaticResource Caption}" Text="Taux de retard" />
-                    <TextBlock Style="{StaticResource KpiValue}" Foreground="{StaticResource Warning}" Text="{Binding KpiLate}" /></StackPanel>
+                    <TextBlock Style="{StaticResource KpiValue}" Foreground="{DynamicResource Warning}" Text="{Binding KpiLate}" /></StackPanel>
             </Border>
             <Border Style="{StaticResource Kpi}">
                 <StackPanel><TextBlock Style="{StaticResource Caption}" Text="Jours ouvrés" />
@@ -100,15 +100,15 @@
             </Border>
             <Border Style="{StaticResource Kpi}">
                 <StackPanel><TextBlock Style="{StaticResource Caption}" Text="Présents aujourd'hui" />
-                    <TextBlock Style="{StaticResource KpiValue}" Foreground="{StaticResource Salary}" Text="{Binding KpiPresentToday}" /></StackPanel>
+                    <TextBlock Style="{StaticResource KpiValue}" Foreground="{DynamicResource Salary}" Text="{Binding KpiPresentToday}" /></StackPanel>
             </Border>
             <Border Style="{StaticResource Kpi}">
                 <StackPanel><TextBlock Style="{StaticResource Caption}" Text="En congé" />
-                    <TextBlock Style="{StaticResource KpiValue}" Foreground="{StaticResource Employer}" Text="{Binding KpiOnLeave}" /></StackPanel>
+                    <TextBlock Style="{StaticResource KpiValue}" Foreground="{DynamicResource Employer}" Text="{Binding KpiOnLeave}" /></StackPanel>
             </Border>
             <Border Style="{StaticResource Kpi}">
                 <StackPanel><TextBlock Style="{StaticResource Caption}" Text="En mission" />
-                    <TextBlock Style="{StaticResource KpiValue}" Foreground="{StaticResource Employer}" Text="{Binding KpiOnMission}" /></StackPanel>
+                    <TextBlock Style="{StaticResource KpiValue}" Foreground="{DynamicResource Employer}" Text="{Binding KpiOnMission}" /></StackPanel>
             </Border>
             <Border Style="{StaticResource Kpi}">
                 <StackPanel><TextBlock Style="{StaticResource Caption}" Text="Effectif" />
@@ -119,7 +119,7 @@
         <!-- Palette + bulk toolbar -->
         <Border Grid.Row="3" Style="{StaticResource Card}" Padding="12,10" Margin="0,12,0,0">
             <WrapPanel Orientation="Horizontal" VerticalAlignment="Center">
-                <TextBlock Text="Statut :" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{StaticResource TextSecondary}" FontWeight="SemiBold" />
+                <TextBlock Text="Statut :" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{DynamicResource TextSecondary}" FontWeight="SemiBold" />
                 <ItemsControl ItemsSource="{Binding Palette}" VerticalAlignment="Center">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate>
@@ -132,12 +132,12 @@
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
-                <Border Width="1" Background="{StaticResource Border}" Margin="10,2" />
+                <Border Width="1" Background="{DynamicResource Border}" Margin="10,2" />
                 <Button Style="{StaticResource SecondaryButton}" Height="32" Margin="0,0,6,0"
                         Content="Appliquer au mois (sélection)" Command="{Binding ApplyMonthToSelectionCommand}" />
                 <Button Style="{StaticResource SecondaryButton}" Height="32" Margin="0,0,6,0" Content="Tout cocher" Command="{Binding SelectAllCommand}" />
                 <Button Style="{StaticResource SecondaryButton}" Height="32" Margin="0,0,6,0" Content="Décocher" Command="{Binding ClearSelectionCommand}" />
-                <Border Width="1" Background="{StaticResource Border}" Margin="10,2" />
+                <Border Width="1" Background="{DynamicResource Border}" Margin="10,2" />
                 <Button Style="{StaticResource SecondaryButton}" Height="32" Margin="0,0,6,0" Content="Rapports du mois" Command="{Binding MonthSummaryCommand}" />
                 <Button Style="{StaticResource SecondaryButton}" Height="32" Content="Paramètres" Command="{Binding SettingsCommand}" />
             </WrapPanel>
@@ -150,10 +150,10 @@
                   EnableRowVirtualization="True" EnableColumnVirtualization="True"
                   VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"
                   VirtualizingPanel.ScrollUnit="Pixel" ColumnWidth="Auto"
-                  RowHeight="28" FontFamily="Segoe UI" FontSize="12" Background="{StaticResource Surface}"
-                  RowBackground="{StaticResource Surface}" AlternatingRowBackground="{StaticResource SurfaceMuted}"
-                  BorderBrush="{StaticResource Border}" BorderThickness="1"
-                  HorizontalGridLinesBrush="{StaticResource Border}" VerticalGridLinesBrush="{StaticResource Border}"
+                  RowHeight="28" FontFamily="Segoe UI" FontSize="12" Background="{DynamicResource Surface}"
+                  RowBackground="{DynamicResource Surface}" AlternatingRowBackground="{DynamicResource SurfaceMuted}"
+                  BorderBrush="{DynamicResource Border}" BorderThickness="1"
+                  HorizontalGridLinesBrush="{DynamicResource Border}" VerticalGridLinesBrush="{DynamicResource Border}"
                   ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.CanContentScroll="True" />
 
         <!-- Legend + status -->
@@ -165,8 +165,8 @@
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal" Margin="0,0,10,0" VerticalAlignment="Center">
-                                <Border Width="14" Height="14" CornerRadius="3" Background="{Binding Fill}" BorderBrush="{StaticResource BorderStrong}" BorderThickness="1" />
-                                <TextBlock Text="{Binding Label}" Margin="4,0,0,0" FontSize="11" Foreground="{StaticResource TextSecondary}" VerticalAlignment="Center" />
+                                <Border Width="14" Height="14" CornerRadius="3" Background="{Binding Fill}" BorderBrush="{DynamicResource BorderStrong}" BorderThickness="1" />
+                                <TextBlock Text="{Binding Label}" Margin="4,0,0,0" FontSize="11" Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Center" />
                             </StackPanel>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>

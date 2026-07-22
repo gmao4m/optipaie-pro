@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="{Binding Title}" Height="740" Width="800"
         MinHeight="560" MinWidth="680"
-        WindowStartupLocation="CenterOwner" Background="{StaticResource Canvas}">
+        WindowStartupLocation="CenterOwner" Background="{DynamicResource Canvas}">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolVis" />
     </Window.Resources>
@@ -16,10 +16,10 @@
         </Grid.RowDefinitions>
 
         <!-- Header band: employee + live overall score -->
-        <Border Grid.Row="0" Background="{StaticResource Brand}" Padding="24,18">
+        <Border Grid.Row="0" Background="{DynamicResource Brand}" Padding="24,18">
             <Grid>
                 <StackPanel HorizontalAlignment="Left" VerticalAlignment="Center">
-                    <TextBlock Text="{Binding EmployeeName}" FontSize="20" FontWeight="SemiBold" Foreground="{StaticResource TextOnBrand}" />
+                    <TextBlock Text="{Binding EmployeeName}" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource TextOnBrand}" />
                     <TextBlock Text="{Binding EmployeeMeta}" FontSize="12.5" Margin="0,3,0,0" Foreground="#B9C2D6" />
                     <TextBlock Margin="0,2,0,0" FontSize="12" Foreground="#B9C2D6">
                         <Run Text="Période :" />
@@ -30,7 +30,7 @@
                     <StackPanel>
                         <TextBlock Text="Note globale" FontSize="11" Foreground="#B9C2D6" HorizontalAlignment="Right" />
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,2,0,0">
-                            <TextBlock Text="{Binding OverallText}" FontSize="30" FontWeight="Bold" Foreground="{StaticResource TextOnBrand}" />
+                            <TextBlock Text="{Binding OverallText}" FontSize="30" FontWeight="Bold" Foreground="{DynamicResource TextOnBrand}" />
                         </StackPanel>
                         <Border HorizontalAlignment="Right" Margin="0,4,0,0" CornerRadius="7" Padding="10,3" Background="{Binding OverallBrush}">
                             <TextBlock Text="{Binding RatingText}" FontSize="12" FontWeight="SemiBold" Foreground="White" />
@@ -55,21 +55,21 @@
                         <TextBox Style="{StaticResource AppTextBox}" Margin="0,4,0,0" IsEnabled="{Binding IsEditable}"
                                  Text="{Binding Reviewer, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
-                    <Border Grid.Column="2" VerticalAlignment="Bottom" Height="38" Background="{StaticResource AccentSoft}" CornerRadius="8" Padding="12,0"
+                    <Border Grid.Column="2" VerticalAlignment="Bottom" Height="38" Background="{DynamicResource AccentSoft}" CornerRadius="8" Padding="12,0"
                             Visibility="{Binding HasAttendance, Converter={StaticResource BoolVis}}">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <Path Width="15" Height="15" Stretch="Uniform" Fill="{StaticResource Accent}" Data="{StaticResource IconClock}" VerticalAlignment="Center" />
-                            <TextBlock Margin="8,0,0,0" VerticalAlignment="Center" FontSize="12" Foreground="{StaticResource TextSecondary}" Text="{Binding AttendanceText}" />
+                            <Path Width="15" Height="15" Stretch="Uniform" Fill="{DynamicResource Accent}" Data="{StaticResource IconClock}" VerticalAlignment="Center" />
+                            <TextBlock Margin="8,0,0,0" VerticalAlignment="Center" FontSize="12" Foreground="{DynamicResource TextSecondary}" Text="{Binding AttendanceText}" />
                         </StackPanel>
                     </Border>
                 </Grid>
 
                 <!-- Performance → Training: suggestion for the weakest criterion -->
-                <Border Margin="0,16,0,0" Background="{StaticResource AccentSoft}" CornerRadius="8" Padding="12,10"
+                <Border Margin="0,16,0,0" Background="{DynamicResource AccentSoft}" CornerRadius="8" Padding="12,10"
                         Visibility="{Binding HasSuggestion, Converter={StaticResource BoolVis}}">
                     <StackPanel Orientation="Horizontal">
-                        <Path Width="16" Height="16" Stretch="Uniform" Fill="{StaticResource Accent}" Data="{StaticResource IconSchool}" VerticalAlignment="Top" Margin="0,1,0,0" />
-                        <TextBlock Margin="10,0,0,0" FontSize="12.5" Foreground="{StaticResource TextSecondary}" TextWrapping="Wrap" Text="{Binding SuggestionText}" />
+                        <Path Width="16" Height="16" Stretch="Uniform" Fill="{DynamicResource Accent}" Data="{StaticResource IconSchool}" VerticalAlignment="Top" Margin="0,1,0,0" />
+                        <TextBlock Margin="10,0,0,0" FontSize="12.5" Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap" Text="{Binding SuggestionText}" />
                     </StackPanel>
                 </Border>
 
@@ -88,8 +88,8 @@
                                     </Grid.ColumnDefinitions>
 
                                     <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding Label}" FontSize="14.5" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" TextWrapping="Wrap" />
-                                        <TextBlock Text="{Binding ShareText}" FontSize="11.5" Margin="0,3,0,10" Foreground="{StaticResource TextMuted}" />
+                                        <TextBlock Text="{Binding Label}" FontSize="14.5" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" TextWrapping="Wrap" />
+                                        <TextBlock Text="{Binding ShareText}" FontSize="11.5" Margin="0,3,0,10" Foreground="{DynamicResource TextMuted}" />
                                         <TextBox Style="{StaticResource AppTextBox}" Height="34" MinWidth="200"
                                                  IsEnabled="{Binding DataContext.IsEditable, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                  VerticalContentAlignment="Center"
@@ -139,7 +139,7 @@
         </ScrollViewer>
 
         <!-- Footer -->
-        <Border Grid.Row="2" Background="{StaticResource Surface}" BorderBrush="{StaticResource Border}" BorderThickness="0,1,0,0" Padding="24,12">
+        <Border Grid.Row="2" Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="0,1,0,0" Padding="24,12">
             <Grid>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                     <Button Style="{StaticResource SecondaryButton}" Content="Exporter PDF" Command="{Binding PdfCommand}" />

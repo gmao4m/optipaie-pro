@@ -67,6 +67,7 @@ namespace OptiPaie.Desktop.Shell
 
             OpenNotificationCommand = new RelayCommand(p => OpenNotification(p as OptiPaie.Core.Dtos.Notification));
             SignOutCommand = new RelayCommand(() => (Application.Current as OptiPaie.Desktop.App)?.SignOut());
+            ToggleThemeCommand = new RelayCommand(ToggleTheme);
 
             // Load the company list once and react to header company switches: re-activate
             // the visible module so it reloads the new company's data (no stale data left).
@@ -107,6 +108,18 @@ namespace OptiPaie.Desktop.Shell
 
         /// <summary>Ends the session and returns to the activation / trial-start screen.</summary>
         public ICommand SignOutCommand { get; }
+
+        /// <summary>Toggles the light/dark colour theme (persisted).</summary>
+        public ICommand ToggleThemeCommand { get; }
+
+        public string ThemeToggleText => Composition.ThemeManager.IsDark ? "Mode clair" : "Mode sombre";
+
+        private void ToggleTheme()
+        {
+            bool dark = Composition.ThemeManager.Toggle();
+            _services.Settings.Set("Ui.Theme", dark ? "dark" : "light");
+            Raise(nameof(ThemeToggleText));
+        }
 
         private void RefreshNotifications()
         {

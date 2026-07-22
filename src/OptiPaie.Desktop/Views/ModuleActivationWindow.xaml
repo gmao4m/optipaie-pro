@@ -4,7 +4,7 @@
         Title="Activer un module"
         Height="360" Width="460" ResizeMode="NoResize"
         WindowStartupLocation="CenterOwner"
-        FontFamily="Segoe UI" Background="{StaticResource Canvas}" Language="fr-FR"
+        FontFamily="Segoe UI" Background="{DynamicResource Canvas}" Language="fr-FR"
         TextOptions.TextFormattingMode="Ideal" UseLayoutRounding="True">
     <Grid Margin="26,22">
         <Grid.RowDefinitions>
@@ -17,8 +17,8 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,4">
-            <Border Width="40" Height="40" CornerRadius="11" Background="{StaticResource BrandSoft}">
-                <Path Width="20" Height="20" Stretch="Uniform" Fill="{StaticResource Brand}"
+            <Border Width="40" Height="40" CornerRadius="11" Background="{DynamicResource BrandSoft}">
+                <Path Width="20" Height="20" Stretch="Uniform" Fill="{DynamicResource Brand}"
                       Data="{StaticResource IconLock}" HorizontalAlignment="Center" VerticalAlignment="Center" />
             </Border>
             <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
@@ -33,7 +33,7 @@
                  IsEnabled="{Binding IsNotBusy}" CharacterCasing="Upper"
                  FontFamily="Consolas" FontSize="16" FontWeight="SemiBold"
                  Height="44" Padding="12,0" VerticalContentAlignment="Center"
-                 Background="{StaticResource Surface}" BorderBrush="{StaticResource BorderStrong}" BorderThickness="1" />
+                 Background="{DynamicResource Surface}" BorderBrush="{DynamicResource BorderStrong}" BorderThickness="1" />
         <TextBlock Grid.Row="3" Text="Format : MOD-XXXXX-XXXXX-XXXXX-XXXXX" Style="{StaticResource Caption}" Margin="2,6,0,0" />
 
         <!-- Status -->
@@ -41,7 +41,7 @@
                 Visibility="{Binding StatusMessage, Converter={StaticResource EmptyToVis}}">
             <Border.Style>
                 <Style TargetType="Border">
-                    <Setter Property="Background" Value="{StaticResource BrandSoft}" />
+                    <Setter Property="Background" Value="{DynamicResource BrandSoft}" />
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding IsError}" Value="True">
                             <Setter Property="Background" Value="#FCE8E6" />
@@ -52,10 +52,10 @@
             <TextBlock Text="{Binding StatusMessage}" TextWrapping="Wrap" FontSize="12.5">
                 <TextBlock.Style>
                     <Style TargetType="TextBlock" BasedOn="{StaticResource Body}">
-                        <Setter Property="Foreground" Value="{StaticResource Salary}" />
+                        <Setter Property="Foreground" Value="{DynamicResource Salary}" />
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding IsError}" Value="True">
-                                <Setter Property="Foreground" Value="{StaticResource Deduction}" />
+                                <Setter Property="Foreground" Value="{DynamicResource Deduction}" />
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>

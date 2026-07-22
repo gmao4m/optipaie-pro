@@ -2,17 +2,17 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Candidats" Height="540" Width="820"
-        WindowStartupLocation="CenterOwner" Background="{StaticResource Canvas}">
+        WindowStartupLocation="CenterOwner" Background="{DynamicResource Canvas}">
     <Window.Resources>
         <Style x:Key="GridHeader" TargetType="DataGridColumnHeader">
-            <Setter Property="Background" Value="{StaticResource SurfaceMuted}" />
-            <Setter Property="Foreground" Value="{StaticResource TextSecondary}" />
+            <Setter Property="Background" Value="{DynamicResource SurfaceMuted}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
             <Setter Property="FontSize" Value="12" />
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="Height" Value="32" />
             <Setter Property="Padding" Value="8,0" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
-            <Setter Property="BorderBrush" Value="{StaticResource Border}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource Border}" />
             <Setter Property="BorderThickness" Value="0,0,1,1" />
         </Style>
         <Style x:Key="CenterText" TargetType="TextBlock">
@@ -40,10 +40,10 @@
         <DataGrid Grid.Row="1" Margin="0,14,0,0" ItemsSource="{Binding Candidates}" SelectedItem="{Binding SelectedCandidate}"
                   AutoGenerateColumns="False" HeadersVisibility="Column" IsReadOnly="True"
                   CanUserAddRows="False" CanUserResizeRows="False" GridLinesVisibility="All"
-                  RowHeight="32" FontFamily="Segoe UI" FontSize="12.5" Background="{StaticResource Surface}"
-                  RowBackground="{StaticResource Surface}" AlternatingRowBackground="{StaticResource SurfaceMuted}"
-                  BorderBrush="{StaticResource Border}" BorderThickness="1"
-                  HorizontalGridLinesBrush="{StaticResource Border}" VerticalGridLinesBrush="{StaticResource Border}"
+                  RowHeight="32" FontFamily="Segoe UI" FontSize="12.5" Background="{DynamicResource Surface}"
+                  RowBackground="{DynamicResource Surface}" AlternatingRowBackground="{DynamicResource SurfaceMuted}"
+                  BorderBrush="{DynamicResource Border}" BorderThickness="1"
+                  HorizontalGridLinesBrush="{DynamicResource Border}" VerticalGridLinesBrush="{DynamicResource Border}"
                   ColumnHeaderStyle="{StaticResource GridHeader}">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Candidat" Binding="{Binding FullName}" Width="*" />

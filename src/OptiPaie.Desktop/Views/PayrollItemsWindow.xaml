@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Rubriques de paie" Width="720" Height="540"
         WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
-        FontFamily="Segoe UI" Background="{StaticResource Canvas}" Language="fr-FR"
+        FontFamily="Segoe UI" Background="{DynamicResource Canvas}" Language="fr-FR"
         TextOptions.TextFormattingMode="Ideal" UseLayoutRounding="True">
     <Grid Margin="20">
         <Grid.RowDefinitions>
@@ -17,17 +17,17 @@
         <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,14,0,12">
             <Button Style="{StaticResource PrimaryButton}" Height="34" Content="Ajouter" Command="{Binding NewCommand}" />
             <Button Style="{StaticResource SecondaryButton}" Height="34" Margin="8,0,0,0" Content="Modifier" Command="{Binding EditCommand}" />
-            <Button Style="{StaticResource SecondaryButton}" Height="34" Margin="8,0,0,0" Content="Supprimer" Foreground="{StaticResource Deduction}" Command="{Binding DeleteCommand}" />
+            <Button Style="{StaticResource SecondaryButton}" Height="34" Margin="8,0,0,0" Content="Supprimer" Foreground="{DynamicResource Deduction}" Command="{Binding DeleteCommand}" />
             <Button Style="{StaticResource SecondaryButton}" Height="34" Margin="8,0,0,0" Content="Fermer" Command="{Binding CloseCommand}" />
         </StackPanel>
 
         <DataGrid Grid.Row="2" ItemsSource="{Binding Items}" SelectedItem="{Binding Selected}"
                   AutoGenerateColumns="False" HeadersVisibility="Column" IsReadOnly="True"
                   CanUserAddRows="False" CanUserResizeRows="False" GridLinesVisibility="Horizontal"
-                  RowHeight="32" FontSize="12.5" Background="{StaticResource Surface}"
-                  RowBackground="{StaticResource Surface}" AlternatingRowBackground="{StaticResource SurfaceMuted}"
-                  BorderBrush="{StaticResource Border}" BorderThickness="1"
-                  HorizontalGridLinesBrush="{StaticResource Border}"
+                  RowHeight="32" FontSize="12.5" Background="{DynamicResource Surface}"
+                  RowBackground="{DynamicResource Surface}" AlternatingRowBackground="{DynamicResource SurfaceMuted}"
+                  BorderBrush="{DynamicResource Border}" BorderThickness="1"
+                  HorizontalGridLinesBrush="{DynamicResource Border}"
                   MouseDoubleClick="OnRowDoubleClick">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Libellé" Binding="{Binding NameFr}" Width="*" />

@@ -3,14 +3,14 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <UserControl.Resources>
         <Style x:Key="GridHeader" TargetType="DataGridColumnHeader">
-            <Setter Property="Background" Value="{StaticResource SurfaceMuted}" />
-            <Setter Property="Foreground" Value="{StaticResource TextSecondary}" />
+            <Setter Property="Background" Value="{DynamicResource SurfaceMuted}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
             <Setter Property="FontSize" Value="12" />
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="Height" Value="34" />
             <Setter Property="Padding" Value="8,0" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
-            <Setter Property="BorderBrush" Value="{StaticResource Border}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource Border}" />
             <Setter Property="BorderThickness" Value="0,0,1,1" />
         </Style>
         <Style x:Key="CenterText" TargetType="TextBlock">
@@ -18,8 +18,8 @@
             <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
         <Style x:Key="Kpi" TargetType="Border">
-            <Setter Property="Background" Value="{StaticResource Surface}" />
-            <Setter Property="BorderBrush" Value="{StaticResource Border}" />
+            <Setter Property="Background" Value="{DynamicResource Surface}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource Border}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="CornerRadius" Value="10" />
             <Setter Property="Padding" Value="16,11" />
@@ -65,19 +65,19 @@
                 <Border Style="{StaticResource Kpi}">
                     <StackPanel>
                         <TextBlock Style="{StaticResource Caption}" Text="Solde restant" />
-                        <TextBlock FontSize="20" FontWeight="SemiBold" Foreground="{StaticResource Salary}" Text="{Binding RemainingText}" />
+                        <TextBlock FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource Salary}" Text="{Binding RemainingText}" />
                     </StackPanel>
                 </Border>
                 <Border Style="{StaticResource Kpi}">
                     <StackPanel>
                         <TextBlock Style="{StaticResource Caption}" Text="En attente" />
-                        <TextBlock FontSize="20" FontWeight="SemiBold" Foreground="{StaticResource Warning}" Text="{Binding PendingText}" />
+                        <TextBlock FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource Warning}" Text="{Binding PendingText}" />
                     </StackPanel>
                 </Border>
                 <Border Style="{StaticResource Kpi}">
                     <StackPanel>
                         <TextBlock Style="{StaticResource Caption}" Text="Sans solde" />
-                        <TextBlock FontSize="20" FontWeight="SemiBold" Foreground="{StaticResource Deduction}" Text="{Binding UnpaidText}" />
+                        <TextBlock FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource Deduction}" Text="{Binding UnpaidText}" />
                     </StackPanel>
                 </Border>
             </StackPanel>
@@ -87,10 +87,10 @@
         <DataGrid Grid.Row="2" Margin="0,18,0,0" ItemsSource="{Binding Requests}" SelectedItem="{Binding SelectedRequest}"
                   AutoGenerateColumns="False" HeadersVisibility="Column" IsReadOnly="True"
                   CanUserAddRows="False" CanUserResizeRows="False" GridLinesVisibility="All"
-                  RowHeight="32" FontFamily="Segoe UI" FontSize="12.5" Background="{StaticResource Surface}"
-                  RowBackground="{StaticResource Surface}" AlternatingRowBackground="{StaticResource SurfaceMuted}"
-                  BorderBrush="{StaticResource Border}" BorderThickness="1"
-                  HorizontalGridLinesBrush="{StaticResource Border}" VerticalGridLinesBrush="{StaticResource Border}"
+                  RowHeight="32" FontFamily="Segoe UI" FontSize="12.5" Background="{DynamicResource Surface}"
+                  RowBackground="{DynamicResource Surface}" AlternatingRowBackground="{DynamicResource SurfaceMuted}"
+                  BorderBrush="{DynamicResource Border}" BorderThickness="1"
+                  HorizontalGridLinesBrush="{DynamicResource Border}" VerticalGridLinesBrush="{DynamicResource Border}"
                   ColumnHeaderStyle="{StaticResource GridHeader}">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Employé" Binding="{Binding EmployeeName}" Width="*" />

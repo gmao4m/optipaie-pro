@@ -14,14 +14,14 @@
             <Setter Property="VerticalContentAlignment" Value="Center" />
         </Style>
         <Style x:Key="GridHeader" TargetType="DataGridColumnHeader">
-            <Setter Property="Background" Value="{StaticResource SurfaceMuted}" />
-            <Setter Property="Foreground" Value="{StaticResource TextSecondary}" />
+            <Setter Property="Background" Value="{DynamicResource SurfaceMuted}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
             <Setter Property="FontSize" Value="12" />
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="Height" Value="34" />
             <Setter Property="Padding" Value="8,0" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
-            <Setter Property="BorderBrush" Value="{StaticResource Border}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource Border}" />
             <Setter Property="BorderThickness" Value="0,0,1,1" />
         </Style>
         <Style x:Key="Stat" TargetType="StackPanel">
@@ -43,7 +43,7 @@
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <!-- Company selection is global (header selector) -->
 
-                <TextBlock Text="Employé" VerticalAlignment="Center" Foreground="{StaticResource TextMuted}" FontSize="12" Margin="14,0,6,0" />
+                <TextBlock Text="Employé" VerticalAlignment="Center" Foreground="{DynamicResource TextMuted}" FontSize="12" Margin="14,0,6,0" />
                 <ComboBox Style="{StaticResource AppComboBox}" Width="170" Height="32" ItemsSource="{Binding Employees}" SelectedItem="{Binding SelectedEmployee}">
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
@@ -58,9 +58,9 @@
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
                 </ComboBox>
-                <TextBlock Text="Mois" VerticalAlignment="Center" Foreground="{StaticResource TextMuted}" FontSize="12" Margin="14,0,6,0" />
+                <TextBlock Text="Mois" VerticalAlignment="Center" Foreground="{DynamicResource TextMuted}" FontSize="12" Margin="14,0,6,0" />
                 <ComboBox Style="{StaticResource AppComboBox}" Width="120" Height="32" ItemsSource="{Binding Months}" SelectedValue="{Binding SelectedMonth}" SelectedValuePath="Value" DisplayMemberPath="Label" />
-                <TextBlock Text="Année" VerticalAlignment="Center" Foreground="{StaticResource TextMuted}" FontSize="12" Margin="14,0,6,0" />
+                <TextBlock Text="Année" VerticalAlignment="Center" Foreground="{DynamicResource TextMuted}" FontSize="12" Margin="14,0,6,0" />
                 <ComboBox Style="{StaticResource AppComboBox}" Width="80" Height="32" ItemsSource="{Binding Years}" SelectedItem="{Binding SelectedYear}" />
             </StackPanel>
         </Grid>
@@ -71,9 +71,9 @@
                         Visibility="{Binding HasEmployee, Converter={StaticResource BoolToVis}}">
                 <TextBlock Style="{StaticResource H2}" FontSize="14" Text="Éléments de paie" VerticalAlignment="Center" />
                 <!-- Filled automatically by the Attendance module when the month has pointage -->
-                <Border Background="{StaticResource BrandSoft}" CornerRadius="6" Padding="9,4" Margin="12,0,0,0" VerticalAlignment="Center"
+                <Border Background="{DynamicResource BrandSoft}" CornerRadius="6" Padding="9,4" Margin="12,0,0,0" VerticalAlignment="Center"
                         Visibility="{Binding AttendanceNote, Converter={StaticResource NonEmptyToVis}}">
-                    <TextBlock FontSize="11.5" Foreground="{StaticResource TextSecondary}" Text="{Binding AttendanceNote}" />
+                    <TextBlock FontSize="11.5" Foreground="{DynamicResource TextSecondary}" Text="{Binding AttendanceNote}" />
                 </Border>
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Visibility="{Binding HasEmployee, Converter={StaticResource BoolToVis}}">
@@ -93,10 +93,10 @@
                       Visibility="{Binding HasEmployee, Converter={StaticResource BoolToVis}}"
                       CanUserAddRows="False" CanUserDeleteRows="False" CanUserResizeRows="False" CanUserReorderColumns="False"
                       GridLinesVisibility="All" SelectionUnit="Cell" SelectionMode="Single"
-                      RowHeight="30" FontFamily="Segoe UI" FontSize="12.5" Background="{StaticResource Surface}"
-                      RowBackground="{StaticResource Surface}" AlternatingRowBackground="{StaticResource SurfaceMuted}"
-                      BorderBrush="{StaticResource Border}" BorderThickness="1"
-                      HorizontalGridLinesBrush="{StaticResource Border}" VerticalGridLinesBrush="{StaticResource Border}"
+                      RowHeight="30" FontFamily="Segoe UI" FontSize="12.5" Background="{DynamicResource Surface}"
+                      RowBackground="{DynamicResource Surface}" AlternatingRowBackground="{DynamicResource SurfaceMuted}"
+                      BorderBrush="{DynamicResource Border}" BorderThickness="1"
+                      HorizontalGridLinesBrush="{DynamicResource Border}" VerticalGridLinesBrush="{DynamicResource Border}"
                       ColumnHeaderStyle="{StaticResource GridHeader}">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Libellé" Binding="{Binding Rubrique}" Width="*">
@@ -122,7 +122,7 @@
                                         Visibility="{Binding CanRemove, Converter={StaticResource BoolToVis}}"
                                         Command="{Binding DataContext.RemoveLineCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                         CommandParameter="{Binding}">
-                                    <Path Width="14" Height="14" Stretch="Uniform" Fill="{StaticResource Deduction}" Data="{StaticResource IconTrash}" />
+                                    <Path Width="14" Height="14" Stretch="Uniform" Fill="{DynamicResource Deduction}" Data="{StaticResource IconTrash}" />
                                 </Button>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
@@ -132,11 +132,11 @@
         </Grid>
 
         <!-- Totals + actions -->
-        <Border Grid.Row="3" BorderBrush="{StaticResource Border}" BorderThickness="1" CornerRadius="10" Background="{StaticResource Surface}"
+        <Border Grid.Row="3" BorderBrush="{DynamicResource Border}" BorderThickness="1" CornerRadius="10" Background="{DynamicResource Surface}"
                 Padding="16,12" Margin="0,14,0,0" Visibility="{Binding HasEmployee, Converter={StaticResource BoolToVis}}">
             <StackPanel>
                 <DockPanel>
-                    <Border DockPanel.Dock="Right" Background="{StaticResource TextPrimary}" CornerRadius="8" Padding="16,8" VerticalAlignment="Center">
+                    <Border DockPanel.Dock="Right" Background="{DynamicResource TextPrimary}" CornerRadius="8" Padding="16,8" VerticalAlignment="Center">
                         <StackPanel>
                             <TextBlock Text="Net à payer" Foreground="#C9CDD2" FontSize="11" />
                             <TextBlock Text="{Binding NetText}" Foreground="White" FontSize="17" FontWeight="SemiBold" Margin="0,2,0,0" />
@@ -146,13 +146,13 @@
                         <StackPanel Style="{StaticResource Stat}"><TextBlock Style="{StaticResource Caption}" Text="Salaire brut" /><TextBlock FontWeight="SemiBold" FontSize="13" Text="{Binding GrossText}" /></StackPanel>
                         <StackPanel Style="{StaticResource Stat}"><TextBlock Style="{StaticResource Caption}" Text="Salaire cotisable" /><TextBlock FontWeight="SemiBold" FontSize="13" Text="{Binding CotisableText}" /></StackPanel>
                         <StackPanel Style="{StaticResource Stat}"><TextBlock Style="{StaticResource Caption}" Text="Salaire imposable" /><TextBlock FontWeight="SemiBold" FontSize="13" Text="{Binding ImposableText}" /></StackPanel>
-                        <StackPanel Style="{StaticResource Stat}"><TextBlock Style="{StaticResource Caption}" Text="CNAS" /><TextBlock FontWeight="SemiBold" FontSize="13" Foreground="{StaticResource Deduction}" Text="{Binding CnasText}" /></StackPanel>
+                        <StackPanel Style="{StaticResource Stat}"><TextBlock Style="{StaticResource Caption}" Text="CNAS" /><TextBlock FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource Deduction}" Text="{Binding CnasText}" /></StackPanel>
                         <StackPanel Style="{StaticResource Stat}"><TextBlock Style="{StaticResource Caption}" Text="Abattement" /><TextBlock FontWeight="SemiBold" FontSize="13" Text="{Binding AbattementText}" /></StackPanel>
-                        <StackPanel Style="{StaticResource Stat}"><TextBlock Style="{StaticResource Caption}" Text="IRG" /><TextBlock FontWeight="SemiBold" FontSize="13" Foreground="{StaticResource Deduction}" Text="{Binding IrgText}" /></StackPanel>
+                        <StackPanel Style="{StaticResource Stat}"><TextBlock Style="{StaticResource Caption}" Text="IRG" /><TextBlock FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource Deduction}" Text="{Binding IrgText}" /></StackPanel>
                     </WrapPanel>
                 </DockPanel>
 
-                <Border Height="1" Background="{StaticResource Border}" Margin="0,12" />
+                <Border Height="1" Background="{DynamicResource Border}" Margin="0,12" />
 
                 <Grid>
                     <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Center" HorizontalAlignment="Left" Text="{Binding Status}" />
