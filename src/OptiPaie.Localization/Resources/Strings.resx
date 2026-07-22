@@ -683,6 +683,50 @@
   <data name="Enum_CertType_SalaryCertificate" xml:space="preserve"><value>Attestation de salaire</value></data>
   <data name="Enum_CertType_Free" xml:space="preserve"><value>Document libre</value></data>
 
+  <!-- Performance module (8-tab hub) -->
+  <data name="Perf_Title" xml:space="preserve"><value>Performance &amp; Carrière</value></data>
+  <data name="Perf_Subtitle" xml:space="preserve"><value>Campagnes d'évaluation, modèles, objectifs, calibrage et parcours des employés.</value></data>
+  <data name="Perf_Tab_Campaigns" xml:space="preserve"><value>Campagnes</value></data>
+  <data name="Perf_Tab_Reviews" xml:space="preserve"><value>Évaluations</value></data>
+  <data name="Perf_Tab_Templates" xml:space="preserve"><value>Modèles</value></data>
+  <data name="Perf_Tab_Calibration" xml:space="preserve"><value>Calibrage</value></data>
+  <data name="Perf_Tab_Goals" xml:space="preserve"><value>Objectifs</value></data>
+  <data name="Perf_Tab_Comparison" xml:space="preserve"><value>Comparaison</value></data>
+  <data name="Perf_Tab_Career" xml:space="preserve"><value>Parcours</value></data>
+  <data name="Perf_LaunchCampaign" xml:space="preserve"><value>Lancer une campagne</value></data>
+  <data name="Perf_Reviewer" xml:space="preserve"><value>Évaluateur</value></data>
+  <data name="Perf_Score" xml:space="preserve"><value>Note</value></data>
+  <data name="Perf_OpenReview" xml:space="preserve"><value>Ouvrir l'évaluation</value></data>
+  <data name="Perf_Rating" xml:space="preserve"><value>Appréciation</value></data>
+  <data name="Perf_NewReview" xml:space="preserve"><value>Nouvelle évaluation</value></data>
+  <data name="Perf_Open" xml:space="preserve"><value>Ouvrir</value></data>
+  <data name="Perf_Duplicate" xml:space="preserve"><value>Dupliquer</value></data>
+  <data name="Perf_NoData" xml:space="preserve"><value>Aucune donnée à afficher pour le moment.</value></data>
+  <data name="Perf_Top10" xml:space="preserve"><value>Meilleurs 10 %</value></data>
+  <data name="Perf_Bottom10" xml:space="preserve"><value>À accompagner (10 % les plus bas)</value></data>
+  <data name="Perf_DeptAverage" xml:space="preserve"><value>Moyenne par département</value></data>
+  <data name="Perf_YearTrend" xml:space="preserve"><value>Tendance annuelle</value></data>
+  <data name="Perf_NoFinalized" xml:space="preserve"><value>Aucune évaluation finalisée pour cette année.</value></data>
+  <data name="Perf_Col_Reviews" xml:space="preserve"><value>Évals</value></data>
+  <data name="Perf_Average" xml:space="preserve"><value>Moyenne</value></data>
+  <data name="Perf_Deviation" xml:space="preserve"><value>Écart</value></data>
+  <data name="Perf_Cal_Insuff" xml:space="preserve"><value>Insuff.</value></data>
+  <data name="Perf_Cal_FairlyGood" xml:space="preserve"><value>A. bien</value></data>
+  <data name="Perf_Cal_Good" xml:space="preserve"><value>Bien</value></data>
+  <data name="Perf_Cal_VeryGood" xml:space="preserve"><value>T. bien</value></data>
+  <data name="Perf_Cal_Excellent" xml:space="preserve"><value>Excel.</value></data>
+  <data name="Perf_Alert" xml:space="preserve"><value>Alerte</value></data>
+  <data name="Perf_Goal" xml:space="preserve"><value>Objectif</value></data>
+  <data name="Perf_Target" xml:space="preserve"><value>Cible</value></data>
+  <data name="Perf_Progress" xml:space="preserve"><value>Progression</value></data>
+  <data name="Perf_MarkAchieved" xml:space="preserve"><value>Marquer atteint</value></data>
+  <data name="Perf_NewGoal" xml:space="preserve"><value>Nouvel objectif</value></data>
+  <data name="Perf_Clear" xml:space="preserve"><value>Effacer</value></data>
+  <data name="Perf_Compare" xml:space="preserve"><value>Comparer</value></data>
+  <data name="Perf_LastScore" xml:space="preserve"><value>Dernière note</value></data>
+  <data name="Perf_RewardBtn" xml:space="preserve"><value>+ Récompense</value></data>
+  <data name="Perf_PromotionBtn" xml:space="preserve"><value>+ Promotion</value></data>
+
   <!-- Domain enum labels -->
   <data name="Enum_Gender_Male" xml:space="preserve"><value>Masculin</value></data>
   <data name="Enum_Gender_Female" xml:space="preserve"><value>Féminin</value></data>

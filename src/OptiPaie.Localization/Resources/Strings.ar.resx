@@ -683,6 +683,50 @@
   <data name="Enum_CertType_SalaryCertificate" xml:space="preserve"><value>شهادة أجر</value></data>
   <data name="Enum_CertType_Free" xml:space="preserve"><value>وثيقة حرة</value></data>
 
+  <!-- Performance module (8-tab hub) -->
+  <data name="Perf_Title" xml:space="preserve"><value>الأداء والمسار المهني</value></data>
+  <data name="Perf_Subtitle" xml:space="preserve"><value>حملات التقييم والنماذج والأهداف والمعايرة ومسار الموظفين.</value></data>
+  <data name="Perf_Tab_Campaigns" xml:space="preserve"><value>الحملات</value></data>
+  <data name="Perf_Tab_Reviews" xml:space="preserve"><value>التقييمات</value></data>
+  <data name="Perf_Tab_Templates" xml:space="preserve"><value>النماذج</value></data>
+  <data name="Perf_Tab_Calibration" xml:space="preserve"><value>المعايرة</value></data>
+  <data name="Perf_Tab_Goals" xml:space="preserve"><value>الأهداف</value></data>
+  <data name="Perf_Tab_Comparison" xml:space="preserve"><value>المقارنة</value></data>
+  <data name="Perf_Tab_Career" xml:space="preserve"><value>المسار المهني</value></data>
+  <data name="Perf_LaunchCampaign" xml:space="preserve"><value>إطلاق حملة</value></data>
+  <data name="Perf_Reviewer" xml:space="preserve"><value>المُقيِّم</value></data>
+  <data name="Perf_Score" xml:space="preserve"><value>العلامة</value></data>
+  <data name="Perf_OpenReview" xml:space="preserve"><value>فتح التقييم</value></data>
+  <data name="Perf_Rating" xml:space="preserve"><value>التقدير</value></data>
+  <data name="Perf_NewReview" xml:space="preserve"><value>تقييم جديد</value></data>
+  <data name="Perf_Open" xml:space="preserve"><value>فتح</value></data>
+  <data name="Perf_Duplicate" xml:space="preserve"><value>تكرار</value></data>
+  <data name="Perf_NoData" xml:space="preserve"><value>لا توجد بيانات للعرض حالياً.</value></data>
+  <data name="Perf_Top10" xml:space="preserve"><value>أفضل 10٪</value></data>
+  <data name="Perf_Bottom10" xml:space="preserve"><value>بحاجة إلى دعم (أدنى 10٪)</value></data>
+  <data name="Perf_DeptAverage" xml:space="preserve"><value>المعدل حسب القسم</value></data>
+  <data name="Perf_YearTrend" xml:space="preserve"><value>الاتجاه السنوي</value></data>
+  <data name="Perf_NoFinalized" xml:space="preserve"><value>لا يوجد تقييم نهائي لهذه السنة.</value></data>
+  <data name="Perf_Col_Reviews" xml:space="preserve"><value>تقييمات</value></data>
+  <data name="Perf_Average" xml:space="preserve"><value>المعدل</value></data>
+  <data name="Perf_Deviation" xml:space="preserve"><value>الفارق</value></data>
+  <data name="Perf_Cal_Insuff" xml:space="preserve"><value>ضعيف</value></data>
+  <data name="Perf_Cal_FairlyGood" xml:space="preserve"><value>لا بأس</value></data>
+  <data name="Perf_Cal_Good" xml:space="preserve"><value>جيد</value></data>
+  <data name="Perf_Cal_VeryGood" xml:space="preserve"><value>جيد جداً</value></data>
+  <data name="Perf_Cal_Excellent" xml:space="preserve"><value>ممتاز</value></data>
+  <data name="Perf_Alert" xml:space="preserve"><value>تنبيه</value></data>
+  <data name="Perf_Goal" xml:space="preserve"><value>الهدف</value></data>
+  <data name="Perf_Target" xml:space="preserve"><value>الهدف المحدد</value></data>
+  <data name="Perf_Progress" xml:space="preserve"><value>التقدّم</value></data>
+  <data name="Perf_MarkAchieved" xml:space="preserve"><value>تعليم كمُحقَّق</value></data>
+  <data name="Perf_NewGoal" xml:space="preserve"><value>هدف جديد</value></data>
+  <data name="Perf_Clear" xml:space="preserve"><value>مسح</value></data>
+  <data name="Perf_Compare" xml:space="preserve"><value>مقارنة</value></data>
+  <data name="Perf_LastScore" xml:space="preserve"><value>آخر علامة</value></data>
+  <data name="Perf_RewardBtn" xml:space="preserve"><value>+ مكافأة</value></data>
+  <data name="Perf_PromotionBtn" xml:space="preserve"><value>+ ترقية</value></data>
+
   <!-- Domain enum labels -->
   <data name="Enum_Gender_Male" xml:space="preserve"><value>ذكر</value></data>
   <data name="Enum_Gender_Female" xml:space="preserve"><value>أنثى</value></data>
