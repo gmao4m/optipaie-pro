@@ -32,6 +32,8 @@
     <Reference Include="System.Net.Http" />
     <!-- DPAPI (ProtectedData) for the encrypted local license/trial cache. -->
     <Reference Include="System.Security" />
+    <!-- GDI+ : renders the demo company's placeholder logo (DemoDataSeeder). -->
+    <Reference Include="System.Drawing" />
   </ItemGroup>
 
 </Project>

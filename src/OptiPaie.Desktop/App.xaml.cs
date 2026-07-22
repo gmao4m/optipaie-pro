@@ -70,6 +70,11 @@ namespace OptiPaie.Desktop
                 return;
             }
 
+            // Demo experience: on a trial with an empty database, fill it with a realistic
+            // Algerian sample dataset so every screen demonstrates the product immediately.
+            // Never runs for a licensed install or a database that already has data.
+            SeedDemoDataIfTrial();
+
             var window = new MainWindow();
             MainWindow = window;
             ApplyFlowDirection(window);
@@ -78,6 +83,36 @@ namespace OptiPaie.Desktop
             StartBackgroundLicenseSync();
             StartUpdateChecks();
             StartTrialWatchdog();
+        }
+
+        /// <summary>
+        /// Seeds the demo dataset when the app is running on the trial AND the database is
+        /// empty (a fresh demo install). A licensed install, or any database that already
+        /// contains data, is left completely untouched. Failures never block startup.
+        /// </summary>
+        private void SeedDemoDataIfTrial()
+        {
+            try
+            {
+                if (Services.Access.Evaluate().State != AccessState.Trial)
+                {
+                    return;
+                }
+
+                var seeder = new OptiPaie.Services.DemoDataSeeder(
+                    Services.Companies, Services.Employees, Services.Contracts, Services.Attendance,
+                    Services.Leave, Services.Loans, Services.Assets, Services.Training,
+                    Services.Certificates, Services.Performance);
+
+                if (seeder.IsDatabaseEmpty())
+                {
+                    seeder.Seed();
+                }
+            }
+            catch
+            {
+                // Seeding demo data must never prevent the app from opening.
+            }
         }
 
         /// <summary>
