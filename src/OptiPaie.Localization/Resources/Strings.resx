@@ -727,6 +727,15 @@
   <data name="Perf_RewardBtn" xml:space="preserve"><value>+ Récompense</value></data>
   <data name="Perf_PromotionBtn" xml:space="preserve"><value>+ Promotion</value></data>
 
+  <!-- Company edit window -->
+  <data name="Cmp_AccountRib" xml:space="preserve"><value>Compte / RIB</value></data>
+
+  <!-- Employee edit window -->
+  <data name="EmpEdit_LastNameFr" xml:space="preserve"><value>Nom (FR)</value></data>
+  <data name="EmpEdit_FirstNameFr" xml:space="preserve"><value>Prénom (FR)</value></data>
+  <data name="EmpEdit_LastNameAr" xml:space="preserve"><value>Nom (AR)</value></data>
+  <data name="EmpEdit_FirstNameAr" xml:space="preserve"><value>Prénom (AR)</value></data>
+
   <!-- Domain enum labels -->
   <data name="Enum_Gender_Male" xml:space="preserve"><value>Masculin</value></data>
   <data name="Enum_Gender_Female" xml:space="preserve"><value>Féminin</value></data>

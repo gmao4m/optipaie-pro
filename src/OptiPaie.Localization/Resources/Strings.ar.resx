@@ -727,6 +727,15 @@
   <data name="Perf_RewardBtn" xml:space="preserve"><value>+ مكافأة</value></data>
   <data name="Perf_PromotionBtn" xml:space="preserve"><value>+ ترقية</value></data>
 
+  <!-- Company edit window -->
+  <data name="Cmp_AccountRib" xml:space="preserve"><value>الحساب / RIB</value></data>
+
+  <!-- Employee edit window -->
+  <data name="EmpEdit_LastNameFr" xml:space="preserve"><value>اللقب (بالفرنسية)</value></data>
+  <data name="EmpEdit_FirstNameFr" xml:space="preserve"><value>الاسم (بالفرنسية)</value></data>
+  <data name="EmpEdit_LastNameAr" xml:space="preserve"><value>اللقب (بالعربية)</value></data>
+  <data name="EmpEdit_FirstNameAr" xml:space="preserve"><value>الاسم (بالعربية)</value></data>
+
   <!-- Domain enum labels -->
   <data name="Enum_Gender_Male" xml:space="preserve"><value>ذكر</value></data>
   <data name="Enum_Gender_Female" xml:space="preserve"><value>أنثى</value></data>

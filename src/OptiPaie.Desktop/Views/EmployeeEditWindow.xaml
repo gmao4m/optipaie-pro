@@ -1,6 +1,7 @@
 <Window x:Class="OptiPaie.Desktop.Views.EmployeeEditWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="clr-namespace:OptiPaie.Desktop.Localization"
         Title="{Binding Title}" Width="640" Height="760"
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize" ShowInTaskbar="False"
         FontFamily="Segoe UI" Background="{DynamicResource Canvas}" Language="fr-FR"
@@ -36,30 +37,30 @@
 
                 <Border Style="{StaticResource Card}" Padding="20" Margin="0,0,0,16">
                     <StackPanel>
-                        <TextBlock Style="{StaticResource SectionTitle}" Text="Identité" />
+                        <TextBlock Style="{StaticResource SectionTitle}" Text="{loc:Loc Employee_GroupIdentity}" />
                         <UniformGrid Columns="2">
                             <StackPanel Margin="0,0,8,14">
-                                <TextBlock Style="{StaticResource FieldLabel}" Text="Nom (FR)" />
+                                <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Loc EmpEdit_LastNameFr}" />
                                 <TextBox Style="{StaticResource AppTextBox}" Text="{Binding Employee.LastNameFr, UpdateSourceTrigger=PropertyChanged}" />
                             </StackPanel>
                             <StackPanel Margin="8,0,0,14">
-                                <TextBlock Style="{StaticResource FieldLabel}" Text="Prénom (FR)" />
+                                <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Loc EmpEdit_FirstNameFr}" />
                                 <TextBox Style="{StaticResource AppTextBox}" Text="{Binding Employee.FirstNameFr, UpdateSourceTrigger=PropertyChanged}" />
                             </StackPanel>
                             <StackPanel Margin="0,0,8,14">
-                                <TextBlock Style="{StaticResource FieldLabel}" Text="Nom (AR)" />
+                                <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Loc EmpEdit_LastNameAr}" />
                                 <TextBox Style="{StaticResource AppTextBox}" Text="{Binding Employee.LastNameAr}" />
                             </StackPanel>
                             <StackPanel Margin="8,0,0,14">
-                                <TextBlock Style="{StaticResource FieldLabel}" Text="Prénom (AR)" />
+                                <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Loc EmpEdit_FirstNameAr}" />
                                 <TextBox Style="{StaticResource AppTextBox}" Text="{Binding Employee.FirstNameAr}" />
                             </StackPanel>
                             <StackPanel Margin="0,0,8,0">
-                                <TextBlock Style="{StaticResource FieldLabel}" Text="Genre" />
+                                <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Loc Employee_Gender}" />
                                 <ComboBox Style="{StaticResource AppComboBox}" ItemsSource="{Binding Genders}" SelectedValue="{Binding Employee.Gender}" SelectedValuePath="Value" DisplayMemberPath="Label" />
                             </StackPanel>
                             <StackPanel Margin="8,0,0,0">
-                                <TextBlock Style="{StaticResource FieldLabel}" Text="Situation familiale" />
+                                <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Loc Employee_MaritalStatus}" />
                                 <ComboBox Style="{StaticResource AppComboBox}" ItemsSource="{Binding Maritals}" SelectedValue="{Binding Employee.MaritalStatus}" SelectedValuePath="Value" DisplayMemberPath="Label" />
                             </StackPanel>
                         </UniformGrid>
@@ -68,22 +69,22 @@
 
                 <Border Style="{StaticResource Card}" Padding="20" Margin="0,0,0,16">
                     <StackPanel>
-                        <TextBlock Style="{StaticResource SectionTitle}" Text="Contrat" />
+                        <TextBlock Style="{StaticResource SectionTitle}" Text="{loc:Loc Employee_GroupContract}" />
                         <UniformGrid Columns="2">
                             <StackPanel Margin="0,0,8,14">
-                                <TextBlock Style="{StaticResource FieldLabel}" Text="Type de contrat" />
+                                <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Loc Employee_ContractType}" />
                                 <ComboBox Style="{StaticResource AppComboBox}" ItemsSource="{Binding Contracts}" SelectedValue="{Binding Employee.ContractType}" SelectedValuePath="Value" DisplayMemberPath="Label" />
                             </StackPanel>
                             <StackPanel Margin="8,0,0,14">
-                                <TextBlock Style="{StaticResource FieldLabel}" Text="Date de recrutement" />
+                                <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Loc Employee_HireDate}" />
                                 <DatePicker Height="38" SelectedDate="{Binding Employee.HireDate}" />
                             </StackPanel>
                             <StackPanel Margin="0,0,8,0">
-                                <TextBlock Style="{StaticResource FieldLabel}" Text="Date de naissance" />
+                                <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Loc Employee_BirthDate}" />
                                 <DatePicker Height="38" SelectedDate="{Binding Employee.BirthDate}" />
                             </StackPanel>
                             <StackPanel Margin="8,0,0,0">
-                                <TextBlock Style="{StaticResource FieldLabel}" Text="Date de sortie" />
+                                <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Loc Employee_ExitDate}" />
                                 <DatePicker Height="38" SelectedDate="{Binding Employee.ExitDate}" />
                             </StackPanel>
                         </UniformGrid>
@@ -92,26 +93,26 @@
 
                 <Border Style="{StaticResource Card}" Padding="20" Margin="0,0,0,16">
                     <StackPanel>
-                        <TextBlock Style="{StaticResource SectionTitle}" Text="Poste et rémunération" />
+                        <TextBlock Style="{StaticResource SectionTitle}" Text="{loc:Loc Employee_GroupJob}" />
                         <UniformGrid Columns="2">
                             <StackPanel Margin="0,0,8,14">
-                                <TextBlock Style="{StaticResource FieldLabel}" Text="Poste" />
+                                <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Loc Employee_Poste}" />
                                 <TextBox Style="{StaticResource AppTextBox}" Text="{Binding Employee.Poste}" />
                             </StackPanel>
                             <StackPanel Margin="8,0,0,14">
-                                <TextBlock Style="{StaticResource FieldLabel}" Text="Département / Service" />
+                                <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Loc Users_ColDepartment}" />
                                 <TextBox Style="{StaticResource AppTextBox}" Text="{Binding Employee.Department}" />
                             </StackPanel>
                             <StackPanel Margin="0,0,8,14">
-                                <TextBlock Style="{StaticResource FieldLabel}" Text="Catégorie" />
+                                <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Loc Employee_Category}" />
                                 <TextBox Style="{StaticResource AppTextBox}" Text="{Binding Employee.Category}" />
                             </StackPanel>
                             <StackPanel Margin="8,0,0,14">
-                                <TextBlock Style="{StaticResource FieldLabel}" Text="Salaire de base (DA)" />
+                                <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Loc Employee_BaseSalary}" />
                                 <TextBox Style="{StaticResource AppTextBox}" Text="{Binding Employee.BaseSalary}" />
                             </StackPanel>
                             <StackPanel Margin="0,0,8,0">
-                                <TextBlock Style="{StaticResource FieldLabel}" Text="Personnes à charge" />
+                                <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Loc Employee_Dependents}" />
                                 <TextBox Style="{StaticResource AppTextBox}" Text="{Binding Employee.Dependents}" />
                             </StackPanel>
                         </UniformGrid>
@@ -120,26 +121,26 @@
 
                 <Border Style="{StaticResource Card}" Padding="20">
                     <StackPanel>
-                        <TextBlock Style="{StaticResource SectionTitle}" Text="Identifiants et paiement" />
+                        <TextBlock Style="{StaticResource SectionTitle}" Text="{loc:Loc Employee_GroupPayment}" />
                         <UniformGrid Columns="2">
                             <StackPanel Margin="0,0,8,14">
-                                <TextBlock Style="{StaticResource FieldLabel}" Text="N° sécurité sociale" />
+                                <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Loc Employee_Nss}" />
                                 <TextBox Style="{StaticResource AppTextBox}" Text="{Binding Employee.Nss}" />
                             </StackPanel>
                             <StackPanel Margin="8,0,0,14">
-                                <TextBlock Style="{StaticResource FieldLabel}" Text="N° national" />
+                                <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Loc Employee_NationalId}" />
                                 <TextBox Style="{StaticResource AppTextBox}" Text="{Binding Employee.NationalId}" />
                             </StackPanel>
                             <StackPanel Margin="0,0,8,0">
-                                <TextBlock Style="{StaticResource FieldLabel}" Text="Mode de paiement" />
+                                <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Loc Employee_PaymentMode}" />
                                 <ComboBox Style="{StaticResource AppComboBox}" ItemsSource="{Binding Payments}" SelectedValue="{Binding Employee.PaymentMode}" SelectedValuePath="Value" DisplayMemberPath="Label" />
                             </StackPanel>
                             <StackPanel Margin="8,0,0,0">
-                                <TextBlock Style="{StaticResource FieldLabel}" Text="RIB" />
+                                <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Loc Employee_Rib}" />
                                 <TextBox Style="{StaticResource AppTextBox}" Text="{Binding Employee.Rib}" />
                             </StackPanel>
                         </UniformGrid>
-                        <CheckBox Margin="0,16,0,0" IsChecked="{Binding Employee.IsActive}" Content="Employé actif" VerticalContentAlignment="Center" />
+                        <CheckBox Margin="0,16,0,0" IsChecked="{Binding Employee.IsActive}" Content="{loc:Loc Employee_Active}" VerticalContentAlignment="Center" />
                     </StackPanel>
                 </Border>
 
@@ -149,8 +150,8 @@
         <!-- Footer -->
         <Border Grid.Row="2" Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="0,1,0,0" Padding="24,14">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Style="{StaticResource SecondaryButton}" Content="Annuler" Command="{Binding CancelCommand}" />
-                <Button Style="{StaticResource PrimaryButton}" Margin="12,0,0,0" Content="Enregistrer" Command="{Binding SaveCommand}" />
+                <Button Style="{StaticResource SecondaryButton}" Content="{loc:Loc Common_Cancel}" Command="{Binding CancelCommand}" />
+                <Button Style="{StaticResource PrimaryButton}" Margin="12,0,0,0" Content="{loc:Loc Common_Save}" Command="{Binding SaveCommand}" />
             </StackPanel>
         </Border>
     </Grid>

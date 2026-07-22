@@ -12,9 +12,9 @@
     <Product>OptiPaie PRO</Product>
     <Authors>OptiPaie</Authors>
     <Copyright>© 2026 OptiPaie. Tous droits réservés.</Copyright>
-    <Version>1.7.15</Version>
-    <FileVersion>1.7.15.0</FileVersion>
-    <AssemblyVersion>1.7.15.0</AssemblyVersion>
+    <Version>1.7.16</Version>
+    <FileVersion>1.7.16.0</FileVersion>
+    <AssemblyVersion>1.7.16.0</AssemblyVersion>
 
     <!-- Target platform: .NET Framework 4.8 (Windows 7 SP1 -> Windows 11) -->
     <TargetFramework>net48</TargetFramework>
