@@ -64,7 +64,7 @@ namespace OptiPaie.Core.Licensing
         }
     }
 
-    /// <summary>Manages the local, offline 30-day trial (no server involved).</summary>
+    /// <summary>Manages the local, offline 48-hour trial (no server involved).</summary>
     public interface ITrialService
     {
         /// <summary>Current trial status (anti clock-rollback aware).</summary>

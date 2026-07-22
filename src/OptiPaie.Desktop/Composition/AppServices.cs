@@ -107,7 +107,7 @@ namespace OptiPaie.Desktop.Composition
         /// <summary>Read-only gate the UI uses to unlock or lock (🔒) each module.</summary>
         public ILicenseGate LicenseGate { get; }
 
-        /// <summary>Offline 30-day trial manager.</summary>
+        /// <summary>Offline 48-hour trial manager.</summary>
         public ITrialService Trial { get; }
 
         /// <summary>Combined access decision (license + trial) for startup gating.</summary>

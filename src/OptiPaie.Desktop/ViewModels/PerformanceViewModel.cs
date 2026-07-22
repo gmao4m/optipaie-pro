@@ -141,9 +141,12 @@ namespace OptiPaie.Desktop.ViewModels
 
         private void Open()
         {
-            IReadOnlyList<Employee> employees = _services.Employees.GetByCompany(_selectedCompany.Id, false);
-            var vm = new PerformanceEditViewModel(_services, employees, _selectedYear, _selectedReview.Id);
-            if (ShowEditor(vm))
+            // The signature review form: one card per criterion, a live colour-coded overall.
+            var vm = new Performance.PerformanceReviewFormViewModel(_services, _selectedReview.Id);
+            var window = new PerformanceReviewWindow { DataContext = vm, Owner = Application.Current.MainWindow };
+            App.ApplyFlowDirection(window);
+            vm.RequestClose = ok => window.DialogResult = ok;
+            if (window.ShowDialog() == true)
             {
                 Load();
             }
