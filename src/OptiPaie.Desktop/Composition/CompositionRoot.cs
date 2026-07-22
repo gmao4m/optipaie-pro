@@ -62,6 +62,14 @@ namespace OptiPaie.Desktop.Composition
                 atsService, assetService, trainingService);
             var notificationService = new NotificationService(
                 companyService, employeeService, contractService, leaveService, trainingService);
+
+            // Audit trail. Wired into the lifecycle events of the modules through the
+            // optional sink, so history is recorded without changing any service ctor.
+            var auditService = new AuditService(unitOfWorkFactory, logger);
+            leaveService.Audit = auditService;
+            contractService.Audit = auditService;
+            loanService.Audit = auditService;
+            assetService.Audit = auditService;
             var backupService = new BackupService(backupProvider, unitOfWorkFactory, configuration, logger);
             var localizationService = new LocalizationService();
 
@@ -127,7 +135,8 @@ namespace OptiPaie.Desktop.Composition
                 certificateService,
                 dashboardService,
                 reportService,
-                notificationService);
+                notificationService,
+                auditService);
         }
     }
 }

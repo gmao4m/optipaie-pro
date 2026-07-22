@@ -66,7 +66,31 @@ Status: builds **0 errors / 0 warnings**; full suite **1355/1355**. Payroll engi
 untouched. Verified by clean build + service tests; the WPF surfaces were not click-tested
 in this environment.
 
+## Audit trail (cross-cutting)
+
+`AuditEntry` + `IAuditRepository` + `IAuditService` (migration `0021_AuditLog.sql`, an
+append-only table). Module services record lifecycle changes through an **optional
+property-injected `IAuditSink`** — unset it is a no-op (`NullAuditSink`), so no service
+constructor or existing test changed. Composition sets the real sink; wired so far:
+
+- **Leave** — approve / reject / cancel
+- **Contracts** — activate / terminate
+- **Loans** — status change (old → new)
+- **Assets** — assign / return
+
+Each entry records the entity, action, an old→new value, the operator and the time. The
+**Dashboard's "Journal d'activité"** shows the latest entries live; `GetForEntity` powers
+per-record history. `AuditServiceTests` (4) cover the store, cross-entity recency, the
+wired-sink recording a real leave approval, and the no-op path.
+
+> **Single-user note:** this is a per-machine licensed desktop app with no login, so the
+> audit "actor" is the local operator (configurable), not an authenticated identity —
+> and true **RBAC** (Admin/HR/Manager/Employee) would require an auth layer that does not
+> exist yet.
+
 ### Roadmap (from the master spec, not yet built)
-Employee 360-view, multi-branch/org-chart Company, and the horizontals — **RBAC**,
-per-record **audit log**, **offline-sync conflict rules**, full **RTL mirroring**,
-**dark mode**, keyboard shortcuts — remain a multi-release effort.
+Employee 360-view, multi-branch/org-chart Company, and the remaining horizontals —
+**RBAC / user accounts**, **offline-sync conflict rules**, full **RTL mirroring**,
+**dark mode**, keyboard shortcuts, native **.xlsx** — remain a multi-release effort. The
+audit trail is also only wired into the four services above so far; extending it to the
+rest is one `Record` call per lifecycle method.

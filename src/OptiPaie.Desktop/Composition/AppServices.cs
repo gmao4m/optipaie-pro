@@ -43,7 +43,8 @@ namespace OptiPaie.Desktop.Composition
             IWorkCertificateService certificates,
             IDashboardService dashboard,
             IReportService reports,
-            INotificationService notifications)
+            INotificationService notifications,
+            IAuditService audit)
         {
             Configuration = configuration;
             Logger = logger;
@@ -74,6 +75,7 @@ namespace OptiPaie.Desktop.Composition
             Dashboard = dashboard;
             Reports = reports;
             Notifications = notifications;
+            Audit = audit;
         }
 
         public AppConfiguration Configuration { get; }
@@ -141,5 +143,8 @@ namespace OptiPaie.Desktop.Composition
 
         /// <summary>Central notification engine — cross-module alerts for the bell (read-only).</summary>
         public INotificationService Notifications { get; }
+
+        /// <summary>Audit trail — records lifecycle changes and serves history/activity feeds.</summary>
+        public IAuditService Audit { get; }
     }
 }

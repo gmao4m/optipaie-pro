@@ -72,6 +72,9 @@ namespace OptiPaie.Core.Interfaces.Repositories
         /// <summary>Work-certificate repository (premium module, shares Employees).</summary>
         IWorkCertificateRepository Certificates { get; }
 
+        /// <summary>Append-only audit trail.</summary>
+        IAuditRepository Audit { get; }
+
         /// <summary>Begins a database transaction for the subsequent repository calls.</summary>
         void BeginTransaction();
 

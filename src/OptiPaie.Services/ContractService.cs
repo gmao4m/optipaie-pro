@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using OptiPaie.Common.Validation;
+using OptiPaie.Core.Auditing;
 using OptiPaie.Core.Dtos;
 using OptiPaie.Core.Entities;
 using OptiPaie.Core.Enums;
@@ -33,6 +34,9 @@ namespace OptiPaie.Services
         {
             _unitOfWorkFactory = Guard.AgainstNull(unitOfWorkFactory, nameof(unitOfWorkFactory));
         }
+
+        /// <summary>Optional audit sink (no-op unless wired by composition).</summary>
+        public IAuditSink Audit { get; set; } = NullAuditSink.Instance;
 
         public Result<long> Save(EmploymentContract contract)
         {
@@ -114,6 +118,7 @@ namespace OptiPaie.Services
                     uow.Contracts.Update(contract);
                     SyncEmployee(uow, contract);
                     uow.Commit();
+                    Audit.Record("Contract", id, AuditAction.StatusChanged, "Contrat activé", "Préparation", "En vigueur");
                     return Result.Ok();
                 }
                 catch
@@ -167,6 +172,7 @@ namespace OptiPaie.Services
                     }
 
                     uow.Commit();
+                    Audit.Record("Contract", id, AuditAction.StatusChanged, "Contrat résilié", "En vigueur", "Résilié");
                     return Result.Ok();
                 }
                 catch

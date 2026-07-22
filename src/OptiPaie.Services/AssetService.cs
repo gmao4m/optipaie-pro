@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using OptiPaie.Common.Validation;
+using OptiPaie.Core.Auditing;
 using OptiPaie.Core.Dtos;
 using OptiPaie.Core.Entities;
 using OptiPaie.Core.Enums;
@@ -24,6 +25,9 @@ namespace OptiPaie.Services
         {
             _unitOfWorkFactory = Guard.AgainstNull(unitOfWorkFactory, nameof(unitOfWorkFactory));
         }
+
+        /// <summary>Optional audit sink (no-op unless wired by composition).</summary>
+        public IAuditSink Audit { get; set; } = NullAuditSink.Instance;
 
         public Result<long> Save(Asset asset)
         {
@@ -110,6 +114,7 @@ namespace OptiPaie.Services
                     uow.Assets.Update(asset);
 
                     uow.Commit();
+                    Audit.Record("Asset", assetId, AuditAction.Assigned, "Matériel attribué", "Disponible", "Attribué");
                     return Result.Ok();
                 }
                 catch
@@ -152,6 +157,7 @@ namespace OptiPaie.Services
                     uow.Assets.Update(asset);
 
                     uow.Commit();
+                    Audit.Record("Asset", assetId, AuditAction.Returned, "Matériel retourné", "Attribué", "Disponible");
                     return Result.Ok();
                 }
                 catch

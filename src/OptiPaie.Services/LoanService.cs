@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using OptiPaie.Common.Validation;
+using OptiPaie.Core.Auditing;
 using OptiPaie.Core.Dtos;
 using OptiPaie.Core.Entities;
 using OptiPaie.Core.Enums;
@@ -30,6 +31,9 @@ namespace OptiPaie.Services
         {
             _unitOfWorkFactory = Guard.AgainstNull(unitOfWorkFactory, nameof(unitOfWorkFactory));
         }
+
+        /// <summary>Optional audit sink (no-op unless wired by composition).</summary>
+        public IAuditSink Audit { get; set; } = NullAuditSink.Instance;
 
         public Result<long> Save(Loan loan)
         {
@@ -109,8 +113,10 @@ namespace OptiPaie.Services
                     return Result.Fail("Prêt introuvable.", "Loan_NotFound");
                 }
 
+                LoanStatus old = loan.Status;
                 loan.Status = status;
                 uow.Loans.Update(loan);
+                Audit.Record("Loan", id, AuditAction.StatusChanged, "Statut du prêt modifié", old.ToString(), status.ToString());
                 return Result.Ok();
             }
         }

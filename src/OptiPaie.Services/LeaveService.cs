@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using OptiPaie.Common.Validation;
+using OptiPaie.Core.Auditing;
 using OptiPaie.Core.Dtos;
 using OptiPaie.Core.Entities;
 using OptiPaie.Core.Enums;
@@ -37,6 +38,9 @@ namespace OptiPaie.Services
         {
             _unitOfWorkFactory = Guard.AgainstNull(unitOfWorkFactory, nameof(unitOfWorkFactory));
         }
+
+        /// <summary>Optional audit sink (no-op unless wired by composition). Records lifecycle changes.</summary>
+        public IAuditSink Audit { get; set; } = NullAuditSink.Instance;
 
         public Result<long> Save(LeaveRequest request)
         {
@@ -131,6 +135,7 @@ namespace OptiPaie.Services
                     WriteAttendance(uow, request, settings);
 
                     uow.Commit();
+                    Audit.Record("Leave", id, AuditAction.Approved, "Congé approuvé", "En attente", "Approuvé");
                     return Result.Ok();
                 }
                 catch
@@ -160,6 +165,7 @@ namespace OptiPaie.Services
                 request.DecisionNote = note;
                 request.DecidedAtUtc = DateTime.UtcNow;
                 uow.Leave.Update(request);
+                Audit.Record("Leave", id, AuditAction.Rejected, "Congé refusé", "En attente", "Refusé");
                 return Result.Ok();
             }
         }
@@ -200,6 +206,7 @@ namespace OptiPaie.Services
                     }
 
                     uow.Commit();
+                    Audit.Record("Leave", id, AuditAction.StatusChanged, "Congé annulé", null, "Annulé");
                     return Result.Ok();
                 }
                 catch

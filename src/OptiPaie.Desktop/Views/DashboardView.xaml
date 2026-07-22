@@ -25,6 +25,7 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
             <!-- Header -->
@@ -164,8 +165,28 @@
                 </Border>
             </Grid>
 
+            <!-- Activity journal (audit trail) -->
+            <Border Grid.Row="3" Style="{StaticResource Card}" Padding="0" Margin="0,16,0,0">
+                <StackPanel>
+                    <TextBlock Style="{StaticResource H2}" FontSize="15" Text="Journal d'activité" Margin="16,14,16,8" />
+                    <ItemsControl ItemsSource="{Binding RecentActivity}" Margin="14,0,14,12">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,3">
+                                    <TextBlock Text="{Binding Text}" FontSize="12.5" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding Detail}" FontSize="11.5" Foreground="{StaticResource TextSecondary}"
+                                               HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock Text="Aucune activité enregistrée pour l'instant." Foreground="{StaticResource TextMuted}"
+                               Margin="16,0,0,14" Visibility="{Binding HasActivity, Converter={StaticResource InverseBoolToVis}}" />
+                </StackPanel>
+            </Border>
+
             <!-- Quick actions -->
-            <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,16,0,0">
+            <StackPanel Grid.Row="4" Orientation="Horizontal" Margin="0,16,0,0">
                 <Button Style="{StaticResource SecondaryButton}" Content="Nouvel employé" Command="{Binding NewEmployeeCommand}" />
                 <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="Matrice de présence" Command="{Binding AttendanceCommand}" />
                 <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="Congés" Command="{Binding LeaveCommand}" />

@@ -63,9 +63,11 @@ namespace OptiPaie.Desktop.ViewModels
 
         public ObservableCollection<ApprovalItem> Approvals { get; } = new ObservableCollection<ApprovalItem>();
         public ObservableCollection<DeadlineItem> Deadlines { get; } = new ObservableCollection<DeadlineItem>();
+        public ObservableCollection<ActivityLine> RecentActivity { get; } = new ObservableCollection<ActivityLine>();
 
         public bool HasApprovals => Approvals.Count > 0;
         public bool HasDeadlines => Deadlines.Count > 0;
+        public bool HasActivity => RecentActivity.Count > 0;
 
         public ICommand RefreshCommand { get; }
         public ICommand OpenCommand { get; }
@@ -102,10 +104,23 @@ namespace OptiPaie.Desktop.ViewModels
             Deadlines.Clear();
             foreach (DeadlineItem d in s.Deadlines) Deadlines.Add(d);
 
+            RecentActivity.Clear();
+            foreach (Core.Entities.AuditEntry e in _services.Audit.GetRecent(12))
+            {
+                RecentActivity.Add(new ActivityLine
+                {
+                    Text = e.Summary ?? e.Action.ToString(),
+                    Detail = (string.IsNullOrEmpty(e.NewValue) ? string.Empty : e.OldValue + " → " + e.NewValue + " · ") +
+                             e.CreatedAtUtc.ToLocalTime().ToString("dd/MM HH:mm", Fr) +
+                             (string.IsNullOrWhiteSpace(e.Actor) ? string.Empty : " · " + e.Actor)
+                });
+            }
+
             ApprovalsHeader = "À traiter" + (Approvals.Count > 0 ? " (" + Approvals.Count + ")" : string.Empty);
             DeadlinesHeader = "Échéances à venir" + (Deadlines.Count > 0 ? " (" + Deadlines.Count + ")" : string.Empty);
             Raise(nameof(HasApprovals));
             Raise(nameof(HasDeadlines));
+            Raise(nameof(HasActivity));
         }
 
         private void Open(string moduleKey)
@@ -117,5 +132,12 @@ namespace OptiPaie.Desktop.ViewModels
         {
             return string.IsNullOrEmpty(s) ? s : char.ToUpper(s[0], Fr) + s.Substring(1);
         }
+    }
+
+    /// <summary>One line of the dashboard activity journal (from the audit trail).</summary>
+    public sealed class ActivityLine
+    {
+        public string Text { get; set; }
+        public string Detail { get; set; }
     }
 }
