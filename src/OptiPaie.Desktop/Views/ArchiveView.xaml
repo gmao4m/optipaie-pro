@@ -1,6 +1,7 @@
 <UserControl x:Class="OptiPaie.Desktop.Views.ArchiveView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:OptiPaie.Desktop.Localization">
     <Grid Margin="28">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -10,8 +11,8 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0">
-            <TextBlock Style="{StaticResource H1}" Text="Archive" />
-            <TextBlock Style="{StaticResource Caption}" Margin="0,5,0,0" Text="Consultez et réimprimez les bulletins archivés" />
+            <TextBlock Style="{StaticResource H1}" Text="{loc:Loc Shell_Nav_Archive}" />
+            <TextBlock Style="{StaticResource Caption}" Margin="0,5,0,0" Text="{loc:Loc Archive_Subtitle}" />
         </StackPanel>
 
         <Border Grid.Row="1" Style="{StaticResource Card}" Padding="16" Margin="0,20,0,0">
@@ -24,14 +25,14 @@
                 </Grid.ColumnDefinitions>
                 <!-- Company selection is global (header selector) -->
                 <StackPanel Grid.Column="0" Margin="0,0,10,0">
-                    <TextBlock Style="{StaticResource Caption}" Text="Année" Margin="0,0,0,5" />
+                    <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Payroll_Year}" Margin="0,0,0,5" />
                     <ComboBox Style="{StaticResource AppComboBox}" ItemsSource="{Binding Years}" SelectedItem="{Binding SelectedYear}" />
                 </StackPanel>
                 <StackPanel Grid.Column="1" Margin="0,0,10,0">
-                    <TextBlock Style="{StaticResource Caption}" Text="Mois" Margin="0,0,0,5" />
+                    <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Payroll_Month}" Margin="0,0,0,5" />
                     <ComboBox Style="{StaticResource AppComboBox}" ItemsSource="{Binding Months}" SelectedValue="{Binding SelectedMonth}" SelectedValuePath="Value" DisplayMemberPath="Label" />
                 </StackPanel>
-                <Button Grid.Column="3" Style="{StaticResource PrimaryButton}" VerticalAlignment="Bottom" Content="Rechercher" Command="{Binding SearchCommand}" />
+                <Button Grid.Column="3" Style="{StaticResource PrimaryButton}" VerticalAlignment="Bottom" Content="{loc:Loc Common_Search}" Command="{Binding SearchCommand}" />
             </Grid>
         </Border>
 
@@ -84,15 +85,15 @@
                     <Border Width="60" Height="60" CornerRadius="16" Background="{DynamicResource SurfaceMuted}" HorizontalAlignment="Center">
                         <Path Width="28" Height="28" Stretch="Uniform" Fill="{DynamicResource TextMuted}" Data="{StaticResource IconArchive}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
-                    <TextBlock Style="{StaticResource Caption}" Margin="0,14,0,0" HorizontalAlignment="Center" Text="Aucun bulletin pour cette période." />
+                    <TextBlock Style="{StaticResource Caption}" Margin="0,14,0,0" HorizontalAlignment="Center" Text="{loc:Loc Archive_EmptyState}" />
                 </StackPanel>
             </Grid>
         </Border>
 
         <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0"
                     Visibility="{Binding HasSelection, Converter={StaticResource BoolToVis}}">
-            <Button Style="{StaticResource SecondaryButton}" Content="Aperçu" Command="{Binding PreviewCommand}" />
-            <Button Style="{StaticResource PrimaryButton}" Margin="10,0,0,0" Content="Imprimer" Command="{Binding PrintCommand}" />
+            <Button Style="{StaticResource SecondaryButton}" Content="{loc:Loc Common_Preview}" Command="{Binding PreviewCommand}" />
+            <Button Style="{StaticResource PrimaryButton}" Margin="10,0,0,0" Content="{loc:Loc Common_Print}" Command="{Binding PrintCommand}" />
         </StackPanel>
     </Grid>
 </UserControl>

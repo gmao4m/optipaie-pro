@@ -1,6 +1,7 @@
 <UserControl x:Class="OptiPaie.Desktop.Views.SettingsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:OptiPaie.Desktop.Localization">
     <UserControl.Resources>
         <!-- One label/value row on the License card -->
         <Style x:Key="LicLabel" TargetType="TextBlock" BasedOn="{StaticResource Caption}">
@@ -20,8 +21,8 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0">
-            <TextBlock Style="{StaticResource H1}" Text="Paramètres" />
-            <TextBlock Style="{StaticResource Caption}" Margin="0,5,0,0" Text="Préférences de l'application, licence et sécurité des données" />
+            <TextBlock Style="{StaticResource H1}" Text="{loc:Loc Shell_Nav_Settings}" />
+            <TextBlock Style="{StaticResource Caption}" Margin="0,5,0,0" Text="{loc:Loc Settings_Subtitle}" />
         </StackPanel>
 
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,22,0,0">
@@ -29,13 +30,13 @@
                 <!-- General preferences -->
                 <Border Style="{StaticResource Card}" Padding="24" Margin="0,0,0,16">
                     <StackPanel>
-                        <TextBlock Style="{StaticResource H2}" Text="Préférences générales" />
+                        <TextBlock Style="{StaticResource H2}" Text="{loc:Loc Settings_GroupPreferences}" />
                         <Grid Margin="0,18,0,0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="220" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="Langue de l'application" />
+                            <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="{loc:Loc Settings_AppLanguage}" />
                             <ComboBox Grid.Column="1" Width="240" HorizontalAlignment="Left" Style="{StaticResource AppComboBox}"
                                       ItemsSource="{Binding Languages}" SelectedValue="{Binding Language}" SelectedValuePath="Value" DisplayMemberPath="Label" />
                         </Grid>
@@ -44,7 +45,7 @@
                                 <ColumnDefinition Width="220" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="Taux CNAS salarié" />
+                            <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="{loc:Loc Settings_CnasRate}" />
                             <TextBlock Grid.Column="1" VerticalAlignment="Center" FontWeight="SemiBold" Text="{Binding CnasRateText}" />
                         </Grid>
                     </StackPanel>
@@ -57,7 +58,7 @@
                             <Border DockPanel.Dock="Right" Background="{DynamicResource BrandSoft}" CornerRadius="6" Padding="10,4" VerticalAlignment="Center">
                                 <TextBlock Text="{Binding AccessStateText}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource Brand}" />
                             </Border>
-                            <TextBlock Style="{StaticResource H2}" Text="Licence" VerticalAlignment="Center" />
+                            <TextBlock Style="{StaticResource H2}" Text="{loc:Loc Settings_License}" VerticalAlignment="Center" />
                         </DockPanel>
 
                         <Grid Margin="0,18,0,0">
@@ -76,36 +77,36 @@
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
 
-                            <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource LicLabel}" Text="Client" Margin="0,0,0,10" />
+                            <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource LicLabel}" Text="{loc:Loc Settings_Customer}" Margin="0,0,0,10" />
                             <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource LicValue}" Text="{Binding CustomerText}" Margin="0,0,0,10" />
 
-                            <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource LicLabel}" Text="Type de licence" Margin="0,0,0,10" />
+                            <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource LicLabel}" Text="{loc:Loc Settings_LicenseType}" Margin="0,0,0,10" />
                             <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource LicValue}" Text="{Binding LicenseTypeText}" Margin="0,0,0,10" />
 
-                            <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource LicLabel}" Text="Produit" Margin="0,0,0,10" />
+                            <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource LicLabel}" Text="{loc:Loc Settings_Product}" Margin="0,0,0,10" />
                             <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource LicValue}" Text="{Binding ProductText}" Margin="0,0,0,10" />
 
-                            <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource LicLabel}" Text="Clé de licence" Margin="0,0,0,10" />
+                            <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource LicLabel}" Text="{loc:Loc Settings_LicenseKey}" Margin="0,0,0,10" />
                             <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource LicValue}" FontFamily="Consolas" Text="{Binding LicenseKeyText}" Margin="0,0,0,10" />
 
-                            <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource LicLabel}" Text="Expiration" Margin="0,0,0,10" />
+                            <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource LicLabel}" Text="{loc:Loc Settings_Expiration}" Margin="0,0,0,10" />
                             <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource LicValue}" Text="{Binding ExpirationText}" Margin="0,0,0,10" />
 
-                            <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource LicLabel}" Text="Activée le" Margin="0,0,0,10" />
+                            <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource LicLabel}" Text="{loc:Loc Settings_ActivatedOn}" Margin="0,0,0,10" />
                             <TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource LicValue}" Text="{Binding ActivatedText}" Margin="0,0,0,10" />
 
-                            <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource LicLabel}" Text="Identifiant appareil" Margin="0,0,0,10" />
+                            <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource LicLabel}" Text="{loc:Loc Settings_DeviceId}" Margin="0,0,0,10" />
                             <TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource LicValue}" FontFamily="Consolas" Text="{Binding DeviceIdText}" Margin="0,0,0,10" />
 
-                            <TextBlock Grid.Row="7" Grid.Column="0" Style="{StaticResource LicLabel}" Text="Modules" />
+                            <TextBlock Grid.Row="7" Grid.Column="0" Style="{StaticResource LicLabel}" Text="{loc:Loc Settings_Modules}" />
                             <TextBlock Grid.Row="7" Grid.Column="1" Style="{StaticResource LicValue}" Text="{Binding ModulesText}" />
                         </Grid>
 
                         <WrapPanel Margin="0,20,0,0">
-                            <Button Style="{StaticResource PrimaryButton}" Content="Renouveler / Activer" Command="{Binding RenewCommand}" Margin="0,0,10,10" />
-                            <Button Style="{StaticResource SecondaryButton}" Content="Activer un module" Command="{Binding ActivateModuleCommand}" Margin="0,0,10,10" />
-                            <Button Style="{StaticResource SecondaryButton}" Content="Désactiver l'appareil" Command="{Binding DeactivateCommand}" Margin="0,0,10,10" />
-                            <Button Style="{StaticResource SecondaryButton}" Content="Vérifier les mises à jour" Command="{Binding CheckUpdatesCommand}" Margin="0,0,10,10" />
+                            <Button Style="{StaticResource PrimaryButton}" Content="{loc:Loc Settings_Renew}" Command="{Binding RenewCommand}" Margin="0,0,10,10" />
+                            <Button Style="{StaticResource SecondaryButton}" Content="{loc:Loc Settings_ActivateModule}" Command="{Binding ActivateModuleCommand}" Margin="0,0,10,10" />
+                            <Button Style="{StaticResource SecondaryButton}" Content="{loc:Loc Settings_Deactivate}" Command="{Binding DeactivateCommand}" Margin="0,0,10,10" />
+                            <Button Style="{StaticResource SecondaryButton}" Content="{loc:Loc Settings_CheckUpdates}" Command="{Binding CheckUpdatesCommand}" Margin="0,0,10,10" />
                         </WrapPanel>
                         <TextBlock Style="{StaticResource Caption}" Margin="0,2,0,0" Text="{Binding LastUpdateCheckText}" />
                     </StackPanel>
@@ -114,11 +115,11 @@
                 <!-- Data & security -->
                 <Border Style="{StaticResource Card}" Padding="24" Margin="0,0,0,16">
                     <StackPanel>
-                        <TextBlock Style="{StaticResource H2}" Text="Données et sécurité" />
-                        <TextBlock Style="{StaticResource Caption}" Margin="0,6,0,16" Text="Sauvegardez régulièrement votre base de données." />
+                        <TextBlock Style="{StaticResource H2}" Text="{loc:Loc Settings_GroupSecurity}" />
+                        <TextBlock Style="{StaticResource Caption}" Margin="0,6,0,16" Text="{loc:Loc Settings_BackupHint}" />
                         <StackPanel Orientation="Horizontal">
-                            <Button Style="{StaticResource PrimaryButton}" Content="Sauvegarder maintenant" Command="{Binding BackupCommand}" />
-                            <Button Style="{StaticResource SecondaryButton}" Margin="12,0,0,0" Content="Restaurer une sauvegarde" Command="{Binding RestoreCommand}" />
+                            <Button Style="{StaticResource PrimaryButton}" Content="{loc:Loc Settings_BackupNow}" Command="{Binding BackupCommand}" />
+                            <Button Style="{StaticResource SecondaryButton}" Margin="12,0,0,0" Content="{loc:Loc Settings_RestoreBackup}" Command="{Binding RestoreCommand}" />
                         </StackPanel>
                     </StackPanel>
                 </Border>

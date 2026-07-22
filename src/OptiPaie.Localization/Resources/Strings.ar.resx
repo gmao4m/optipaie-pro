@@ -469,6 +469,45 @@
   <data name="Dashboard_Kpi_AssetsAssigned" xml:space="preserve"><value>المعدات المخصصة</value></data>
   <data name="Dashboard_Kpi_TrainingUpcoming" xml:space="preserve"><value>تكوينات قادمة</value></data>
 
+  <!-- Home view -->
+  <data name="Home_Greeting" xml:space="preserve"><value>مرحباً</value></data>
+  <data name="Home_Subtitle" xml:space="preserve"><value>إليك نشاط مؤسستك</value></data>
+  <data name="Home_CurrentPeriod" xml:space="preserve"><value>الفترة الحالية</value></data>
+  <data name="Home_QuickActions" xml:space="preserve"><value>إجراءات سريعة</value></data>
+  <data name="Home_PayrollArchive" xml:space="preserve"><value>أرشيف الأجور</value></data>
+  <data name="Home_RecentActivity" xml:space="preserve"><value>النشاط الأخير</value></data>
+  <data name="Home_RecentEmpty" xml:space="preserve"><value>سيظهر هنا النشاط الأخير لكشوف أجورك.</value></data>
+
+  <!-- Reports view -->
+  <data name="Reports_Title" xml:space="preserve"><value>مركز التقارير</value></data>
+  <data name="Reports_Subtitle" xml:space="preserve"><value>تقارير جاهزة للاستخدام — معاينة وتصدير PDF وExcel (CSV).</value></data>
+  <data name="Reports_Generate" xml:space="preserve"><value>إنشاء</value></data>
+  <data name="Reports_ExportCsv" xml:space="preserve"><value>تصدير CSV (Excel)</value></data>
+
+  <!-- Archive view -->
+  <data name="Archive_EmptyState" xml:space="preserve"><value>لا يوجد كشف لهذه الفترة.</value></data>
+
+  <!-- Settings view -->
+  <data name="Settings_AppLanguage" xml:space="preserve"><value>لغة التطبيق</value></data>
+  <data name="Settings_CnasRate" xml:space="preserve"><value>نسبة CNAS للأجير</value></data>
+  <data name="Settings_License" xml:space="preserve"><value>الرخصة</value></data>
+  <data name="Settings_Customer" xml:space="preserve"><value>العميل</value></data>
+  <data name="Settings_LicenseType" xml:space="preserve"><value>نوع الرخصة</value></data>
+  <data name="Settings_Product" xml:space="preserve"><value>المنتج</value></data>
+  <data name="Settings_LicenseKey" xml:space="preserve"><value>مفتاح الرخصة</value></data>
+  <data name="Settings_Expiration" xml:space="preserve"><value>انتهاء الصلاحية</value></data>
+  <data name="Settings_ActivatedOn" xml:space="preserve"><value>فُعّلت في</value></data>
+  <data name="Settings_DeviceId" xml:space="preserve"><value>معرّف الجهاز</value></data>
+  <data name="Settings_Modules" xml:space="preserve"><value>الوحدات</value></data>
+  <data name="Settings_Renew" xml:space="preserve"><value>تجديد / تفعيل</value></data>
+  <data name="Settings_ActivateModule" xml:space="preserve"><value>تفعيل وحدة</value></data>
+  <data name="Settings_Deactivate" xml:space="preserve"><value>إلغاء تفعيل الجهاز</value></data>
+  <data name="Settings_CheckUpdates" xml:space="preserve"><value>التحقق من التحديثات</value></data>
+  <data name="Settings_GroupSecurity" xml:space="preserve"><value>البيانات والأمان</value></data>
+  <data name="Settings_BackupHint" xml:space="preserve"><value>احفظ نسخة احتياطية من قاعدة بياناتك بانتظام.</value></data>
+  <data name="Settings_BackupNow" xml:space="preserve"><value>احفظ الآن</value></data>
+  <data name="Settings_RestoreBackup" xml:space="preserve"><value>استعادة نسخة احتياطية</value></data>
+
   <!-- Payroll view (labels only — never affects the payroll engine or values) -->
   <data name="Common_Preview" xml:space="preserve"><value>معاينة</value></data>
   <data name="Payroll_Employee" xml:space="preserve"><value>الموظف</value></data>

@@ -33,8 +33,8 @@ namespace OptiPaie.Desktop.ViewModels
             Recent = new ObservableCollection<ActivityItem>();
         }
 
-        public string Greeting => "Bonjour";
-        public string Subtitle => "Voici l'activité de votre entreprise";
+        public string Greeting => _services.Localization.GetString("Home_Greeting");
+        public string Subtitle => _services.Localization.GetString("Home_Subtitle");
 
         public string MonthLabel
         {
@@ -64,12 +64,15 @@ namespace OptiPaie.Desktop.ViewModels
 
         public void OnActivated()
         {
+            Raise(nameof(Greeting));
+            Raise(nameof(Subtitle));
+
             DateTime now = DateTime.Now;
-            CultureInfo fr = CultureInfo.GetCultureInfo("fr-FR");
-            string month = fr.DateTimeFormat.GetMonthName(now.Month);
+            CultureInfo culture = _services.Localization.CurrentCulture;
+            string month = culture.DateTimeFormat.GetMonthName(now.Month);
             if (month.Length > 0)
             {
-                month = char.ToUpper(month[0], fr) + month.Substring(1);
+                month = char.ToUpper(month[0], culture) + month.Substring(1);
             }
 
             MonthLabel = month + " " + now.Year;

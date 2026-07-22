@@ -1,6 +1,7 @@
 <UserControl x:Class="OptiPaie.Desktop.Views.ReportsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:OptiPaie.Desktop.Localization">
     <Grid Margin="24,20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -12,9 +13,8 @@
 
         <!-- Title -->
         <StackPanel Grid.Row="0" HorizontalAlignment="Left">
-            <TextBlock Style="{StaticResource H1}" Text="Centre de rapports" />
-            <TextBlock Style="{StaticResource Caption}" Margin="0,5,0,0"
-                       Text="Rapports transversaux prêts à l'emploi — aperçu, export PDF et Excel (CSV)." />
+            <TextBlock Style="{StaticResource H1}" Text="{loc:Loc Reports_Title}" />
+            <TextBlock Style="{StaticResource Caption}" Margin="0,5,0,0" Text="{loc:Loc Reports_Subtitle}" />
         </StackPanel>
 
         <!-- Toolbar -->
@@ -29,7 +29,7 @@
                           SelectedValuePath="Value" DisplayMemberPath="Label" IsEnabled="{Binding MonthEnabled}" />
                 <ComboBox Style="{StaticResource AppComboBox}" Width="90" Height="32" Margin="0,0,8,0"
                           ItemsSource="{Binding Years}" SelectedItem="{Binding SelectedYear}" />
-                <Button Style="{StaticResource SecondaryButton}" Height="32" Content="Générer" Command="{Binding GenerateCommand}" />
+                <Button Style="{StaticResource SecondaryButton}" Height="32" Content="{loc:Loc Reports_Generate}" Command="{Binding GenerateCommand}" />
             </WrapPanel>
         </Border>
 
@@ -53,8 +53,8 @@
         <Grid Grid.Row="4" Margin="0,12,0,0">
             <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Center" HorizontalAlignment="Left" Text="{Binding StatusMessage}" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Style="{StaticResource SecondaryButton}" Content="Exporter CSV (Excel)" Command="{Binding ExportCsvCommand}" />
-                <Button Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Content="Exporter PDF" Command="{Binding ExportPdfCommand}" />
+                <Button Style="{StaticResource SecondaryButton}" Content="{loc:Loc Reports_ExportCsv}" Command="{Binding ExportCsvCommand}" />
+                <Button Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Content="{loc:Loc Common_ExportPdf}" Command="{Binding ExportPdfCommand}" />
             </StackPanel>
         </Grid>
     </Grid>
