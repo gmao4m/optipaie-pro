@@ -28,7 +28,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
                     <Border x:Name="b" Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
-                        <ContentPresenter x:Name="cp" HorizontalAlignment="Center" VerticalAlignment="Center" TextElement.Foreground="{StaticResource TextOnBrand}" />
+                        <TextBlock x:Name="cp" Text="{TemplateBinding Content}" FontFamily="{TemplateBinding FontFamily}" FontSize="{TemplateBinding FontSize}" FontWeight="{TemplateBinding FontWeight}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{StaticResource TextOnBrand}" />
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
@@ -39,7 +39,7 @@
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter TargetName="b" Property="Background" Value="{StaticResource ButtonDisabledFill}" />
-                            <Setter TargetName="cp" Property="TextElement.Foreground" Value="{StaticResource ButtonDisabledText}" />
+                            <Setter TargetName="cp" Property="Foreground" Value="{StaticResource ButtonDisabledText}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -62,7 +62,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
                     <Border x:Name="b" Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
-                        <ContentPresenter x:Name="cp" HorizontalAlignment="Center" VerticalAlignment="Center" TextElement.Foreground="{StaticResource TextOnBrand}" />
+                        <TextBlock x:Name="cp" Text="{TemplateBinding Content}" FontFamily="{TemplateBinding FontFamily}" FontSize="{TemplateBinding FontSize}" FontWeight="{TemplateBinding FontWeight}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{StaticResource TextOnBrand}" />
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
@@ -73,7 +73,7 @@
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter TargetName="b" Property="Background" Value="{StaticResource ButtonDisabledFill}" />
-                            <Setter TargetName="cp" Property="TextElement.Foreground" Value="{StaticResource ButtonDisabledText}" />
+                            <Setter TargetName="cp" Property="Foreground" Value="{StaticResource ButtonDisabledText}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -96,7 +96,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
                     <Border x:Name="b" Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
-                        <ContentPresenter x:Name="cp" HorizontalAlignment="Center" VerticalAlignment="Center" TextElement.Foreground="{StaticResource TextOnBrand}" />
+                        <TextBlock x:Name="cp" Text="{TemplateBinding Content}" FontFamily="{TemplateBinding FontFamily}" FontSize="{TemplateBinding FontSize}" FontWeight="{TemplateBinding FontWeight}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{StaticResource TextOnBrand}" />
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
@@ -107,7 +107,7 @@
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter TargetName="b" Property="Background" Value="{StaticResource ButtonDisabledFill}" />
-                            <Setter TargetName="cp" Property="TextElement.Foreground" Value="{StaticResource ButtonDisabledText}" />
+                            <Setter TargetName="cp" Property="Foreground" Value="{StaticResource ButtonDisabledText}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -128,7 +128,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
                     <Border x:Name="b" Background="{TemplateBinding Background}" BorderBrush="{StaticResource BorderStrong}" BorderThickness="1" CornerRadius="8" Padding="{TemplateBinding Padding}">
-                        <ContentPresenter x:Name="cp" HorizontalAlignment="Center" VerticalAlignment="Center" TextElement.Foreground="{StaticResource TextPrimary}" />
+                        <TextBlock x:Name="cp" Text="{TemplateBinding Content}" FontFamily="{TemplateBinding FontFamily}" FontSize="{TemplateBinding FontSize}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{StaticResource TextPrimary}" />
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
@@ -139,7 +139,7 @@
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter TargetName="b" Property="Background" Value="{StaticResource ButtonDisabledFill}" />
-                            <Setter TargetName="cp" Property="TextElement.Foreground" Value="{StaticResource ButtonDisabledText}" />
+                            <Setter TargetName="cp" Property="Foreground" Value="{StaticResource ButtonDisabledText}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -217,6 +217,80 @@
         <Setter Property="Height" Value="38" />
         <Setter Property="Padding" Value="8,0" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+
+    <!-- ============================================================================
+         Selection contrast (root fix). WPF's default selected/highlighted state uses the
+         SYSTEM highlight brush — a saturated blue — under which dark item text becomes
+         unreadable (a "blue background with invisible label" on controls that don't draw
+         from the shared button styles: ComboBox dropdown items, list items, grid cells).
+         These IMPLICIT styles replace that system blue everywhere with the brand's light
+         selection (BrandSoft) + dark text, so every selection stays clearly readable.
+         Views that define their own ItemContainerStyle keep it (explicit wins).
+         ============================================================================ -->
+
+    <Style TargetType="ComboBoxItem">
+        <Setter Property="Foreground" Value="{StaticResource TextPrimary}" />
+        <Setter Property="FontFamily" Value="{StaticResource AppFont}" />
+        <Setter Property="Padding" Value="10,7" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ComboBoxItem">
+                    <Border x:Name="bd" Background="Transparent" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="True">
+                        <ContentPresenter />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="bd" Property="Background" Value="{StaticResource SurfaceMuted}" />
+                        </Trigger>
+                        <Trigger Property="IsHighlighted" Value="True">
+                            <Setter TargetName="bd" Property="Background" Value="{StaticResource BrandSoft}" />
+                            <Setter Property="Foreground" Value="{StaticResource Brand}" />
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="bd" Property="Background" Value="{StaticResource BrandSoft}" />
+                            <Setter Property="Foreground" Value="{StaticResource Brand}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="ListBoxItem">
+        <Setter Property="Foreground" Value="{StaticResource TextPrimary}" />
+        <Setter Property="FontFamily" Value="{StaticResource AppFont}" />
+        <Setter Property="Padding" Value="10,7" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ListBoxItem">
+                    <Border x:Name="bd" Background="Transparent" Padding="{TemplateBinding Padding}" CornerRadius="6" SnapsToDevicePixels="True">
+                        <ContentPresenter />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="bd" Property="Background" Value="{StaticResource SurfaceMuted}" />
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="bd" Property="Background" Value="{StaticResource BrandSoft}" />
+                            <Setter Property="Foreground" Value="{StaticResource Brand}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Grid cell/row selection: brand light instead of system blue, always dark-readable. -->
+    <Style TargetType="DataGridCell">
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Style.Triggers>
+            <Trigger Property="IsSelected" Value="True">
+                <Setter Property="Background" Value="{StaticResource BrandSoft}" />
+                <Setter Property="Foreground" Value="{StaticResource TextPrimary}" />
+                <Setter Property="BorderBrush" Value="{StaticResource BrandSoft}" />
+            </Trigger>
+        </Style.Triggers>
     </Style>
 
 </ResourceDictionary>

@@ -1,0 +1,62 @@
+<Window x:Class="OptiPaie.Desktop.Views.CareerEventWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="{Binding Title}" Height="440" Width="500"
+        WindowStartupLocation="CenterOwner" Background="{StaticResource Canvas}">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolVis" />
+    </Window.Resources>
+    <Grid Margin="24,20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0">
+            <TextBlock Style="{StaticResource H2}" Text="{Binding Title}" />
+            <TextBlock Style="{StaticResource Caption}" Margin="0,5,0,0" Text="{Binding EmployeeName}" />
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" Margin="0,14,0,0">
+            <!-- Promotion fields -->
+            <StackPanel Visibility="{Binding IsPromotion, Converter={StaticResource BoolVis}}">
+                <TextBlock Style="{StaticResource Caption}" Text="Ancien poste" />
+                <TextBox Style="{StaticResource AppTextBox}" Margin="0,4,0,0" Text="{Binding OldPosition, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBlock Style="{StaticResource Caption}" Margin="0,12,0,0" Text="Nouveau poste" />
+                <TextBox Style="{StaticResource AppTextBox}" Margin="0,4,0,0" Text="{Binding NewPosition, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+
+            <!-- Reward fields -->
+            <StackPanel Visibility="{Binding IsReward, Converter={StaticResource BoolVis}}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Style="{StaticResource Caption}" Text="Montant (DA)" />
+                        <TextBox Style="{StaticResource AppTextBox}" Margin="0,4,0,0" Text="{Binding AmountText, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Style="{StaticResource Caption}" Text="Catégorie" />
+                        <TextBox Style="{StaticResource AppTextBox}" Margin="0,4,0,0" Text="{Binding Category, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                </Grid>
+            </StackPanel>
+
+            <TextBlock Style="{StaticResource Caption}" Margin="0,12,0,0" Text="Date" />
+            <DatePicker Height="34" Margin="0,4,0,0" SelectedDate="{Binding EventDate}" HorizontalAlignment="Left" Width="200" />
+
+            <TextBlock Style="{StaticResource Caption}" Margin="0,12,0,0" Text="Motif" />
+            <TextBox Style="{StaticResource AppTextBox}" Height="60" Margin="0,4,0,0" AcceptsReturn="True" TextWrapping="Wrap"
+                     VerticalContentAlignment="Top" Text="{Binding Reason, UpdateSourceTrigger=PropertyChanged}" />
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+            <Button Style="{StaticResource SecondaryButton}" Content="Annuler" Command="{Binding CancelCommand}" />
+            <Button Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Content="Enregistrer" Command="{Binding SaveCommand}" />
+        </StackPanel>
+    </Grid>
+</Window>

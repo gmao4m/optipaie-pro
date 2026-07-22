@@ -12,6 +12,7 @@ using OptiPaie.Core.Primitives;
 using OptiPaie.Desktop.Common;
 using OptiPaie.Desktop.Composition;
 using OptiPaie.Desktop.Mvvm;
+using OptiPaie.Desktop.ViewModels.Performance;
 using OptiPaie.Desktop.Views;
 
 namespace OptiPaie.Desktop.ViewModels
@@ -62,6 +63,37 @@ namespace OptiPaie.Desktop.ViewModels
             CompleteCommand = new RelayCommand(CompleteReview, () => _selectedReview != null && _selectedReview.IsDraft);
             ReopenCommand = new RelayCommand(Reopen, () => _selectedReview != null && _selectedReview.IsCompleted);
             DeleteCommand = new RelayCommand(Delete, () => _selectedReview != null);
+
+            // Hub tabs (each reads the hub's active company / year).
+            Cycles = new CyclesTabViewModel(_services, CompanyId);
+            Modeles = new TemplatesTabViewModel(_services, CompanyId);
+            Dashboard = new DashboardTabViewModel(_services, CompanyId);
+            Calibration = new CalibrationTabViewModel(_services, CompanyId, () => _selectedYear);
+            Objectifs = new GoalsTabViewModel(_services, CompanyId);
+            Comparaison = new ComparisonTabViewModel(_services, CompanyId);
+            Parcours = new CareerTabViewModel(_services, CompanyId);
+        }
+
+        private long CompanyId() => _selectedCompany != null ? _selectedCompany.Id : 0L;
+
+        // Performance &amp; Career hub tabs.
+        public CyclesTabViewModel Cycles { get; }
+        public TemplatesTabViewModel Modeles { get; }
+        public DashboardTabViewModel Dashboard { get; }
+        public CalibrationTabViewModel Calibration { get; }
+        public GoalsTabViewModel Objectifs { get; }
+        public ComparisonTabViewModel Comparaison { get; }
+        public CareerTabViewModel Parcours { get; }
+
+        private void RefreshTabs()
+        {
+            Cycles.Refresh();
+            Modeles.Refresh();
+            Dashboard.Refresh();
+            Calibration.Refresh();
+            Objectifs.Refresh();
+            Comparaison.Refresh();
+            Parcours.Refresh();
         }
 
         public ObservableCollection<Company> Companies { get; } = new ObservableCollection<Company>();
@@ -77,7 +109,7 @@ namespace OptiPaie.Desktop.ViewModels
         public int SelectedYear
         {
             get => _selectedYear;
-            set { if (Set(ref _selectedYear, value)) Load(); }
+            set { if (Set(ref _selectedYear, value)) { Load(); Calibration.Refresh(); Dashboard.Refresh(); } }
         }
 
         public PerformanceRowViewModel SelectedReview
@@ -100,6 +132,7 @@ namespace OptiPaie.Desktop.ViewModels
             _selectedCompany = _services.CompanyContext.Active;
             Raise(nameof(SelectedCompany));
             Load();
+            RefreshTabs();
         }
 
         private void Load()
