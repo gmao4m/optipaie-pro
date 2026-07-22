@@ -22,8 +22,8 @@
             <WrapPanel Orientation="Horizontal">
                 <ComboBox Style="{StaticResource AppComboBox}" Width="240" Height="32" Margin="0,0,8,0"
                           ItemsSource="{Binding Reports}" SelectedItem="{Binding SelectedReport}" DisplayMemberPath="Title" />
-                <ComboBox Style="{StaticResource AppComboBox}" Width="180" Height="32" Margin="0,0,8,0"
-                          ItemsSource="{Binding Companies}" SelectedItem="{Binding SelectedCompany}" DisplayMemberPath="NameFr" />
+                <!-- Company selection is global (header selector) -->
+
                 <ComboBox Style="{StaticResource AppComboBox}" Width="120" Height="32" Margin="0,0,8,0"
                           ItemsSource="{Binding Months}" SelectedValue="{Binding SelectedMonth}"
                           SelectedValuePath="Value" DisplayMemberPath="Label" IsEnabled="{Binding MonthEnabled}" />

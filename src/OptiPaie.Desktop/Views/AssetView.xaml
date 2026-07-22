@@ -47,8 +47,8 @@
                            Text="Suivez le matériel de l'entreprise et son attribution aux employés." />
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
-                <ComboBox Style="{StaticResource AppComboBox}" Width="200" Height="32" VerticalAlignment="Center"
-                          ItemsSource="{Binding Companies}" SelectedItem="{Binding SelectedCompany}" DisplayMemberPath="NameFr" />
+                <!-- Company selection is global (header selector) -->
+
                 <Button Style="{StaticResource PrimaryButton}" Height="32" Margin="10,0,0,0"
                         Content="Nouveau matériel" Command="{Binding NewCommand}" />
             </StackPanel>

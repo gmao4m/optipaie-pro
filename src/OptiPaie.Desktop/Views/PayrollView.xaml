@@ -41,8 +41,8 @@
         <Grid Grid.Row="0">
             <TextBlock Style="{StaticResource H2}" Text="Établir une paie" VerticalAlignment="Center" HorizontalAlignment="Left" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <TextBlock Text="Entreprise" VerticalAlignment="Center" Foreground="{StaticResource TextMuted}" FontSize="12" Margin="0,0,6,0" />
-                <ComboBox Style="{StaticResource AppComboBox}" Width="150" Height="32" ItemsSource="{Binding Companies}" SelectedItem="{Binding SelectedCompany}" DisplayMemberPath="NameFr" />
+                <!-- Company selection is global (header selector) -->
+
                 <TextBlock Text="Employé" VerticalAlignment="Center" Foreground="{StaticResource TextMuted}" FontSize="12" Margin="14,0,6,0" />
                 <ComboBox Style="{StaticResource AppComboBox}" Width="170" Height="32" ItemsSource="{Binding Employees}" SelectedItem="{Binding SelectedEmployee}">
                     <ComboBox.ItemTemplate>

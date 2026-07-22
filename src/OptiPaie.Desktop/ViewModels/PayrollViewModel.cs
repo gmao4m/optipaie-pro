@@ -147,22 +147,15 @@ namespace OptiPaie.Desktop.ViewModels
 
         public void OnActivated()
         {
-            Companies.Clear();
-            foreach (Company c in _services.Companies.GetAll())
-            {
-                Companies.Add(c);
-            }
-
             Catalog.Clear();
             foreach (PayrollElement el in _services.PayrollElements.GetAll(false))
             {
                 Catalog.Add(el);
             }
 
-            if (SelectedCompany == null || Companies.All(c => c.Id != SelectedCompany.Id))
-            {
-                SelectedCompany = Companies.FirstOrDefault();
-            }
+            // The active company comes from the single global selector in the header
+            // (its setter reloads this company's employees — payroll logic is unchanged).
+            SelectedCompany = _services.CompanyContext.Active;
         }
 
         private void ReloadEmployees()

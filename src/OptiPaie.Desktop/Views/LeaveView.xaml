@@ -43,8 +43,8 @@
                            Text="Les congés approuvés alimentent automatiquement la présence et la paie." />
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
-                <ComboBox Style="{StaticResource AppComboBox}" Width="200" Height="32" VerticalAlignment="Center"
-                          ItemsSource="{Binding Companies}" SelectedItem="{Binding SelectedCompany}" DisplayMemberPath="NameFr" />
+                <!-- Company selection is global (header selector) -->
+
                 <ComboBox Style="{StaticResource AppComboBox}" Width="90" Height="32" Margin="10,0,0,0" VerticalAlignment="Center"
                           ItemsSource="{Binding Years}" SelectedItem="{Binding SelectedYear}" />
                 <Button Style="{StaticResource PrimaryButton}" Height="32" Margin="10,0,0,0"

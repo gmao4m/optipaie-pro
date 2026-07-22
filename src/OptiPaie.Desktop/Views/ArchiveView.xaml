@@ -17,20 +17,17 @@
         <Border Grid.Row="1" Style="{StaticResource Card}" Padding="16" Margin="0,20,0,0">
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="130" />
                     <ColumnDefinition Width="170" />
+                    <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
+                <!-- Company selection is global (header selector) -->
                 <StackPanel Grid.Column="0" Margin="0,0,10,0">
-                    <TextBlock Style="{StaticResource Caption}" Text="Entreprise" Margin="0,0,0,5" />
-                    <ComboBox Style="{StaticResource AppComboBox}" ItemsSource="{Binding Companies}" SelectedItem="{Binding SelectedCompany}" DisplayMemberPath="NameFr" />
-                </StackPanel>
-                <StackPanel Grid.Column="1" Margin="0,0,10,0">
                     <TextBlock Style="{StaticResource Caption}" Text="Année" Margin="0,0,0,5" />
                     <ComboBox Style="{StaticResource AppComboBox}" ItemsSource="{Binding Years}" SelectedItem="{Binding SelectedYear}" />
                 </StackPanel>
-                <StackPanel Grid.Column="2" Margin="0,0,10,0">
+                <StackPanel Grid.Column="1" Margin="0,0,10,0">
                     <TextBlock Style="{StaticResource Caption}" Text="Mois" Margin="0,0,0,5" />
                     <ComboBox Style="{StaticResource AppComboBox}" ItemsSource="{Binding Months}" SelectedValue="{Binding SelectedMonth}" SelectedValuePath="Value" DisplayMemberPath="Label" />
                 </StackPanel>

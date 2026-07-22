@@ -47,8 +47,8 @@
                            Text="Organisez les formations et suivez les participants et leurs attestations." />
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
-                <ComboBox Style="{StaticResource AppComboBox}" Width="200" Height="32" VerticalAlignment="Center"
-                          ItemsSource="{Binding Companies}" SelectedItem="{Binding SelectedCompany}" DisplayMemberPath="NameFr" />
+                <!-- Company selection is global (header selector) -->
+
                 <Button Style="{StaticResource PrimaryButton}" Height="32" Margin="10,0,0,0"
                         Content="Nouvelle formation" Command="{Binding NewCommand}" />
             </StackPanel>

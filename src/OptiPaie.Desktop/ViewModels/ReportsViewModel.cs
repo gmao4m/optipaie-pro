@@ -87,16 +87,10 @@ namespace OptiPaie.Desktop.ViewModels
 
         public void OnActivated()
         {
-            Companies.Clear();
-            foreach (Company c in _services.Companies.GetAll()) Companies.Add(c);
-            if (_selectedCompany == null && Companies.Count > 0)
-            {
-                SelectedCompany = Companies[0]; // triggers Generate
-            }
-            else
-            {
-                Generate();
-            }
+            // The active company comes from the single global selector in the header.
+            _selectedCompany = _services.CompanyContext.Active;
+            Raise(nameof(SelectedCompany));
+            Generate();
         }
 
         private void Generate()

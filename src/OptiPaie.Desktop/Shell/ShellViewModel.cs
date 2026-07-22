@@ -67,7 +67,27 @@ namespace OptiPaie.Desktop.Shell
 
             OpenNotificationCommand = new RelayCommand(p => OpenNotification(p as OptiPaie.Core.Dtos.Notification));
 
+            // Load the company list once and react to header company switches: re-activate
+            // the visible module so it reloads the new company's data (no stale data left).
+            _services.CompanyContext.Reload();
+            _services.CompanyContext.ActiveChanged += OnActiveCompanyChanged;
+
             Navigate("dashboard"); // also refreshes the notification bell
+        }
+
+        /// <summary>The single active-company selection bound to the header selector.</summary>
+        public CompanyContext CompanyContext => _services.CompanyContext;
+
+        private void OnActiveCompanyChanged(object sender, EventArgs e)
+        {
+            // Reload whatever screen is showing so it reflects the newly selected company,
+            // then refresh the cross-module alert bell for that company's data.
+            if (_current is IActivable activable)
+            {
+                activable.OnActivated();
+            }
+
+            RefreshNotifications();
         }
 
         /// <summary>Cross-module alerts for the header bell.</summary>

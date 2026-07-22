@@ -63,20 +63,10 @@ namespace OptiPaie.Desktop.ViewModels
 
         public void OnActivated()
         {
-            Companies.Clear();
-            foreach (Company c in _services.Companies.GetAll())
-            {
-                Companies.Add(c);
-            }
-
-            if (SelectedCompany == null || Companies.All(c => c.Id != SelectedCompany.Id))
-            {
-                SelectedCompany = Companies.FirstOrDefault();
-            }
-            else
-            {
-                LoadEmployees();
-            }
+            // The active company comes from the single global selector in the header.
+            _selectedCompany = _services.CompanyContext.Active;
+            Raise(nameof(SelectedCompany));
+            LoadEmployees();
         }
 
         private void LoadEmployees()

@@ -150,6 +150,34 @@
             <!-- Top bar -->
             <Border Grid.Row="0" Background="{StaticResource Surface}" BorderBrush="{StaticResource Border}" BorderThickness="0,0,0,1">
                 <Grid>
+                    <!-- Global company selector: the single, always-visible active-company
+                         switch every module reads from. Shows the active company's logo + name. -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="18,0,0,0">
+                        <Path Width="15" Height="15" Stretch="Uniform" Fill="{StaticResource TextMuted}"
+                              Data="{StaticResource IconBuilding}" VerticalAlignment="Center" />
+                        <TextBlock Text="Entreprise active" Margin="8,0,10,0" VerticalAlignment="Center"
+                                   FontSize="11.5" Foreground="{StaticResource TextMuted}" />
+                        <ComboBox ItemsSource="{Binding CompanyContext.Companies}"
+                                  SelectedItem="{Binding CompanyContext.Active, Mode=TwoWay}"
+                                  MinWidth="230" Height="32" VerticalContentAlignment="Center"
+                                  FontSize="13" FontWeight="SemiBold" ToolTip="Changer d'entreprise (s'applique à tous les modules)">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Border Width="22" Height="22" CornerRadius="5" Background="{StaticResource BrandSoft}" VerticalAlignment="Center">
+                                            <Grid>
+                                                <Path Width="12" Height="12" Stretch="Uniform" Fill="{StaticResource Brand}"
+                                                      Data="{StaticResource IconBuilding}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                <Image Source="{Binding Logo, Converter={StaticResource BytesToImage}}" Width="22" Height="22" Stretch="UniformToFill" />
+                                            </Grid>
+                                        </Border>
+                                        <TextBlock Text="{Binding NameFr}" Margin="9,0,0,0" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </StackPanel>
+
                     <ToggleButton x:Name="BellButton" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,18,0"
                                   Background="Transparent" BorderThickness="0" Cursor="Hand" Padding="10,6">
                         <ToggleButton.Template>

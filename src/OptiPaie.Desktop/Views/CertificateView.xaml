@@ -33,8 +33,8 @@
                            Text="Les attestations sont générées en direct à partir de la fiche employé (poste, salaire, ancienneté)." />
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
-                <ComboBox Style="{StaticResource AppComboBox}" Width="200" Height="32" VerticalAlignment="Center"
-                          ItemsSource="{Binding Companies}" SelectedItem="{Binding SelectedCompany}" DisplayMemberPath="NameFr" />
+                <!-- Company selection is global (header selector) -->
+
                 <Button Style="{StaticResource PrimaryButton}" Height="32" Margin="10,0,0,0"
                         Content="Nouvelle attestation" Command="{Binding NewCommand}" />
             </StackPanel>

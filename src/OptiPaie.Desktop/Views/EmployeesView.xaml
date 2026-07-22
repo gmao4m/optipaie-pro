@@ -14,8 +14,8 @@
                 <TextBlock Style="{StaticResource Caption}" Margin="0,5,0,0" Text="Gérez vos employés et leurs informations" />
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
-                <ComboBox Style="{StaticResource AppComboBox}" Width="220" VerticalAlignment="Center"
-                          ItemsSource="{Binding Companies}" SelectedItem="{Binding SelectedCompany}" DisplayMemberPath="NameFr" />
+                <!-- Company selection is global (header selector) -->
+
                 <Button Style="{StaticResource PrimaryButton}" Margin="12,0,0,0" Command="{Binding NewCommand}">
                     <StackPanel Orientation="Horizontal">
                         <Path Width="15" Height="15" Stretch="Uniform" Fill="{StaticResource TextOnBrand}" Data="{StaticResource IconPlus}" VerticalAlignment="Center" />

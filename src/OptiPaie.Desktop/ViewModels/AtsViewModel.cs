@@ -119,18 +119,10 @@ namespace OptiPaie.Desktop.ViewModels
 
         public void OnActivated()
         {
-            IReadOnlyList<Company> companies = _services.Companies.GetAll();
-            Companies.Clear();
-            foreach (Company c in companies) Companies.Add(c);
-
-            if (_selectedCompany == null && Companies.Count > 0)
-            {
-                SelectedCompany = Companies[0]; // triggers Load
-            }
-            else
-            {
-                Load();
-            }
+            // The active company comes from the single global selector in the header.
+            _selectedCompany = _services.CompanyContext.Active;
+            Raise(nameof(SelectedCompany));
+            Load();
         }
 
         private void Load()

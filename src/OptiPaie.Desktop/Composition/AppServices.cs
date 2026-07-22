@@ -78,6 +78,14 @@ namespace OptiPaie.Desktop.Composition
             Audit = audit;
         }
 
+        private CompanyContext _companyContext;
+
+        /// <summary>
+        /// The app-wide active-company selection shared by the header selector and every
+        /// module. Created lazily from the company service so no composition change is needed.
+        /// </summary>
+        public CompanyContext CompanyContext => _companyContext ?? (_companyContext = new CompanyContext(Companies));
+
         public AppConfiguration Configuration { get; }
         public ILogger Logger { get; }
         public ICompanyService Companies { get; }

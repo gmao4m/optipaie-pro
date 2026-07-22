@@ -42,8 +42,8 @@
                            Text="Recruter un candidat crée automatiquement l'employé dans le module Employés." />
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
-                <ComboBox Style="{StaticResource AppComboBox}" Width="200" Height="32" VerticalAlignment="Center"
-                          ItemsSource="{Binding Companies}" SelectedItem="{Binding SelectedCompany}" DisplayMemberPath="NameFr" />
+                <!-- Company selection is global (header selector) -->
+
                 <Button Style="{StaticResource PrimaryButton}" Height="32" Margin="10,0,0,0"
                         Content="Nouvelle offre" Command="{Binding NewCommand}" />
             </StackPanel>
