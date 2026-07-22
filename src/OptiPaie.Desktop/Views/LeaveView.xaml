@@ -97,7 +97,15 @@
                 <DataGridTextColumn Header="{loc:Loc Common_Type}" Binding="{Binding TypeLabel}" Width="150" />
                 <DataGridTextColumn Header="{loc:Loc Leave_Period}" Binding="{Binding Period}" Width="200" ElementStyle="{StaticResource CenterText}" />
                 <DataGridTextColumn Header="{loc:Loc Leave_Days}" Binding="{Binding DaysText}" Width="70" ElementStyle="{StaticResource CenterText}" />
-                <DataGridTextColumn Header="{loc:Loc Common_Status}" Binding="{Binding StatusLabel}" Width="110" ElementStyle="{StaticResource CenterText}" />
+                <DataGridTemplateColumn Header="{loc:Loc Common_Status}" Width="110">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Border Style="{StaticResource StatusPill}">
+                                <TextBlock Style="{StaticResource PillText}" Text="{Binding StatusLabel}" />
+                            </Border>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
                 <DataGridTextColumn Header="{loc:Loc Leave_Reason}" Binding="{Binding Reason}" Width="220" />
             </DataGrid.Columns>
         </DataGrid>

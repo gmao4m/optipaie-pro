@@ -34,6 +34,20 @@ namespace OptiPaie.Desktop.ViewModels
         public string OpenText => Summary.OpenDate.ToString("dd/MM/yyyy", Fr);
         public string PositionsText => Summary.Positions.ToString();
         public string CandidatesText => Summary.HiredCount + " / " + Summary.CandidateCount;
+
+        /// <summary>Semantic colour bucket for the status pill (shared with the other lists).</summary>
+        public string StatusKind
+        {
+            get
+            {
+                switch (Summary.Status)
+                {
+                    case JobStatus.Open: return "accent";     // actively recruiting
+                    case JobStatus.Filled: return "success";  // position filled
+                    default: return "neutral";                // closed
+                }
+            }
+        }
     }
 
     /// <summary>French labels for the recruitment enums.</summary>

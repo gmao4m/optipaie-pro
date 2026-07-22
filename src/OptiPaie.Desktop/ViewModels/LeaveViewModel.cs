@@ -36,6 +36,21 @@ namespace OptiPaie.Desktop.ViewModels
         public string Reason => Request.Reason;
         public bool IsPending => Request.Status == LeaveStatus.Pending;
         public bool IsApproved => Request.Status == LeaveStatus.Approved;
+
+        /// <summary>Semantic colour bucket for the status pill (shared with the other lists).</summary>
+        public string StatusKind
+        {
+            get
+            {
+                switch (Request.Status)
+                {
+                    case LeaveStatus.Approved: return "success"; // granted
+                    case LeaveStatus.Pending: return "pending";  // awaiting decision
+                    case LeaveStatus.Rejected: return "danger";  // refused
+                    default: return "neutral";                   // cancelled
+                }
+            }
+        }
     }
 
     /// <summary>Localized labels for the leave enums (resolved for the active language).</summary>
