@@ -24,6 +24,7 @@ namespace OptiPaie.Desktop.Shell
         private readonly IModuleRegistry _registry;
         private readonly ILicenseGate _gate;
 
+        private DashboardViewModel _dashboard;
         private HomeViewModel _home;
         private EmployeesViewModel _employees;
         private CompaniesViewModel _companies;
@@ -62,7 +63,7 @@ namespace OptiPaie.Desktop.Shell
             // (e.g. after an online synchronization enables a newly purchased module).
             _services.Licensing.Changed += OnLicenseChanged;
 
-            Navigate("home");
+            Navigate("dashboard");
         }
 
         /// <summary>Fixed core screens (always accessible).</summary>
@@ -82,6 +83,7 @@ namespace OptiPaie.Desktop.Shell
 
         private void BuildNavigation()
         {
+            AddCore("dashboard", "Tableau de bord", "IconTrend");
             AddCore("home", "Accueil", "IconHome");
             AddCore("employees", "Employés", "IconUsers");
             AddCore("payroll", "Paie", "IconCash");
@@ -153,6 +155,9 @@ namespace OptiPaie.Desktop.Shell
                     break;
                 case "settings":
                     target = _settings ?? (_settings = new SettingsViewModel(_services));
+                    break;
+                case "dashboard":
+                    target = _dashboard ?? (_dashboard = new DashboardViewModel(_services, Navigate));
                     break;
                 case "home":
                     target = _home ?? (_home = new HomeViewModel(_services, Navigate));

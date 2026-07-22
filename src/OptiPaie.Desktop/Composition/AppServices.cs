@@ -40,7 +40,8 @@ namespace OptiPaie.Desktop.Composition
             IAssetService assets,
             ITrainingService training,
             IAtsService ats,
-            IWorkCertificateService certificates)
+            IWorkCertificateService certificates,
+            IDashboardService dashboard)
         {
             Configuration = configuration;
             Logger = logger;
@@ -68,6 +69,7 @@ namespace OptiPaie.Desktop.Composition
             Training = training;
             Ats = ats;
             Certificates = certificates;
+            Dashboard = dashboard;
         }
 
         public AppConfiguration Configuration { get; }
@@ -126,5 +128,8 @@ namespace OptiPaie.Desktop.Composition
 
         /// <summary>Work-certificates module (premium) — renders live from the shared records.</summary>
         public IWorkCertificateService Certificates { get; }
+
+        /// <summary>Executive dashboard aggregation across every HR module (read-only).</summary>
+        public IDashboardService Dashboard { get; }
     }
 }

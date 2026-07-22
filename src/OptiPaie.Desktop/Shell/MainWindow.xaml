@@ -12,6 +12,9 @@
 
     <Window.Resources>
         <!-- Page templates -->
+        <DataTemplate DataType="{x:Type vm:DashboardViewModel}">
+            <views:DashboardView />
+        </DataTemplate>
         <DataTemplate DataType="{x:Type vm:HomeViewModel}">
             <views:HomeView />
         </DataTemplate>

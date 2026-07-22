@@ -394,6 +394,7 @@ namespace OptiPaie.Services
             {
                 LoanId = loan.Id,
                 EmployeeId = loan.EmployeeId,
+                Status = loan.Status,
                 Principal = loan.Principal,
                 MonthlyInstallment = loan.MonthlyInstallment,
                 Repaid = repaid,

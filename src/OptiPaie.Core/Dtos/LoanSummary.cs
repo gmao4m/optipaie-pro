@@ -12,6 +12,9 @@ namespace OptiPaie.Core.Dtos
         /// <summary>Display name (filled when listing a whole company).</summary>
         public string EmployeeName { get; set; }
 
+        /// <summary>Lifecycle state (for dashboards / filtering).</summary>
+        public OptiPaie.Core.Enums.LoanStatus Status { get; set; }
+
         public decimal Principal { get; set; }
         public decimal MonthlyInstallment { get; set; }
 
