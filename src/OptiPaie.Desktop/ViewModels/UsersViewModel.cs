@@ -123,10 +123,12 @@ namespace OptiPaie.Desktop.ViewModels
 
         private string L(string key) => _services.Localization.GetString(key);
 
+        private string Err(Result r) => Localization.ResultText.Localize(_services.Localization, r.Error, r.ErrorCode);
+
         private void Add()
         {
             Result<long> r = _services.Users.Create(_newUsername, _newFullName, _newPassword, _newRole.Value, _newDepartment);
-            if (r.IsFailure) { Dialogs.Error(r.Error); return; }
+            if (r.IsFailure) { Dialogs.Error(Err(r)); return; }
 
             NewUsername = NewFullName = NewPassword = NewDepartment = string.Empty;
             Refresh();
@@ -137,7 +139,7 @@ namespace OptiPaie.Desktop.ViewModels
         {
             if (!Dialogs.Confirm("Supprimer cet utilisateur ?")) return;
             Result r = _services.Users.Delete(_selected.Id);
-            if (r.IsFailure) { Dialogs.Error(r.Error); return; }
+            if (r.IsFailure) { Dialogs.Error(Err(r)); return; }
             Refresh();
         }
 
@@ -147,7 +149,7 @@ namespace OptiPaie.Desktop.ViewModels
             if (u == null) return;
             u.IsActive = !u.IsActive;
             Result r = _services.Users.Update(u);
-            if (r.IsFailure) { Dialogs.Error(r.Error); return; }
+            if (r.IsFailure) { Dialogs.Error(Err(r)); return; }
             Refresh();
         }
 
@@ -161,7 +163,7 @@ namespace OptiPaie.Desktop.ViewModels
             }
 
             Result r = _services.Users.ChangePassword(_selected.Id, _newPassword);
-            if (r.IsFailure) { Dialogs.Error(r.Error); return; }
+            if (r.IsFailure) { Dialogs.Error(Err(r)); return; }
 
             NewPassword = string.Empty;
             StatusMessage = L("Users_PasswordReset");

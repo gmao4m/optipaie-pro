@@ -432,4 +432,12 @@
   <data name="Role_Admin" xml:space="preserve"><value>Administrateur</value></data>
   <data name="Role_Manager" xml:space="preserve"><value>Responsable</value></data>
   <data name="Session_FullAccess" xml:space="preserve"><value>Accès complet</value></data>
+
+  <!-- User service errors -->
+  <data name="User_UsernameRequired" xml:space="preserve"><value>Le nom d'utilisateur est requis.</value></data>
+  <data name="User_PasswordTooShort" xml:space="preserve"><value>Le mot de passe doit contenir au moins 4 caractères.</value></data>
+  <data name="User_UsernameExists" xml:space="preserve"><value>Ce nom d'utilisateur existe déjà.</value></data>
+  <data name="User_NotFound" xml:space="preserve"><value>Utilisateur introuvable.</value></data>
+  <data name="User_LastAdmin" xml:space="preserve"><value>Au moins un administrateur actif est requis.</value></data>
+  <data name="User_BadCredentials" xml:space="preserve"><value>Nom d'utilisateur ou mot de passe incorrect.</value></data>
 </root>

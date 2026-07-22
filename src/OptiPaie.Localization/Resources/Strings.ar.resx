@@ -432,4 +432,12 @@
   <data name="Role_Admin" xml:space="preserve"><value>مدير</value></data>
   <data name="Role_Manager" xml:space="preserve"><value>مسؤول</value></data>
   <data name="Session_FullAccess" xml:space="preserve"><value>وصول كامل</value></data>
+
+  <!-- User service errors -->
+  <data name="User_UsernameRequired" xml:space="preserve"><value>اسم المستخدم مطلوب.</value></data>
+  <data name="User_PasswordTooShort" xml:space="preserve"><value>يجب أن تحتوي كلمة المرور على 4 أحرف على الأقل.</value></data>
+  <data name="User_UsernameExists" xml:space="preserve"><value>اسم المستخدم موجود بالفعل.</value></data>
+  <data name="User_NotFound" xml:space="preserve"><value>المستخدم غير موجود.</value></data>
+  <data name="User_LastAdmin" xml:space="preserve"><value>يلزم وجود مسؤول نشط واحد على الأقل.</value></data>
+  <data name="User_BadCredentials" xml:space="preserve"><value>اسم المستخدم أو كلمة المرور غير صحيحة.</value></data>
 </root>

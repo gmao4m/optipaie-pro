@@ -53,7 +53,7 @@ namespace OptiPaie.Desktop.ViewModels
             if (result.IsFailure)
             {
                 IsError = true;
-                StatusMessage = result.Error;
+                StatusMessage = Localization.ResultText.Localize(_services.Localization, result.Error, result.ErrorCode);
                 return;
             }
 
