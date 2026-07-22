@@ -328,4 +328,21 @@
         </Style.Triggers>
     </Style>
 
+    <!-- ==================================================================
+         Empty state — a centred, muted message shown over a list that has
+         no rows yet (a fresh company, a filtered-out period). Drive its
+         Visibility from the grid's HasItems via InverseBoolToVis so it needs
+         no per-VM flag.
+         ================================================================== -->
+    <Style x:Key="EmptyStateMessage" TargetType="TextBlock">
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="TextAlignment" Value="Center" />
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
+        <Setter Property="FontSize" Value="13.5" />
+        <Setter Property="IsHitTestVisible" Value="False" />
+        <Setter Property="MaxWidth" Value="360" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
 </ResourceDictionary>

@@ -69,7 +69,7 @@
             </Border>
         </StackPanel>
 
-        <DataGrid Grid.Row="2" Margin="0,18,0,0" ItemsSource="{Binding Sessions}" SelectedItem="{Binding SelectedSession}"
+        <DataGrid x:Name="SessionsGrid" Grid.Row="2" Margin="0,18,0,0" ItemsSource="{Binding Sessions}" SelectedItem="{Binding SelectedSession}"
                   AutoGenerateColumns="False" HeadersVisibility="Column" IsReadOnly="True"
                   CanUserAddRows="False" CanUserResizeRows="False" GridLinesVisibility="All"
                   RowHeight="32" FontFamily="Segoe UI" FontSize="12.5" Background="{DynamicResource Surface}"
@@ -95,6 +95,9 @@
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
+
+        <TextBlock Grid.Row="2" Margin="0,18,0,0" Style="{StaticResource EmptyStateMessage}" Text="{loc:Loc Msg_NoData}"
+                   Visibility="{Binding HasItems, ElementName=SessionsGrid, Converter={StaticResource InverseBoolToVis}}" />
 
         <Grid Grid.Row="3" Margin="0,14,0,0">
             <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Center" HorizontalAlignment="Left" Text="{Binding StatusMessage}" />
