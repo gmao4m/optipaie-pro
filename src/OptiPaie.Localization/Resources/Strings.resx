@@ -469,6 +469,26 @@
   <data name="Dashboard_Kpi_AssetsAssigned" xml:space="preserve"><value>Matériel attribué</value></data>
   <data name="Dashboard_Kpi_TrainingUpcoming" xml:space="preserve"><value>Formations à venir</value></data>
 
+  <!-- Payroll view (labels only — never affects the payroll engine or values) -->
+  <data name="Common_Preview" xml:space="preserve"><value>Aperçu</value></data>
+  <data name="Payroll_Employee" xml:space="preserve"><value>Employé</value></data>
+  <data name="Payroll_Month" xml:space="preserve"><value>Mois</value></data>
+  <data name="Payroll_Year" xml:space="preserve"><value>Année</value></data>
+  <data name="Payroll_Elements" xml:space="preserve"><value>Éléments de paie</value></data>
+  <data name="Payroll_ManageItems" xml:space="preserve"><value>Gérer les rubriques</value></data>
+  <data name="Payroll_EmptyState" xml:space="preserve"><value>Choisissez un employé pour établir sa paie.</value></data>
+  <data name="Payroll_Col_Label" xml:space="preserve"><value>Libellé</value></data>
+  <data name="Payroll_Col_Base" xml:space="preserve"><value>Base</value></data>
+  <data name="Payroll_Col_Rate" xml:space="preserve"><value>Taux</value></data>
+  <data name="Payroll_Col_Gain" xml:space="preserve"><value>Gain</value></data>
+  <data name="Payroll_Col_Deduction" xml:space="preserve"><value>Retenue</value></data>
+  <data name="Payroll_NetToPay" xml:space="preserve"><value>Net à payer</value></data>
+  <data name="Payroll_Gross" xml:space="preserve"><value>Salaire brut</value></data>
+  <data name="Payroll_Contributable" xml:space="preserve"><value>Salaire cotisable</value></data>
+  <data name="Payroll_Taxable" xml:space="preserve"><value>Salaire imposable</value></data>
+  <data name="Payroll_Abatement" xml:space="preserve"><value>Abattement</value></data>
+  <data name="Payroll_Save" xml:space="preserve"><value>Enregistrer la paie</value></data>
+
   <!-- User service errors -->
   <data name="User_UsernameRequired" xml:space="preserve"><value>Le nom d'utilisateur est requis.</value></data>
   <data name="User_PasswordTooShort" xml:space="preserve"><value>Le mot de passe doit contenir au moins 4 caractères.</value></data>

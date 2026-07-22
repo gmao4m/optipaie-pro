@@ -469,6 +469,26 @@
   <data name="Dashboard_Kpi_AssetsAssigned" xml:space="preserve"><value>المعدات المخصصة</value></data>
   <data name="Dashboard_Kpi_TrainingUpcoming" xml:space="preserve"><value>تكوينات قادمة</value></data>
 
+  <!-- Payroll view (labels only — never affects the payroll engine or values) -->
+  <data name="Common_Preview" xml:space="preserve"><value>معاينة</value></data>
+  <data name="Payroll_Employee" xml:space="preserve"><value>الموظف</value></data>
+  <data name="Payroll_Month" xml:space="preserve"><value>الشهر</value></data>
+  <data name="Payroll_Year" xml:space="preserve"><value>السنة</value></data>
+  <data name="Payroll_Elements" xml:space="preserve"><value>عناصر الأجر</value></data>
+  <data name="Payroll_ManageItems" xml:space="preserve"><value>إدارة العناصر</value></data>
+  <data name="Payroll_EmptyState" xml:space="preserve"><value>اختر موظفاً لإعداد كشف أجره.</value></data>
+  <data name="Payroll_Col_Label" xml:space="preserve"><value>البيان</value></data>
+  <data name="Payroll_Col_Base" xml:space="preserve"><value>الأساس</value></data>
+  <data name="Payroll_Col_Rate" xml:space="preserve"><value>النسبة</value></data>
+  <data name="Payroll_Col_Gain" xml:space="preserve"><value>الاستحقاق</value></data>
+  <data name="Payroll_Col_Deduction" xml:space="preserve"><value>الاقتطاع</value></data>
+  <data name="Payroll_NetToPay" xml:space="preserve"><value>الصافي للدفع</value></data>
+  <data name="Payroll_Gross" xml:space="preserve"><value>الأجر الإجمالي</value></data>
+  <data name="Payroll_Contributable" xml:space="preserve"><value>الأجر الخاضع للاشتراك</value></data>
+  <data name="Payroll_Taxable" xml:space="preserve"><value>الأجر الخاضع للضريبة</value></data>
+  <data name="Payroll_Abatement" xml:space="preserve"><value>التخفيض</value></data>
+  <data name="Payroll_Save" xml:space="preserve"><value>حفظ كشف الأجور</value></data>
+
   <!-- User service errors -->
   <data name="User_UsernameRequired" xml:space="preserve"><value>اسم المستخدم مطلوب.</value></data>
   <data name="User_PasswordTooShort" xml:space="preserve"><value>يجب أن تحتوي كلمة المرور على 4 أحرف على الأقل.</value></data>

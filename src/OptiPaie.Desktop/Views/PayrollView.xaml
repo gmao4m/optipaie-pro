@@ -1,6 +1,7 @@
 <UserControl x:Class="OptiPaie.Desktop.Views.PayrollView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:OptiPaie.Desktop.Localization">
     <UserControl.Resources>
         <Style x:Key="RightText" TargetType="TextBlock">
             <Setter Property="TextAlignment" Value="Right" />
@@ -39,11 +40,11 @@
 
         <!-- Title + selectors -->
         <Grid Grid.Row="0">
-            <TextBlock Style="{StaticResource H2}" Text="Établir une paie" VerticalAlignment="Center" HorizontalAlignment="Left" />
+            <TextBlock Style="{StaticResource H2}" Text="{loc:Loc Dashboard_NewPayroll}" VerticalAlignment="Center" HorizontalAlignment="Left" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <!-- Company selection is global (header selector) -->
 
-                <TextBlock Text="Employé" VerticalAlignment="Center" Foreground="{DynamicResource TextMuted}" FontSize="12" Margin="14,0,6,0" />
+                <TextBlock Text="{loc:Loc Payroll_Employee}" VerticalAlignment="Center" Foreground="{DynamicResource TextMuted}" FontSize="12" Margin="14,0,6,0" />
                 <ComboBox Style="{StaticResource AppComboBox}" Width="170" Height="32" ItemsSource="{Binding Employees}" SelectedItem="{Binding SelectedEmployee}">
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
@@ -58,9 +59,9 @@
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
                 </ComboBox>
-                <TextBlock Text="Mois" VerticalAlignment="Center" Foreground="{DynamicResource TextMuted}" FontSize="12" Margin="14,0,6,0" />
+                <TextBlock Text="{loc:Loc Payroll_Month}" VerticalAlignment="Center" Foreground="{DynamicResource TextMuted}" FontSize="12" Margin="14,0,6,0" />
                 <ComboBox Style="{StaticResource AppComboBox}" Width="120" Height="32" ItemsSource="{Binding Months}" SelectedValue="{Binding SelectedMonth}" SelectedValuePath="Value" DisplayMemberPath="Label" />
-                <TextBlock Text="Année" VerticalAlignment="Center" Foreground="{DynamicResource TextMuted}" FontSize="12" Margin="14,0,6,0" />
+                <TextBlock Text="{loc:Loc Payroll_Year}" VerticalAlignment="Center" Foreground="{DynamicResource TextMuted}" FontSize="12" Margin="14,0,6,0" />
                 <ComboBox Style="{StaticResource AppComboBox}" Width="80" Height="32" ItemsSource="{Binding Years}" SelectedItem="{Binding SelectedYear}" />
             </StackPanel>
         </Grid>
@@ -69,7 +70,7 @@
         <Grid Grid.Row="1" Margin="0,16,0,8">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left"
                         Visibility="{Binding HasEmployee, Converter={StaticResource BoolToVis}}">
-                <TextBlock Style="{StaticResource H2}" FontSize="14" Text="Éléments de paie" VerticalAlignment="Center" />
+                <TextBlock Style="{StaticResource H2}" FontSize="14" Text="{loc:Loc Payroll_Elements}" VerticalAlignment="Center" />
                 <!-- Filled automatically by the Attendance module when the month has pointage -->
                 <Border Background="{DynamicResource BrandSoft}" CornerRadius="6" Padding="9,4" Margin="12,0,0,0" VerticalAlignment="Center"
                         Visibility="{Binding AttendanceNote, Converter={StaticResource NonEmptyToVis}}">
@@ -78,15 +79,15 @@
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Visibility="{Binding HasEmployee, Converter={StaticResource BoolToVis}}">
                 <ComboBox Style="{StaticResource AppComboBox}" Width="200" Height="32" ItemsSource="{Binding Catalog}" SelectedItem="{Binding SelectedCatalogElement}" DisplayMemberPath="NameFr" />
-                <Button Style="{StaticResource SecondaryButton}" Height="32" Margin="8,0,0,0" Content="Ajouter" Command="{Binding AddElementCommand}" />
-                <Button Style="{StaticResource SecondaryButton}" Height="32" Margin="8,0,0,0" Content="Gérer les rubriques" Command="{Binding ManageItemsCommand}" />
+                <Button Style="{StaticResource SecondaryButton}" Height="32" Margin="8,0,0,0" Content="{loc:Loc Common_Add}" Command="{Binding AddElementCommand}" />
+                <Button Style="{StaticResource SecondaryButton}" Height="32" Margin="8,0,0,0" Content="{loc:Loc Payroll_ManageItems}" Command="{Binding ManageItemsCommand}" />
             </StackPanel>
         </Grid>
 
         <!-- Payroll grid -->
         <Grid Grid.Row="2">
             <Border Style="{StaticResource Card}" Visibility="{Binding HasEmployee, Converter={StaticResource InverseBoolToVis}}">
-                <TextBlock Style="{StaticResource Caption}" HorizontalAlignment="Center" VerticalAlignment="Center" Text="Choisissez un employé pour établir sa paie." />
+                <TextBlock Style="{StaticResource Caption}" HorizontalAlignment="Center" VerticalAlignment="Center" Text="{loc:Loc Payroll_EmptyState}" />
             </Border>
 
             <DataGrid ItemsSource="{Binding Lines}" AutoGenerateColumns="False" HeadersVisibility="Column"
@@ -99,7 +100,7 @@
                       HorizontalGridLinesBrush="{DynamicResource Border}" VerticalGridLinesBrush="{DynamicResource Border}"
                       ColumnHeaderStyle="{StaticResource GridHeader}">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Libellé" Binding="{Binding Rubrique}" Width="*">
+                    <DataGridTextColumn Header="{loc:Loc Payroll_Col_Label}" Binding="{Binding Rubrique}" Width="*">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock"><Setter Property="VerticalAlignment" Value="Center" /><Setter Property="Margin" Value="8,0,0,0" /></Style>
                         </DataGridTextColumn.ElementStyle>
@@ -107,13 +108,13 @@
                             <Style TargetType="TextBox"><Setter Property="BorderThickness" Value="0" /><Setter Property="Padding" Value="6,0" /><Setter Property="VerticalContentAlignment" Value="Center" /></Style>
                         </DataGridTextColumn.EditingElementStyle>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Header="Base" Binding="{Binding Base, UpdateSourceTrigger=PropertyChanged}" Width="120"
+                    <DataGridTextColumn Header="{loc:Loc Payroll_Col_Base}" Binding="{Binding Base, UpdateSourceTrigger=PropertyChanged}" Width="120"
                                         ElementStyle="{StaticResource RightText}" EditingElementStyle="{StaticResource RightEdit}" />
-                    <DataGridTextColumn Header="Taux" Binding="{Binding Taux, UpdateSourceTrigger=PropertyChanged}" Width="100"
+                    <DataGridTextColumn Header="{loc:Loc Payroll_Col_Rate}" Binding="{Binding Taux, UpdateSourceTrigger=PropertyChanged}" Width="100"
                                         ElementStyle="{StaticResource RightText}" EditingElementStyle="{StaticResource RightEdit}" />
-                    <DataGridTextColumn Header="Gain" Binding="{Binding Gain, StringFormat=N2}" Width="140" IsReadOnly="True"
+                    <DataGridTextColumn Header="{loc:Loc Payroll_Col_Gain}" Binding="{Binding Gain, StringFormat=N2}" Width="140" IsReadOnly="True"
                                         ElementStyle="{StaticResource RightText}" />
-                    <DataGridTextColumn Header="Retenue" Binding="{Binding Retenue, StringFormat=N2}" Width="140" IsReadOnly="True"
+                    <DataGridTextColumn Header="{loc:Loc Payroll_Col_Deduction}" Binding="{Binding Retenue, StringFormat=N2}" Width="140" IsReadOnly="True"
                                         ElementStyle="{StaticResource RightText}" />
                     <DataGridTemplateColumn Width="36" CanUserResize="False">
                         <DataGridTemplateColumn.CellTemplate>
@@ -138,16 +139,16 @@
                 <DockPanel>
                     <Border DockPanel.Dock="Right" Background="{DynamicResource TextPrimary}" CornerRadius="8" Padding="16,8" VerticalAlignment="Center">
                         <StackPanel>
-                            <TextBlock Text="Net à payer" Foreground="#C9CDD2" FontSize="11" />
+                            <TextBlock Text="{loc:Loc Payroll_NetToPay}" Foreground="#C9CDD2" FontSize="11" />
                             <TextBlock Text="{Binding NetText}" Foreground="White" FontSize="17" FontWeight="SemiBold" Margin="0,2,0,0" />
                         </StackPanel>
                     </Border>
                     <WrapPanel VerticalAlignment="Center">
-                        <StackPanel Style="{StaticResource Stat}"><TextBlock Style="{StaticResource Caption}" Text="Salaire brut" /><TextBlock FontWeight="SemiBold" FontSize="13" Text="{Binding GrossText}" /></StackPanel>
-                        <StackPanel Style="{StaticResource Stat}"><TextBlock Style="{StaticResource Caption}" Text="Salaire cotisable" /><TextBlock FontWeight="SemiBold" FontSize="13" Text="{Binding CotisableText}" /></StackPanel>
-                        <StackPanel Style="{StaticResource Stat}"><TextBlock Style="{StaticResource Caption}" Text="Salaire imposable" /><TextBlock FontWeight="SemiBold" FontSize="13" Text="{Binding ImposableText}" /></StackPanel>
+                        <StackPanel Style="{StaticResource Stat}"><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Payroll_Gross}" /><TextBlock FontWeight="SemiBold" FontSize="13" Text="{Binding GrossText}" /></StackPanel>
+                        <StackPanel Style="{StaticResource Stat}"><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Payroll_Contributable}" /><TextBlock FontWeight="SemiBold" FontSize="13" Text="{Binding CotisableText}" /></StackPanel>
+                        <StackPanel Style="{StaticResource Stat}"><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Payroll_Taxable}" /><TextBlock FontWeight="SemiBold" FontSize="13" Text="{Binding ImposableText}" /></StackPanel>
                         <StackPanel Style="{StaticResource Stat}"><TextBlock Style="{StaticResource Caption}" Text="CNAS" /><TextBlock FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource Deduction}" Text="{Binding CnasText}" /></StackPanel>
-                        <StackPanel Style="{StaticResource Stat}"><TextBlock Style="{StaticResource Caption}" Text="Abattement" /><TextBlock FontWeight="SemiBold" FontSize="13" Text="{Binding AbattementText}" /></StackPanel>
+                        <StackPanel Style="{StaticResource Stat}"><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Payroll_Abatement}" /><TextBlock FontWeight="SemiBold" FontSize="13" Text="{Binding AbattementText}" /></StackPanel>
                         <StackPanel Style="{StaticResource Stat}"><TextBlock Style="{StaticResource Caption}" Text="IRG" /><TextBlock FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource Deduction}" Text="{Binding IrgText}" /></StackPanel>
                     </WrapPanel>
                 </DockPanel>
@@ -157,10 +158,10 @@
                 <Grid>
                     <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Center" HorizontalAlignment="Left" Text="{Binding Status}" />
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button Style="{StaticResource SecondaryButton}" Height="36" Content="Aperçu" Command="{Binding PreviewCommand}" />
-                        <Button Style="{StaticResource SecondaryButton}" Height="36" Margin="8,0,0,0" Content="Imprimer" Command="{Binding PrintCommand}" />
-                        <Button Style="{StaticResource SecondaryButton}" Height="36" Margin="8,0,0,0" Content="Exporter PDF" Command="{Binding ExportPdfCommand}" />
-                        <Button Style="{StaticResource PrimaryButton}" Height="36" Margin="8,0,0,0" Content="Enregistrer la paie" Command="{Binding SaveCommand}" />
+                        <Button Style="{StaticResource SecondaryButton}" Height="36" Content="{loc:Loc Common_Preview}" Command="{Binding PreviewCommand}" />
+                        <Button Style="{StaticResource SecondaryButton}" Height="36" Margin="8,0,0,0" Content="{loc:Loc Common_Print}" Command="{Binding PrintCommand}" />
+                        <Button Style="{StaticResource SecondaryButton}" Height="36" Margin="8,0,0,0" Content="{loc:Loc Common_ExportPdf}" Command="{Binding ExportPdfCommand}" />
+                        <Button Style="{StaticResource PrimaryButton}" Height="36" Margin="8,0,0,0" Content="{loc:Loc Payroll_Save}" Command="{Binding SaveCommand}" />
                     </StackPanel>
                 </Grid>
             </StackPanel>
