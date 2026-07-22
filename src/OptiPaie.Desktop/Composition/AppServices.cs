@@ -41,7 +41,9 @@ namespace OptiPaie.Desktop.Composition
             ITrainingService training,
             IAtsService ats,
             IWorkCertificateService certificates,
-            IDashboardService dashboard)
+            IDashboardService dashboard,
+            IReportService reports,
+            INotificationService notifications)
         {
             Configuration = configuration;
             Logger = logger;
@@ -70,6 +72,8 @@ namespace OptiPaie.Desktop.Composition
             Ats = ats;
             Certificates = certificates;
             Dashboard = dashboard;
+            Reports = reports;
+            Notifications = notifications;
         }
 
         public AppConfiguration Configuration { get; }
@@ -131,5 +135,11 @@ namespace OptiPaie.Desktop.Composition
 
         /// <summary>Executive dashboard aggregation across every HR module (read-only).</summary>
         public IDashboardService Dashboard { get; }
+
+        /// <summary>Reports Center — cross-module report library (read-only).</summary>
+        public IReportService Reports { get; }
+
+        /// <summary>Central notification engine — cross-module alerts for the bell (read-only).</summary>
+        public INotificationService Notifications { get; }
     }
 }

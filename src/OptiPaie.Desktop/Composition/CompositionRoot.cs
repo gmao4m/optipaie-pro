@@ -57,6 +57,11 @@ namespace OptiPaie.Desktop.Composition
             var dashboardService = new DashboardService(
                 companyService, employeeService, contractService, leaveService, loanService,
                 attendanceService, atsService, assetService, trainingService);
+            var reportService = new ReportService(
+                companyService, employeeService, attendanceService, leaveService, loanService,
+                atsService, assetService, trainingService);
+            var notificationService = new NotificationService(
+                companyService, employeeService, contractService, leaveService, trainingService);
             var backupService = new BackupService(backupProvider, unitOfWorkFactory, configuration, logger);
             var localizationService = new LocalizationService();
 
@@ -120,7 +125,9 @@ namespace OptiPaie.Desktop.Composition
                 trainingService,
                 atsService,
                 certificateService,
-                dashboardService);
+                dashboardService,
+                reportService,
+                notificationService);
         }
     }
 }

@@ -132,6 +132,33 @@ namespace OptiPaie.Desktop.Converters
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => Binding.DoNothing;
     }
 
+    /// <summary>NotificationSeverity → a status colour dot (Urgent red, Warning amber, Info gray).</summary>
+    public sealed class SeverityToBrushConverter : IValueConverter
+    {
+        private static readonly System.Windows.Media.Brush Urgent =
+            new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xC0, 0x45, 0x3B));
+        private static readonly System.Windows.Media.Brush Warning =
+            new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xC9, 0x7A, 0x10));
+        private static readonly System.Windows.Media.Brush Info =
+            new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x8A, 0x94, 0xA2));
+
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is OptiPaie.Core.Dtos.NotificationSeverity s)
+            {
+                switch (s)
+                {
+                    case OptiPaie.Core.Dtos.NotificationSeverity.Urgent: return Urgent;
+                    case OptiPaie.Core.Dtos.NotificationSeverity.Warning: return Warning;
+                }
+            }
+
+            return Info;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => Binding.DoNothing;
+    }
+
     /// <summary>true → Collapsed, false → Visible (for empty-state text).</summary>
     public sealed class InverseBooleanToVisibilityConverter : IValueConverter
     {

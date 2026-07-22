@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Media;
 using OptiPaie.Core.Licensing;
 using OptiPaie.Desktop.Composition;
@@ -25,6 +26,7 @@ namespace OptiPaie.Desktop.Shell
         private readonly ILicenseGate _gate;
 
         private DashboardViewModel _dashboard;
+        private ReportsViewModel _reports;
         private HomeViewModel _home;
         private EmployeesViewModel _employees;
         private CompaniesViewModel _companies;
@@ -63,7 +65,44 @@ namespace OptiPaie.Desktop.Shell
             // (e.g. after an online synchronization enables a newly purchased module).
             _services.Licensing.Changed += OnLicenseChanged;
 
-            Navigate("dashboard");
+            OpenNotificationCommand = new RelayCommand(p => OpenNotification(p as OptiPaie.Core.Dtos.Notification));
+
+            Navigate("dashboard"); // also refreshes the notification bell
+        }
+
+        /// <summary>Cross-module alerts for the header bell.</summary>
+        public ObservableCollection<OptiPaie.Core.Dtos.Notification> Notifications { get; } =
+            new ObservableCollection<OptiPaie.Core.Dtos.Notification>();
+
+        private int _notificationCount;
+        public int NotificationCount { get => _notificationCount; private set => Set(ref _notificationCount, value); }
+
+        public bool HasNotifications => _notificationCount > 0;
+
+        /// <summary>Badge text (capped for space).</summary>
+        public string NotificationBadge => _notificationCount > 9 ? "9+" : _notificationCount.ToString();
+
+        public ICommand OpenNotificationCommand { get; }
+
+        private void RefreshNotifications()
+        {
+            Notifications.Clear();
+            foreach (OptiPaie.Core.Dtos.Notification n in _services.Notifications.GetNotifications())
+            {
+                Notifications.Add(n);
+            }
+
+            NotificationCount = Notifications.Count;
+            Raise(nameof(HasNotifications));
+            Raise(nameof(NotificationBadge));
+        }
+
+        private void OpenNotification(OptiPaie.Core.Dtos.Notification notification)
+        {
+            if (notification != null && !string.IsNullOrWhiteSpace(notification.ModuleKey))
+            {
+                Navigate(notification.ModuleKey);
+            }
         }
 
         /// <summary>Fixed core screens (always accessible).</summary>
@@ -89,6 +128,7 @@ namespace OptiPaie.Desktop.Shell
             AddCore("payroll", "Paie", "IconCash");
             AddCore("companies", "Entreprises", "IconBuilding");
             AddCore("archive", "Archive", "IconArchive");
+            AddCore("reports", "Rapports", "IconFile");
 
             foreach (ModuleDescriptor module in _registry.Upsells)
             {
@@ -159,6 +199,9 @@ namespace OptiPaie.Desktop.Shell
                 case "dashboard":
                     target = _dashboard ?? (_dashboard = new DashboardViewModel(_services, Navigate));
                     break;
+                case "reports":
+                    target = _reports ?? (_reports = new ReportsViewModel(_services));
+                    break;
                 case "home":
                     target = _home ?? (_home = new HomeViewModel(_services, Navigate));
                     break;
@@ -183,6 +226,9 @@ namespace OptiPaie.Desktop.Shell
             {
                 activable.OnActivated();
             }
+
+            // Alerts may have changed after acting on a screen — keep the bell current.
+            RefreshNotifications();
         }
 
         /// <summary>
