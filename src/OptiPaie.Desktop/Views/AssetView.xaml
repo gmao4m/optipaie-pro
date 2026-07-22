@@ -1,6 +1,7 @@
 <UserControl x:Class="OptiPaie.Desktop.Views.AssetView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:OptiPaie.Desktop.Localization">
     <UserControl.Resources>
         <Style x:Key="GridHeader" TargetType="DataGridColumnHeader">
             <Setter Property="Background" Value="{DynamicResource SurfaceMuted}" />
@@ -42,34 +43,33 @@
 
         <Grid Grid.Row="0">
             <StackPanel HorizontalAlignment="Left">
-                <TextBlock Style="{StaticResource H1}" Text="Matériel" />
-                <TextBlock Style="{StaticResource Caption}" Margin="0,5,0,0"
-                           Text="Suivez le matériel de l'entreprise et son attribution aux employés." />
+                <TextBlock Style="{StaticResource H1}" Text="{loc:Loc Asset_Title}" />
+                <TextBlock Style="{StaticResource Caption}" Margin="0,5,0,0" Text="{loc:Loc Asset_Subtitle}" />
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
                 <!-- Company selection is global (header selector) -->
 
                 <Button Style="{StaticResource PrimaryButton}" Height="32" Margin="10,0,0,0"
-                        Content="Nouveau matériel" Command="{Binding NewCommand}" />
+                        Content="{loc:Loc Asset_New}" Command="{Binding NewCommand}" />
             </StackPanel>
         </Grid>
 
         <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,18,0,0">
             <Border Style="{StaticResource Kpi}">
                 <StackPanel>
-                    <TextBlock Style="{StaticResource Caption}" Text="Disponibles" />
+                    <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Asset_Available}" />
                     <TextBlock FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource Salary}" Text="{Binding AvailableText}" />
                 </StackPanel>
             </Border>
             <Border Style="{StaticResource Kpi}">
                 <StackPanel>
-                    <TextBlock Style="{StaticResource Caption}" Text="Attribués" />
+                    <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Asset_Assigned}" />
                     <TextBlock FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource Employer}" Text="{Binding AssignedText}" />
                 </StackPanel>
             </Border>
             <Border Style="{StaticResource Kpi}">
                 <StackPanel>
-                    <TextBlock Style="{StaticResource Caption}" Text="Valeur totale (DA)" />
+                    <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Asset_TotalValue}" />
                     <TextBlock FontSize="20" FontWeight="SemiBold" Text="{Binding ValueText}" />
                 </StackPanel>
             </Border>
@@ -84,25 +84,25 @@
                   HorizontalGridLinesBrush="{DynamicResource Border}" VerticalGridLinesBrush="{DynamicResource Border}"
                   ColumnHeaderStyle="{StaticResource GridHeader}">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Matériel" Binding="{Binding Name}" Width="*" />
-                <DataGridTextColumn Header="Catégorie" Binding="{Binding CategoryLabel}" Width="120" ElementStyle="{StaticResource CenterText}" />
-                <DataGridTextColumn Header="N° série" Binding="{Binding SerialNumber}" Width="130" />
-                <DataGridTextColumn Header="Valeur" Binding="{Binding ValueText}" Width="110" ElementStyle="{StaticResource RightText}" />
-                <DataGridTextColumn Header="Détenteur" Binding="{Binding HolderName}" Width="180" />
-                <DataGridTextColumn Header="Statut" Binding="{Binding StatusLabel}" Width="120" ElementStyle="{StaticResource CenterText}" />
+                <DataGridTextColumn Header="{loc:Loc Asset_Title}" Binding="{Binding Name}" Width="*" />
+                <DataGridTextColumn Header="{loc:Loc Asset_Category}" Binding="{Binding CategoryLabel}" Width="120" ElementStyle="{StaticResource CenterText}" />
+                <DataGridTextColumn Header="{loc:Loc Asset_Serial}" Binding="{Binding SerialNumber}" Width="130" />
+                <DataGridTextColumn Header="{loc:Loc Asset_Value}" Binding="{Binding ValueText}" Width="110" ElementStyle="{StaticResource RightText}" />
+                <DataGridTextColumn Header="{loc:Loc Asset_Holder}" Binding="{Binding HolderName}" Width="180" />
+                <DataGridTextColumn Header="{loc:Loc Common_Status}" Binding="{Binding StatusLabel}" Width="120" ElementStyle="{StaticResource CenterText}" />
             </DataGrid.Columns>
         </DataGrid>
 
         <Grid Grid.Row="3" Margin="0,14,0,0">
             <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Center" HorizontalAlignment="Left" Text="{Binding StatusMessage}" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Style="{StaticResource SecondaryButton}" Content="Historique" Command="{Binding HistoryCommand}" />
-                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="Modifier" Command="{Binding EditCommand}" />
-                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="Réparation" Command="{Binding RepairCommand}" />
-                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="Réformer" Command="{Binding RetireCommand}" />
-                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="Supprimer" Command="{Binding DeleteCommand}" />
-                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="Retour" Command="{Binding ReturnCommand}" />
-                <Button Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Content="Attribuer" Command="{Binding AssignCommand}" />
+                <Button Style="{StaticResource SecondaryButton}" Content="{loc:Loc Asset_History}" Command="{Binding HistoryCommand}" />
+                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="{loc:Loc Common_Edit}" Command="{Binding EditCommand}" />
+                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="{loc:Loc Asset_Repair}" Command="{Binding RepairCommand}" />
+                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="{loc:Loc Asset_Retire}" Command="{Binding RetireCommand}" />
+                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="{loc:Loc Common_Delete}" Command="{Binding DeleteCommand}" />
+                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="{loc:Loc Asset_Return}" Command="{Binding ReturnCommand}" />
+                <Button Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Content="{loc:Loc Asset_Assign}" Command="{Binding AssignCommand}" />
             </StackPanel>
         </Grid>
     </Grid>

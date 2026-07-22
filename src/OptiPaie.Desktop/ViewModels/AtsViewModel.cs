@@ -39,13 +39,15 @@ namespace OptiPaie.Desktop.ViewModels
     /// <summary>French labels for the recruitment enums.</summary>
     public static class AtsLabels
     {
+        private static string L(string key) => OptiPaie.Desktop.Localization.TranslationSource.Instance[key];
+
         public static string PostingStatus(JobStatus status)
         {
             switch (status)
             {
-                case JobStatus.Open: return "Ouverte";
-                case JobStatus.Closed: return "Fermée";
-                case JobStatus.Filled: return "Pourvue";
+                case JobStatus.Open: return L("Enum_JobStatus_Open");
+                case JobStatus.Closed: return L("Enum_JobStatus_Closed");
+                case JobStatus.Filled: return L("Enum_JobStatus_Filled");
                 default: return string.Empty;
             }
         }
@@ -54,12 +56,12 @@ namespace OptiPaie.Desktop.ViewModels
         {
             switch (stage)
             {
-                case CandidateStage.Applied: return "Candidature";
-                case CandidateStage.Screening: return "Présélection";
-                case CandidateStage.Interview: return "Entretien";
-                case CandidateStage.Offer: return "Offre";
-                case CandidateStage.Hired: return "Recruté";
-                case CandidateStage.Rejected: return "Écarté";
+                case CandidateStage.Applied: return L("Enum_CandidateStage_Applied");
+                case CandidateStage.Screening: return L("Enum_CandidateStage_Screening");
+                case CandidateStage.Interview: return L("Enum_CandidateStage_Interview");
+                case CandidateStage.Offer: return L("Enum_CandidateStage_Offer");
+                case CandidateStage.Hired: return L("Enum_CandidateStage_Hired");
+                case CandidateStage.Rejected: return L("Enum_CandidateStage_Rejected");
                 default: return string.Empty;
             }
         }

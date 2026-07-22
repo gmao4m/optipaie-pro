@@ -599,6 +599,90 @@
   <data name="Enum_ContractStatus_Terminated" xml:space="preserve"><value>Résilié</value></data>
   <data name="Enum_ContractStatus_Renewed" xml:space="preserve"><value>Renouvelé</value></data>
 
+  <!-- Assets module -->
+  <data name="Asset_Title" xml:space="preserve"><value>Matériel</value></data>
+  <data name="Asset_Subtitle" xml:space="preserve"><value>Suivez le matériel de l'entreprise et son attribution aux employés.</value></data>
+  <data name="Asset_New" xml:space="preserve"><value>Nouveau matériel</value></data>
+  <data name="Asset_Available" xml:space="preserve"><value>Disponibles</value></data>
+  <data name="Asset_Assigned" xml:space="preserve"><value>Attribués</value></data>
+  <data name="Asset_TotalValue" xml:space="preserve"><value>Valeur totale (DA)</value></data>
+  <data name="Asset_Category" xml:space="preserve"><value>Catégorie</value></data>
+  <data name="Asset_Serial" xml:space="preserve"><value>N° série</value></data>
+  <data name="Asset_Value" xml:space="preserve"><value>Valeur</value></data>
+  <data name="Asset_Holder" xml:space="preserve"><value>Détenteur</value></data>
+  <data name="Asset_History" xml:space="preserve"><value>Historique</value></data>
+  <data name="Asset_Repair" xml:space="preserve"><value>Réparation</value></data>
+  <data name="Asset_Retire" xml:space="preserve"><value>Réformer</value></data>
+  <data name="Asset_Return" xml:space="preserve"><value>Retour</value></data>
+  <data name="Asset_Assign" xml:space="preserve"><value>Attribuer</value></data>
+  <data name="Enum_AssetCat_Laptop" xml:space="preserve"><value>Ordinateur</value></data>
+  <data name="Enum_AssetCat_Phone" xml:space="preserve"><value>Téléphone</value></data>
+  <data name="Enum_AssetCat_Vehicle" xml:space="preserve"><value>Véhicule</value></data>
+  <data name="Enum_AssetCat_Uniform" xml:space="preserve"><value>Tenue / EPI</value></data>
+  <data name="Enum_AssetCat_Tool" xml:space="preserve"><value>Outillage</value></data>
+  <data name="Enum_AssetCat_Other" xml:space="preserve"><value>Autre</value></data>
+  <data name="Enum_AssetStatus_Available" xml:space="preserve"><value>Disponible</value></data>
+  <data name="Enum_AssetStatus_Assigned" xml:space="preserve"><value>Attribué</value></data>
+  <data name="Enum_AssetStatus_UnderRepair" xml:space="preserve"><value>En réparation</value></data>
+  <data name="Enum_AssetStatus_Retired" xml:space="preserve"><value>Réformé</value></data>
+
+  <!-- Training module -->
+  <data name="Training_Title" xml:space="preserve"><value>Formation</value></data>
+  <data name="Training_Subtitle" xml:space="preserve"><value>Organisez les formations et suivez les participants et leurs attestations.</value></data>
+  <data name="Training_New" xml:space="preserve"><value>Nouvelle formation</value></data>
+  <data name="Training_PlannedOngoing" xml:space="preserve"><value>Planifiées / en cours</value></data>
+  <data name="Training_TotalBudget" xml:space="preserve"><value>Budget total (DA)</value></data>
+  <data name="Training_Col_Title" xml:space="preserve"><value>Intitulé</value></data>
+  <data name="Training_Domain" xml:space="preserve"><value>Domaine</value></data>
+  <data name="Training_Provider" xml:space="preserve"><value>Organisme</value></data>
+  <data name="Training_Dates" xml:space="preserve"><value>Dates</value></data>
+  <data name="Training_Cost" xml:space="preserve"><value>Coût</value></data>
+  <data name="Training_Passed" xml:space="preserve"><value>Réussis</value></data>
+  <data name="Training_Start" xml:space="preserve"><value>Démarrer</value></data>
+  <data name="Training_Complete" xml:space="preserve"><value>Terminer</value></data>
+  <data name="Training_Participants" xml:space="preserve"><value>Participants</value></data>
+  <data name="Enum_TrainingStatus_Planned" xml:space="preserve"><value>Planifiée</value></data>
+  <data name="Enum_TrainingStatus_Ongoing" xml:space="preserve"><value>En cours</value></data>
+  <data name="Enum_TrainingStatus_Completed" xml:space="preserve"><value>Terminée</value></data>
+  <data name="Enum_TrainingStatus_Cancelled" xml:space="preserve"><value>Annulée</value></data>
+  <data name="Enum_TrainingResult_Enrolled" xml:space="preserve"><value>Inscrit</value></data>
+  <data name="Enum_TrainingResult_Completed" xml:space="preserve"><value>Réussi</value></data>
+  <data name="Enum_TrainingResult_Failed" xml:space="preserve"><value>Échoué</value></data>
+  <data name="Enum_TrainingResult_Absent" xml:space="preserve"><value>Absent</value></data>
+
+  <!-- Recruitment (ATS) module -->
+  <data name="Ats_Title" xml:space="preserve"><value>Recrutement</value></data>
+  <data name="Ats_Subtitle" xml:space="preserve"><value>Recruter un candidat crée automatiquement l'employé dans le module Employés.</value></data>
+  <data name="Ats_New" xml:space="preserve"><value>Nouvelle offre</value></data>
+  <data name="Ats_OpenPostings" xml:space="preserve"><value>Offres ouvertes</value></data>
+  <data name="Ats_OpenedOn" xml:space="preserve"><value>Ouverte le</value></data>
+  <data name="Ats_Positions" xml:space="preserve"><value>Postes</value></data>
+  <data name="Ats_Recruited" xml:space="preserve"><value>Recrutés</value></data>
+  <data name="Ats_CloseOffer" xml:space="preserve"><value>Fermer l'offre</value></data>
+  <data name="Ats_Reopen" xml:space="preserve"><value>Rouvrir</value></data>
+  <data name="Enum_JobStatus_Open" xml:space="preserve"><value>Ouverte</value></data>
+  <data name="Enum_JobStatus_Closed" xml:space="preserve"><value>Fermée</value></data>
+  <data name="Enum_JobStatus_Filled" xml:space="preserve"><value>Pourvue</value></data>
+  <data name="Enum_CandidateStage_Applied" xml:space="preserve"><value>Candidature</value></data>
+  <data name="Enum_CandidateStage_Screening" xml:space="preserve"><value>Présélection</value></data>
+  <data name="Enum_CandidateStage_Interview" xml:space="preserve"><value>Entretien</value></data>
+  <data name="Enum_CandidateStage_Offer" xml:space="preserve"><value>Offre</value></data>
+  <data name="Enum_CandidateStage_Hired" xml:space="preserve"><value>Recruté</value></data>
+  <data name="Enum_CandidateStage_Rejected" xml:space="preserve"><value>Écarté</value></data>
+
+  <!-- Certificates module -->
+  <data name="Cert_Title" xml:space="preserve"><value>Attestations</value></data>
+  <data name="Cert_Subtitle" xml:space="preserve"><value>Les attestations sont générées en direct à partir de la fiche employé (poste, salaire, ancienneté).</value></data>
+  <data name="Cert_New" xml:space="preserve"><value>Nouvelle attestation</value></data>
+  <data name="Cert_Reference" xml:space="preserve"><value>Référence</value></data>
+  <data name="Cert_IssuedOn" xml:space="preserve"><value>Délivrée le</value></data>
+  <data name="Cert_Purpose" xml:space="preserve"><value>Objet</value></data>
+  <data name="Cert_PrintPdf" xml:space="preserve"><value>Imprimer (PDF)</value></data>
+  <data name="Enum_CertType_WorkCertificate" xml:space="preserve"><value>Attestation de travail</value></data>
+  <data name="Enum_CertType_WorkExperience" xml:space="preserve"><value>Certificat de travail</value></data>
+  <data name="Enum_CertType_SalaryCertificate" xml:space="preserve"><value>Attestation de salaire</value></data>
+  <data name="Enum_CertType_Free" xml:space="preserve"><value>Document libre</value></data>
+
   <!-- Domain enum labels -->
   <data name="Enum_Gender_Male" xml:space="preserve"><value>Masculin</value></data>
   <data name="Enum_Gender_Female" xml:space="preserve"><value>Féminin</value></data>

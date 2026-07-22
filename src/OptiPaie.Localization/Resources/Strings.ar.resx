@@ -599,6 +599,90 @@
   <data name="Enum_ContractStatus_Terminated" xml:space="preserve"><value>مفسوخ</value></data>
   <data name="Enum_ContractStatus_Renewed" xml:space="preserve"><value>مجدَّد</value></data>
 
+  <!-- Assets module -->
+  <data name="Asset_Title" xml:space="preserve"><value>المعدات</value></data>
+  <data name="Asset_Subtitle" xml:space="preserve"><value>تتبّع معدات المؤسسة وتخصيصها للموظفين.</value></data>
+  <data name="Asset_New" xml:space="preserve"><value>معدات جديدة</value></data>
+  <data name="Asset_Available" xml:space="preserve"><value>المتوفرة</value></data>
+  <data name="Asset_Assigned" xml:space="preserve"><value>المخصصة</value></data>
+  <data name="Asset_TotalValue" xml:space="preserve"><value>القيمة الإجمالية (دج)</value></data>
+  <data name="Asset_Category" xml:space="preserve"><value>الفئة</value></data>
+  <data name="Asset_Serial" xml:space="preserve"><value>الرقم التسلسلي</value></data>
+  <data name="Asset_Value" xml:space="preserve"><value>القيمة</value></data>
+  <data name="Asset_Holder" xml:space="preserve"><value>الحائز</value></data>
+  <data name="Asset_History" xml:space="preserve"><value>السجل</value></data>
+  <data name="Asset_Repair" xml:space="preserve"><value>إصلاح</value></data>
+  <data name="Asset_Retire" xml:space="preserve"><value>شطب</value></data>
+  <data name="Asset_Return" xml:space="preserve"><value>إرجاع</value></data>
+  <data name="Asset_Assign" xml:space="preserve"><value>تخصيص</value></data>
+  <data name="Enum_AssetCat_Laptop" xml:space="preserve"><value>حاسوب</value></data>
+  <data name="Enum_AssetCat_Phone" xml:space="preserve"><value>هاتف</value></data>
+  <data name="Enum_AssetCat_Vehicle" xml:space="preserve"><value>مركبة</value></data>
+  <data name="Enum_AssetCat_Uniform" xml:space="preserve"><value>لباس / معدات وقاية</value></data>
+  <data name="Enum_AssetCat_Tool" xml:space="preserve"><value>أدوات</value></data>
+  <data name="Enum_AssetCat_Other" xml:space="preserve"><value>أخرى</value></data>
+  <data name="Enum_AssetStatus_Available" xml:space="preserve"><value>متوفر</value></data>
+  <data name="Enum_AssetStatus_Assigned" xml:space="preserve"><value>مخصَّص</value></data>
+  <data name="Enum_AssetStatus_UnderRepair" xml:space="preserve"><value>قيد الإصلاح</value></data>
+  <data name="Enum_AssetStatus_Retired" xml:space="preserve"><value>مشطوب</value></data>
+
+  <!-- Training module -->
+  <data name="Training_Title" xml:space="preserve"><value>التكوين</value></data>
+  <data name="Training_Subtitle" xml:space="preserve"><value>نظّم التكوينات وتابع المشاركين وشهاداتهم.</value></data>
+  <data name="Training_New" xml:space="preserve"><value>تكوين جديد</value></data>
+  <data name="Training_PlannedOngoing" xml:space="preserve"><value>مخطَّطة / جارية</value></data>
+  <data name="Training_TotalBudget" xml:space="preserve"><value>الميزانية الإجمالية (دج)</value></data>
+  <data name="Training_Col_Title" xml:space="preserve"><value>العنوان</value></data>
+  <data name="Training_Domain" xml:space="preserve"><value>المجال</value></data>
+  <data name="Training_Provider" xml:space="preserve"><value>الجهة</value></data>
+  <data name="Training_Dates" xml:space="preserve"><value>التواريخ</value></data>
+  <data name="Training_Cost" xml:space="preserve"><value>التكلفة</value></data>
+  <data name="Training_Passed" xml:space="preserve"><value>الناجحون</value></data>
+  <data name="Training_Start" xml:space="preserve"><value>بدء</value></data>
+  <data name="Training_Complete" xml:space="preserve"><value>إنهاء</value></data>
+  <data name="Training_Participants" xml:space="preserve"><value>المشاركون</value></data>
+  <data name="Enum_TrainingStatus_Planned" xml:space="preserve"><value>مخطَّطة</value></data>
+  <data name="Enum_TrainingStatus_Ongoing" xml:space="preserve"><value>جارية</value></data>
+  <data name="Enum_TrainingStatus_Completed" xml:space="preserve"><value>منتهية</value></data>
+  <data name="Enum_TrainingStatus_Cancelled" xml:space="preserve"><value>ملغاة</value></data>
+  <data name="Enum_TrainingResult_Enrolled" xml:space="preserve"><value>مسجَّل</value></data>
+  <data name="Enum_TrainingResult_Completed" xml:space="preserve"><value>ناجح</value></data>
+  <data name="Enum_TrainingResult_Failed" xml:space="preserve"><value>راسب</value></data>
+  <data name="Enum_TrainingResult_Absent" xml:space="preserve"><value>غائب</value></data>
+
+  <!-- Recruitment (ATS) module -->
+  <data name="Ats_Title" xml:space="preserve"><value>التوظيف</value></data>
+  <data name="Ats_Subtitle" xml:space="preserve"><value>توظيف مترشح يُنشئ الموظف تلقائياً في وحدة الموظفين.</value></data>
+  <data name="Ats_New" xml:space="preserve"><value>عرض جديد</value></data>
+  <data name="Ats_OpenPostings" xml:space="preserve"><value>العروض المفتوحة</value></data>
+  <data name="Ats_OpenedOn" xml:space="preserve"><value>فُتح في</value></data>
+  <data name="Ats_Positions" xml:space="preserve"><value>المناصب</value></data>
+  <data name="Ats_Recruited" xml:space="preserve"><value>الموظَّفون</value></data>
+  <data name="Ats_CloseOffer" xml:space="preserve"><value>إغلاق العرض</value></data>
+  <data name="Ats_Reopen" xml:space="preserve"><value>إعادة فتح</value></data>
+  <data name="Enum_JobStatus_Open" xml:space="preserve"><value>مفتوحة</value></data>
+  <data name="Enum_JobStatus_Closed" xml:space="preserve"><value>مغلقة</value></data>
+  <data name="Enum_JobStatus_Filled" xml:space="preserve"><value>مشغولة</value></data>
+  <data name="Enum_CandidateStage_Applied" xml:space="preserve"><value>ترشّح</value></data>
+  <data name="Enum_CandidateStage_Screening" xml:space="preserve"><value>فرز أولي</value></data>
+  <data name="Enum_CandidateStage_Interview" xml:space="preserve"><value>مقابلة</value></data>
+  <data name="Enum_CandidateStage_Offer" xml:space="preserve"><value>عرض</value></data>
+  <data name="Enum_CandidateStage_Hired" xml:space="preserve"><value>موظَّف</value></data>
+  <data name="Enum_CandidateStage_Rejected" xml:space="preserve"><value>مستبعَد</value></data>
+
+  <!-- Certificates module -->
+  <data name="Cert_Title" xml:space="preserve"><value>الشهادات</value></data>
+  <data name="Cert_Subtitle" xml:space="preserve"><value>تُنشأ الشهادات مباشرة من بطاقة الموظف (المنصب، الأجر، الأقدمية).</value></data>
+  <data name="Cert_New" xml:space="preserve"><value>شهادة جديدة</value></data>
+  <data name="Cert_Reference" xml:space="preserve"><value>المرجع</value></data>
+  <data name="Cert_IssuedOn" xml:space="preserve"><value>صدرت في</value></data>
+  <data name="Cert_Purpose" xml:space="preserve"><value>الغرض</value></data>
+  <data name="Cert_PrintPdf" xml:space="preserve"><value>طباعة (PDF)</value></data>
+  <data name="Enum_CertType_WorkCertificate" xml:space="preserve"><value>شهادة عمل</value></data>
+  <data name="Enum_CertType_WorkExperience" xml:space="preserve"><value>شهادة خبرة</value></data>
+  <data name="Enum_CertType_SalaryCertificate" xml:space="preserve"><value>شهادة أجر</value></data>
+  <data name="Enum_CertType_Free" xml:space="preserve"><value>وثيقة حرة</value></data>
+
   <!-- Domain enum labels -->
   <data name="Enum_Gender_Male" xml:space="preserve"><value>ذكر</value></data>
   <data name="Enum_Gender_Female" xml:space="preserve"><value>أنثى</value></data>

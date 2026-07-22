@@ -41,16 +41,18 @@ namespace OptiPaie.Desktop.ViewModels
     /// <summary>French labels for the asset enums.</summary>
     public static class AssetLabels
     {
+        private static string L(string key) => OptiPaie.Desktop.Localization.TranslationSource.Instance[key];
+
         public static string Category(AssetCategory category)
         {
             switch (category)
             {
-                case AssetCategory.Laptop: return "Ordinateur";
-                case AssetCategory.Phone: return "Téléphone";
-                case AssetCategory.Vehicle: return "Véhicule";
-                case AssetCategory.Uniform: return "Tenue / EPI";
-                case AssetCategory.Tool: return "Outillage";
-                default: return "Autre";
+                case AssetCategory.Laptop: return L("Enum_AssetCat_Laptop");
+                case AssetCategory.Phone: return L("Enum_AssetCat_Phone");
+                case AssetCategory.Vehicle: return L("Enum_AssetCat_Vehicle");
+                case AssetCategory.Uniform: return L("Enum_AssetCat_Uniform");
+                case AssetCategory.Tool: return L("Enum_AssetCat_Tool");
+                default: return L("Enum_AssetCat_Other");
             }
         }
 
@@ -58,10 +60,10 @@ namespace OptiPaie.Desktop.ViewModels
         {
             switch (status)
             {
-                case AssetStatus.Available: return "Disponible";
-                case AssetStatus.Assigned: return "Attribué";
-                case AssetStatus.UnderRepair: return "En réparation";
-                case AssetStatus.Retired: return "Réformé";
+                case AssetStatus.Available: return L("Enum_AssetStatus_Available");
+                case AssetStatus.Assigned: return L("Enum_AssetStatus_Assigned");
+                case AssetStatus.UnderRepair: return L("Enum_AssetStatus_UnderRepair");
+                case AssetStatus.Retired: return L("Enum_AssetStatus_Retired");
                 default: return string.Empty;
             }
         }

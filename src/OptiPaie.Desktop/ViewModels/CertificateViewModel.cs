@@ -42,14 +42,16 @@ namespace OptiPaie.Desktop.ViewModels
     /// <summary>French labels for the certificate type.</summary>
     public static class CertificateLabels
     {
+        private static string L(string key) => OptiPaie.Desktop.Localization.TranslationSource.Instance[key];
+
         public static string Type(CertificateType type)
         {
             switch (type)
             {
-                case CertificateType.WorkCertificate: return "Attestation de travail";
-                case CertificateType.WorkExperience: return "Certificat de travail";
-                case CertificateType.SalaryCertificate: return "Attestation de salaire";
-                default: return "Document libre";
+                case CertificateType.WorkCertificate: return L("Enum_CertType_WorkCertificate");
+                case CertificateType.WorkExperience: return L("Enum_CertType_WorkExperience");
+                case CertificateType.SalaryCertificate: return L("Enum_CertType_SalaryCertificate");
+                default: return L("Enum_CertType_Free");
             }
         }
     }

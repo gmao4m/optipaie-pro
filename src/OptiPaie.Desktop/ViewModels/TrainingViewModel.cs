@@ -41,14 +41,16 @@ namespace OptiPaie.Desktop.ViewModels
     /// <summary>French labels for the training enums.</summary>
     public static class TrainingLabels
     {
+        private static string L(string key) => OptiPaie.Desktop.Localization.TranslationSource.Instance[key];
+
         public static string Status(TrainingStatus status)
         {
             switch (status)
             {
-                case TrainingStatus.Planned: return "Planifiée";
-                case TrainingStatus.Ongoing: return "En cours";
-                case TrainingStatus.Completed: return "Terminée";
-                case TrainingStatus.Cancelled: return "Annulée";
+                case TrainingStatus.Planned: return L("Enum_TrainingStatus_Planned");
+                case TrainingStatus.Ongoing: return L("Enum_TrainingStatus_Ongoing");
+                case TrainingStatus.Completed: return L("Enum_TrainingStatus_Completed");
+                case TrainingStatus.Cancelled: return L("Enum_TrainingStatus_Cancelled");
                 default: return string.Empty;
             }
         }
@@ -57,10 +59,10 @@ namespace OptiPaie.Desktop.ViewModels
         {
             switch (result)
             {
-                case TrainingResult.Enrolled: return "Inscrit";
-                case TrainingResult.Completed: return "Réussi";
-                case TrainingResult.Failed: return "Échoué";
-                case TrainingResult.Absent: return "Absent";
+                case TrainingResult.Enrolled: return L("Enum_TrainingResult_Enrolled");
+                case TrainingResult.Completed: return L("Enum_TrainingResult_Completed");
+                case TrainingResult.Failed: return L("Enum_TrainingResult_Failed");
+                case TrainingResult.Absent: return L("Enum_TrainingResult_Absent");
                 default: return string.Empty;
             }
         }
