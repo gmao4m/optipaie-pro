@@ -1,6 +1,7 @@
 <UserControl x:Class="OptiPaie.Desktop.Views.PlaceholderView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:OptiPaie.Desktop.Localization">
     <Grid Margin="28">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -20,7 +21,7 @@
                 </Border>
                 <TextBlock Style="{StaticResource H2}" Margin="0,16,0,0" HorizontalAlignment="Center" Text="{Binding Title}" />
                 <TextBlock Style="{StaticResource Caption}" Margin="0,6,0,0" HorizontalAlignment="Center"
-                           Text="Ce module est en cours de finalisation." />
+                           Text="{loc:Loc Placeholder_Text}" />
             </StackPanel>
         </Border>
     </Grid>

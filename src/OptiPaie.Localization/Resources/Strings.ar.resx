@@ -874,6 +874,12 @@
   <data name="AttMonth_Hours" xml:space="preserve"><value>الساعات</value></data>
   <data name="AttMonth_Overtime" xml:space="preserve"><value>س. إضافية</value></data>
 
+  <!-- Placeholder + premium upsell -->
+  <data name="Placeholder_Text" xml:space="preserve"><value>هذه الوحدة قيد الإنهاء.</value></data>
+  <data name="Premium_Badge" xml:space="preserve"><value>وحدة متقدمة</value></data>
+  <data name="Premium_KeyFeatures" xml:space="preserve"><value>الميزات الرئيسية</value></data>
+  <data name="Premium_ContactSupport" xml:space="preserve"><value>الاتصال بالدعم</value></data>
+
   <!-- Attendance matrix view -->
   <data name="Att_Subtitle" xml:space="preserve"><value>شاشة واحدة للشهر بأكمله. اختر حالة وانقر على الخلايا — حفظ تلقائي.</value></data>
   <data name="Att_CurrentMonth" xml:space="preserve"><value>الشهر الحالي</value></data>

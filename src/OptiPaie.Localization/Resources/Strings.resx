@@ -874,6 +874,12 @@
   <data name="AttMonth_Hours" xml:space="preserve"><value>Heures</value></data>
   <data name="AttMonth_Overtime" xml:space="preserve"><value>H. supp.</value></data>
 
+  <!-- Placeholder + premium upsell -->
+  <data name="Placeholder_Text" xml:space="preserve"><value>Ce module est en cours de finalisation.</value></data>
+  <data name="Premium_Badge" xml:space="preserve"><value>MODULE PREMIUM</value></data>
+  <data name="Premium_KeyFeatures" xml:space="preserve"><value>Fonctionnalités clés</value></data>
+  <data name="Premium_ContactSupport" xml:space="preserve"><value>Contacter le support</value></data>
+
   <!-- Attendance matrix view -->
   <data name="Att_Subtitle" xml:space="preserve"><value>Un seul écran pour tout le mois. Choisissez un statut, cliquez les cellules — enregistrement automatique.</value></data>
   <data name="Att_CurrentMonth" xml:space="preserve"><value>Mois courant</value></data>
