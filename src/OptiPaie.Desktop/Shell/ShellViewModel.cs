@@ -68,6 +68,7 @@ namespace OptiPaie.Desktop.Shell
             OpenNotificationCommand = new RelayCommand(p => OpenNotification(p as OptiPaie.Core.Dtos.Notification));
             SignOutCommand = new RelayCommand(() => (Application.Current as OptiPaie.Desktop.App)?.SignOut());
             ToggleThemeCommand = new RelayCommand(ToggleTheme);
+            ManageUsersCommand = new RelayCommand(OpenUsers);
 
             // Load the company list once and react to header company switches: re-activate
             // the visible module so it reloads the new company's data (no stale data left).
@@ -112,7 +113,35 @@ namespace OptiPaie.Desktop.Shell
         /// <summary>Toggles the light/dark colour theme (persisted).</summary>
         public ICommand ToggleThemeCommand { get; }
 
+        /// <summary>Opens the user &amp; access management window (admins only).</summary>
+        public ICommand ManageUsersCommand { get; }
+
+        /// <summary>True when the current session has administrator rights (or no login is enforced).</summary>
+        public bool IsAdmin => _services.Session.IsAdmin;
+
+        /// <summary>True when a user is actually signed in (login enforced).</summary>
+        public bool IsSignedIn => _services.Session.IsAuthenticated;
+
+        /// <summary>Header label for the signed-in user, e.g. "Nadia B. · Responsable".</summary>
+        public string SessionUserText =>
+            _services.Session.IsAuthenticated
+                ? _services.Session.DisplayName + " · " + _services.Session.RoleLabel
+                : string.Empty;
+
         public string ThemeToggleText => Composition.ThemeManager.IsDark ? "Mode clair" : "Mode sombre";
+
+        private void OpenUsers()
+        {
+            var viewModel = new ViewModels.UsersViewModel(_services);
+            var window = new Views.UsersWindow
+            {
+                DataContext = viewModel,
+                Owner = Application.Current != null ? Application.Current.MainWindow : null
+            };
+            OptiPaie.Desktop.App.ApplyFlowDirection(window);
+            viewModel.RequestClose = () => window.Close();
+            window.ShowDialog();
+        }
 
         private void ToggleTheme()
         {
@@ -159,11 +188,18 @@ namespace OptiPaie.Desktop.Shell
 
         private void BuildNavigation()
         {
+            // Administrator screens (company setup and application settings) are hidden for a
+            // signed-in manager; when no login is enforced everyone is treated as an admin.
+            bool isAdmin = _services.Session.IsAdmin;
+
             AddCore("dashboard", "Tableau de bord", "IconTrend");
             AddCore("home", "Accueil", "IconHome");
             AddCore("employees", "Employés", "IconUsers");
             AddCore("payroll", "Paie", "IconCash");
-            AddCore("companies", "Entreprises", "IconBuilding");
+            if (isAdmin)
+            {
+                AddCore("companies", "Entreprises", "IconBuilding");
+            }
             AddCore("archive", "Archive", "IconArchive");
             AddCore("reports", "Rapports", "IconFile");
 
@@ -175,9 +211,12 @@ namespace OptiPaie.Desktop.Shell
                 _allNav.Add(item);
             }
 
-            NavItemViewModel settings = NewItem("settings", "Paramètres", "IconSettings", false);
-            SettingsNav.Add(settings);
-            _allNav.Add(settings);
+            if (isAdmin)
+            {
+                NavItemViewModel settings = NewItem("settings", "Paramètres", "IconSettings", false);
+                SettingsNav.Add(settings);
+                _allNav.Add(settings);
+            }
         }
 
         private void AddCore(string key, string title, string iconKey)
@@ -214,6 +253,12 @@ namespace OptiPaie.Desktop.Shell
 
         private void Navigate(string key)
         {
+            // Managers cannot reach the administrator screens even via a direct key.
+            if (!_services.Session.IsAdmin && (key == "companies" || key == "settings"))
+            {
+                key = "dashboard";
+            }
+
             object target;
 
             switch (key)

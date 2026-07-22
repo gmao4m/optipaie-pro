@@ -75,6 +75,9 @@ namespace OptiPaie.Core.Interfaces.Repositories
         /// <summary>Append-only audit trail.</summary>
         IAuditRepository Audit { get; }
 
+        /// <summary>Local user accounts (optional login).</summary>
+        IUserRepository Users { get; }
+
         /// <summary>Begins a database transaction for the subsequent repository calls.</summary>
         void BeginTransaction();
 

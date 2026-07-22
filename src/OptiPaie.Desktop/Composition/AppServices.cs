@@ -44,7 +44,8 @@ namespace OptiPaie.Desktop.Composition
             IDashboardService dashboard,
             IReportService reports,
             INotificationService notifications,
-            IAuditService audit)
+            IAuditService audit,
+            IUserService users)
         {
             Configuration = configuration;
             Logger = logger;
@@ -76,7 +77,14 @@ namespace OptiPaie.Desktop.Composition
             Reports = reports;
             Notifications = notifications;
             Audit = audit;
+            Users = users;
         }
+
+        /// <summary>Local user accounts &amp; the optional login gate.</summary>
+        public IUserService Users { get; }
+
+        /// <summary>The current login session (who is signed in and their role).</summary>
+        public UserSession Session { get; } = new UserSession();
 
         private CompanyContext _companyContext;
 

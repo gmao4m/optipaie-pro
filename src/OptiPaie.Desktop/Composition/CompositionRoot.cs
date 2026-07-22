@@ -72,6 +72,7 @@ namespace OptiPaie.Desktop.Composition
             assetService.Audit = auditService;
             var backupService = new BackupService(backupProvider, unitOfWorkFactory, configuration, logger);
             var localizationService = new LocalizationService();
+            var userService = new UserService(unitOfWorkFactory, settingsService);
 
             IPayrollEngine engine = new PayrollCalculationEngine();
             var payrollService = new PayrollService(unitOfWorkFactory, configurationService, engine);
@@ -136,7 +137,8 @@ namespace OptiPaie.Desktop.Composition
                 dashboardService,
                 reportService,
                 notificationService,
-                auditService);
+                auditService,
+                userService);
         }
     }
 }

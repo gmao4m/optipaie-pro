@@ -79,6 +79,13 @@ namespace OptiPaie.Desktop
             // Never runs for a licensed install or a database that already has data.
             SeedDemoDataIfTrial();
 
+            // Optional login gate (dormant unless an admin enabled it and users exist).
+            if (!EnsureLogin())
+            {
+                Shutdown();
+                return;
+            }
+
             var window = new MainWindow();
             MainWindow = window;
             ApplyFlowDirection(window);
@@ -130,24 +137,33 @@ namespace OptiPaie.Desktop
                 return;
             }
 
+            // Clear the login session.
+            Services.Session.Current = null;
+
             Window main = MainWindow;
-
-            var viewModel = new ActivationViewModel(Services);
-            var window = new ActivationWindow { DataContext = viewModel };
-            ApplyFlowDirection(window);
-            viewModel.CloseRequested = ok =>
-            {
-                try { window.DialogResult = ok; } catch { window.Close(); }
-            };
-
             if (main != null)
             {
                 main.Hide();
             }
 
-            window.ShowDialog();
+            bool proceed;
+            if (Services.Users.IsLoginRequired())
+            {
+                // Login is enforced — require re-authentication.
+                proceed = EnsureLogin();
+            }
+            else
+            {
+                // No login enforced — show the activation / trial-start screen.
+                var viewModel = new ActivationViewModel(Services);
+                var window = new ActivationWindow { DataContext = viewModel };
+                ApplyFlowDirection(window);
+                viewModel.CloseRequested = ok => { try { window.DialogResult = ok; } catch { window.Close(); } };
+                window.ShowDialog();
+                proceed = Services.Access.Evaluate().CanUseApp;
+            }
 
-            if (Services.Access.Evaluate().CanUseApp)
+            if (proceed && Services.Access.Evaluate().CanUseApp)
             {
                 if (main != null)
                 {
@@ -158,6 +174,26 @@ namespace OptiPaie.Desktop
             {
                 Shutdown();
             }
+        }
+
+        /// <summary>
+        /// Shows the login screen when the gate is enabled and users exist; returns true once
+        /// signed in. When login is not enforced, returns true immediately (full access).
+        /// </summary>
+        private bool EnsureLogin()
+        {
+            if (Services == null || !Services.Users.IsLoginRequired())
+            {
+                return true;
+            }
+
+            var viewModel = new ViewModels.LoginViewModel(Services);
+            var window = new LoginWindow { DataContext = viewModel };
+            ApplyFlowDirection(window);
+            viewModel.CloseRequested = result => { try { window.DialogResult = result; } catch { window.Close(); } };
+
+            bool ok = window.ShowDialog() == true;
+            return ok && Services.Session.IsAuthenticated;
         }
 
         /// <summary>

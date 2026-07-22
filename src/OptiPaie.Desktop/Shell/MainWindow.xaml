@@ -199,12 +199,31 @@
                         </ComboBox>
                     </StackPanel>
 
-                    <Button Style="{StaticResource SecondaryButton}" Height="30" Padding="12,0" FontSize="12"
-                            HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,140,0"
-                            Command="{Binding ToggleThemeCommand}" Content="{Binding ThemeToggleText}"
-                            ToolTip="Basculer entre le thème clair et le thème sombre" />
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,18,0">
+                        <!-- Signed-in user (only when login is enforced) -->
+                        <Border Background="{DynamicResource BrandSoft}" CornerRadius="7" Padding="10,4" Margin="0,0,12,0"
+                                VerticalAlignment="Center"
+                                Visibility="{Binding IsSignedIn, Converter={StaticResource BoolToVis}}">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Width="13" Height="13" Stretch="Uniform" Fill="{DynamicResource Brand}"
+                                      Data="{StaticResource IconUsers}" VerticalAlignment="Center" />
+                                <TextBlock Text="{Binding SessionUserText}" Margin="7,0,0,0" VerticalAlignment="Center"
+                                           FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource Brand}" />
+                            </StackPanel>
+                        </Border>
 
-                    <ToggleButton x:Name="BellButton" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,18,0"
+                        <!-- Users &amp; access management (administrators only) -->
+                        <Button Style="{StaticResource SecondaryButton}" Height="30" Padding="12,0" FontSize="12" Margin="0,0,10,0"
+                                VerticalAlignment="Center" Command="{Binding ManageUsersCommand}" Content="Utilisateurs"
+                                ToolTip="Gérer les utilisateurs et la connexion"
+                                Visibility="{Binding IsAdmin, Converter={StaticResource BoolToVis}}" />
+
+                        <Button Style="{StaticResource SecondaryButton}" Height="30" Padding="12,0" FontSize="12" Margin="0,0,10,0"
+                                VerticalAlignment="Center"
+                                Command="{Binding ToggleThemeCommand}" Content="{Binding ThemeToggleText}"
+                                ToolTip="Basculer entre le thème clair et le thème sombre" />
+
+                    <ToggleButton x:Name="BellButton" VerticalAlignment="Center"
                                   Background="Transparent" BorderThickness="0" Cursor="Hand" Padding="10,6">
                         <ToggleButton.Template>
                             <ControlTemplate TargetType="ToggleButton">
@@ -227,6 +246,7 @@
                             </ControlTemplate>
                         </ToggleButton.Template>
                     </ToggleButton>
+                    </StackPanel>
 
                     <Popup IsOpen="{Binding IsChecked, ElementName=BellButton}" StaysOpen="False" Placement="Bottom"
                            PlacementTarget="{Binding ElementName=BellButton}" HorizontalOffset="-300" AllowsTransparency="True"

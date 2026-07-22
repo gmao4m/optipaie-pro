@@ -39,6 +39,7 @@ namespace OptiPaie.Data.Context
         private IAtsRepository _ats;
         private IWorkCertificateRepository _certificates;
         private IAuditRepository _audit;
+        private IUserRepository _users;
 
         public UnitOfWork(SQLiteConnection connection)
         {
@@ -82,6 +83,8 @@ namespace OptiPaie.Data.Context
         public IWorkCertificateRepository Certificates => _certificates ?? (_certificates = new WorkCertificateRepository(this));
 
         public IAuditRepository Audit => _audit ?? (_audit = new AuditRepository(this));
+
+        public IUserRepository Users => _users ?? (_users = new UserRepository(this));
 
         public void BeginTransaction()
         {
