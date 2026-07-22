@@ -1,6 +1,7 @@
 <Window x:Class="OptiPaie.Desktop.Views.UsersWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="clr-namespace:OptiPaie.Desktop.Localization"
         Title="OptiPaie PRO — Utilisateurs &amp; accès" Height="620" Width="820"
         WindowStartupLocation="CenterScreen" Background="{DynamicResource Canvas}">
     <Window.Resources>
@@ -28,27 +29,25 @@
 
         <!-- Header -->
         <StackPanel Grid.Row="0">
-            <TextBlock Style="{StaticResource H1}" Text="Utilisateurs &amp; accès" />
-            <TextBlock Style="{StaticResource Caption}" Margin="0,5,0,0"
-                       Text="Gérez les comptes locaux et activez la connexion pour protéger l'application." />
+            <TextBlock Style="{StaticResource H1}" Text="{loc:Loc Users_Title}" />
+            <TextBlock Style="{StaticResource Caption}" Margin="0,5,0,0" Text="{loc:Loc Users_Subtitle}" />
         </StackPanel>
 
         <!-- Login gate toggle -->
         <Border Grid.Row="1" Style="{StaticResource Card}" Margin="0,16,0,0" Padding="16,12">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                 <CheckBox VerticalAlignment="Center" IsChecked="{Binding LoginEnabled}"
-                          Content="Exiger une connexion au démarrage"
+                          Content="{loc:Loc Users_RequireLogin}"
                           Foreground="{DynamicResource TextPrimary}" FontSize="13" FontWeight="SemiBold" />
                 <TextBlock VerticalAlignment="Center" Margin="16,0,0,0" FontSize="12"
-                           Foreground="{DynamicResource TextMuted}"
-                           Text="Nécessite au moins un administrateur actif. Effectif au prochain démarrage." />
+                           Foreground="{DynamicResource TextMuted}" Text="{loc:Loc Users_RequireLoginHint}" />
             </StackPanel>
         </Border>
 
         <!-- Add form -->
         <Border Grid.Row="2" Style="{StaticResource Card}" Margin="0,14,0,0" Padding="16,14">
             <StackPanel>
-                <TextBlock Text="Ajouter un utilisateur" FontSize="13.5" FontWeight="SemiBold"
+                <TextBlock Text="{loc:Loc Users_AddUser}" FontSize="13.5" FontWeight="SemiBold"
                            Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,10" />
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -59,31 +58,31 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" Margin="0,0,10,0">
-                        <TextBlock Style="{StaticResource Caption}" Text="Nom d'utilisateur" />
+                        <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Login_Username}" />
                         <TextBox Style="{StaticResource AppTextBox}" Margin="0,4,0,0"
                                  Text="{Binding NewUsername, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                     <StackPanel Grid.Column="1" Margin="0,0,10,0">
-                        <TextBlock Style="{StaticResource Caption}" Text="Nom complet" />
+                        <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Users_FullName}" />
                         <TextBox Style="{StaticResource AppTextBox}" Margin="0,4,0,0"
                                  Text="{Binding NewFullName, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                     <StackPanel Grid.Column="2" Margin="0,0,10,0">
-                        <TextBlock Style="{StaticResource Caption}" Text="Mot de passe initial" />
+                        <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Users_InitialPassword}" />
                         <TextBox Style="{StaticResource AppTextBox}" Margin="0,4,0,0"
                                  Text="{Binding NewPassword, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                     <StackPanel Grid.Column="3" Margin="0,0,10,0">
-                        <TextBlock Style="{StaticResource Caption}" Text="Rôle" />
+                        <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Users_Role}" />
                         <ComboBox Style="{StaticResource AppComboBox}" Margin="0,4,0,0"
                                   ItemsSource="{Binding Roles}" SelectedItem="{Binding NewRole}"
                                   DisplayMemberPath="Label" />
                     </StackPanel>
                     <Button Grid.Column="4" Style="{StaticResource PrimaryButton}" VerticalAlignment="Bottom"
-                            Height="38" Content="Ajouter" Command="{Binding AddCommand}" />
+                            Height="38" Content="{loc:Loc Common_Add}" Command="{Binding AddCommand}" />
                 </Grid>
                 <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                    <TextBlock Style="{StaticResource Caption}" Text="Département (responsable) : " VerticalAlignment="Center" />
+                    <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Users_DepartmentInline}" VerticalAlignment="Center" />
                     <TextBox Style="{StaticResource AppTextBox}" Width="240" Margin="6,0,0,0"
                              Text="{Binding NewDepartment, UpdateSourceTrigger=PropertyChanged}" />
                 </StackPanel>
@@ -100,11 +99,11 @@
                   HorizontalGridLinesBrush="{DynamicResource Border}" VerticalGridLinesBrush="{DynamicResource Border}"
                   ColumnHeaderStyle="{StaticResource GridHeader}">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Nom d'utilisateur" Binding="{Binding Username}" Width="180" />
-                <DataGridTextColumn Header="Nom complet" Binding="{Binding FullName}" Width="*" MinWidth="220" />
-                <DataGridTextColumn Header="Rôle" Binding="{Binding RoleLabel}" Width="150" />
-                <DataGridTextColumn Header="Département" Binding="{Binding Department}" Width="150" />
-                <DataGridTextColumn Header="État" Binding="{Binding ActiveLabel}" Width="90" />
+                <DataGridTextColumn Header="{loc:Loc Login_Username}" Binding="{Binding Username}" Width="180" />
+                <DataGridTextColumn Header="{loc:Loc Users_FullName}" Binding="{Binding FullName}" Width="*" MinWidth="220" />
+                <DataGridTextColumn Header="{loc:Loc Users_Role}" Binding="{Binding RoleLabel}" Width="150" />
+                <DataGridTextColumn Header="{loc:Loc Users_ColDepartment}" Binding="{Binding Department}" Width="150" />
+                <DataGridTextColumn Header="{loc:Loc Users_ColState}" Binding="{Binding ActiveLabel}" Width="90" />
             </DataGrid.Columns>
         </DataGrid>
 
@@ -113,11 +112,11 @@
             <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Center" HorizontalAlignment="Left"
                        Text="{Binding StatusMessage}" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Style="{StaticResource SecondaryButton}" Content="Activer / Désactiver"
+                <Button Style="{StaticResource SecondaryButton}" Content="{loc:Loc Users_ToggleActive}"
                         Command="{Binding ToggleActiveCommand}" />
-                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="Supprimer"
+                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="{loc:Loc Common_Delete}"
                         Foreground="{DynamicResource Deduction}" Command="{Binding DeleteCommand}" />
-                <Button Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Content="Fermer"
+                <Button Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Content="{loc:Loc Common_Close}"
                         Command="{Binding CloseCommand}" />
             </StackPanel>
         </Grid>

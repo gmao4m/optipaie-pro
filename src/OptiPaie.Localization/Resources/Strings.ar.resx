@@ -380,4 +380,53 @@
   <data name="Recent_Kind" xml:space="preserve"><value>النوع</value></data>
   <data name="Recent_Label" xml:space="preserve"><value>العنصر</value></data>
   <data name="Recent_Date" xml:space="preserve"><value>التاريخ</value></data>
+
+  <!-- Navigation rail (shell) -->
+  <data name="Shell_Nav_Dashboard" xml:space="preserve"><value>لوحة القيادة</value></data>
+  <data name="Shell_Nav_Home" xml:space="preserve"><value>الرئيسية</value></data>
+  <data name="Shell_Nav_Employees" xml:space="preserve"><value>الموظفون</value></data>
+  <data name="Shell_Nav_Payroll" xml:space="preserve"><value>الأجور</value></data>
+  <data name="Shell_Nav_Companies" xml:space="preserve"><value>المؤسسات</value></data>
+  <data name="Shell_Nav_Archive" xml:space="preserve"><value>الأرشيف</value></data>
+  <data name="Shell_Nav_Reports" xml:space="preserve"><value>التقارير</value></data>
+  <data name="Shell_Nav_Settings" xml:space="preserve"><value>الإعدادات</value></data>
+  <data name="Shell_Nav_PremiumHeader" xml:space="preserve"><value>الوحدات المتقدمة</value></data>
+
+  <!-- Top bar (shell) -->
+  <data name="Shell_ActiveCompany" xml:space="preserve"><value>المؤسسة النشطة</value></data>
+  <data name="Shell_Alerts" xml:space="preserve"><value>التنبيهات</value></data>
+  <data name="Shell_Notifications" xml:space="preserve"><value>الإشعارات</value></data>
+  <data name="Shell_NoNotifications" xml:space="preserve"><value>لا توجد إشعارات — كل شيء محدَّث.</value></data>
+  <data name="Shell_Users" xml:space="preserve"><value>المستخدمون</value></data>
+  <data name="Shell_SignOut" xml:space="preserve"><value>تسجيل الخروج</value></data>
+  <data name="Shell_ThemeLight" xml:space="preserve"><value>الوضع الفاتح</value></data>
+  <data name="Shell_ThemeDark" xml:space="preserve"><value>الوضع الداكن</value></data>
+
+  <!-- Login window -->
+  <data name="Login_Title" xml:space="preserve"><value>تسجيل الدخول</value></data>
+  <data name="Login_Username" xml:space="preserve"><value>اسم المستخدم</value></data>
+  <data name="Login_Password" xml:space="preserve"><value>كلمة المرور</value></data>
+  <data name="Login_SignIn" xml:space="preserve"><value>تسجيل الدخول</value></data>
+
+  <!-- Users &amp; access window -->
+  <data name="Users_Title" xml:space="preserve"><value>المستخدمون والوصول</value></data>
+  <data name="Users_Subtitle" xml:space="preserve"><value>أدر الحسابات المحلية وفعّل تسجيل الدخول لحماية التطبيق.</value></data>
+  <data name="Users_RequireLogin" xml:space="preserve"><value>طلب تسجيل الدخول عند بدء التشغيل</value></data>
+  <data name="Users_RequireLoginHint" xml:space="preserve"><value>يتطلب مسؤولاً نشطاً واحداً على الأقل. يسري عند بدء التشغيل التالي.</value></data>
+  <data name="Users_AddUser" xml:space="preserve"><value>إضافة مستخدم</value></data>
+  <data name="Users_FullName" xml:space="preserve"><value>الاسم الكامل</value></data>
+  <data name="Users_InitialPassword" xml:space="preserve"><value>كلمة المرور الأولية</value></data>
+  <data name="Users_Role" xml:space="preserve"><value>الدور</value></data>
+  <data name="Users_DepartmentInline" xml:space="preserve"><value>القسم (المسؤول): </value></data>
+  <data name="Users_ColDepartment" xml:space="preserve"><value>القسم</value></data>
+  <data name="Users_ColState" xml:space="preserve"><value>الحالة</value></data>
+  <data name="Users_ToggleActive" xml:space="preserve"><value>تفعيل / تعطيل</value></data>
+  <data name="Users_CountSuffix" xml:space="preserve"><value>مستخدم</value></data>
+  <data name="State_Active" xml:space="preserve"><value>نشط</value></data>
+  <data name="State_Inactive" xml:space="preserve"><value>غير نشط</value></data>
+
+  <!-- Roles &amp; session -->
+  <data name="Role_Admin" xml:space="preserve"><value>مدير</value></data>
+  <data name="Role_Manager" xml:space="preserve"><value>مسؤول</value></data>
+  <data name="Session_FullAccess" xml:space="preserve"><value>وصول كامل</value></data>
 </root>

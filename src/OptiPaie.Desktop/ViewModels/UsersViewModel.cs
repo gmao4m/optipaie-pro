@@ -22,14 +22,20 @@ namespace OptiPaie.Desktop.ViewModels
     /// <summary>One user row in the management list.</summary>
     public sealed class UserRowViewModel
     {
-        public UserRowViewModel(User user) { User = user; }
+        public UserRowViewModel(User user, string roleLabel, string activeLabel)
+        {
+            User = user;
+            RoleLabel = roleLabel;
+            ActiveLabel = activeLabel;
+        }
+
         public User User { get; }
         public long Id => User.Id;
         public string Username => User.Username;
         public string FullName => User.FullName;
-        public string RoleLabel => User.Role == UserRole.Admin ? "Administrateur" : "Responsable";
+        public string RoleLabel { get; }
         public string Department => User.Department;
-        public string ActiveLabel => User.IsActive ? "Actif" : "Inactif";
+        public string ActiveLabel { get; }
     }
 
     /// <summary>
@@ -52,8 +58,8 @@ namespace OptiPaie.Desktop.ViewModels
         {
             _services = services;
 
-            Roles.Add(new RoleOption(UserRole.Admin, "Administrateur"));
-            Roles.Add(new RoleOption(UserRole.Manager, "Responsable"));
+            Roles.Add(new RoleOption(UserRole.Admin, L("Role_Admin")));
+            Roles.Add(new RoleOption(UserRole.Manager, L("Role_Manager")));
             _newRole = Roles[0];
 
             AddCommand = new RelayCommand(Add);
@@ -106,10 +112,14 @@ namespace OptiPaie.Desktop.ViewModels
             Users.Clear();
             foreach (User u in _services.Users.GetAll())
             {
-                Users.Add(new UserRowViewModel(u));
+                string role = u.Role == UserRole.Admin ? L("Role_Admin") : L("Role_Manager");
+                string active = L(u.IsActive ? "State_Active" : "State_Inactive");
+                Users.Add(new UserRowViewModel(u, role, active));
             }
-            StatusMessage = Users.Count + " utilisateur(s)";
+            StatusMessage = Users.Count + " " + L("Users_CountSuffix");
         }
+
+        private string L(string key) => _services.Localization.GetString(key);
 
         private void Add()
         {

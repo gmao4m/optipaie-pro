@@ -54,6 +54,10 @@ namespace OptiPaie.Desktop
 
                 Services.Localization.SetLanguage(language);
 
+                // Bridge the localization service to data binding so {loc:Loc ...} text
+                // resolves for the active language and updates live on a language switch.
+                Localization.TranslationSource.Instance.Attach(Services.Localization);
+
                 // Apply the saved colour theme (light/dark) before any window is shown.
                 bool darkTheme = string.Equals(Services.Settings.Get("Ui.Theme", "light"), "dark", StringComparison.OrdinalIgnoreCase);
                 ThemeManager.Apply(darkTheme);

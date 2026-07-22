@@ -65,6 +65,10 @@ namespace OptiPaie.Desktop.Shell
             // (e.g. after an online synchronization enables a newly purchased module).
             _services.Licensing.Changed += OnLicenseChanged;
 
+            // Rebuild the (code-built) navigation and refresh chrome text when the UI
+            // language switches, so Arabic/French applies live without a restart.
+            _services.Localization.LanguageChanged += OnLanguageChanged;
+
             OpenNotificationCommand = new RelayCommand(p => OpenNotification(p as OptiPaie.Core.Dtos.Notification));
             SignOutCommand = new RelayCommand(() => (Application.Current as OptiPaie.Desktop.App)?.SignOut());
             ToggleThemeCommand = new RelayCommand(ToggleTheme);
@@ -123,12 +127,22 @@ namespace OptiPaie.Desktop.Shell
         public bool IsSignedIn => _services.Session.IsAuthenticated;
 
         /// <summary>Header label for the signed-in user, e.g. "Nadia B. · Responsable".</summary>
-        public string SessionUserText =>
-            _services.Session.IsAuthenticated
-                ? _services.Session.DisplayName + " · " + _services.Session.RoleLabel
-                : string.Empty;
+        public string SessionUserText
+        {
+            get
+            {
+                if (!_services.Session.IsAuthenticated)
+                {
+                    return string.Empty;
+                }
 
-        public string ThemeToggleText => Composition.ThemeManager.IsDark ? "Mode clair" : "Mode sombre";
+                OptiPaie.Core.Entities.User user = _services.Session.Current;
+                string role = L(user.Role == OptiPaie.Core.Enums.UserRole.Admin ? "Role_Admin" : "Role_Manager");
+                return _services.Session.DisplayName + " · " + role;
+            }
+        }
+
+        public string ThemeToggleText => L(Composition.ThemeManager.IsDark ? "Shell_ThemeLight" : "Shell_ThemeDark");
 
         private void OpenUsers()
         {
@@ -188,24 +202,31 @@ namespace OptiPaie.Desktop.Shell
 
         private void BuildNavigation()
         {
+            // Rebuildable: called at startup and again on a language switch.
+            CoreNav.Clear();
+            ModuleNav.Clear();
+            SettingsNav.Clear();
+            _allNav.Clear();
+
             // Administrator screens (company setup and application settings) are hidden for a
             // signed-in manager; when no login is enforced everyone is treated as an admin.
             bool isAdmin = _services.Session.IsAdmin;
+            bool rtl = _services.Localization.IsRightToLeft;
 
-            AddCore("dashboard", "Tableau de bord", "IconTrend");
-            AddCore("home", "Accueil", "IconHome");
-            AddCore("employees", "Employés", "IconUsers");
-            AddCore("payroll", "Paie", "IconCash");
+            AddCore("dashboard", L("Shell_Nav_Dashboard"), "IconTrend");
+            AddCore("home", L("Shell_Nav_Home"), "IconHome");
+            AddCore("employees", L("Shell_Nav_Employees"), "IconUsers");
+            AddCore("payroll", L("Shell_Nav_Payroll"), "IconCash");
             if (isAdmin)
             {
-                AddCore("companies", "Entreprises", "IconBuilding");
+                AddCore("companies", L("Shell_Nav_Companies"), "IconBuilding");
             }
-            AddCore("archive", "Archive", "IconArchive");
-            AddCore("reports", "Rapports", "IconFile");
+            AddCore("archive", L("Shell_Nav_Archive"), "IconArchive");
+            AddCore("reports", L("Shell_Nav_Reports"), "IconFile");
 
             foreach (ModuleDescriptor module in _registry.Upsells)
             {
-                NavItemViewModel item = NewItem(module.Key, module.NameFr, IconKeyFor(module.Key), true);
+                NavItemViewModel item = NewItem(module.Key, module.DisplayName(rtl), IconKeyFor(module.Key), true);
                 item.IsLocked = !_gate.IsEnabled(module.Key);
                 ModuleNav.Add(item);
                 _allNav.Add(item);
@@ -213,9 +234,32 @@ namespace OptiPaie.Desktop.Shell
 
             if (isAdmin)
             {
-                NavItemViewModel settings = NewItem("settings", "Paramètres", "IconSettings", false);
+                NavItemViewModel settings = NewItem("settings", L("Shell_Nav_Settings"), "IconSettings", false);
                 SettingsNav.Add(settings);
                 _allNav.Add(settings);
+            }
+        }
+
+        private string L(string key) => _services.Localization.GetString(key);
+
+        private void OnLanguageChanged(object sender, EventArgs e)
+        {
+            Action refresh = () =>
+            {
+                BuildNavigation();
+                UpdateSelection(_activeKey ?? "dashboard");
+                Raise(nameof(ThemeToggleText));
+                Raise(nameof(SessionUserText));
+            };
+
+            System.Windows.Threading.Dispatcher dispatcher = Application.Current != null ? Application.Current.Dispatcher : null;
+            if (dispatcher != null && !dispatcher.CheckAccess())
+            {
+                dispatcher.Invoke(refresh);
+            }
+            else
+            {
+                refresh();
             }
         }
 
