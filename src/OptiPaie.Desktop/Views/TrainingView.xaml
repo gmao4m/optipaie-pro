@@ -84,7 +84,15 @@
                 <DataGridTextColumn Header="{loc:Loc Training_Dates}" Binding="{Binding DatesText}" Width="180" ElementStyle="{StaticResource CenterText}" />
                 <DataGridTextColumn Header="{loc:Loc Training_Cost}" Binding="{Binding CostText}" Width="110" ElementStyle="{StaticResource RightText}" />
                 <DataGridTextColumn Header="{loc:Loc Training_Passed}" Binding="{Binding ParticipantsText}" Width="80" ElementStyle="{StaticResource CenterText}" />
-                <DataGridTextColumn Header="{loc:Loc Common_Status}" Binding="{Binding StatusLabel}" Width="100" ElementStyle="{StaticResource CenterText}" />
+                <DataGridTemplateColumn Header="{loc:Loc Common_Status}" Width="110">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Border Style="{StaticResource StatusPill}">
+                                <TextBlock Style="{StaticResource PillText}" Text="{Binding StatusLabel}" />
+                            </Border>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
 

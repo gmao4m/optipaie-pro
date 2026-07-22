@@ -40,6 +40,21 @@ namespace OptiPaie.Desktop.ViewModels
         public bool IsActive => Loan.Status == LoanStatus.Active;
         public bool IsSuspended => Loan.Status == LoanStatus.Suspended;
 
+        /// <summary>Semantic colour bucket for the status pill (shared with the other lists).</summary>
+        public string StatusKind
+        {
+            get
+            {
+                switch (Loan.Status)
+                {
+                    case LoanStatus.Active: return "accent";      // repaying
+                    case LoanStatus.Settled: return "success";    // paid off
+                    case LoanStatus.Suspended: return "pending";  // paused
+                    default: return "neutral";                    // cancelled
+                }
+            }
+        }
+
         private static string Money(decimal value) => value.ToString("N2", CultureInfo.GetCultureInfo("fr-FR"));
     }
 

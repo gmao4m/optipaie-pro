@@ -36,6 +36,21 @@ namespace OptiPaie.Desktop.ViewModels
         public string HolderName => Summary.HolderName ?? "—";
         public bool IsAvailable => Summary.Status == AssetStatus.Available;
         public bool IsAssigned => Summary.Status == AssetStatus.Assigned;
+
+        /// <summary>Semantic colour bucket for the status pill (shared with the other lists).</summary>
+        public string StatusKind
+        {
+            get
+            {
+                switch (Summary.Status)
+                {
+                    case AssetStatus.Available: return "success";   // ready to assign
+                    case AssetStatus.Assigned: return "accent";     // in use
+                    case AssetStatus.UnderRepair: return "pending"; // in the workshop
+                    default: return "neutral";                      // retired
+                }
+            }
+        }
     }
 
     /// <summary>French labels for the asset enums.</summary>

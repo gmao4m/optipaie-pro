@@ -36,6 +36,21 @@ namespace OptiPaie.Desktop.ViewModels
                                    (Summary.EndDate.HasValue ? " → " + Summary.EndDate.Value.ToString("dd/MM/yyyy", Fr) : string.Empty);
         public string CostText => Summary.Cost.ToString("N2", Fr);
         public string ParticipantsText => Summary.CompletedCount + " / " + Summary.ParticipantCount;
+
+        /// <summary>Semantic colour bucket for the status pill (matches the Contracts grid).</summary>
+        public string StatusKind
+        {
+            get
+            {
+                switch (Summary.Status)
+                {
+                    case TrainingStatus.Ongoing: return "accent";    // in progress
+                    case TrainingStatus.Completed: return "success"; // done
+                    case TrainingStatus.Cancelled: return "danger";  // cancelled
+                    default: return "neutral";                       // planned
+                }
+            }
+        }
     }
 
     /// <summary>French labels for the training enums.</summary>

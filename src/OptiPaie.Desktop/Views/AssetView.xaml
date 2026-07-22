@@ -89,7 +89,15 @@
                 <DataGridTextColumn Header="{loc:Loc Asset_Serial}" Binding="{Binding SerialNumber}" Width="130" />
                 <DataGridTextColumn Header="{loc:Loc Asset_Value}" Binding="{Binding ValueText}" Width="110" ElementStyle="{StaticResource RightText}" />
                 <DataGridTextColumn Header="{loc:Loc Asset_Holder}" Binding="{Binding HolderName}" Width="180" />
-                <DataGridTextColumn Header="{loc:Loc Common_Status}" Binding="{Binding StatusLabel}" Width="120" ElementStyle="{StaticResource CenterText}" />
+                <DataGridTemplateColumn Header="{loc:Loc Common_Status}" Width="120">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Border Style="{StaticResource StatusPill}">
+                                <TextBlock Style="{StaticResource PillText}" Text="{Binding StatusLabel}" />
+                            </Border>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
 

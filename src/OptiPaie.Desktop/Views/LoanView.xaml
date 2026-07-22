@@ -88,7 +88,15 @@
                 <DataGridTextColumn Header="{loc:Loc Loan_Outstanding}" Binding="{Binding OutstandingText}" Width="120" ElementStyle="{StaticResource RightText}" />
                 <DataGridTextColumn Header="{loc:Loc Loan_Start}" Binding="{Binding StartText}" Width="90" ElementStyle="{StaticResource CenterText}" />
                 <DataGridTextColumn Header="{loc:Loc Loan_Remaining}" Binding="{Binding RemainingText}" Width="90" ElementStyle="{StaticResource CenterText}" />
-                <DataGridTextColumn Header="{loc:Loc Common_Status}" Binding="{Binding StatusLabel}" Width="100" ElementStyle="{StaticResource CenterText}" />
+                <DataGridTemplateColumn Header="{loc:Loc Common_Status}" Width="110">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Border Style="{StaticResource StatusPill}">
+                                <TextBlock Style="{StaticResource PillText}" Text="{Binding StatusLabel}" />
+                            </Border>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
 
