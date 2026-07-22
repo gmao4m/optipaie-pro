@@ -122,7 +122,7 @@
                                                     <TextBlock Text="{Binding Detail}" Foreground="{DynamicResource TextSecondary}" FontSize="11.5" Margin="0,2,0,0" />
                                                 </StackPanel>
                                                 <TextBlock Text="{loc:Loc Dashboard_Process}" HorizontalAlignment="Right" VerticalAlignment="Center"
-                                                           Foreground="{DynamicResource Brand}" FontWeight="SemiBold" FontSize="12" />
+                                                           Foreground="{DynamicResource BrandText}" FontWeight="SemiBold" FontSize="12" />
                                             </Grid>
                                         </Border>
                                     </Button>

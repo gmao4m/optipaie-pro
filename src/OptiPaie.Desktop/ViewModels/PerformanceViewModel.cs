@@ -87,13 +87,23 @@ namespace OptiPaie.Desktop.ViewModels
 
         private void RefreshTabs()
         {
-            Cycles.Refresh();
-            Modeles.Refresh();
-            Dashboard.Refresh();
-            Calibration.Refresh();
-            Objectifs.Refresh();
-            Comparaison.Refresh();
-            Parcours.Refresh();
+            // Each tab loads independently and defensively: a data problem in one tab
+            // degrades that tab to empty rather than tearing down the whole module (and,
+            // via the shell's activation guard, never the app). The entry path is proven
+            // crash-free by PerformanceEntryPathTests, but real-world data is unpredictable.
+            SafeRefresh(Cycles.Refresh);
+            SafeRefresh(Modeles.Refresh);
+            SafeRefresh(Dashboard.Refresh);
+            SafeRefresh(Calibration.Refresh);
+            SafeRefresh(Objectifs.Refresh);
+            SafeRefresh(Comparaison.Refresh);
+            SafeRefresh(Parcours.Refresh);
+        }
+
+        private static void SafeRefresh(Action refresh)
+        {
+            try { refresh(); }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine("Performance tab refresh failed: " + ex); }
         }
 
         public ObservableCollection<Company> Companies { get; } = new ObservableCollection<Company>();

@@ -19,7 +19,7 @@
 
         <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,4">
             <Border Width="40" Height="40" CornerRadius="11" Background="{DynamicResource BrandSoft}">
-                <Path Width="20" Height="20" Stretch="Uniform" Fill="{DynamicResource Brand}"
+                <Path Width="20" Height="20" Stretch="Uniform" Fill="{DynamicResource BrandText}"
                       Data="{StaticResource IconLock}" HorizontalAlignment="Center" VerticalAlignment="Center" />
             </Border>
             <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">

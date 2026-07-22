@@ -233,8 +233,35 @@ namespace OptiPaie.Desktop.ViewModels
 
             if (window.ShowDialog() != true) return;
 
+            // Capture before Run() reloads and clears the selection.
+            long employeeId = _selectedContract.Summary.EmployeeId;
+            string employeeName = _selectedContract.EmployeeName;
+
             Run(_services.Contracts.Terminate(_selectedContract.Id, vm.EffectiveDate, vm.Reason),
                 "Contrat résilié — la date de sortie de l'employé a été enregistrée.");
+
+            // Cross-module exit clearance (Contrats → Matériel): list the assets this employee
+            // still holds so they are recovered on departure. Reads the real Assets data.
+            ShowExitClearance(employeeId, employeeName);
+        }
+
+        private void ShowExitClearance(long employeeId, string employeeName)
+        {
+            IReadOnlyList<OptiPaie.Core.Dtos.AssetAssignmentSummary> held = _services.Assets.GetHeldByEmployee(employeeId);
+            if (held == null || held.Count == 0)
+            {
+                return;
+            }
+
+            var fr = CultureInfo.GetCultureInfo("fr-FR");
+            var lines = held.Select(a => "•  " + a.AssetName + "  (attribué le " + a.AssignedDate.ToString("dd/MM/yyyy", fr) + ")");
+            string message =
+                "Solde de tout compte — " + employeeName + "\r\n\r\n" +
+                "Cet employé détient encore " + held.Count + " bien(s) de l'entreprise à récupérer :\r\n\r\n" +
+                string.Join("\r\n", lines) + "\r\n\r\n" +
+                "Récupérez-les et enregistrez leur retour dans le module « Matériel ».";
+
+            Dialogs.Info(message, "Biens à récupérer");
         }
 
         private void Renew()

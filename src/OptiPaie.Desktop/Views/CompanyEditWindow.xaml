@@ -110,6 +110,19 @@
 
                 <Border Style="{StaticResource Card}" Padding="20" Margin="0,0,0,16">
                     <StackPanel>
+                        <TextBlock Style="{StaticResource SectionTitle}" Text="{loc:Loc Cacobatph_Section}" />
+                        <CheckBox IsChecked="{Binding BtphSector}" Content="{loc:Loc Cacobatph_SectorToggle}"
+                                  Foreground="{DynamicResource TextPrimary}" FontSize="13" VerticalContentAlignment="Center" />
+                        <CheckBox Margin="0,10,0,0" IsChecked="{Binding CacobatphEnabled}" IsEnabled="{Binding CanEnableCacobatph}"
+                                  Content="{loc:Loc Cacobatph_EnableToggle}" FontSize="13" FontWeight="SemiBold"
+                                  Foreground="{DynamicResource TextPrimary}" VerticalContentAlignment="Center" />
+                        <TextBlock Margin="24,6,0,0" TextWrapping="Wrap" FontSize="11.5"
+                                   Foreground="{DynamicResource TextMuted}" Text="{loc:Loc Cacobatph_Hint}" />
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource Card}" Padding="20" Margin="0,0,0,16">
+                    <StackPanel>
                         <TextBlock Style="{StaticResource SectionTitle}" Text="{loc:Loc Company_Bank}" />
                         <UniformGrid Columns="2">
                             <StackPanel Margin="0,0,8,0">

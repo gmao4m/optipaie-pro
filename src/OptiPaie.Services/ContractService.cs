@@ -90,6 +90,44 @@ namespace OptiPaie.Services
             }
         }
 
+        public Result<long> CreateDraftFromEmployee(long employeeId)
+        {
+            using (IUnitOfWork uow = _unitOfWorkFactory.Create())
+            {
+                Employee employee = uow.Employees.GetById(employeeId);
+                if (employee == null)
+                {
+                    return Result.Fail<long>("Employé introuvable.", "Contract_EmployeeNotFound");
+                }
+
+                // Idempotent: a new hire gets one draft; never duplicate if a contract exists.
+                EmploymentContract existing = uow.Contracts.GetByEmployee(employeeId).FirstOrDefault();
+                if (existing != null)
+                {
+                    return Result.Ok(existing.Id);
+                }
+
+                DateTime start = employee.HireDate == default(DateTime) ? DateTime.Today : employee.HireDate;
+                var draft = new EmploymentContract
+                {
+                    EmployeeId = employeeId,
+                    Type = employee.ContractType,
+                    Status = ContractStatus.Draft,
+                    Position = employee.Poste,
+                    BaseSalary = employee.BaseSalary,
+                    StartDate = start,
+                    // A fixed-term draft gets a sensible one-year default the user can adjust.
+                    EndDate = employee.ContractType == ContractType.Cdi ? (DateTime?)null : start.AddYears(1),
+                    TrialPeriodDays = 0
+                };
+
+                // A system-generated draft skips the finalisation checks (salary/dates are
+                // completed by the user before activation, which re-validates in full).
+                long id = uow.Contracts.Insert(draft);
+                return Result.Ok(id);
+            }
+        }
+
         public Result Activate(long id)
         {
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())

@@ -68,7 +68,7 @@
                             <Grid>
                                 <StackPanel Orientation="Horizontal">
                                     <Border Width="34" Height="34" CornerRadius="9" Background="{DynamicResource BrandSoft}" VerticalAlignment="Center">
-                                        <Path Width="17" Height="17" Stretch="Uniform" Fill="{DynamicResource Brand}" Data="{StaticResource IconFileCheck}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        <Path Width="17" Height="17" Stretch="Uniform" Fill="{DynamicResource BrandText}" Data="{StaticResource IconFileCheck}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                     </Border>
                                     <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
                                         <TextBlock FontWeight="SemiBold" Text="{Binding EmployeeName}" />

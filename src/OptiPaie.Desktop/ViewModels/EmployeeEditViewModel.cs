@@ -67,6 +67,18 @@ namespace OptiPaie.Desktop.ViewModels
                     Dialogs.Error(result.Error);
                     return;
                 }
+
+                // Cross-module link: a new hire automatically gets a matching DRAFT contract
+                // (pre-filled from what we already know) so the user finalises it in Contrats
+                // instead of re-entering everything. Never blocks saving the employee.
+                Result<long> draft = _services.Contracts.CreateDraftFromEmployee(result.Value);
+                if (draft.IsSuccess)
+                {
+                    Dialogs.Info(
+                        "Un contrat provisoire a été créé automatiquement pour cet employé.\r\n" +
+                        "Ouvrez le module « Contrats » pour compléter et activer ses termes (type, salaire, dates).",
+                        "Contrat créé");
+                }
             }
             else
             {

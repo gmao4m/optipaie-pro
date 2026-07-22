@@ -13,6 +13,9 @@
     <SolidColorBrush x:Key="BrandHover" Color="#587AB9" />
     <SolidColorBrush x:Key="BrandPressed" Color="#3C5A92" />
     <SolidColorBrush x:Key="BrandSoft" Color="#28324A" />
+    <!-- Brand-as-text: a light blue so brand labels/icons and BrandSoft chips stay
+         legible on dark surfaces (the mid-navy Brand is too close to them). -->
+    <SolidColorBrush x:Key="BrandText" Color="#9DBBEC" />
 
     <!-- Accent: teal, brightened slightly for dark. -->
     <SolidColorBrush x:Key="Accent" Color="#17A99A" />

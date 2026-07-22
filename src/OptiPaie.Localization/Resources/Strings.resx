@@ -888,10 +888,18 @@
   <data name="Att_RateLate" xml:space="preserve"><value>Taux de retard</value></data>
   <data name="Att_WorkingDays" xml:space="preserve"><value>Jours ouvrés</value></data>
   <data name="Att_StatusLabel" xml:space="preserve"><value>Statut :</value></data>
-  <data name="Att_ApplyMonth" xml:space="preserve"><value>Appliquer au mois (sélection)</value></data>
+  <data name="Att_ApplyMonth" xml:space="preserve"><value>Remplir le mois (employés cochés)</value></data>
   <data name="Att_SelectAll" xml:space="preserve"><value>Tout cocher</value></data>
   <data name="Att_ClearSelection" xml:space="preserve"><value>Décocher</value></data>
   <data name="Att_MonthReports" xml:space="preserve"><value>Rapports du mois</value></data>
+
+  <!-- CACOBATPH (BTPH sector) -->
+  <data name="Cacobatph_Section" xml:space="preserve"><value>Secteur BTPH &amp; CACOBATPH</value></data>
+  <data name="Cacobatph_SectorToggle" xml:space="preserve"><value>Entreprise du secteur BTPH (bâtiment, travaux publics, hydraulique)</value></data>
+  <data name="Cacobatph_EnableToggle" xml:space="preserve"><value>Activer les cotisations et déclarations CACOBATPH</value></data>
+  <data name="Cacobatph_Hint" xml:space="preserve"><value>Optionnel. Ajoute le Congé Payé (12,21 %) et le Chômage-Intempéries (0,75 %) sur la même base que la CNAS. Sans aucun effet sur les fiches de paie tant qu'il reste désactivé.</value></data>
+  <data name="Cacobatph_CongePaye" xml:space="preserve"><value>CACOBATPH — Congé Payé (12,21 %)</value></data>
+  <data name="Cacobatph_Chomage" xml:space="preserve"><value>CACOBATPH — Chômage-Intempéries (0,75 %)</value></data>
 
   <!-- Company edit window -->
   <data name="Cmp_AccountRib" xml:space="preserve"><value>Compte / RIB</value></data>

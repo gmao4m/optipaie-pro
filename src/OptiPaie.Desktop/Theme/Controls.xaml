@@ -172,8 +172,8 @@
                         </Trigger>
                         <Trigger Property="IsChecked" Value="True">
                             <Setter TargetName="b" Property="Background" Value="{DynamicResource BrandSoft}" />
-                            <Setter TargetName="ic" Property="Fill" Value="{DynamicResource Brand}" />
-                            <Setter Property="Foreground" Value="{DynamicResource Brand}" />
+                            <Setter TargetName="ic" Property="Fill" Value="{DynamicResource BrandText}" />
+                            <Setter Property="Foreground" Value="{DynamicResource BrandText}" />
                             <Setter Property="FontWeight" Value="SemiBold" />
                         </Trigger>
                     </ControlTemplate.Triggers>
@@ -245,11 +245,11 @@
                         </Trigger>
                         <Trigger Property="IsHighlighted" Value="True">
                             <Setter TargetName="bd" Property="Background" Value="{DynamicResource BrandSoft}" />
-                            <Setter Property="Foreground" Value="{DynamicResource Brand}" />
+                            <Setter Property="Foreground" Value="{DynamicResource BrandText}" />
                         </Trigger>
                         <Trigger Property="IsSelected" Value="True">
                             <Setter TargetName="bd" Property="Background" Value="{DynamicResource BrandSoft}" />
-                            <Setter Property="Foreground" Value="{DynamicResource Brand}" />
+                            <Setter Property="Foreground" Value="{DynamicResource BrandText}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -273,7 +273,7 @@
                         </Trigger>
                         <Trigger Property="IsSelected" Value="True">
                             <Setter TargetName="bd" Property="Background" Value="{DynamicResource BrandSoft}" />
-                            <Setter Property="Foreground" Value="{DynamicResource Brand}" />
+                            <Setter Property="Foreground" Value="{DynamicResource BrandText}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

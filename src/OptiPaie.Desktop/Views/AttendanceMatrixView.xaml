@@ -135,7 +135,8 @@
                 </ItemsControl>
                 <Border Width="1" Background="{DynamicResource Border}" Margin="10,2" />
                 <Button Style="{StaticResource SecondaryButton}" Height="32" Margin="0,0,6,0"
-                        Content="{loc:Loc Att_ApplyMonth}" Command="{Binding ApplyMonthToSelectionCommand}" />
+                        Content="{loc:Loc Att_ApplyMonth}" Command="{Binding ApplyMonthToSelectionCommand}"
+                        ToolTip="Cochez des employés, choisissez un statut dans la palette, puis remplissez tout le mois (jours ouvrés) pour eux d'un seul clic." />
                 <Button Style="{StaticResource SecondaryButton}" Height="32" Margin="0,0,6,0" Content="{loc:Loc Att_SelectAll}" Command="{Binding SelectAllCommand}" />
                 <Button Style="{StaticResource SecondaryButton}" Height="32" Margin="0,0,6,0" Content="{loc:Loc Att_ClearSelection}" Command="{Binding ClearSelectionCommand}" />
                 <Border Width="1" Background="{DynamicResource Border}" Margin="10,2" />
@@ -145,7 +146,7 @@
         </Border>
 
         <!-- Matrix -->
-        <DataGrid x:Name="Grid" Grid.Row="4" Margin="0,12,0,0"
+        <DataGrid x:Name="Grid" Grid.Row="4" Margin="0,12,0,0" ItemsSource="{Binding Rows}"
                   AutoGenerateColumns="False" HeadersVisibility="Column" CanUserAddRows="False" CanUserDeleteRows="False"
                   CanUserReorderColumns="False" CanUserResizeRows="False" SelectionMode="Single" IsReadOnly="True"
                   EnableRowVirtualization="True" EnableColumnVirtualization="True"

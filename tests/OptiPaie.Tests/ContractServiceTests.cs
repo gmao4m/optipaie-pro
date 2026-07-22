@@ -314,6 +314,39 @@ namespace OptiPaie.Tests
             Assert.That(contracts[0].EmployeeName, Is.EqualTo("BENALI Karim"));
         }
 
+        // ------------------------------------------- auto-created draft on new hire (2.1)
+
+        [Test]
+        public void CreateDraftFromEmployee_PrefillsFromTheEmployee_AsADraft()
+        {
+            Result<long> draft = _service.CreateDraftFromEmployee(_employeeId);
+            Assert.That(draft.IsSuccess, Is.True, draft.Error);
+
+            EmploymentContract c = _service.Get(draft.Value);
+            Assert.That(c.Status, Is.EqualTo(ContractStatus.Draft));
+            Assert.That(c.Type, Is.EqualTo(ContractType.Cdd), "copied the employee's contract type");
+            Assert.That(c.Position, Is.EqualTo("Ancien poste"), "copied the employee's position");
+            Assert.That(c.BaseSalary, Is.EqualTo(30000m), "copied the employee's salary");
+            Assert.That(c.StartDate.Date, Is.EqualTo(new DateTime(2020, 1, 1)), "copied the hire date");
+            Assert.That(c.EndDate.HasValue, Is.True, "a fixed-term draft gets a default end date");
+        }
+
+        [Test]
+        public void CreateDraftFromEmployee_IsIdempotent_NeverDuplicates()
+        {
+            long first = _service.CreateDraftFromEmployee(_employeeId).Value;
+            long second = _service.CreateDraftFromEmployee(_employeeId).Value;
+
+            Assert.That(second, Is.EqualTo(first), "a second call returns the same contract");
+            Assert.That(_service.GetByEmployee(_employeeId).Count, Is.EqualTo(1), "exactly one contract exists");
+        }
+
+        [Test]
+        public void CreateDraftFromEmployee_UnknownEmployee_Fails()
+        {
+            Assert.That(_service.CreateDraftFromEmployee(999999).IsFailure, Is.True);
+        }
+
         private EmploymentContract NewContract(ContractType type, DateTime start, DateTime? end, decimal salary, string position = "Poste")
         {
             return new EmploymentContract

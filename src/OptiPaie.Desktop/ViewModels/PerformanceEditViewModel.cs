@@ -114,7 +114,9 @@ namespace OptiPaie.Desktop.ViewModels
             else
             {
                 _selectedEmployee = Employees.Count > 0 ? Employees[0] : null;
-                _periodLabel = year.ToString();
+                // Auto-default to the CURRENT period (month + year) so a monthly cadence needs
+                // no manual date entry; the user stays free to type any past period instead.
+                _periodLabel = DefaultCurrentPeriod(year);
                 _reviewDate = DateTime.Today;
                 Title = "Nouvelle évaluation";
                 foreach (string label in new[] { "Qualité du travail", "Productivité / rendement", "Assiduité et ponctualité", "Travail d'équipe", "Initiative et autonomie" })
@@ -160,6 +162,22 @@ namespace OptiPaie.Desktop.ViewModels
         public ICommand RemoveCriterionCommand { get; }
         public ICommand PdfCommand { get; }
         public ICommand CancelCommand { get; }
+
+        /// <summary>
+        /// The current-period label for a new review: the current month + the evaluation year
+        /// (e.g. "Juillet 2026"), or just the year when evaluating a different year than today's.
+        /// </summary>
+        private static string DefaultCurrentPeriod(int year)
+        {
+            if (year != DateTime.Today.Year)
+            {
+                return year.ToString(CultureInfo.InvariantCulture);
+            }
+
+            string month = Fr.DateTimeFormat.GetMonthName(DateTime.Today.Month);
+            if (month.Length > 0) month = char.ToUpper(month[0], Fr) + month.Substring(1);
+            return month + " " + year.ToString(CultureInfo.InvariantCulture);
+        }
 
         private void LoadExisting()
         {

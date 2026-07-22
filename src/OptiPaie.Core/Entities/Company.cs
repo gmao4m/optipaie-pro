@@ -41,6 +41,16 @@ namespace OptiPaie.Core.Entities
         /// <summary>CACOBATPH affiliation number (construction/public works sector).</summary>
         public string Cacobatph { get; set; }
 
+        /// <summary>True if the company operates in the BTPH (bâtiment/travaux publics/hydraulique) sector.</summary>
+        public bool BtphSector { get; set; }
+
+        /// <summary>
+        /// True to apply the optional CACOBATPH contributions on payslips and expose the
+        /// CACOBATPH declarations. Off by default and only meaningful when <see cref="BtphSector"/>
+        /// is on; never alters the payroll engine.
+        /// </summary>
+        public bool CacobatphEnabled { get; set; }
+
         /// <summary>Bank name.</summary>
         public string Bank { get; set; }
 

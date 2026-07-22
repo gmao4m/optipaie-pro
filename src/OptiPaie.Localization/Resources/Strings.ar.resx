@@ -888,10 +888,18 @@
   <data name="Att_RateLate" xml:space="preserve"><value>نسبة التأخير</value></data>
   <data name="Att_WorkingDays" xml:space="preserve"><value>أيام العمل</value></data>
   <data name="Att_StatusLabel" xml:space="preserve"><value>الحالة:</value></data>
-  <data name="Att_ApplyMonth" xml:space="preserve"><value>تطبيق على الشهر (المحدد)</value></data>
+  <data name="Att_ApplyMonth" xml:space="preserve"><value>ملء الشهر (الموظفون المحددون)</value></data>
   <data name="Att_SelectAll" xml:space="preserve"><value>تحديد الكل</value></data>
   <data name="Att_ClearSelection" xml:space="preserve"><value>إلغاء التحديد</value></data>
   <data name="Att_MonthReports" xml:space="preserve"><value>تقارير الشهر</value></data>
+
+  <!-- CACOBATPH (BTPH sector) -->
+  <data name="Cacobatph_Section" xml:space="preserve"><value>قطاع البناء والأشغال العمومية وCACOBATPH</value></data>
+  <data name="Cacobatph_SectorToggle" xml:space="preserve"><value>مؤسسة من قطاع البناء والأشغال العمومية والري</value></data>
+  <data name="Cacobatph_EnableToggle" xml:space="preserve"><value>تفعيل اشتراكات وتصريحات CACOBATPH</value></data>
+  <data name="Cacobatph_Hint" xml:space="preserve"><value>اختياري. يضيف العطلة المدفوعة (12.21%) والبطالة بسبب سوء الأحوال الجوية (0.75%) على نفس أساس CNAS. لا يؤثر على كشوف الأجور ما دام معطَّلاً.</value></data>
+  <data name="Cacobatph_CongePaye" xml:space="preserve"><value>CACOBATPH — العطلة المدفوعة (12.21%)</value></data>
+  <data name="Cacobatph_Chomage" xml:space="preserve"><value>CACOBATPH — البطالة بسبب سوء الأحوال (0.75%)</value></data>
 
   <!-- Company edit window -->
   <data name="Cmp_AccountRib" xml:space="preserve"><value>الحساب / RIB</value></data>

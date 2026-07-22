@@ -95,8 +95,8 @@
                             </Trigger>
                             <DataTrigger Binding="{Binding IsSelected}" Value="True">
                                 <Setter TargetName="b" Property="Background" Value="{DynamicResource BrandSoft}" />
-                                <Setter TargetName="ic" Property="Fill" Value="{DynamicResource Brand}" />
-                                <Setter TargetName="tx" Property="Foreground" Value="{DynamicResource Brand}" />
+                                <Setter TargetName="ic" Property="Fill" Value="{DynamicResource BrandText}" />
+                                <Setter TargetName="tx" Property="Foreground" Value="{DynamicResource BrandText}" />
                                 <Setter TargetName="tx" Property="FontWeight" Value="SemiBold" />
                             </DataTrigger>
                         </ControlTemplate.Triggers>
@@ -188,7 +188,7 @@
                                     <StackPanel Orientation="Horizontal">
                                         <Border Width="22" Height="22" CornerRadius="5" Background="{DynamicResource BrandSoft}" VerticalAlignment="Center">
                                             <Grid>
-                                                <Path Width="12" Height="12" Stretch="Uniform" Fill="{DynamicResource Brand}"
+                                                <Path Width="12" Height="12" Stretch="Uniform" Fill="{DynamicResource BrandText}"
                                                       Data="{StaticResource IconBuilding}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                                 <Image Source="{Binding Logo, Converter={StaticResource BytesToImage}}" Width="22" Height="22" Stretch="UniformToFill" />
                                             </Grid>
@@ -206,10 +206,10 @@
                                 VerticalAlignment="Center"
                                 Visibility="{Binding IsSignedIn, Converter={StaticResource BoolToVis}}">
                             <StackPanel Orientation="Horizontal">
-                                <Path Width="13" Height="13" Stretch="Uniform" Fill="{DynamicResource Brand}"
+                                <Path Width="13" Height="13" Stretch="Uniform" Fill="{DynamicResource BrandText}"
                                       Data="{StaticResource IconUsers}" VerticalAlignment="Center" />
                                 <TextBlock Text="{Binding SessionUserText}" Margin="7,0,0,0" VerticalAlignment="Center"
-                                           FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource Brand}" />
+                                           FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource BrandText}" />
                             </StackPanel>
                         </Border>
 

@@ -17,6 +17,14 @@ namespace OptiPaie.Core.Interfaces.Services
         Result<long> Save(EmploymentContract contract);
 
         /// <summary>
+        /// Idempotently creates a pre-filled DRAFT contract for a (usually newly-created)
+        /// employee — copying their type, position, salary and hire date — so a new hire
+        /// already has a contract record to finalise instead of one to create from scratch.
+        /// If the employee already has a contract, returns that one and creates nothing.
+        /// </summary>
+        Result<long> CreateDraftFromEmployee(long employeeId);
+
+        /// <summary>
         /// Puts a contract in force: supersedes the employee's current active contract
         /// and copies this contract's terms onto the shared employee record.
         /// </summary>

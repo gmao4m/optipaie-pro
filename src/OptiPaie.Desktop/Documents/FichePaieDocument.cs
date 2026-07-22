@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Linq;
 using OptiPaie.Core.Entities;
 using OptiPaie.Core.Enums;
+using OptiPaie.Core.Payroll;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
@@ -35,10 +36,21 @@ namespace OptiPaie.Desktop.Documents
 
         private readonly FichePaieModel _m;
 
+        // Optional CACOBATPH overlay (BTPH sector, opt-in). Purely additive and read-only:
+        // computed from the already-calculated CNAS base. When off, the payslip is byte-for-byte
+        // identical to before — nothing below runs.
+        private readonly bool _cacobatphOn;
+        private readonly CacobatphResult _cacobatph;
+
         public FichePaieDocument(FichePaieModel model)
         {
             _m = model;
+            _cacobatphOn = model.Company != null && model.Company.BtphSector && model.Company.CacobatphEnabled;
+            _cacobatph = _cacobatphOn ? CacobatphCalculator.Compute(model.BaseCotisable) : null;
         }
+
+        /// <summary>The net actually paid: the engine's net, minus the CACOBATPH employee share when enabled.</summary>
+        private decimal NetToPay => _cacobatphOn ? _m.NetSalaire - _cacobatph.EmployeeTotal : _m.NetSalaire;
 
         public void Compose(IDocumentContainer container)
         {
@@ -218,6 +230,15 @@ namespace OptiPaie.Desktop.Documents
                     SummaryLine(s, "Salaire cotisable", _m.BaseCotisable);
                     SummaryLine(s, "Salaire imposable", _m.BaseImposable);
                     SummaryLine(s, "CNAS", _m.CnasEmployee);
+
+                    // CACOBATPH (BTPH sector, opt-in) — two additive lines directly after CNAS,
+                    // on the same base. Only rendered when the company enabled it.
+                    if (_cacobatphOn)
+                    {
+                        SummaryLine(s, "CACOBATPH — Congé Payé (12,21 %)", _cacobatph.CongePaye);
+                        SummaryLine(s, "CACOBATPH — Chômage-Intempéries (0,75 %)", _cacobatph.ChomageEmployer + _cacobatph.ChomageEmployee);
+                    }
+
                     SummaryLine(s, "Abattement", _m.Abattement);
                     SummaryLine(s, "IRG", _m.Irg);
                 });
@@ -242,7 +263,7 @@ namespace OptiPaie.Desktop.Documents
             {
                 row.RelativeItem().AlignMiddle().Text("NET À PAYER").FontSize(14).Bold().FontColor(White);
                 row.AutoItem().AlignMiddle()
-                    .Text(Money(_m.NetSalaire) + " DA").FontFamily(Mono).FontSize(18).Bold().FontColor(White);
+                    .Text(Money(NetToPay) + " DA").FontFamily(Mono).FontSize(18).Bold().FontColor(White);
             });
         }
 

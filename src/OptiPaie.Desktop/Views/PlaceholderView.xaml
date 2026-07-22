@@ -16,7 +16,7 @@
         <Border Grid.Row="1" Margin="0,20,0,0" Style="{StaticResource Card}">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                 <Border Width="64" Height="64" CornerRadius="16" Background="{DynamicResource BrandSoft}" HorizontalAlignment="Center">
-                    <Path Width="30" Height="30" Stretch="Uniform" Fill="{DynamicResource Brand}"
+                    <Path Width="30" Height="30" Stretch="Uniform" Fill="{DynamicResource BrandText}"
                           Data="{StaticResource IconWallet}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Border>
                 <TextBlock Style="{StaticResource H2}" Margin="0,16,0,0" HorizontalAlignment="Center" Text="{Binding Title}" />

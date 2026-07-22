@@ -39,6 +39,30 @@ namespace OptiPaie.Desktop.ViewModels
             private set { Company.Logo = value; Raise(); }
         }
 
+        /// <summary>BTPH-sector opt-in. Turning it off also switches CACOBATPH off.</summary>
+        public bool BtphSector
+        {
+            get => Company.BtphSector;
+            set
+            {
+                if (Company.BtphSector == value) return;
+                Company.BtphSector = value;
+                if (!value) CacobatphEnabled = false; // CACOBATPH is meaningless without the sector
+                Raise();
+                Raise(nameof(CanEnableCacobatph));
+            }
+        }
+
+        /// <summary>The optional CACOBATPH contributions/declarations toggle (BTPH only).</summary>
+        public bool CacobatphEnabled
+        {
+            get => Company.CacobatphEnabled;
+            set { if (Company.CacobatphEnabled != value) { Company.CacobatphEnabled = value; Raise(); } }
+        }
+
+        /// <summary>CACOBATPH can only be enabled once the company is flagged BTPH.</summary>
+        public bool CanEnableCacobatph => BtphSector;
+
         public ICommand SaveCommand { get; }
         public ICommand CancelCommand { get; }
         public ICommand PickLogoCommand { get; }

@@ -19,6 +19,10 @@
     <SolidColorBrush x:Key="BrandHover" Color="{StaticResource BrandHoverColor}" />
     <SolidColorBrush x:Key="BrandPressed" Color="{StaticResource BrandPressedColor}" />
     <SolidColorBrush x:Key="BrandSoft" Color="{StaticResource BrandSoftColor}" />
+    <!-- Brand as text/icon (accent) — must stay legible on white, Surface AND BrandSoft.
+         Identical to Brand in light mode; the dark palette overrides it to a light blue
+         so brand-coloured labels/icons and BrandSoft chips never go blue-on-blue. -->
+    <SolidColorBrush x:Key="BrandText" Color="{StaticResource BrandColor}" />
 
     <!-- Accent: deep teal — the product's signature colour, used sparingly for the
          standout positive call-to-action per screen. -->

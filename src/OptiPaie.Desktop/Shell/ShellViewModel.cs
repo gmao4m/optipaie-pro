@@ -89,10 +89,7 @@ namespace OptiPaie.Desktop.Shell
         {
             // Reload whatever screen is showing so it reflects the newly selected company,
             // then refresh the cross-module alert bell for that company's data.
-            if (_current is IActivable activable)
-            {
-                activable.OnActivated();
-            }
+            SafeActivate(_current);
 
             RefreshNotifications();
         }
@@ -253,10 +250,7 @@ namespace OptiPaie.Desktop.Shell
 
                 // Re-activate the current module so its own (VM-built) labels re-read
                 // in the new language, not just the shell chrome.
-                if (_current is IActivable activable)
-                {
-                    activable.OnActivated();
-                }
+                SafeActivate(_current);
             };
 
             System.Windows.Threading.Dispatcher dispatcher = Application.Current != null ? Application.Current.Dispatcher : null;
@@ -355,13 +349,35 @@ namespace OptiPaie.Desktop.Shell
             Current = target;
             UpdateSelection(key);
 
-            if (target is IActivable activable)
-            {
-                activable.OnActivated();
-            }
+            SafeActivate(target);
 
             // Alerts may have changed after acting on a screen — keep the bell current.
             RefreshNotifications();
+        }
+
+        /// <summary>
+        /// Activates a screen without ever letting a data-load exception crash the whole
+        /// application: a module that fails to load simply shows empty instead of taking
+        /// the app down. Errors are surfaced non-fatally so they can still be reported.
+        /// </summary>
+        private void SafeActivate(object target)
+        {
+            if (!(target is IActivable activable))
+            {
+                return;
+            }
+
+            try
+            {
+                activable.OnActivated();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Module activation failed: " + ex);
+                MessageBox.Show(
+                    "Ce module n'a pas pu charger toutes ses données. Il s'affiche partiellement.\r\n\r\n" + ex.Message,
+                    "OptiPaie PRO", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
         }
 
         /// <summary>

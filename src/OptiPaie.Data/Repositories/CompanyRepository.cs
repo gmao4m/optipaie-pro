@@ -35,11 +35,11 @@ namespace OptiPaie.Data.Repositories
             const string sql =
                 "INSERT INTO Companies " +
                 "(NameFr, NameAr, LegalForm, AddressFr, AddressAr, Nif, Nis, Rc, ArticleImposition, " +
-                " CnasEmployerNumber, Cacobatph, Bank, BankAccount, Currency, Phone, Email, Logo, " +
+                " CnasEmployerNumber, Cacobatph, BtphSector, CacobatphEnabled, Bank, BankAccount, Currency, Phone, Email, Logo, " +
                 " CreatedAtUtc, UpdatedAtUtc, IsDeleted) " +
                 "VALUES " +
                 "(@NameFr, @NameAr, @LegalForm, @AddressFr, @AddressAr, @Nif, @Nis, @Rc, @ArticleImposition, " +
-                " @CnasEmployerNumber, @Cacobatph, @Bank, @BankAccount, @Currency, @Phone, @Email, @Logo, " +
+                " @CnasEmployerNumber, @Cacobatph, @BtphSector, @CacobatphEnabled, @Bank, @BankAccount, @Currency, @Phone, @Email, @Logo, " +
                 " @CreatedAtUtc, @UpdatedAtUtc, @IsDeleted); " +
                 "SELECT last_insert_rowid();";
 
@@ -56,7 +56,8 @@ namespace OptiPaie.Data.Repositories
                 "UPDATE Companies SET " +
                 "NameFr = @NameFr, NameAr = @NameAr, LegalForm = @LegalForm, AddressFr = @AddressFr, " +
                 "AddressAr = @AddressAr, Nif = @Nif, Nis = @Nis, Rc = @Rc, ArticleImposition = @ArticleImposition, " +
-                "CnasEmployerNumber = @CnasEmployerNumber, Cacobatph = @Cacobatph, Bank = @Bank, " +
+                "CnasEmployerNumber = @CnasEmployerNumber, Cacobatph = @Cacobatph, " +
+                "BtphSector = @BtphSector, CacobatphEnabled = @CacobatphEnabled, Bank = @Bank, " +
                 "BankAccount = @BankAccount, Currency = @Currency, Phone = @Phone, Email = @Email, Logo = @Logo, " +
                 "UpdatedAtUtc = @UpdatedAtUtc, IsDeleted = @IsDeleted " +
                 "WHERE Id = @Id;";

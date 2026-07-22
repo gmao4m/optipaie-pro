@@ -43,7 +43,7 @@
                 <Border Background="{DynamicResource BrandSoft}" CornerRadius="8" Padding="12,8" Margin="10,0,0,0">
                     <StackPanel>
                         <TextBlock Text="{loc:Loc Upd_NewVersion}" Style="{StaticResource Caption}" />
-                        <TextBlock Text="{Binding LatestVersion}" FontWeight="SemiBold" Foreground="{DynamicResource Brand}" Margin="0,2,0,0" />
+                        <TextBlock Text="{Binding LatestVersion}" FontWeight="SemiBold" Foreground="{DynamicResource BrandText}" Margin="0,2,0,0" />
                     </StackPanel>
                 </Border>
             </StackPanel>
@@ -66,7 +66,7 @@
             <!-- Progress + status -->
             <StackPanel Grid.Row="3" Margin="0,14,0,0">
                 <ProgressBar Height="8" Minimum="0" Maximum="100" Value="{Binding Progress}"
-                             Foreground="{DynamicResource Brand}"
+                             Foreground="{DynamicResource BrandText}"
                              Visibility="{Binding IsBusy, Converter={StaticResource BoolToVis}}" />
                 <TextBlock Text="{Binding StatusMessage}" Margin="0,8,0,0" TextWrapping="Wrap"
                            Visibility="{Binding StatusMessage, Converter={StaticResource EmptyToVis}}">
