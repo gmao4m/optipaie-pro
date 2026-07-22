@@ -45,6 +45,19 @@
     <SolidColorBrush x:Key="TextMuted" Color="#8B8F99" />
     <SolidColorBrush x:Key="TextOnBrand" Color="#FFFFFF" />
 
+    <!-- Destructive (filled) action: a red dark enough for white text to clear 4.5:1.
+         Distinct from the #C24444 semantic red used for status text/badges. -->
+    <Color x:Key="ButtonDangerColor">#B23A3A</Color>
+    <SolidColorBrush x:Key="ButtonDanger" Color="{StaticResource ButtonDangerColor}" />
+    <SolidColorBrush x:Key="ButtonDangerHover" Color="#9E3333" />
+    <SolidColorBrush x:Key="ButtonDangerPressed" Color="#8A2C2C" />
+
+    <!-- Disabled button state: a neutral, clearly-legible muted look applied uniformly to
+         EVERY button variant. Never a washed-out filled button with unreadable text
+         (#5B616B on #E9E6DF ≈ 4.7:1, so the label stays readable while looking inactive). -->
+    <SolidColorBrush x:Key="ButtonDisabledFill" Color="#E9E6DF" />
+    <SolidColorBrush x:Key="ButtonDisabledText" Color="#5B616B" />
+
     <!-- Semantic status colours (used consistently everywhere; meaning is preserved:
          green = success/active/present/gain, amber = pending/late, red = danger/absent/
          deduction, blue = informational). -->
