@@ -237,5 +237,37 @@ namespace OptiPaie.Tests
             Assert.That(_companies.GetAll().Count, Is.EqualTo(1), "no duplicate company");
             Assert.That(first, Is.GreaterThan(0L));
         }
+
+        [Test]
+        public void EnsureDemo_ReplacesLeftoverData_WithTheDemo()
+        {
+            // Simulate a leftover, non-demo company (e.g. a test "Optirasoft" company).
+            using (IUnitOfWork uow = _uowf.Create())
+            {
+                uow.BeginTransaction();
+                long cid = uow.Companies.Insert(new Company { NameFr = "Optirasoft", Nif = "111111111111111" });
+                uow.Employees.Insert(new Employee
+                {
+                    CompanyId = cid, LastNameFr = "TEST", FirstNameFr = "User", Gender = Gender.Male,
+                    MaritalStatus = MaritalStatus.Single, PaymentMode = PaymentMode.Cash, ContractType = ContractType.Cdi,
+                    HireDate = new DateTime(2020, 1, 1), BaseSalary = 50000m, IsActive = true
+                });
+                uow.Commit();
+            }
+
+            Assert.That(_seeder.HasDemoCompany(), Is.False);
+
+            Result<long> r = _seeder.EnsureDemo();
+            Assert.That(r.IsSuccess, Is.True, r.Error);
+
+            IReadOnlyList<Company> companies = _companies.GetAll();
+            Assert.That(companies.Count, Is.EqualTo(1), "the leftover company is hidden; only the demo remains");
+            Assert.That(companies[0].NameFr, Is.EqualTo("SARL Atlas Industrie"));
+
+            // Idempotent once the demo is present.
+            Result<long> again = _seeder.EnsureDemo();
+            Assert.That(again.Value, Is.EqualTo(0L));
+            Assert.That(_companies.GetAll().Count, Is.EqualTo(1));
+        }
     }
 }

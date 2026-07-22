@@ -58,10 +58,59 @@ namespace OptiPaie.Services
             _performance = performance;
         }
 
+        /// <summary>The demo company name — used to detect whether the demo is already present.</summary>
+        public const string DemoCompanyName = "SARL Atlas Industrie";
+
         /// <summary>True when there is no company yet (a fresh install / empty demo DB).</summary>
         public bool IsDatabaseEmpty()
         {
             return _companies.GetAll().Count == 0;
+        }
+
+        /// <summary>True when the Algerian demo company is already present.</summary>
+        public bool HasDemoCompany()
+        {
+            foreach (Company c in _companies.GetAll())
+            {
+                if (string.Equals(c.NameFr, DemoCompanyName, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Ensures the demo dataset is present for the trial/demo experience. If the demo
+        /// company is missing but the database holds OTHER data (e.g. leftover test companies),
+        /// that data is hidden (soft-deleted) and the Algerian demo is seeded fresh. Only ever
+        /// called in trial mode — a licensed install is never touched.
+        /// </summary>
+        public Result<long> EnsureDemo()
+        {
+            if (HasDemoCompany())
+            {
+                return Result.Ok(0L);
+            }
+
+            try
+            {
+                // Hide any leftover companies/employees so the demo starts from a clean slate.
+                foreach (Company c in _companies.GetAll())
+                {
+                    foreach (Employee e in _employees.GetByCompany(c.Id, true))
+                    {
+                        _employees.Delete(e.Id);
+                    }
+                    _companies.Delete(c.Id);
+                }
+            }
+            catch (Exception ex)
+            {
+                return Result.Fail<long>("Réinitialisation de la démo impossible : " + ex.Message, "Demo_ResetFailed");
+            }
+
+            return Seed();
         }
 
         /// <summary>

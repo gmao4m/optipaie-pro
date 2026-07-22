@@ -66,6 +66,7 @@ namespace OptiPaie.Desktop.Shell
             _services.Licensing.Changed += OnLicenseChanged;
 
             OpenNotificationCommand = new RelayCommand(p => OpenNotification(p as OptiPaie.Core.Dtos.Notification));
+            SignOutCommand = new RelayCommand(() => (Application.Current as OptiPaie.Desktop.App)?.SignOut());
 
             // Load the company list once and react to header company switches: re-activate
             // the visible module so it reloads the new company's data (no stale data left).
@@ -103,6 +104,9 @@ namespace OptiPaie.Desktop.Shell
         public string NotificationBadge => _notificationCount > 9 ? "9+" : _notificationCount.ToString();
 
         public ICommand OpenNotificationCommand { get; }
+
+        /// <summary>Ends the session and returns to the activation / trial-start screen.</summary>
+        public ICommand SignOutCommand { get; }
 
         private void RefreshNotifications()
         {

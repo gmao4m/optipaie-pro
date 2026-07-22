@@ -104,14 +104,55 @@ namespace OptiPaie.Desktop
                     Services.Leave, Services.Loans, Services.Assets, Services.Training,
                     Services.Certificates, Services.Performance);
 
-                if (seeder.IsDatabaseEmpty())
-                {
-                    seeder.Seed();
-                }
+                // Ensure the Algerian demo is present in trial mode: seeds on an empty DB, and
+                // replaces any leftover (non-demo) data so the demo always shows.
+                seeder.EnsureDemo();
             }
             catch
             {
                 // Seeding demo data must never prevent the app from opening.
+            }
+        }
+
+        /// <summary>
+        /// Signs out of the current session: hides the main window and returns to the
+        /// activation / trial-start screen. If access is still valid when that screen closes
+        /// (e.g. the user continues the trial), the main window reopens; otherwise the app exits.
+        /// </summary>
+        public void SignOut()
+        {
+            if (Services == null)
+            {
+                return;
+            }
+
+            Window main = MainWindow;
+
+            var viewModel = new ActivationViewModel(Services);
+            var window = new ActivationWindow { DataContext = viewModel };
+            ApplyFlowDirection(window);
+            viewModel.CloseRequested = ok =>
+            {
+                try { window.DialogResult = ok; } catch { window.Close(); }
+            };
+
+            if (main != null)
+            {
+                main.Hide();
+            }
+
+            window.ShowDialog();
+
+            if (Services.Access.Evaluate().CanUseApp)
+            {
+                if (main != null)
+                {
+                    main.Show();
+                }
+            }
+            else
+            {
+                Shutdown();
             }
         }
 
