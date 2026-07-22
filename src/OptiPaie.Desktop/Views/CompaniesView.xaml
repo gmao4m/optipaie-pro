@@ -1,6 +1,7 @@
 <UserControl x:Class="OptiPaie.Desktop.Views.CompaniesView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:OptiPaie.Desktop.Localization">
     <Grid Margin="28">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -9,15 +10,11 @@
 
         <Grid Grid.Row="0">
             <StackPanel HorizontalAlignment="Left">
-                <TextBlock Style="{StaticResource H1}" Text="Entreprises" />
-                <TextBlock Style="{StaticResource Caption}" Margin="0,5,0,0" Text="Gérez vos entreprises et leurs informations légales" />
+                <TextBlock Style="{StaticResource H1}" Text="{loc:Loc Shell_Nav_Companies}" />
+                <TextBlock Style="{StaticResource Caption}" Margin="0,5,0,0" Text="{loc:Loc Companies_Subtitle}" />
             </StackPanel>
-            <Button Style="{StaticResource PrimaryButton}" HorizontalAlignment="Right" VerticalAlignment="Top" Command="{Binding NewCommand}">
-                <StackPanel Orientation="Horizontal">
-                    <Path Width="15" Height="15" Stretch="Uniform" Fill="{DynamicResource TextOnBrand}" Data="{StaticResource IconPlus}" VerticalAlignment="Center" />
-                    <TextBlock Text="Nouvelle entreprise" Margin="8,0,0,0" VerticalAlignment="Center" />
-                </StackPanel>
-            </Button>
+            <Button Style="{StaticResource PrimaryButton}" HorizontalAlignment="Right" VerticalAlignment="Top" Command="{Binding NewCommand}"
+                    Content="{loc:Loc Companies_New}" />
         </Grid>
 
         <Grid Grid.Row="1" Margin="0,22,0,0">
@@ -37,7 +34,7 @@
                         <TextBox Style="{StaticResource AppTextBox}" Text="{Binding Search, UpdateSourceTrigger=PropertyChanged}" Padding="34,0,10,0" />
                         <Path Width="16" Height="16" Stretch="Uniform" Fill="{DynamicResource TextMuted}" Data="{StaticResource IconSearch}"
                               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="11,0,0,0" IsHitTestVisible="False" />
-                        <TextBlock Text="Rechercher une entreprise" Foreground="{DynamicResource TextMuted}" VerticalAlignment="Center" Margin="34,0,0,0"
+                        <TextBlock Text="{loc:Loc Companies_SearchPlaceholder}" Foreground="{DynamicResource TextMuted}" VerticalAlignment="Center" Margin="34,0,0,0"
                                    IsHitTestVisible="False" Visibility="{Binding Search, Converter={StaticResource EmptyToVis}}" />
                     </Grid>
 
@@ -84,14 +81,14 @@
                         <Border Width="60" Height="60" CornerRadius="16" Background="{DynamicResource SurfaceMuted}" HorizontalAlignment="Center">
                             <Path Width="28" Height="28" Stretch="Uniform" Fill="{DynamicResource TextMuted}" Data="{StaticResource IconBuilding}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
-                        <TextBlock Style="{StaticResource Caption}" Margin="0,14,0,0" HorizontalAlignment="Center" Text="Sélectionnez une entreprise." />
+                        <TextBlock Style="{StaticResource Caption}" Margin="0,14,0,0" HorizontalAlignment="Center" Text="{loc:Loc Companies_EmptyState}" />
                     </StackPanel>
                 </Border>
 
                 <DockPanel Visibility="{Binding HasSelection, Converter={StaticResource BoolToVis}}">
                     <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
-                        <Button Style="{StaticResource SecondaryButton}" Command="{Binding DeleteCommand}" Content="Supprimer" Foreground="{DynamicResource Deduction}" />
-                        <Button Style="{StaticResource PrimaryButton}" Margin="12,0,0,0" Command="{Binding EditCommand}" Content="Modifier" />
+                        <Button Style="{StaticResource SecondaryButton}" Command="{Binding DeleteCommand}" Content="{loc:Loc Common_Delete}" Foreground="{DynamicResource Deduction}" />
+                        <Button Style="{StaticResource PrimaryButton}" Margin="12,0,0,0" Command="{Binding EditCommand}" Content="{loc:Loc Common_Edit}" />
                     </StackPanel>
                     <Border Style="{StaticResource Card}" Padding="24" VerticalAlignment="Top">
                         <StackPanel DataContext="{Binding SelectedCompany}">
@@ -109,27 +106,27 @@
 
                             <UniformGrid Columns="2">
                                 <StackPanel Margin="0,0,16,16">
-                                    <TextBlock Style="{StaticResource Caption}" Text="NIF" />
+                                    <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Company_Nif}" />
                                     <TextBlock Margin="0,3,0,0" Text="{Binding Nif, TargetNullValue=—}" />
                                 </StackPanel>
                                 <StackPanel Margin="0,0,0,16">
-                                    <TextBlock Style="{StaticResource Caption}" Text="RC" />
+                                    <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Company_Rc}" />
                                     <TextBlock Margin="0,3,0,0" Text="{Binding Rc, TargetNullValue=—}" />
                                 </StackPanel>
                                 <StackPanel Margin="0,0,16,16">
-                                    <TextBlock Style="{StaticResource Caption}" Text="N° CNAS employeur" />
+                                    <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Company_CnasEmployerNumber}" />
                                     <TextBlock Margin="0,3,0,0" Text="{Binding CnasEmployerNumber, TargetNullValue=—}" />
                                 </StackPanel>
                                 <StackPanel Margin="0,0,0,16">
-                                    <TextBlock Style="{StaticResource Caption}" Text="Téléphone" />
+                                    <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Company_Phone}" />
                                     <TextBlock Margin="0,3,0,0" Text="{Binding Phone, TargetNullValue=—}" />
                                 </StackPanel>
                                 <StackPanel Margin="0,0,16,0">
-                                    <TextBlock Style="{StaticResource Caption}" Text="Adresse" />
+                                    <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Company_Address}" />
                                     <TextBlock Margin="0,3,0,0" TextWrapping="Wrap" Text="{Binding AddressFr, TargetNullValue=—}" />
                                 </StackPanel>
                                 <StackPanel Margin="0,0,0,0">
-                                    <TextBlock Style="{StaticResource Caption}" Text="Banque" />
+                                    <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Company_Bank}" />
                                     <TextBlock Margin="0,3,0,0" Text="{Binding Bank, TargetNullValue=—}" />
                                 </StackPanel>
                             </UniformGrid>

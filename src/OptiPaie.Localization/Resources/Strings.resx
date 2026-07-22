@@ -433,6 +433,18 @@
   <data name="Role_Manager" xml:space="preserve"><value>Responsable</value></data>
   <data name="Session_FullAccess" xml:space="preserve"><value>Accès complet</value></data>
 
+  <!-- Employees view -->
+  <data name="Employees_New" xml:space="preserve"><value>Nouvel employé</value></data>
+  <data name="Employees_SearchPlaceholder" xml:space="preserve"><value>Rechercher un employé</value></data>
+  <data name="Employees_EmptyState" xml:space="preserve"><value>Sélectionnez un employé pour voir son profil.</value></data>
+
+  <!-- Companies view -->
+  <data name="Companies_New" xml:space="preserve"><value>Nouvelle entreprise</value></data>
+  <data name="Companies_SearchPlaceholder" xml:space="preserve"><value>Rechercher une entreprise</value></data>
+  <data name="Companies_EmptyState" xml:space="preserve"><value>Sélectionnez une entreprise.</value></data>
+  <data name="Company_Address" xml:space="preserve"><value>Adresse</value></data>
+  <data name="Company_Bank" xml:space="preserve"><value>Banque</value></data>
+
   <!-- User service errors -->
   <data name="User_UsernameRequired" xml:space="preserve"><value>Le nom d'utilisateur est requis.</value></data>
   <data name="User_PasswordTooShort" xml:space="preserve"><value>Le mot de passe doit contenir au moins 4 caractères.</value></data>

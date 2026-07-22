@@ -433,6 +433,18 @@
   <data name="Role_Manager" xml:space="preserve"><value>مسؤول</value></data>
   <data name="Session_FullAccess" xml:space="preserve"><value>وصول كامل</value></data>
 
+  <!-- Employees view -->
+  <data name="Employees_New" xml:space="preserve"><value>موظف جديد</value></data>
+  <data name="Employees_SearchPlaceholder" xml:space="preserve"><value>البحث عن موظف</value></data>
+  <data name="Employees_EmptyState" xml:space="preserve"><value>اختر موظفاً لعرض ملفه.</value></data>
+
+  <!-- Companies view -->
+  <data name="Companies_New" xml:space="preserve"><value>مؤسسة جديدة</value></data>
+  <data name="Companies_SearchPlaceholder" xml:space="preserve"><value>البحث عن مؤسسة</value></data>
+  <data name="Companies_EmptyState" xml:space="preserve"><value>اختر مؤسسة.</value></data>
+  <data name="Company_Address" xml:space="preserve"><value>العنوان</value></data>
+  <data name="Company_Bank" xml:space="preserve"><value>البنك</value></data>
+
   <!-- User service errors -->
   <data name="User_UsernameRequired" xml:space="preserve"><value>اسم المستخدم مطلوب.</value></data>
   <data name="User_PasswordTooShort" xml:space="preserve"><value>يجب أن تحتوي كلمة المرور على 4 أحرف على الأقل.</value></data>
