@@ -36,26 +36,28 @@ namespace OptiPaie.Desktop.ViewModels
         public string InstallmentText => Money(Summary.MonthlyInstallment);
         public string OutstandingText => Money(Summary.Outstanding);
         public string StartText => Loan.StartMonth.ToString("00", CultureInfo.InvariantCulture) + "/" + Loan.StartYear;
-        public string RemainingText => Summary.RemainingInstallments + " mois";
+        public string RemainingText => Summary.RemainingInstallments + " " + OptiPaie.Desktop.Localization.TranslationSource.Instance["Common_MonthsSuffix"];
         public bool IsActive => Loan.Status == LoanStatus.Active;
         public bool IsSuspended => Loan.Status == LoanStatus.Suspended;
 
         private static string Money(decimal value) => value.ToString("N2", CultureInfo.GetCultureInfo("fr-FR"));
     }
 
-    /// <summary>French labels for the loan enums (kept in one place).</summary>
+    /// <summary>Localized labels for the loan enums (resolved for the active language).</summary>
     public static class LoanLabels
     {
-        public static string Type(LoanType type) => type == LoanType.Advance ? "Avance sur salaire" : "Prêt";
+        private static string L(string key) => OptiPaie.Desktop.Localization.TranslationSource.Instance[key];
+
+        public static string Type(LoanType type) => L(type == LoanType.Advance ? "Enum_LoanType_Advance" : "Enum_LoanType_Loan");
 
         public static string Status(LoanStatus status)
         {
             switch (status)
             {
-                case LoanStatus.Active: return "En cours";
-                case LoanStatus.Settled: return "Soldé";
-                case LoanStatus.Suspended: return "Suspendu";
-                case LoanStatus.Cancelled: return "Annulé";
+                case LoanStatus.Active: return L("Enum_LoanStatus_Active");
+                case LoanStatus.Settled: return L("Enum_LoanStatus_Settled");
+                case LoanStatus.Suspended: return L("Enum_LoanStatus_Suspended");
+                case LoanStatus.Cancelled: return L("Enum_LoanStatus_Cancelled");
                 default: return string.Empty;
             }
         }

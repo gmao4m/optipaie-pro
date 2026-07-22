@@ -1,6 +1,7 @@
 <UserControl x:Class="OptiPaie.Desktop.Views.ContractView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:OptiPaie.Desktop.Localization">
     <UserControl.Resources>
         <Style x:Key="GridHeader" TargetType="DataGridColumnHeader">
             <Setter Property="Background" Value="{DynamicResource SurfaceMuted}" />
@@ -42,28 +43,27 @@
 
         <Grid Grid.Row="0">
             <StackPanel HorizontalAlignment="Left">
-                <TextBlock Style="{StaticResource H1}" Text="Contrats" />
-                <TextBlock Style="{StaticResource Caption}" Margin="0,5,0,0"
-                           Text="Activer un contrat applique son salaire, son type et son poste à l'employé." />
+                <TextBlock Style="{StaticResource H1}" Text="{loc:Loc Contract_Title}" />
+                <TextBlock Style="{StaticResource Caption}" Margin="0,5,0,0" Text="{loc:Loc Contract_Subtitle}" />
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
                 <!-- Company selection is global (header selector) -->
 
                 <Button Style="{StaticResource PrimaryButton}" Height="32" Margin="10,0,0,0"
-                        Content="Nouveau contrat" Command="{Binding NewCommand}" />
+                        Content="{loc:Loc Contract_New}" Command="{Binding NewCommand}" />
             </StackPanel>
         </Grid>
 
         <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,18,0,0">
             <Border Style="{StaticResource Kpi}">
                 <StackPanel>
-                    <TextBlock Style="{StaticResource Caption}" Text="Contrats en vigueur" />
+                    <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_ActiveContracts}" />
                     <TextBlock FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource Salary}" Text="{Binding ActiveCountText}" />
                 </StackPanel>
             </Border>
             <Border Style="{StaticResource Kpi}">
                 <StackPanel>
-                    <TextBlock Style="{StaticResource Caption}" Text="À renouveler (30 j)" />
+                    <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Contract_ToRenew}" />
                     <TextBlock FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource Warning}" Text="{Binding ExpiringCountText}" />
                 </StackPanel>
             </Border>
@@ -78,14 +78,14 @@
                   HorizontalGridLinesBrush="{DynamicResource Border}" VerticalGridLinesBrush="{DynamicResource Border}"
                   ColumnHeaderStyle="{StaticResource GridHeader}">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Employé" Binding="{Binding EmployeeName}" Width="*" />
-                <DataGridTextColumn Header="Type" Binding="{Binding TypeLabel}" Width="90" ElementStyle="{StaticResource CenterText}" />
-                <DataGridTextColumn Header="Poste" Binding="{Binding Position}" Width="150" />
-                <DataGridTextColumn Header="Salaire" Binding="{Binding SalaryText}" Width="110" ElementStyle="{StaticResource RightText}" />
-                <DataGridTextColumn Header="Début" Binding="{Binding StartText}" Width="95" ElementStyle="{StaticResource CenterText}" />
-                <DataGridTextColumn Header="Fin" Binding="{Binding EndText}" Width="95" ElementStyle="{StaticResource CenterText}" />
-                <DataGridTextColumn Header="Échéance" Binding="{Binding ExpiryText}" Width="110" ElementStyle="{StaticResource CenterText}" />
-                <DataGridTextColumn Header="Statut" Binding="{Binding StatusLabel}" Width="105" ElementStyle="{StaticResource CenterText}" />
+                <DataGridTextColumn Header="{loc:Loc Payroll_Employee}" Binding="{Binding EmployeeName}" Width="*" />
+                <DataGridTextColumn Header="{loc:Loc Common_Type}" Binding="{Binding TypeLabel}" Width="90" ElementStyle="{StaticResource CenterText}" />
+                <DataGridTextColumn Header="{loc:Loc Employee_Poste}" Binding="{Binding Position}" Width="150" />
+                <DataGridTextColumn Header="{loc:Loc Contract_Salary}" Binding="{Binding SalaryText}" Width="110" ElementStyle="{StaticResource RightText}" />
+                <DataGridTextColumn Header="{loc:Loc Loan_Start}" Binding="{Binding StartText}" Width="95" ElementStyle="{StaticResource CenterText}" />
+                <DataGridTextColumn Header="{loc:Loc Contract_End}" Binding="{Binding EndText}" Width="95" ElementStyle="{StaticResource CenterText}" />
+                <DataGridTextColumn Header="{loc:Loc Contract_Expiry}" Binding="{Binding ExpiryText}" Width="110" ElementStyle="{StaticResource CenterText}" />
+                <DataGridTextColumn Header="{loc:Loc Common_Status}" Binding="{Binding StatusLabel}" Width="105" ElementStyle="{StaticResource CenterText}" />
             </DataGrid.Columns>
         </DataGrid>
 
@@ -93,11 +93,11 @@
             <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Center" HorizontalAlignment="Left" Text="{Binding StatusMessage}" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Style="{StaticResource SecondaryButton}" Content="PDF" Command="{Binding PdfCommand}" />
-                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="Modifier" Command="{Binding EditCommand}" />
-                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="Résilier" Command="{Binding TerminateCommand}" />
-                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="Renouveler" Command="{Binding RenewCommand}" />
-                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="Supprimer" Command="{Binding DeleteCommand}" />
-                <Button Style="{StaticResource AccentButton}" Margin="8,0,0,0" Content="Activer" Command="{Binding ActivateCommand}" />
+                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="{loc:Loc Common_Edit}" Command="{Binding EditCommand}" />
+                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="{loc:Loc Contract_Terminate}" Command="{Binding TerminateCommand}" />
+                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="{loc:Loc Contract_Renew}" Command="{Binding RenewCommand}" />
+                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="{loc:Loc Common_Delete}" Command="{Binding DeleteCommand}" />
+                <Button Style="{StaticResource AccentButton}" Margin="8,0,0,0" Content="{loc:Loc Contract_Activate}" Command="{Binding ActivateCommand}" />
             </StackPanel>
         </Grid>
     </Grid>

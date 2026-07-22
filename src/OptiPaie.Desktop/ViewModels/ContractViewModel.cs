@@ -46,8 +46,9 @@ namespace OptiPaie.Desktop.ViewModels
             get
             {
                 if (!Summary.DaysUntilExpiry.HasValue) return "—";
-                if (Summary.IsOverdue) return "En retard de " + (-Summary.DaysUntilExpiry.Value) + " j";
-                if (Summary.Status == ContractStatus.Active) return "Dans " + Summary.DaysUntilExpiry.Value + " j";
+                string d = OptiPaie.Desktop.Localization.TranslationSource.Instance["Common_DaysAbbrev"];
+                if (Summary.IsOverdue) return OptiPaie.Desktop.Localization.TranslationSource.Instance["Contract_ExpiryOverdue"] + " " + (-Summary.DaysUntilExpiry.Value) + " " + d;
+                if (Summary.Status == ContractStatus.Active) return OptiPaie.Desktop.Localization.TranslationSource.Instance["Contract_ExpiryIn"] + " " + Summary.DaysUntilExpiry.Value + " " + d;
                 return "—";
             }
         }
@@ -57,18 +58,20 @@ namespace OptiPaie.Desktop.ViewModels
         public bool CanRenew => Summary.Status == ContractStatus.Active || Summary.Status == ContractStatus.Expired;
     }
 
-    /// <summary>French labels for the contract status enum.</summary>
+    /// <summary>Localized labels for the contract status enum (resolved for the active language).</summary>
     public static class ContractLabels
     {
+        private static string L(string key) => OptiPaie.Desktop.Localization.TranslationSource.Instance[key];
+
         public static string Status(ContractStatus status)
         {
             switch (status)
             {
-                case ContractStatus.Draft: return "Préparation";
-                case ContractStatus.Active: return "En vigueur";
-                case ContractStatus.Expired: return "Expiré";
-                case ContractStatus.Terminated: return "Résilié";
-                case ContractStatus.Renewed: return "Renouvelé";
+                case ContractStatus.Draft: return L("Enum_ContractStatus_Draft");
+                case ContractStatus.Active: return L("Enum_ContractStatus_Active");
+                case ContractStatus.Expired: return L("Enum_ContractStatus_Expired");
+                case ContractStatus.Terminated: return L("Enum_ContractStatus_Terminated");
+                case ContractStatus.Renewed: return L("Enum_ContractStatus_Renewed");
                 default: return string.Empty;
             }
         }

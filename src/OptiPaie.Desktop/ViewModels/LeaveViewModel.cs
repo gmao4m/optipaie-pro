@@ -38,19 +38,21 @@ namespace OptiPaie.Desktop.ViewModels
         public bool IsApproved => Request.Status == LeaveStatus.Approved;
     }
 
-    /// <summary>French labels for the leave enums (kept in one place).</summary>
+    /// <summary>Localized labels for the leave enums (resolved for the active language).</summary>
     public static class LeaveLabels
     {
+        private static string L(string key) => OptiPaie.Desktop.Localization.TranslationSource.Instance[key];
+
         public static string Type(LeaveType type)
         {
             switch (type)
             {
-                case LeaveType.Annual: return "Congé annuel";
-                case LeaveType.Sick: return "Congé maladie";
-                case LeaveType.Unpaid: return "Congé sans solde";
-                case LeaveType.Maternity: return "Congé maternité";
-                case LeaveType.Special: return "Congé exceptionnel";
-                default: return "Congé";
+                case LeaveType.Annual: return L("Enum_LeaveType_Annual");
+                case LeaveType.Sick: return L("Enum_LeaveType_Sick");
+                case LeaveType.Unpaid: return L("Enum_LeaveType_Unpaid");
+                case LeaveType.Maternity: return L("Enum_LeaveType_Maternity");
+                case LeaveType.Special: return L("Enum_LeaveType_Special");
+                default: return L("Enum_LeaveType_Other");
             }
         }
 
@@ -58,10 +60,10 @@ namespace OptiPaie.Desktop.ViewModels
         {
             switch (status)
             {
-                case LeaveStatus.Pending: return "En attente";
-                case LeaveStatus.Approved: return "Approuvé";
-                case LeaveStatus.Rejected: return "Refusé";
-                case LeaveStatus.Cancelled: return "Annulé";
+                case LeaveStatus.Pending: return L("Enum_LeaveStatus_Pending");
+                case LeaveStatus.Approved: return L("Enum_LeaveStatus_Approved");
+                case LeaveStatus.Rejected: return L("Enum_LeaveStatus_Rejected");
+                case LeaveStatus.Cancelled: return L("Enum_LeaveStatus_Cancelled");
                 default: return string.Empty;
             }
         }

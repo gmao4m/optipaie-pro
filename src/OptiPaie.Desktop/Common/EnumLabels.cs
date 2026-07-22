@@ -18,20 +18,26 @@ namespace OptiPaie.Desktop.Common
         public override string ToString() => Label;
     }
 
-    /// <summary>French labels for the domain enums (self-contained; no external localizer).</summary>
+    /// <summary>
+    /// Localized labels for the domain enums. Text is resolved for the active language
+    /// through the shared translation source; the French value is the resource fallback,
+    /// so nothing breaks if a key is ever missing.
+    /// </summary>
     public static class EnumLabels
     {
-        public static string GenderLabel(Gender g) => g == Gender.Female ? "Féminin" : "Masculin";
+        private static string L(string key) => OptiPaie.Desktop.Localization.TranslationSource.Instance[key];
+
+        public static string GenderLabel(Gender g) => L(g == Gender.Female ? "Enum_Gender_Female" : "Enum_Gender_Male");
 
         public static string ContractLabel(ContractType c)
         {
             switch (c)
             {
-                case ContractType.Cdi: return "CDI";
-                case ContractType.Cdd: return "CDD";
-                case ContractType.Apprenticeship: return "Apprentissage";
-                case ContractType.Internship: return "Pré-emploi / Stage";
-                default: return "Autre";
+                case ContractType.Cdi: return L("Enum_Contract_Cdi");
+                case ContractType.Cdd: return L("Enum_Contract_Cdd");
+                case ContractType.Apprenticeship: return L("Enum_Contract_Apprenticeship");
+                case ContractType.Internship: return L("Enum_Contract_Internship");
+                default: return L("Enum_Contract_Other");
             }
         }
 
@@ -39,10 +45,10 @@ namespace OptiPaie.Desktop.Common
         {
             switch (m)
             {
-                case MaritalStatus.Single: return "Célibataire";
-                case MaritalStatus.Married: return "Marié(e)";
-                case MaritalStatus.Divorced: return "Divorcé(e)";
-                default: return "Veuf/Veuve";
+                case MaritalStatus.Single: return L("Enum_Marital_Single");
+                case MaritalStatus.Married: return L("Enum_Marital_Married");
+                case MaritalStatus.Divorced: return L("Enum_Marital_Divorced");
+                default: return L("Enum_Marital_Widowed");
             }
         }
 
@@ -50,9 +56,9 @@ namespace OptiPaie.Desktop.Common
         {
             switch (p)
             {
-                case PaymentMode.BankTransfer: return "Virement bancaire";
-                case PaymentMode.Cash: return "Espèces";
-                default: return "Chèque";
+                case PaymentMode.BankTransfer: return L("Enum_Payment_BankTransfer");
+                case PaymentMode.Cash: return L("Enum_Payment_Cash");
+                default: return L("Enum_Payment_Cheque");
             }
         }
 

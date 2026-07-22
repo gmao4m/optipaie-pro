@@ -59,7 +59,8 @@ namespace OptiPaie.Desktop.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return (value is OptiPaie.Core.Enums.ElementType t && t == OptiPaie.Core.Enums.ElementType.Deduction) ? "Retenue" : "Gain";
+            bool deduction = value is OptiPaie.Core.Enums.ElementType t && t == OptiPaie.Core.Enums.ElementType.Deduction;
+            return OptiPaie.Desktop.Localization.TranslationSource.Instance[deduction ? "Payroll_Col_Deduction" : "Payroll_Col_Gain"];
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => Binding.DoNothing;

@@ -528,6 +528,93 @@
   <data name="Payroll_Abatement" xml:space="preserve"><value>Abattement</value></data>
   <data name="Payroll_Save" xml:space="preserve"><value>Enregistrer la paie</value></data>
 
+  <!-- Shared column labels -->
+  <data name="Common_Type" xml:space="preserve"><value>Type</value></data>
+  <data name="Common_Status" xml:space="preserve"><value>Statut</value></data>
+
+  <!-- Leave module -->
+  <data name="Leave_Subtitle" xml:space="preserve"><value>Les congés approuvés alimentent automatiquement la présence et la paie.</value></data>
+  <data name="Leave_NewRequest" xml:space="preserve"><value>Nouvelle demande</value></data>
+  <data name="Leave_DaysTaken" xml:space="preserve"><value>Jours pris</value></data>
+  <data name="Leave_Remaining" xml:space="preserve"><value>Solde restant</value></data>
+  <data name="Leave_Pending" xml:space="preserve"><value>En attente</value></data>
+  <data name="Leave_Unpaid" xml:space="preserve"><value>Sans solde</value></data>
+  <data name="Leave_Period" xml:space="preserve"><value>Période</value></data>
+  <data name="Leave_Days" xml:space="preserve"><value>Jours</value></data>
+  <data name="Leave_Reason" xml:space="preserve"><value>Motif</value></data>
+  <data name="Leave_TeamBalances" xml:space="preserve"><value>Soldes de l'équipe</value></data>
+  <data name="Leave_Reject" xml:space="preserve"><value>Refuser</value></data>
+  <data name="Leave_Cancel" xml:space="preserve"><value>Annuler le congé</value></data>
+  <data name="Leave_Approve" xml:space="preserve"><value>Approuver</value></data>
+  <data name="Enum_LeaveType_Annual" xml:space="preserve"><value>Congé annuel</value></data>
+  <data name="Enum_LeaveType_Sick" xml:space="preserve"><value>Congé maladie</value></data>
+  <data name="Enum_LeaveType_Unpaid" xml:space="preserve"><value>Congé sans solde</value></data>
+  <data name="Enum_LeaveType_Maternity" xml:space="preserve"><value>Congé maternité</value></data>
+  <data name="Enum_LeaveType_Special" xml:space="preserve"><value>Congé exceptionnel</value></data>
+  <data name="Enum_LeaveType_Other" xml:space="preserve"><value>Congé</value></data>
+  <data name="Enum_LeaveStatus_Pending" xml:space="preserve"><value>En attente</value></data>
+  <data name="Enum_LeaveStatus_Approved" xml:space="preserve"><value>Approuvé</value></data>
+  <data name="Enum_LeaveStatus_Rejected" xml:space="preserve"><value>Refusé</value></data>
+  <data name="Enum_LeaveStatus_Cancelled" xml:space="preserve"><value>Annulé</value></data>
+
+  <!-- Loans module -->
+  <data name="Common_MonthsSuffix" xml:space="preserve"><value>mois</value></data>
+  <data name="Loan_Title" xml:space="preserve"><value>Prêts et avances</value></data>
+  <data name="Loan_Subtitle" xml:space="preserve"><value>La mensualité d'un prêt en cours est déduite automatiquement du salaire.</value></data>
+  <data name="Loan_New" xml:space="preserve"><value>Nouveau prêt</value></data>
+  <data name="Loan_TotalOutstanding" xml:space="preserve"><value>Encours total (DA)</value></data>
+  <data name="Loan_ActiveCount" xml:space="preserve"><value>Prêts en cours</value></data>
+  <data name="Loan_Amount" xml:space="preserve"><value>Montant</value></data>
+  <data name="Loan_Installment" xml:space="preserve"><value>Mensualité</value></data>
+  <data name="Loan_Outstanding" xml:space="preserve"><value>Reste dû</value></data>
+  <data name="Loan_Start" xml:space="preserve"><value>Début</value></data>
+  <data name="Loan_Remaining" xml:space="preserve"><value>Restant</value></data>
+  <data name="Loan_Detail" xml:space="preserve"><value>Détail / Remboursements</value></data>
+  <data name="Loan_Suspend" xml:space="preserve"><value>Suspendre</value></data>
+  <data name="Loan_Resume" xml:space="preserve"><value>Réactiver</value></data>
+  <data name="Enum_LoanType_Advance" xml:space="preserve"><value>Avance sur salaire</value></data>
+  <data name="Enum_LoanType_Loan" xml:space="preserve"><value>Prêt</value></data>
+  <data name="Enum_LoanStatus_Active" xml:space="preserve"><value>En cours</value></data>
+  <data name="Enum_LoanStatus_Settled" xml:space="preserve"><value>Soldé</value></data>
+  <data name="Enum_LoanStatus_Suspended" xml:space="preserve"><value>Suspendu</value></data>
+  <data name="Enum_LoanStatus_Cancelled" xml:space="preserve"><value>Annulé</value></data>
+
+  <!-- Contracts module -->
+  <data name="Common_DaysAbbrev" xml:space="preserve"><value>j</value></data>
+  <data name="Contract_Title" xml:space="preserve"><value>Contrats</value></data>
+  <data name="Contract_Subtitle" xml:space="preserve"><value>Activer un contrat applique son salaire, son type et son poste à l'employé.</value></data>
+  <data name="Contract_New" xml:space="preserve"><value>Nouveau contrat</value></data>
+  <data name="Contract_ToRenew" xml:space="preserve"><value>À renouveler (30 j)</value></data>
+  <data name="Contract_Salary" xml:space="preserve"><value>Salaire</value></data>
+  <data name="Contract_End" xml:space="preserve"><value>Fin</value></data>
+  <data name="Contract_Expiry" xml:space="preserve"><value>Échéance</value></data>
+  <data name="Contract_Terminate" xml:space="preserve"><value>Résilier</value></data>
+  <data name="Contract_Renew" xml:space="preserve"><value>Renouveler</value></data>
+  <data name="Contract_Activate" xml:space="preserve"><value>Activer</value></data>
+  <data name="Contract_ExpiryOverdue" xml:space="preserve"><value>En retard de</value></data>
+  <data name="Contract_ExpiryIn" xml:space="preserve"><value>Dans</value></data>
+  <data name="Enum_ContractStatus_Draft" xml:space="preserve"><value>Préparation</value></data>
+  <data name="Enum_ContractStatus_Active" xml:space="preserve"><value>En vigueur</value></data>
+  <data name="Enum_ContractStatus_Expired" xml:space="preserve"><value>Expiré</value></data>
+  <data name="Enum_ContractStatus_Terminated" xml:space="preserve"><value>Résilié</value></data>
+  <data name="Enum_ContractStatus_Renewed" xml:space="preserve"><value>Renouvelé</value></data>
+
+  <!-- Domain enum labels -->
+  <data name="Enum_Gender_Male" xml:space="preserve"><value>Masculin</value></data>
+  <data name="Enum_Gender_Female" xml:space="preserve"><value>Féminin</value></data>
+  <data name="Enum_Contract_Cdi" xml:space="preserve"><value>CDI</value></data>
+  <data name="Enum_Contract_Cdd" xml:space="preserve"><value>CDD</value></data>
+  <data name="Enum_Contract_Apprenticeship" xml:space="preserve"><value>Apprentissage</value></data>
+  <data name="Enum_Contract_Internship" xml:space="preserve"><value>Pré-emploi / Stage</value></data>
+  <data name="Enum_Contract_Other" xml:space="preserve"><value>Autre</value></data>
+  <data name="Enum_Marital_Single" xml:space="preserve"><value>Célibataire</value></data>
+  <data name="Enum_Marital_Married" xml:space="preserve"><value>Marié(e)</value></data>
+  <data name="Enum_Marital_Divorced" xml:space="preserve"><value>Divorcé(e)</value></data>
+  <data name="Enum_Marital_Widowed" xml:space="preserve"><value>Veuf/Veuve</value></data>
+  <data name="Enum_Payment_BankTransfer" xml:space="preserve"><value>Virement bancaire</value></data>
+  <data name="Enum_Payment_Cash" xml:space="preserve"><value>Espèces</value></data>
+  <data name="Enum_Payment_Cheque" xml:space="preserve"><value>Chèque</value></data>
+
   <!-- User service errors -->
   <data name="User_UsernameRequired" xml:space="preserve"><value>Le nom d'utilisateur est requis.</value></data>
   <data name="User_PasswordTooShort" xml:space="preserve"><value>Le mot de passe doit contenir au moins 4 caractères.</value></data>
