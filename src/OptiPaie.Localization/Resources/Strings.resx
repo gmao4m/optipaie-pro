@@ -421,6 +421,9 @@
   <data name="Users_ColDepartment" xml:space="preserve"><value>Département</value></data>
   <data name="Users_ColState" xml:space="preserve"><value>État</value></data>
   <data name="Users_ToggleActive" xml:space="preserve"><value>Activer / Désactiver</value></data>
+  <data name="Users_ResetPassword" xml:space="preserve"><value>Réinitialiser le mot de passe</value></data>
+  <data name="Users_ResetPasswordHint" xml:space="preserve"><value>Sélectionnez un utilisateur, puis saisissez le nouveau mot de passe dans le champ « Mot de passe initial ».</value></data>
+  <data name="Users_PasswordReset" xml:space="preserve"><value>Mot de passe réinitialisé.</value></data>
   <data name="Users_CountSuffix" xml:space="preserve"><value>utilisateur(s)</value></data>
   <data name="State_Active" xml:space="preserve"><value>Actif</value></data>
   <data name="State_Inactive" xml:space="preserve"><value>Inactif</value></data>

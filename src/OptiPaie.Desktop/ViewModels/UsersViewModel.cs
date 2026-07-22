@@ -65,6 +65,7 @@ namespace OptiPaie.Desktop.ViewModels
             AddCommand = new RelayCommand(Add);
             DeleteCommand = new RelayCommand(Delete, () => _selected != null);
             ToggleActiveCommand = new RelayCommand(ToggleActive, () => _selected != null);
+            ResetPasswordCommand = new RelayCommand(ResetPassword, () => _selected != null);
             CloseCommand = new RelayCommand(() => RequestClose?.Invoke());
 
             Refresh();
@@ -105,6 +106,7 @@ namespace OptiPaie.Desktop.ViewModels
         public ICommand AddCommand { get; }
         public ICommand DeleteCommand { get; }
         public ICommand ToggleActiveCommand { get; }
+        public ICommand ResetPasswordCommand { get; }
         public ICommand CloseCommand { get; }
 
         public void Refresh()
@@ -147,6 +149,22 @@ namespace OptiPaie.Desktop.ViewModels
             Result r = _services.Users.Update(u);
             if (r.IsFailure) { Dialogs.Error(r.Error); return; }
             Refresh();
+        }
+
+        private void ResetPassword()
+        {
+            // Reuses the "initial password" field as the new password for the selected user.
+            if (string.IsNullOrWhiteSpace(_newPassword))
+            {
+                Dialogs.Info(L("Users_ResetPasswordHint"));
+                return;
+            }
+
+            Result r = _services.Users.ChangePassword(_selected.Id, _newPassword);
+            if (r.IsFailure) { Dialogs.Error(r.Error); return; }
+
+            NewPassword = string.Empty;
+            StatusMessage = L("Users_PasswordReset");
         }
     }
 }

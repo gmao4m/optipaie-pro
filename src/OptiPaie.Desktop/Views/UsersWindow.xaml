@@ -112,7 +112,9 @@
             <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Center" HorizontalAlignment="Left"
                        Text="{Binding StatusMessage}" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Style="{StaticResource SecondaryButton}" Content="{loc:Loc Users_ToggleActive}"
+                <Button Style="{StaticResource SecondaryButton}" Content="{loc:Loc Users_ResetPassword}"
+                        Command="{Binding ResetPasswordCommand}" />
+                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="{loc:Loc Users_ToggleActive}"
                         Command="{Binding ToggleActiveCommand}" />
                 <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="{loc:Loc Common_Delete}"
                         Foreground="{DynamicResource Deduction}" Command="{Binding DeleteCommand}" />
