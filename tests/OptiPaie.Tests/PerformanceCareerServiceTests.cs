@@ -481,6 +481,35 @@ namespace OptiPaie.Tests
             Assert.That(_service.Save(_service.Get(reviewId), criteria).IsFailure, Is.True, "6 > scale max of 5");
         }
 
+        [Test]
+        public void ContractAmendmentPrompts_AppearForPromotionsNotYetReflectedOnTheEmployee()
+        {
+            long promoted = AddEmployee("PROMU", "Commercial"); // AddEmployee sets Poste = "Agent"
+            _service.LogPromotion(promoted, "Agent", "Chef d'équipe", DateTime.Today, "Excellente évaluation", null);
+
+            IReadOnlyList<ContractAmendmentPrompt> prompts = _service.GetContractAmendmentPrompts(_companyId);
+            Assert.That(prompts.Count, Is.EqualTo(1), "the promotion's new position isn't on the contract yet");
+            Assert.That(prompts[0].EmployeeId, Is.EqualTo(promoted));
+            Assert.That(prompts[0].NewPosition, Is.EqualTo("Chef d'équipe"));
+
+            // A promotion whose target matches the current position needs no amendment.
+            long stable = AddEmployee("STABLE", "Commercial");
+            _service.LogPromotion(stable, "Ancien", "Agent", DateTime.Today, "r", null);
+            Assert.That(_service.GetContractAmendmentPrompts(_companyId).Any(p => p.EmployeeId == stable), Is.False);
+        }
+
+        [Test]
+        public void HasProbationReview_TrueOnlyAfterAProbationTemplateReview()
+        {
+            long employee = AddEmployee("ESSAI", "Administration");
+            Assert.That(_service.HasProbationReview(employee), Is.False);
+
+            long probationTemplate = _service.GetTemplates(_companyId).First(t => t.Kind == TemplateKind.Probation).TemplateId;
+            _service.CreateFromTemplate(employee, probationTemplate, Year, "Essai", "DRH", null, null, null, false);
+
+            Assert.That(_service.HasProbationReview(employee), Is.True);
+        }
+
         private long GeneralTemplateId()
         {
             return _service.GetTemplates(_companyId).First(t => t.Kind == TemplateKind.General).TemplateId;

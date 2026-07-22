@@ -113,6 +113,9 @@ namespace OptiPaie.Core.Interfaces.Repositories
 
         IEnumerable<PerformanceCareerEvent> GetCareerEventsByEmployee(long employeeId);
 
+        /// <summary>Career events of a whole company (joins the shared Employees table).</summary>
+        IEnumerable<PerformanceCareerEvent> GetCareerEventsByCompany(long companyId);
+
         long InsertCareerEvent(PerformanceCareerEvent careerEvent);
 
         void SoftDeleteCareerEvent(long id);

@@ -26,19 +26,22 @@ namespace OptiPaie.Services
         private readonly IContractService _contracts;
         private readonly ILeaveService _leave;
         private readonly ITrainingService _training;
+        private readonly IPerformanceService _performance;
 
         public NotificationService(
             ICompanyService companies,
             IEmployeeService employees,
             IContractService contracts,
             ILeaveService leave,
-            ITrainingService training)
+            ITrainingService training,
+            IPerformanceService performance)
         {
             _companies = Guard.AgainstNull(companies, nameof(companies));
             _employees = Guard.AgainstNull(employees, nameof(employees));
             _contracts = Guard.AgainstNull(contracts, nameof(contracts));
             _leave = Guard.AgainstNull(leave, nameof(leave));
             _training = Guard.AgainstNull(training, nameof(training));
+            _performance = Guard.AgainstNull(performance, nameof(performance));
         }
 
         public IReadOnlyList<Notification> GetNotifications(int expiryWindowDays = 30)
@@ -115,6 +118,67 @@ namespace OptiPaie.Services
                     Date = t.StartDate
                 });
             }
+
+            // Performance — reviews to finalise (from launched cycles), urgency by due date.
+            foreach (PerformanceReminder r in _performance.GetReminders(company.Id, today))
+            {
+                items.Add(new Notification
+                {
+                    Kind = "performance",
+                    Severity = r.IsOverdue ? NotificationSeverity.Urgent
+                             : r.DaysLeft <= 3 ? NotificationSeverity.Warning
+                             : NotificationSeverity.Info,
+                    Title = "Évaluation à finaliser — " + (r.EmployeeName ?? "—"),
+                    Detail = "Échéance le " + r.DueDate.ToString("dd/MM/yyyy", Fr) + " · " + Countdown(r.DaysLeft),
+                    ModuleKey = ModuleKeys.Performance,
+                    Date = r.DueDate
+                });
+            }
+
+            // Performance -> Contracts: a logged promotion prompts a contract amendment (never edits).
+            foreach (ContractAmendmentPrompt p in _performance.GetContractAmendmentPrompts(company.Id))
+            {
+                items.Add(new Notification
+                {
+                    Kind = "performance",
+                    Severity = NotificationSeverity.Warning,
+                    Title = "Avenant de contrat — " + (p.EmployeeName ?? "—"),
+                    Detail = "Promotion " + Arrow(p.OldPosition, p.NewPosition) + " : établir l'avenant de contrat.",
+                    ModuleKey = ModuleKeys.Contracts,
+                    Date = p.Date
+                });
+            }
+
+            // Contracts -> Performance: probation (période d'essai) ending -> fin d'essai evaluation.
+            foreach (ContractSummary c in _contracts.GetByCompany(company.Id))
+            {
+                if (c.Status != ContractStatus.Active) continue;
+
+                EmploymentContract full = _contracts.Get(c.ContractId);
+                if (full == null || full.TrialPeriodDays <= 0) continue;
+
+                DateTime probationEnd = full.StartDate.Date.AddDays(full.TrialPeriodDays);
+                int days = (int)(probationEnd - today).TotalDays;
+                if (days < -7 || days > window) continue;
+                if (_performance.HasProbationReview(c.EmployeeId)) continue;
+
+                names.TryGetValue(c.EmployeeId, out string pn);
+                items.Add(new Notification
+                {
+                    Kind = "performance",
+                    Severity = days <= 3 ? NotificationSeverity.Urgent : NotificationSeverity.Warning,
+                    Title = "Fin d'essai — " + (pn ?? c.EmployeeName ?? "—"),
+                    Detail = "Période d'essai jusqu'au " + probationEnd.ToString("dd/MM/yyyy", Fr) +
+                             " · réaliser l'évaluation de fin d'essai.",
+                    ModuleKey = ModuleKeys.Performance,
+                    Date = probationEnd
+                });
+            }
+        }
+
+        private static string Arrow(string oldPosition, string newPosition)
+        {
+            return (string.IsNullOrWhiteSpace(oldPosition) ? string.Empty : oldPosition + " → ") + (newPosition ?? string.Empty);
         }
 
         private static string Countdown(int days)

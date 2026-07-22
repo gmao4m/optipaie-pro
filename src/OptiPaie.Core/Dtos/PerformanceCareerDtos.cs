@@ -252,4 +252,17 @@ namespace OptiPaie.Core.Dtos
         public int DaysLeft { get; set; }
         public bool IsOverdue { get; set; }
     }
+
+    /// <summary>
+    /// A promotion logged in Performance whose position has not yet been reflected on the
+    /// employee's contract — surfaced as a "prepare a contract amendment" prompt (never edits).
+    /// </summary>
+    public sealed class ContractAmendmentPrompt
+    {
+        public long EmployeeId { get; set; }
+        public string EmployeeName { get; set; }
+        public string OldPosition { get; set; }
+        public string NewPosition { get; set; }
+        public DateTime Date { get; set; }
+    }
 }

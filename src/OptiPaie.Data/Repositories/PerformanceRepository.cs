@@ -451,6 +451,16 @@ namespace OptiPaie.Data.Repositories
                 new { employeeId }, Transaction);
         }
 
+        public IEnumerable<PerformanceCareerEvent> GetCareerEventsByCompany(long companyId)
+        {
+            return Connection.Query<PerformanceCareerEvent>(
+                "SELECT ce.* FROM PerformanceCareerEvents ce " +
+                "INNER JOIN Employees e ON e.Id = ce.EmployeeId " +
+                "WHERE e.CompanyId = @companyId AND e.IsDeleted = 0 AND ce.IsDeleted = 0 " +
+                "ORDER BY ce.EventDate DESC, ce.Id DESC;",
+                new { companyId }, Transaction);
+        }
+
         public long InsertCareerEvent(PerformanceCareerEvent careerEvent)
         {
             careerEvent.CreatedAtUtc = DateTime.UtcNow;

@@ -1345,6 +1345,47 @@ namespace OptiPaie.Services
             }
         }
 
+        public IReadOnlyList<ContractAmendmentPrompt> GetContractAmendmentPrompts(long companyId)
+        {
+            using (IUnitOfWork uow = _unitOfWorkFactory.Create())
+            {
+                var employees = uow.Employees.GetByCompany(companyId).ToDictionary(e => e.Id, e => e);
+                var result = new List<ContractAmendmentPrompt>();
+
+                foreach (var grp in uow.Performance.GetCareerEventsByCompany(companyId)
+                             .Where(ev => ev.EventType == CareerEventType.Promotion)
+                             .GroupBy(ev => ev.EmployeeId))
+                {
+                    PerformanceCareerEvent latest = grp.OrderByDescending(e => e.EventDate).First();
+                    if (!employees.TryGetValue(latest.EmployeeId, out Employee emp)) continue;
+
+                    // An amendment is pending while the employee's position hasn't caught up
+                    // to the promoted-to position (activating an amended contract syncs it).
+                    if (!string.Equals((emp.Poste ?? string.Empty).Trim(), (latest.NewPosition ?? string.Empty).Trim(), StringComparison.OrdinalIgnoreCase))
+                    {
+                        result.Add(new ContractAmendmentPrompt
+                        {
+                            EmployeeId = emp.Id,
+                            EmployeeName = (emp.LastNameFr + " " + emp.FirstNameFr).Trim(),
+                            OldPosition = latest.OldPosition,
+                            NewPosition = latest.NewPosition,
+                            Date = latest.EventDate
+                        });
+                    }
+                }
+
+                return result;
+            }
+        }
+
+        public bool HasProbationReview(long employeeId)
+        {
+            using (IUnitOfWork uow = _unitOfWorkFactory.Create())
+            {
+                return uow.Performance.GetByEmployee(employeeId).Any(r => r.Kind == TemplateKind.Probation);
+            }
+        }
+
         // =====================================================================
         //  Calibration / dashboard / comparison
         // =====================================================================

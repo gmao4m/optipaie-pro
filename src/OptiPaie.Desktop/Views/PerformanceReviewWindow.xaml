@@ -64,6 +64,15 @@
                     </Border>
                 </Grid>
 
+                <!-- Performance → Training: suggestion for the weakest criterion -->
+                <Border Margin="0,16,0,0" Background="{StaticResource AccentSoft}" CornerRadius="8" Padding="12,10"
+                        Visibility="{Binding HasSuggestion, Converter={StaticResource BoolVis}}">
+                    <StackPanel Orientation="Horizontal">
+                        <Path Width="16" Height="16" Stretch="Uniform" Fill="{StaticResource Accent}" Data="{StaticResource IconSchool}" VerticalAlignment="Top" Margin="0,1,0,0" />
+                        <TextBlock Margin="10,0,0,0" FontSize="12.5" Foreground="{StaticResource TextSecondary}" TextWrapping="Wrap" Text="{Binding SuggestionText}" />
+                    </StackPanel>
+                </Border>
+
                 <TextBlock Margin="0,20,0,8" Style="{StaticResource Caption}" Text="CRITÈRES D'ÉVALUATION" FontWeight="SemiBold" />
 
                 <!-- Criterion cards -->

@@ -61,7 +61,7 @@ namespace OptiPaie.Desktop.Composition
                 companyService, employeeService, attendanceService, leaveService, loanService,
                 atsService, assetService, trainingService);
             var notificationService = new NotificationService(
-                companyService, employeeService, contractService, leaveService, trainingService);
+                companyService, employeeService, contractService, leaveService, trainingService, performanceService);
 
             // Audit trail. Wired into the lifecycle events of the modules through the
             // optional sink, so history is recorded without changing any service ctor.

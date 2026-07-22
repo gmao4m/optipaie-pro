@@ -144,6 +144,8 @@ namespace OptiPaie.Desktop.ViewModels.Performance
         private Brush _overallBrush = Amber;
         private string _attendanceText = string.Empty;
         private bool _isCompleted;
+        private string _suggestionText = string.Empty;
+        private readonly List<string> _trainingTitles = new List<string>();
 
         public PerformanceReviewFormViewModel(AppServices services, long reviewId)
         {
@@ -181,6 +183,10 @@ namespace OptiPaie.Desktop.ViewModels.Performance
 
         public string AttendanceText { get => _attendanceText; private set => Set(ref _attendanceText, value); }
         public bool HasAttendance => !string.IsNullOrEmpty(_attendanceText);
+
+        /// <summary>Training suggestion for the weakest criterion (Performance → Training integration).</summary>
+        public string SuggestionText { get => _suggestionText; private set { if (Set(ref _suggestionText, value)) Raise(nameof(HasSuggestion)); } }
+        public bool HasSuggestion => !string.IsNullOrEmpty(_suggestionText);
 
         public bool IsCompleted { get => _isCompleted; private set { if (Set(ref _isCompleted, value)) { Raise(nameof(IsEditable)); } } }
         public bool IsEditable => !_isCompleted;
@@ -228,6 +234,14 @@ namespace OptiPaie.Desktop.ViewModels.Performance
                                  a.OvertimeHours.ToString("0.##", Fr) + " h sup.";
             }
 
+            if (_employee != null)
+            {
+                foreach (TrainingSummary t in _services.Training.GetByCompany(_employee.CompanyId))
+                {
+                    if (!string.IsNullOrWhiteSpace(t.Title)) _trainingTitles.Add(t.Title);
+                }
+            }
+
             Recompute();
             RaiseAll();
         }
@@ -263,6 +277,51 @@ namespace OptiPaie.Desktop.ViewModels.Performance
 
             decimal pct = ScaleMax > 0m ? overall / ScaleMax * 100m : 0m;
             OverallBrush = pct >= 70m ? Green : (pct >= 50m ? Amber : Red);
+
+            UpdateSuggestion();
+        }
+
+        /// <summary>
+        /// Performance → Training: if a criterion scores below half its scale, suggest a matching
+        /// company training course (or a generic suggestion). Read-only — enrols no one.
+        /// </summary>
+        private void UpdateSuggestion()
+        {
+            ReviewCriterionCardViewModel weakest = null;
+            decimal weakestPct = 100m;
+            foreach (ReviewCriterionCardViewModel c in Criteria)
+            {
+                decimal p = c.ScaleMax > 0m ? c.Score / c.ScaleMax * 100m : 0m;
+                if (p < weakestPct) { weakestPct = p; weakest = c; }
+            }
+
+            if (weakest == null || weakestPct >= 50m)
+            {
+                SuggestionText = string.Empty;
+                return;
+            }
+
+            string match = null;
+            foreach (string title in _trainingTitles)
+            {
+                if (Matches(weakest.Label, title)) { match = title; break; }
+            }
+
+            SuggestionText = match != null
+                ? "Point faible : « " + weakest.Label + " ». Formation suggérée : « " + match + " »."
+                : "Point faible : « " + weakest.Label + " ». Envisagez une formation sur ce thème.";
+        }
+
+        /// <summary>True when a significant word (≥4 chars) of the criterion label appears in the text.</summary>
+        private static bool Matches(string label, string text)
+        {
+            if (string.IsNullOrWhiteSpace(label) || string.IsNullOrWhiteSpace(text)) return false;
+            string t = text.ToLowerInvariant();
+            foreach (string word in label.ToLowerInvariant().Split(new[] { ' ', '\'', '/', '-', ',' }, StringSplitOptions.RemoveEmptyEntries))
+            {
+                if (word.Length >= 4 && t.Contains(word)) return true;
+            }
+            return false;
         }
 
         private void SaveInternal(bool finalise)

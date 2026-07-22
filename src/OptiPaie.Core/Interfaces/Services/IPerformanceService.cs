@@ -131,6 +131,12 @@ namespace OptiPaie.Core.Interfaces.Services
 
         CareerTimeline GetCareerTimeline(long employeeId);
 
+        /// <summary>Promotions whose new position isn't yet reflected on the employee — contract-amendment prompts.</summary>
+        IReadOnlyList<ContractAmendmentPrompt> GetContractAmendmentPrompts(long companyId);
+
+        /// <summary>True when the employee already has a probation-template review (any status).</summary>
+        bool HasProbationReview(long employeeId);
+
         // -- calibration / dashboard / comparison -----------------------------
 
         CalibrationView GetCalibration(long companyId, int year);
