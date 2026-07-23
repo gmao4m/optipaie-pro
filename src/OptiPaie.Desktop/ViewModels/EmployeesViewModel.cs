@@ -17,21 +17,24 @@ namespace OptiPaie.Desktop.ViewModels
     public sealed class EmployeesViewModel : ObservableObject, IActivable
     {
         private readonly AppServices _services;
+        private readonly System.Action<string> _navigate;
         private readonly List<Employee> _all = new List<Employee>();
 
         private Company _selectedCompany;
         private Employee _selectedEmployee;
         private string _search = string.Empty;
 
-        public EmployeesViewModel(AppServices services)
+        public EmployeesViewModel(AppServices services, System.Action<string> navigate = null)
         {
             _services = services;
+            _navigate = navigate;
             Companies = new ObservableCollection<Company>();
             Employees = new ObservableCollection<Employee>();
 
             NewCommand = new RelayCommand(New);
             EditCommand = new RelayCommand(Edit);
             DeleteCommand = new RelayCommand(Delete);
+            OpenProfileCommand = new RelayCommand(OpenProfile, () => _selectedEmployee != null);
         }
 
         public ObservableCollection<Company> Companies { get; }
@@ -60,6 +63,13 @@ namespace OptiPaie.Desktop.ViewModels
         public ICommand NewCommand { get; }
         public ICommand EditCommand { get; }
         public ICommand DeleteCommand { get; }
+        public ICommand OpenProfileCommand { get; }
+
+        private void OpenProfile()
+        {
+            if (_selectedEmployee == null) return;
+            Dialogs.ShowEmployeeProfile(new EmployeeProfileViewModel(_services, _selectedEmployee.Id, _navigate));
+        }
 
         public void OnActivated()
         {

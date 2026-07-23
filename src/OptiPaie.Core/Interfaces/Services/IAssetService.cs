@@ -47,5 +47,8 @@ namespace OptiPaie.Core.Interfaces.Services
 
         /// <summary>Assets currently held by one employee.</summary>
         IReadOnlyList<AssetAssignmentSummary> GetHeldByEmployee(long employeeId);
+
+        /// <summary>Every asset this employee has ever held (open + returned), most recent first.</summary>
+        IReadOnlyList<AssetAssignmentSummary> GetAssignmentHistoryByEmployee(long employeeId);
     }
 }

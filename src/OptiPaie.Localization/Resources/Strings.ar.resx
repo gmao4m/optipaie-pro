@@ -952,4 +952,15 @@
   <data name="Batch_ExportAll" xml:space="preserve"><value>تصدير كل الكشوف PDF</value></data>
   <data name="Batch_AlreadyArchived" xml:space="preserve"><value>رواتب هذه الفترة مؤرشفة بالفعل. لا يمكن إجراء معالجة جديدة.</value></data>
   <data name="Batch_Processing" xml:space="preserve"><value>جارٍ المعالجة…</value></data>
+  <data name="Profile_Title" xml:space="preserve"><value>ملف الموظف</value></data>
+  <data name="Profile_ExportDossier" xml:space="preserve"><value>تصدير الملف</value></data>
+  <data name="Profile_OpenModule" xml:space="preserve"><value>عرض الكل ←</value></data>
+  <data name="Profile_LeaveBalance" xml:space="preserve"><value>رصيد العطل</value></data>
+  <data name="Profile_Payroll" xml:space="preserve"><value>الأجور — آخر الكشوف</value></data>
+  <data name="Profile_OpenPayslip" xml:space="preserve"><value>فتح</value></data>
+  <data name="Att_Present" xml:space="preserve"><value>حاضرون</value></data>
+  <data name="Att_Absent" xml:space="preserve"><value>غائبون</value></data>
+  <data name="Att_Late" xml:space="preserve"><value>متأخرون</value></data>
+  <data name="Leave_Entitlement" xml:space="preserve"><value>الحق</value></data>
+  <data name="Shell_Nav_Attendance" xml:space="preserve"><value>الحضور</value></data>
 </root>

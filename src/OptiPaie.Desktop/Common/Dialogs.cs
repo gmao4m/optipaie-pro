@@ -55,6 +55,18 @@ namespace OptiPaie.Desktop.Common
             window.ShowDialog();
         }
 
+        public static void ShowEmployeeProfile(EmployeeProfileViewModel vm)
+        {
+            var window = new EmployeeProfileWindow
+            {
+                DataContext = vm,
+                Owner = Application.Current.MainWindow
+            };
+            App.ApplyFlowDirection(window);
+            vm.RequestClose = () => window.Close();
+            window.ShowDialog();
+        }
+
         public static void ShowBatchPayroll(BatchPayrollViewModel vm)
         {
             var window = new BatchPayrollWindow

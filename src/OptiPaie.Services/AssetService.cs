@@ -312,6 +312,15 @@ namespace OptiPaie.Services
             }
         }
 
+        public IReadOnlyList<AssetAssignmentSummary> GetAssignmentHistoryByEmployee(long employeeId)
+        {
+            using (IUnitOfWork uow = _unitOfWorkFactory.Create())
+            {
+                return uow.Assets.GetAssignmentsByEmployee(employeeId)
+                    .Select(a => ToSummary(uow, a, uow.Assets.GetById(a.AssetId)?.Name)).ToList();
+            }
+        }
+
         // -- internals ---------------------------------------------------------
 
         private static AssetSummary Summarise(IUnitOfWork uow, Asset asset)

@@ -105,6 +105,15 @@ namespace OptiPaie.Data.Repositories
                 new { employeeId }, Transaction);
         }
 
+        public IEnumerable<AssetAssignment> GetAssignmentsByEmployee(long employeeId)
+        {
+            return Connection.Query<AssetAssignment>(
+                "SELECT * FROM AssetAssignments " +
+                "WHERE EmployeeId = @employeeId AND IsDeleted = 0 " +
+                "ORDER BY AssignedDate DESC;",
+                new { employeeId }, Transaction);
+        }
+
         public long InsertAssignment(AssetAssignment assignment)
         {
             assignment.CreatedAtUtc = DateTime.UtcNow;

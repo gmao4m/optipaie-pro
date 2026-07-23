@@ -309,7 +309,7 @@ namespace OptiPaie.Desktop.Shell
             switch (key)
             {
                 case "employees":
-                    target = _employees ?? (_employees = new EmployeesViewModel(_services));
+                    target = _employees ?? (_employees = new EmployeesViewModel(_services, Navigate));
                     break;
                 case "companies":
                     target = _companies ?? (_companies = new CompaniesViewModel(_services));

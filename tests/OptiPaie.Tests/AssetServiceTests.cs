@@ -117,6 +117,24 @@ namespace OptiPaie.Tests
         }
 
         [Test]
+        public void GetAssignmentHistoryByEmployee_ReturnsOpenAndReturned_WhileHeldReturnsOnlyOpen()
+        {
+            long held = _service.Save(NewAsset("Laptop", AssetCategory.Laptop, 120000m)).Value;
+            _service.Assign(held, _employeeId, new DateTime(2026, 1, 10), "Neuf", null);
+
+            long returned = _service.Save(NewAsset("Phone", AssetCategory.Phone, 60000m)).Value;
+            _service.Assign(returned, _employeeId, new DateTime(2026, 1, 5), "Neuf", null);
+            _service.Return(returned, new DateTime(2026, 6, 1), "Bon état");
+
+            var history = _service.GetAssignmentHistoryByEmployee(_employeeId);
+            Assert.That(history.Count, Is.EqualTo(2), "both the held and the returned asset appear in history");
+            Assert.That(history.Any(a => a.AssetName == "Laptop" && a.ReturnedDate == null), Is.True);
+            Assert.That(history.Any(a => a.AssetName == "Phone" && a.ReturnedDate != null), Is.True);
+
+            Assert.That(_service.GetHeldByEmployee(_employeeId).Count, Is.EqualTo(1), "held returns only the open one");
+        }
+
+        [Test]
         public void Assign_AnAlreadyAssignedAsset_IsRejected()
         {
             long id = _service.Save(NewAsset("Voiture", AssetCategory.Vehicle, 2000000m)).Value;

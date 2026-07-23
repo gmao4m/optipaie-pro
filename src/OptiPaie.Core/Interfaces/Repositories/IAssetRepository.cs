@@ -33,6 +33,9 @@ namespace OptiPaie.Core.Interfaces.Repositories
         /// <summary>Open assignments of one employee (what they currently hold).</summary>
         IEnumerable<AssetAssignment> GetOpenAssignmentsByEmployee(long employeeId);
 
+        /// <summary>Every assignment of one employee, open or returned, most recent first.</summary>
+        IEnumerable<AssetAssignment> GetAssignmentsByEmployee(long employeeId);
+
         long InsertAssignment(AssetAssignment assignment);
 
         void UpdateAssignment(AssetAssignment assignment);

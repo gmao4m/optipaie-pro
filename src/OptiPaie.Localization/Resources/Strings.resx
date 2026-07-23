@@ -952,4 +952,15 @@
   <data name="Batch_ExportAll" xml:space="preserve"><value>Exporter tous les PDF</value></data>
   <data name="Batch_AlreadyArchived" xml:space="preserve"><value>La paie de cette période est déjà archivée. Aucun nouveau traitement n'est possible.</value></data>
   <data name="Batch_Processing" xml:space="preserve"><value>Traitement en cours…</value></data>
+  <data name="Profile_Title" xml:space="preserve"><value>Dossier employé</value></data>
+  <data name="Profile_ExportDossier" xml:space="preserve"><value>Exporter le dossier</value></data>
+  <data name="Profile_OpenModule" xml:space="preserve"><value>Voir tout →</value></data>
+  <data name="Profile_LeaveBalance" xml:space="preserve"><value>Solde de congés</value></data>
+  <data name="Profile_Payroll" xml:space="preserve"><value>Paie — derniers bulletins</value></data>
+  <data name="Profile_OpenPayslip" xml:space="preserve"><value>Ouvrir</value></data>
+  <data name="Att_Present" xml:space="preserve"><value>Présents</value></data>
+  <data name="Att_Absent" xml:space="preserve"><value>Absents</value></data>
+  <data name="Att_Late" xml:space="preserve"><value>Retards</value></data>
+  <data name="Leave_Entitlement" xml:space="preserve"><value>Droit</value></data>
+  <data name="Shell_Nav_Attendance" xml:space="preserve"><value>Présence</value></data>
 </root>
