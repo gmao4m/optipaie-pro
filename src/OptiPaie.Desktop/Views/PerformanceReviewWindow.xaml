@@ -20,7 +20,7 @@
         <Border Grid.Row="0" Background="{DynamicResource Brand}" Padding="24,18">
             <Grid>
                 <StackPanel HorizontalAlignment="Left" VerticalAlignment="Center">
-                    <TextBlock Text="{Binding EmployeeName}" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource TextOnBrand}" />
+                    <TextBlock Text="{Binding EmployeeName}" FontFamily="{StaticResource MonoFont}" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource TextOnBrand}" />
                     <TextBlock Text="{Binding EmployeeMeta}" FontSize="12.5" Margin="0,3,0,0" Foreground="#B9C2D6" />
                     <TextBlock Margin="0,2,0,0" FontSize="12" Foreground="#B9C2D6">
                         <Run Text="{loc:Loc PerfReview_PeriodLabel}" />
@@ -100,7 +100,7 @@
 
                                     <StackPanel Grid.Column="2" VerticalAlignment="Center">
                                         <TextBlock Text="{Binding ScoreText}" HorizontalAlignment="Right" FontSize="26" FontWeight="Bold"
-                                                   FontFamily="Consolas" Foreground="{Binding ScoreBrush}" />
+                                                   FontFamily="{StaticResource MonoFont}" Foreground="{Binding ScoreBrush}" />
                                         <Slider Margin="0,6,0,0" Minimum="0" Maximum="{Binding ScaleMaxDouble}"
                                                 Value="{Binding SliderValue, Mode=TwoWay}" TickFrequency="1" IsSnapToTickEnabled="True"
                                                 IsEnabled="{Binding DataContext.IsEditable, RelativeSource={RelativeSource AncestorType=ItemsControl}}" />

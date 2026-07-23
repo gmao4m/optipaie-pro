@@ -53,7 +53,7 @@
 
         <DataGrid Grid.Row="2" Margin="0,12,0,0" ItemsSource="{Binding Participants}" SelectedItem="{Binding SelectedParticipant}"
                   AutoGenerateColumns="False" HeadersVisibility="Column" CanUserAddRows="False" CanUserResizeRows="False"
-                  GridLinesVisibility="All" RowHeight="34" FontFamily="Segoe UI" FontSize="12.5"
+                  GridLinesVisibility="All" RowHeight="34" FontFamily="{StaticResource AppFont}" FontSize="12.5"
                   Background="{DynamicResource Surface}" RowBackground="{DynamicResource Surface}"
                   AlternatingRowBackground="{DynamicResource SurfaceMuted}"
                   BorderBrush="{DynamicResource Border}" BorderThickness="1"

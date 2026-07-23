@@ -30,7 +30,7 @@ namespace OptiPaie.Desktop.Documents
         private const string SoftFill = "#F5F4F0";
         private const string HeadFill = "#F2F1EC";
         private const string White = "#FFFFFF";
-        private const string Mono = "Consolas"; // tabular figures (IBM Plex Mono when its font ships)
+        private const string Mono = PdfFonts.Mono; // tabular figures — bundled IBM Plex Mono
 
         private static readonly CultureInfo Fr = CultureInfo.GetCultureInfo("fr-FR");
 
@@ -58,7 +58,10 @@ namespace OptiPaie.Desktop.Documents
             {
                 page.Size(PageSizes.A4);
                 page.Margin(26);
-                page.DefaultTextStyle(t => t.FontFamily("Segoe UI").FontSize(9).FontColor(Ink));
+                // IBM Plex Sans for the French bulletin; its Arabic sibling (which also
+                // carries a full Latin set) for the Arabic bulletin, so Arabic glyphs never
+                // fall back. Family only — no layout, value or number-format change.
+                page.DefaultTextStyle(t => t.FontFamily(_m.IsArabic ? PdfFonts.SansArabic : PdfFonts.Sans).FontSize(9).FontColor(Ink));
 
                 page.Content().Column(col =>
                 {

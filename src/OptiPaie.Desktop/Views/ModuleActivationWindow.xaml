@@ -5,7 +5,7 @@
         Title="Activer un module"
         Height="360" Width="460" ResizeMode="NoResize"
         WindowStartupLocation="CenterOwner"
-        FontFamily="Segoe UI" Background="{DynamicResource Canvas}" Language="fr-FR"
+        FontFamily="{StaticResource AppFont}" Background="{DynamicResource Canvas}" Language="fr-FR"
         TextOptions.TextFormattingMode="Ideal" UseLayoutRounding="True">
     <Grid Margin="26,22">
         <Grid.RowDefinitions>
@@ -32,7 +32,7 @@
         <TextBox Grid.Row="2" x:Name="KeyBox"
                  Text="{Binding Key, UpdateSourceTrigger=PropertyChanged}"
                  IsEnabled="{Binding IsNotBusy}" CharacterCasing="Upper"
-                 FontFamily="Consolas" FontSize="16" FontWeight="SemiBold"
+                 FontFamily="{StaticResource MonoFont}" FontSize="16" FontWeight="SemiBold"
                  Height="44" Padding="12,0" VerticalContentAlignment="Center"
                  Background="{DynamicResource Surface}" BorderBrush="{DynamicResource BorderStrong}" BorderThickness="1" />
         <TextBlock Grid.Row="3" Text="{loc:Loc ModAct_Format}" Style="{StaticResource Caption}" Margin="2,6,0,0" />

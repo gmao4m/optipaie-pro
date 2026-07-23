@@ -15,11 +15,13 @@
             <Setter Property="BorderThickness" Value="0,0,1,1" />
         </Style>
         <Style x:Key="RightText" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource MonoFont}" />
             <Setter Property="TextAlignment" Value="Right" />
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="Margin" Value="0,0,8,0" />
         </Style>
         <Style x:Key="CenterText" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource MonoFont}" />
             <Setter Property="TextAlignment" Value="Center" />
             <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
@@ -90,13 +92,13 @@
             <Border Style="{StaticResource Kpi}">
                 <StackPanel>
                     <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_ActiveContracts}" />
-                    <TextBlock FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource Salary}" Text="{Binding ActiveCountText}" />
+                    <TextBlock FontFamily="{StaticResource MonoFont}" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource Salary}" Text="{Binding ActiveCountText}" />
                 </StackPanel>
             </Border>
             <Border Style="{StaticResource Kpi}">
                 <StackPanel>
                     <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Contract_ToRenew}" />
-                    <TextBlock FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource Warning}" Text="{Binding ExpiringCountText}" />
+                    <TextBlock FontFamily="{StaticResource MonoFont}" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource Warning}" Text="{Binding ExpiringCountText}" />
                 </StackPanel>
             </Border>
         </StackPanel>
@@ -104,7 +106,7 @@
         <DataGrid x:Name="ContractsGrid" Grid.Row="2" Margin="0,18,0,0" ItemsSource="{Binding Contracts}" SelectedItem="{Binding SelectedContract}"
                   AutoGenerateColumns="False" HeadersVisibility="Column" IsReadOnly="True"
                   CanUserAddRows="False" CanUserResizeRows="False" GridLinesVisibility="All"
-                  RowHeight="34" FontFamily="Segoe UI" FontSize="12.5" Background="{DynamicResource Surface}"
+                  RowHeight="34" FontFamily="{StaticResource AppFont}" FontSize="12.5" Background="{DynamicResource Surface}"
                   RowBackground="{DynamicResource Surface}" RowStyle="{StaticResource ContractRow}"
                   BorderBrush="{DynamicResource Border}" BorderThickness="1"
                   HorizontalGridLinesBrush="{DynamicResource Border}" VerticalGridLinesBrush="{DynamicResource Border}"

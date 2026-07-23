@@ -7,16 +7,22 @@
     </ResourceDictionary.MergedDictionaries>
 
     <!--
-        Font family. A bilingual (Arabic/French) fallback stack: IBM Plex Sans + its
-        Arabic sibling are used when installed, otherwise the system Segoe UI (excellent
-        Latin + Arabic coverage) so the app always renders cleanly. Ship the IBM Plex
-        font files with the installer to realise the exact intended type identity.
+        UI font. IBM Plex is BUNDLED with the app (embedded as WPF resources in
+        Assets/Fonts, see OptiPaie.Desktop.csproj), so these families resolve on every
+        machine with no separate font installation and nothing falls back to a system
+        font. "PlexUI" is a composite that renders Latin/French in IBM Plex Sans and
+        Arabic in IBM Plex Sans Arabic, selected per-codepoint — so one family covers
+        both languages with no Segoe fallback.
     -->
-    <FontFamily x:Key="AppFont">IBM Plex Sans, IBM Plex Sans Arabic, Segoe UI</FontFamily>
+    <FontFamily x:Key="AppFont">/Assets/Fonts/#PlexUI</FontFamily>
 
-    <!-- Monospace face for tabular numeric data (salaries, ids, amounts) so figures
-         align in precise, financial-grade columns. -->
-    <FontFamily x:Key="MonoFont">IBM Plex Mono, Consolas, Courier New</FontFamily>
+    <!-- Separate handles when a single script is wanted explicitly. -->
+    <FontFamily x:Key="AppFontLatin">/Assets/Fonts/#IBM Plex Sans</FontFamily>
+    <FontFamily x:Key="AppFontArabic">/Assets/Fonts/#IBM Plex Sans Arabic</FontFamily>
+
+    <!-- Monospace face (bundled IBM Plex Mono) for tabular numeric data — salaries, ids,
+         amounts, dates, percentages, scores — so figures align in precise columns. -->
+    <FontFamily x:Key="MonoFont">/Assets/Fonts/#IBM Plex Mono</FontFamily>
 
     <sys:Double x:Key="RadiusCard">12</sys:Double>
     <sys:Double x:Key="RadiusControl">8</sys:Double>
@@ -61,9 +67,9 @@
         <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
     </Style>
 
-    <!-- Big figures (KPIs / net) -->
+    <!-- Big figures (KPIs / net) — monospace so amounts stay column-aligned. -->
     <Style x:Key="Figure" TargetType="TextBlock">
-        <Setter Property="FontFamily" Value="{StaticResource AppFont}" />
+        <Setter Property="FontFamily" Value="{StaticResource MonoFont}" />
         <Setter Property="FontSize" Value="28" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />

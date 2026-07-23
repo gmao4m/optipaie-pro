@@ -15,6 +15,7 @@
             <Setter Property="BorderThickness" Value="0,0,1,1" />
         </Style>
         <Style x:Key="CenterText" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource MonoFont}" />
             <Setter Property="TextAlignment" Value="Center" />
             <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
@@ -59,25 +60,25 @@
                 <Border Style="{StaticResource Kpi}">
                     <StackPanel>
                         <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Leave_DaysTaken}" />
-                        <TextBlock FontSize="20" FontWeight="SemiBold" Text="{Binding TakenText}" />
+                        <TextBlock FontFamily="{StaticResource MonoFont}" FontSize="20" FontWeight="SemiBold" Text="{Binding TakenText}" />
                     </StackPanel>
                 </Border>
                 <Border Style="{StaticResource Kpi}">
                     <StackPanel>
                         <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Leave_Remaining}" />
-                        <TextBlock FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource Salary}" Text="{Binding RemainingText}" />
+                        <TextBlock FontFamily="{StaticResource MonoFont}" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource Salary}" Text="{Binding RemainingText}" />
                     </StackPanel>
                 </Border>
                 <Border Style="{StaticResource Kpi}">
                     <StackPanel>
                         <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Leave_Pending}" />
-                        <TextBlock FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource Warning}" Text="{Binding PendingText}" />
+                        <TextBlock FontFamily="{StaticResource MonoFont}" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource Warning}" Text="{Binding PendingText}" />
                     </StackPanel>
                 </Border>
                 <Border Style="{StaticResource Kpi}">
                     <StackPanel>
                         <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Leave_Unpaid}" />
-                        <TextBlock FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource Deduction}" Text="{Binding UnpaidText}" />
+                        <TextBlock FontFamily="{StaticResource MonoFont}" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource Deduction}" Text="{Binding UnpaidText}" />
                     </StackPanel>
                 </Border>
             </StackPanel>
@@ -87,7 +88,7 @@
         <DataGrid x:Name="RequestsGrid" Grid.Row="2" Margin="0,18,0,0" ItemsSource="{Binding Requests}" SelectedItem="{Binding SelectedRequest}"
                   AutoGenerateColumns="False" HeadersVisibility="Column" IsReadOnly="True"
                   CanUserAddRows="False" CanUserResizeRows="False" GridLinesVisibility="All"
-                  RowHeight="32" FontFamily="Segoe UI" FontSize="12.5" Background="{DynamicResource Surface}"
+                  RowHeight="32" FontFamily="{StaticResource AppFont}" FontSize="12.5" Background="{DynamicResource Surface}"
                   RowBackground="{DynamicResource Surface}" AlternatingRowBackground="{DynamicResource SurfaceMuted}"
                   BorderBrush="{DynamicResource Border}" BorderThickness="1"
                   HorizontalGridLinesBrush="{DynamicResource Border}" VerticalGridLinesBrush="{DynamicResource Border}"

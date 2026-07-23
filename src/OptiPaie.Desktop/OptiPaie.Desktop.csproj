@@ -41,4 +41,12 @@
     <Reference Include="System.Configuration" />
   </ItemGroup>
 
+  <!-- Bundled IBM Plex fonts (SIL OFL). Embedded as WPF resources so the exact type
+       identity ships inside the installer and renders on any machine with no separate
+       font installation. Referenced via pack URIs in Theme/Typography.xaml. -->
+  <ItemGroup>
+    <Resource Include="Assets\Fonts\*.ttf" />
+    <Resource Include="Assets\Fonts\*.CompositeFont" />
+  </ItemGroup>
+
 </Project>

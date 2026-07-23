@@ -29,7 +29,7 @@ namespace OptiPaie.Desktop.Documents
             {
                 page.Size(PageSizes.A4.Landscape());
                 page.Margin(24);
-                page.DefaultTextStyle(t => t.FontSize(8.5f));
+                page.DefaultTextStyle(t => t.FontFamily(PdfFonts.Sans).FontSize(8.5f));
 
                 page.Header().Column(col =>
                 {

@@ -21,6 +21,7 @@
             <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
         <Style x:Key="RightText" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource MonoFont}" />
             <Setter Property="TextAlignment" Value="Right" />
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="Margin" Value="0,0,8,0" />
@@ -49,7 +50,7 @@
 
         <DataGrid Grid.Row="1" Margin="0,16,0,0" ItemsSource="{Binding Rows}" AutoGenerateColumns="False" HeadersVisibility="Column"
                   IsReadOnly="True" CanUserAddRows="False" CanUserResizeRows="False" GridLinesVisibility="All"
-                  RowHeight="30" FontFamily="Segoe UI" FontSize="12.5" Background="{DynamicResource Surface}"
+                  RowHeight="30" FontFamily="{StaticResource AppFont}" FontSize="12.5" Background="{DynamicResource Surface}"
                   RowBackground="{DynamicResource Surface}" AlternatingRowBackground="{DynamicResource SurfaceMuted}"
                   BorderBrush="{DynamicResource Border}" BorderThickness="1"
                   HorizontalGridLinesBrush="{DynamicResource Border}" VerticalGridLinesBrush="{DynamicResource Border}"

@@ -152,7 +152,7 @@
                   EnableRowVirtualization="True" EnableColumnVirtualization="True"
                   VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"
                   VirtualizingPanel.ScrollUnit="Pixel" ColumnWidth="Auto"
-                  RowHeight="28" FontFamily="Segoe UI" FontSize="12" Background="{DynamicResource Surface}"
+                  RowHeight="28" FontFamily="{StaticResource AppFont}" FontSize="12" Background="{DynamicResource Surface}"
                   RowBackground="{DynamicResource Surface}" AlternatingRowBackground="{DynamicResource SurfaceMuted}"
                   BorderBrush="{DynamicResource Border}" BorderThickness="1"
                   HorizontalGridLinesBrush="{DynamicResource Border}" VerticalGridLinesBrush="{DynamicResource Border}"

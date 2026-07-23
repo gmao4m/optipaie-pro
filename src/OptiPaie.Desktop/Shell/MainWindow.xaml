@@ -8,7 +8,7 @@
         Title="OptiPaie PRO" Height="820" Width="1280"
         MinWidth="1120" MinHeight="720"
         WindowStartupLocation="CenterScreen" WindowState="Maximized"
-        FontFamily="Segoe UI" Background="{DynamicResource Canvas}" Language="fr-FR"
+        FontFamily="{StaticResource AppFont}" Background="{DynamicResource Canvas}" Language="fr-FR"
         TextOptions.TextFormattingMode="Ideal" UseLayoutRounding="True">
 
     <Window.Resources>

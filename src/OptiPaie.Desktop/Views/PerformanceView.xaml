@@ -26,7 +26,7 @@
             <Setter Property="CanUserResizeRows" Value="False" />
             <Setter Property="GridLinesVisibility" Value="All" />
             <Setter Property="RowHeight" Value="32" />
-            <Setter Property="FontFamily" Value="Segoe UI" />
+            <Setter Property="FontFamily" Value="{StaticResource AppFont}" />
             <Setter Property="FontSize" Value="12.5" />
             <Setter Property="Background" Value="{DynamicResource Surface}" />
             <Setter Property="RowBackground" Value="{DynamicResource Surface}" />
@@ -261,7 +261,7 @@
                                                         <TextBlock Text="{Binding EmployeeName}" FontWeight="SemiBold" FontSize="13" />
                                                         <TextBlock Text="{Binding Department}" FontSize="11" Foreground="{DynamicResource TextMuted}" Margin="8,0,0,0" VerticalAlignment="Center" />
                                                     </StackPanel>
-                                                    <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center" FontFamily="Consolas" FontWeight="SemiBold" Foreground="{Binding Brush}" Text="{Binding PercentText}" />
+                                                    <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center" FontFamily="{StaticResource MonoFont}" FontWeight="SemiBold" Foreground="{Binding Brush}" Text="{Binding PercentText}" />
                                                 </Grid>
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
@@ -279,7 +279,7 @@
                                                         <TextBlock Text="{Binding EmployeeName}" FontWeight="SemiBold" FontSize="13" />
                                                         <TextBlock Text="{Binding Department}" FontSize="11" Foreground="{DynamicResource TextMuted}" Margin="8,0,0,0" VerticalAlignment="Center" />
                                                     </StackPanel>
-                                                    <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center" FontFamily="Consolas" FontWeight="SemiBold" Foreground="{Binding Brush}" Text="{Binding PercentText}" />
+                                                    <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center" FontFamily="{StaticResource MonoFont}" FontWeight="SemiBold" Foreground="{Binding Brush}" Text="{Binding PercentText}" />
                                                 </Grid>
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
@@ -301,7 +301,7 @@
                                                 </Grid.ColumnDefinitions>
                                                 <TextBlock Grid.Column="0" Text="{Binding Department}" VerticalAlignment="Center" FontSize="12.5" />
                                                 <ProgressBar Grid.Column="1" Style="{StaticResource Bar}" VerticalAlignment="Center" Foreground="{Binding Brush}" Value="{Binding BarValue}" />
-                                                <TextBlock Grid.Column="2" Text="{Binding AverageText}" HorizontalAlignment="Right" VerticalAlignment="Center" FontFamily="Consolas" FontSize="12.5" />
+                                                <TextBlock Grid.Column="2" Text="{Binding AverageText}" HorizontalAlignment="Right" VerticalAlignment="Center" FontFamily="{StaticResource MonoFont}" FontSize="12.5" />
                                             </Grid>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
@@ -318,7 +318,7 @@
                                                 </Grid.ColumnDefinitions>
                                                 <TextBlock Grid.Column="0" Text="{Binding Label}" VerticalAlignment="Center" FontSize="12.5" />
                                                 <ProgressBar Grid.Column="1" Style="{StaticResource Bar}" VerticalAlignment="Center" Value="{Binding BarValue}" />
-                                                <TextBlock Grid.Column="2" Text="{Binding AverageText}" HorizontalAlignment="Right" VerticalAlignment="Center" FontFamily="Consolas" FontSize="12.5" />
+                                                <TextBlock Grid.Column="2" Text="{Binding AverageText}" HorizontalAlignment="Right" VerticalAlignment="Center" FontFamily="{StaticResource MonoFont}" FontSize="12.5" />
                                             </Grid>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
@@ -458,10 +458,10 @@
                                             <TextBlock Text="{Binding Poste}" FontSize="11.5" Foreground="{DynamicResource TextSecondary}" />
                                             <TextBlock Text="{Binding Department}" FontSize="11" Foreground="{DynamicResource TextMuted}" Margin="0,0,0,10" />
                                             <TextBlock Text="{loc:Loc Perf_LastScore}" FontSize="11" Foreground="{DynamicResource TextMuted}" Margin="0,4,0,0" />
-                                            <TextBlock Text="{Binding LatestText}" FontFamily="Consolas" FontSize="20" FontWeight="Bold" Foreground="{Binding Brush}" />
+                                            <TextBlock Text="{Binding LatestText}" FontFamily="{StaticResource MonoFont}" FontSize="20" FontWeight="Bold" Foreground="{Binding Brush}" />
                                             <TextBlock Text="{Binding Rating}" FontSize="12" Foreground="{DynamicResource TextSecondary}" />
                                             <TextBlock Text="{loc:Loc Perf_Average}" FontSize="11" Foreground="{DynamicResource TextMuted}" Margin="0,10,0,0" />
-                                            <TextBlock Text="{Binding AverageText}" FontFamily="Consolas" FontSize="14" FontWeight="SemiBold" />
+                                            <TextBlock Text="{Binding AverageText}" FontFamily="{StaticResource MonoFont}" FontSize="14" FontWeight="SemiBold" />
                                             <TextBlock Text="{loc:Loc Perf_Tab_Reviews}" FontSize="11" Foreground="{DynamicResource TextMuted}" Margin="0,8,0,0" />
                                             <TextBlock Text="{Binding ReviewCountText}" FontSize="14" FontWeight="SemiBold" />
                                             <TextBlock Text="{loc:Loc Perf_Tab_Goals}" FontSize="11" Foreground="{DynamicResource TextMuted}" Margin="0,8,0,0" />
@@ -503,7 +503,7 @@
                                                 <ColumnDefinition Width="Auto" />
                                                 <ColumnDefinition Width="*" />
                                             </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0" Text="{Binding DateText}" FontFamily="Consolas" FontSize="12" Foreground="{DynamicResource TextMuted}" VerticalAlignment="Top" Margin="0,10,0,0" />
+                                            <TextBlock Grid.Column="0" Text="{Binding DateText}" FontFamily="{StaticResource MonoFont}" FontSize="12" Foreground="{DynamicResource TextMuted}" VerticalAlignment="Top" Margin="0,10,0,0" />
                                             <StackPanel Grid.Column="1" VerticalAlignment="Stretch" HorizontalAlignment="Center" Margin="6,0,14,0">
                                                 <Border Width="12" Height="12" CornerRadius="6" Background="{Binding KindBrush}" Margin="0,12,0,0" />
                                                 <Border Width="2" Background="{DynamicResource Border}" HorizontalAlignment="Center" Height="40" />

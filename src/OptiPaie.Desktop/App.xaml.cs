@@ -42,6 +42,10 @@ namespace OptiPaie.Desktop
             // (Settings.License / LicenseType were introduced in QuestPDF 2023.4+),
             // so no runtime licence call is required — this build is MIT-licensed.
 
+            // Register the bundled IBM Plex faces with QuestPDF so printed documents share
+            // the on-screen type identity on any machine. Must run before any PDF is built.
+            Documents.PdfFonts.Register();
+
             try
             {
                 Services = CompositionRoot.Build();

@@ -15,11 +15,13 @@
             <Setter Property="BorderThickness" Value="0,0,1,1" />
         </Style>
         <Style x:Key="RightText" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource MonoFont}" />
             <Setter Property="TextAlignment" Value="Right" />
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="Margin" Value="0,0,8,0" />
         </Style>
         <Style x:Key="CenterText" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource MonoFont}" />
             <Setter Property="TextAlignment" Value="Center" />
             <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
@@ -60,13 +62,13 @@
             <Border Style="{StaticResource Kpi}">
                 <StackPanel>
                     <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Loan_TotalOutstanding}" />
-                    <TextBlock FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource Deduction}" Text="{Binding TotalOutstandingText}" />
+                    <TextBlock FontFamily="{StaticResource MonoFont}" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource Deduction}" Text="{Binding TotalOutstandingText}" />
                 </StackPanel>
             </Border>
             <Border Style="{StaticResource Kpi}">
                 <StackPanel>
                     <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Loan_ActiveCount}" />
-                    <TextBlock FontSize="20" FontWeight="SemiBold" Text="{Binding ActiveCountText}" />
+                    <TextBlock FontFamily="{StaticResource MonoFont}" FontSize="20" FontWeight="SemiBold" Text="{Binding ActiveCountText}" />
                 </StackPanel>
             </Border>
         </StackPanel>
@@ -75,7 +77,7 @@
         <DataGrid x:Name="LoansGrid" Grid.Row="2" Margin="0,18,0,0" ItemsSource="{Binding Loans}" SelectedItem="{Binding SelectedLoan}"
                   AutoGenerateColumns="False" HeadersVisibility="Column" IsReadOnly="True"
                   CanUserAddRows="False" CanUserResizeRows="False" GridLinesVisibility="All"
-                  RowHeight="32" FontFamily="Segoe UI" FontSize="12.5" Background="{DynamicResource Surface}"
+                  RowHeight="32" FontFamily="{StaticResource AppFont}" FontSize="12.5" Background="{DynamicResource Surface}"
                   RowBackground="{DynamicResource Surface}" AlternatingRowBackground="{DynamicResource SurfaceMuted}"
                   BorderBrush="{DynamicResource Border}" BorderThickness="1"
                   HorizontalGridLinesBrush="{DynamicResource Border}" VerticalGridLinesBrush="{DynamicResource Border}"

@@ -87,7 +87,7 @@
                             <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource LicValue}" Text="{Binding ProductText}" Margin="0,0,0,10" />
 
                             <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource LicLabel}" Text="{loc:Loc Settings_LicenseKey}" Margin="0,0,0,10" />
-                            <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource LicValue}" FontFamily="Consolas" Text="{Binding LicenseKeyText}" Margin="0,0,0,10" />
+                            <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource LicValue}" FontFamily="{StaticResource MonoFont}" Text="{Binding LicenseKeyText}" Margin="0,0,0,10" />
 
                             <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource LicLabel}" Text="{loc:Loc Settings_Expiration}" Margin="0,0,0,10" />
                             <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource LicValue}" Text="{Binding ExpirationText}" Margin="0,0,0,10" />
@@ -96,7 +96,7 @@
                             <TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource LicValue}" Text="{Binding ActivatedText}" Margin="0,0,0,10" />
 
                             <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource LicLabel}" Text="{loc:Loc Settings_DeviceId}" Margin="0,0,0,10" />
-                            <TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource LicValue}" FontFamily="Consolas" Text="{Binding DeviceIdText}" Margin="0,0,0,10" />
+                            <TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource LicValue}" FontFamily="{StaticResource MonoFont}" Text="{Binding DeviceIdText}" Margin="0,0,0,10" />
 
                             <TextBlock Grid.Row="7" Grid.Column="0" Style="{StaticResource LicLabel}" Text="{loc:Loc Settings_Modules}" />
                             <TextBlock Grid.Row="7" Grid.Column="1" Style="{StaticResource LicValue}" Text="{Binding ModulesText}" />

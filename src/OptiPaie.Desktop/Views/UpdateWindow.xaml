@@ -5,7 +5,7 @@
         Title="Mise à jour disponible"
         Height="500" Width="460" ResizeMode="NoResize"
         WindowStartupLocation="CenterOwner"
-        FontFamily="Segoe UI" Background="{DynamicResource Canvas}" Language="fr-FR"
+        FontFamily="{StaticResource AppFont}" Background="{DynamicResource Canvas}" Language="fr-FR"
         TextOptions.TextFormattingMode="Ideal" UseLayoutRounding="True">
     <Grid>
         <Grid.RowDefinitions>

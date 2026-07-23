@@ -15,6 +15,7 @@
             <Setter Property="BorderThickness" Value="0,0,1,1" />
         </Style>
         <Style x:Key="CenterText" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource MonoFont}" />
             <Setter Property="TextAlignment" Value="Center" />
             <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
@@ -53,13 +54,13 @@
             <Border Style="{StaticResource Kpi}">
                 <StackPanel>
                     <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Ats_OpenPostings}" />
-                    <TextBlock FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource Employer}" Text="{Binding OpenText}" />
+                    <TextBlock FontFamily="{StaticResource MonoFont}" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource Employer}" Text="{Binding OpenText}" />
                 </StackPanel>
             </Border>
             <Border Style="{StaticResource Kpi}">
                 <StackPanel>
                     <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_Candidates}" />
-                    <TextBlock FontSize="20" FontWeight="SemiBold" Text="{Binding CandidatesText}" />
+                    <TextBlock FontFamily="{StaticResource MonoFont}" FontSize="20" FontWeight="SemiBold" Text="{Binding CandidatesText}" />
                 </StackPanel>
             </Border>
         </StackPanel>
@@ -67,7 +68,7 @@
         <DataGrid x:Name="PostingsGrid" Grid.Row="2" Margin="0,18,0,0" ItemsSource="{Binding Postings}" SelectedItem="{Binding SelectedPosting}"
                   AutoGenerateColumns="False" HeadersVisibility="Column" IsReadOnly="True"
                   CanUserAddRows="False" CanUserResizeRows="False" GridLinesVisibility="All"
-                  RowHeight="32" FontFamily="Segoe UI" FontSize="12.5" Background="{DynamicResource Surface}"
+                  RowHeight="32" FontFamily="{StaticResource AppFont}" FontSize="12.5" Background="{DynamicResource Surface}"
                   RowBackground="{DynamicResource Surface}" AlternatingRowBackground="{DynamicResource SurfaceMuted}"
                   BorderBrush="{DynamicResource Border}" BorderThickness="1"
                   HorizontalGridLinesBrush="{DynamicResource Border}" VerticalGridLinesBrush="{DynamicResource Border}"

@@ -4,11 +4,13 @@
              xmlns:loc="clr-namespace:OptiPaie.Desktop.Localization">
     <UserControl.Resources>
         <Style x:Key="RightText" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource MonoFont}" />
             <Setter Property="TextAlignment" Value="Right" />
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="Margin" Value="0,0,8,0" />
         </Style>
         <Style x:Key="RightEdit" TargetType="TextBox">
+            <Setter Property="FontFamily" Value="{StaticResource MonoFont}" />
             <Setter Property="TextAlignment" Value="Right" />
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="Padding" Value="4,0,6,0" />
@@ -94,7 +96,7 @@
                       Visibility="{Binding HasEmployee, Converter={StaticResource BoolToVis}}"
                       CanUserAddRows="False" CanUserDeleteRows="False" CanUserResizeRows="False" CanUserReorderColumns="False"
                       GridLinesVisibility="All" SelectionUnit="Cell" SelectionMode="Single"
-                      RowHeight="30" FontFamily="Segoe UI" FontSize="12.5" Background="{DynamicResource Surface}"
+                      RowHeight="30" FontFamily="{StaticResource AppFont}" FontSize="12.5" Background="{DynamicResource Surface}"
                       RowBackground="{DynamicResource Surface}" AlternatingRowBackground="{DynamicResource SurfaceMuted}"
                       BorderBrush="{DynamicResource Border}" BorderThickness="1"
                       HorizontalGridLinesBrush="{DynamicResource Border}" VerticalGridLinesBrush="{DynamicResource Border}"
@@ -140,7 +142,7 @@
                     <Border DockPanel.Dock="Right" Background="{DynamicResource TextPrimary}" CornerRadius="8" Padding="16,8" VerticalAlignment="Center">
                         <StackPanel>
                             <TextBlock Text="{loc:Loc Payroll_NetToPay}" Foreground="#C9CDD2" FontSize="11" />
-                            <TextBlock Text="{Binding NetText}" Foreground="White" FontSize="17" FontWeight="SemiBold" Margin="0,2,0,0" />
+                            <TextBlock Text="{Binding NetText}" FontFamily="{StaticResource MonoFont}" Foreground="White" FontSize="17" FontWeight="SemiBold" Margin="0,2,0,0" />
                         </StackPanel>
                     </Border>
                     <WrapPanel VerticalAlignment="Center">

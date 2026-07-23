@@ -4,7 +4,7 @@
         xmlns:loc="clr-namespace:OptiPaie.Desktop.Localization"
         Title="{Binding Title}" Width="480" SizeToContent="Height"
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize" ShowInTaskbar="False"
-        FontFamily="Segoe UI" Background="{DynamicResource Canvas}" Language="fr-FR"
+        FontFamily="{StaticResource AppFont}" Background="{DynamicResource Canvas}" Language="fr-FR"
         TextOptions.TextFormattingMode="Ideal" UseLayoutRounding="True">
     <Window.Resources>
         <Style x:Key="Fl" TargetType="TextBlock" BasedOn="{StaticResource Caption}">

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OptiPaie PRO UI font. Latin/French text renders in IBM Plex Sans; Arabic text
+  renders in IBM Plex Sans Arabic. Both target the bundled (embedded) IBM Plex
+  faces in this folder, so nothing ever falls back to a system font. Font family
+  only — no metric or layout intent here.
+-->
+<FontFamily xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <FontFamily.FamilyMaps>
+    <!-- Arabic blocks → IBM Plex Sans Arabic -->
+    <FontFamilyMap Unicode="0600-06FF, 0750-077F, 0870-089F, 08A0-08FF, FB50-FDFF, FE70-FEFF"
+                   Target="./#IBM Plex Sans Arabic" Scale="1.0" />
+    <!-- Everything else (Latin, digits, punctuation, symbols) → IBM Plex Sans -->
+    <FontFamilyMap Unicode="0000-05FF, 0700-074F, 0900-FFFF"
+                   Target="./#IBM Plex Sans" Scale="1.0" />
+  </FontFamily.FamilyMaps>
+</FontFamily>
