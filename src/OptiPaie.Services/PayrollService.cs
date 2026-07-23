@@ -393,7 +393,12 @@ namespace OptiPaie.Services
             return new PayrollDetail
             {
                 PayslipId = payslipId,
-                ElementId = line.ElementId,
+                // A free (manual) worksheet line — e.g. the automatic "Remboursement prêt" —
+                // has no catalog element, so it carries id 0. Store that as NULL: the archive
+                // column has a foreign key to PayrollElements and 0 is not a real element, so
+                // a manual line would otherwise fail to persist. Reference only — no amount,
+                // rate, base or any calculated value is affected.
+                ElementId = line.ElementId.HasValue && line.ElementId.Value != 0 ? line.ElementId : (long?)null,
                 LabelFr = line.LabelFr,
                 LabelAr = line.LabelAr,
                 ElementType = line.ElementType,

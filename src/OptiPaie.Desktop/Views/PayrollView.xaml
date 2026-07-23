@@ -46,6 +46,8 @@
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <!-- Company selection is global (header selector) -->
 
+                <Button Style="{StaticResource PrimaryButton}" Height="32" Content="{loc:Loc Batch_Title}" Command="{Binding BatchCommand}" />
+
                 <TextBlock Text="{loc:Loc Payroll_Employee}" VerticalAlignment="Center" Foreground="{DynamicResource TextMuted}" FontSize="12" Margin="14,0,6,0" />
                 <ComboBox Style="{StaticResource AppComboBox}" Width="170" Height="32" ItemsSource="{Binding Employees}" SelectedItem="{Binding SelectedEmployee}">
                     <ComboBox.ItemTemplate>

@@ -935,4 +935,21 @@
   <data name="User_NotFound" xml:space="preserve"><value>المستخدم غير موجود.</value></data>
   <data name="User_LastAdmin" xml:space="preserve"><value>يلزم وجود مسؤول نشط واحد على الأقل.</value></data>
   <data name="User_BadCredentials" xml:space="preserve"><value>اسم المستخدم أو كلمة المرور غير صحيحة.</value></data>
+  <data name="Batch_Title" xml:space="preserve"><value>معالجة الشهر كامل</value></data>
+  <data name="Batch_Subtitle" xml:space="preserve"><value>إعداد رواتب جميع الموظفين في عملية واحدة</value></data>
+  <data name="Batch_Total" xml:space="preserve"><value>الموظفون</value></data>
+  <data name="Batch_ReadyCount" xml:space="preserve"><value>جاهزون</value></data>
+  <data name="Batch_Ready" xml:space="preserve"><value>جاهز</value></data>
+  <data name="Batch_Warning" xml:space="preserve"><value>للمراجعة</value></data>
+  <data name="Batch_Blocked" xml:space="preserve"><value>محظور</value></data>
+  <data name="Batch_Run" xml:space="preserve"><value>بدء المعالجة</value></data>
+  <data name="Batch_Recheck" xml:space="preserve"><value>إعادة التحقق</value></data>
+  <data name="Batch_Succeeded" xml:space="preserve"><value>ناجح</value></data>
+  <data name="Batch_Skipped" xml:space="preserve"><value>متجاوَز</value></data>
+  <data name="Batch_Failed" xml:space="preserve"><value>فاشل</value></data>
+  <data name="Batch_Detail" xml:space="preserve"><value>التفاصيل</value></data>
+  <data name="Batch_Open" xml:space="preserve"><value>فتح الكشف</value></data>
+  <data name="Batch_ExportAll" xml:space="preserve"><value>تصدير كل الكشوف PDF</value></data>
+  <data name="Batch_AlreadyArchived" xml:space="preserve"><value>رواتب هذه الفترة مؤرشفة بالفعل. لا يمكن إجراء معالجة جديدة.</value></data>
+  <data name="Batch_Processing" xml:space="preserve"><value>جارٍ المعالجة…</value></data>
 </root>

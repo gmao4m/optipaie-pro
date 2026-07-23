@@ -59,6 +59,23 @@ namespace OptiPaie.Desktop.ViewModels
             ExportPdfCommand = new RelayCommand(ExportPdf);
             ResetCommand = new RelayCommand(LoadWorksheet);
             ManageItemsCommand = new RelayCommand(ManageItems);
+            BatchCommand = new RelayCommand(OpenBatch);
+        }
+
+        /// <summary>
+        /// Opens the company-wide "run the whole month" dialog. This does not touch the
+        /// single-employee worksheet or calculation path in any way — it launches a separate
+        /// orchestration that loops this same per-employee run for every active employee.
+        /// </summary>
+        private void OpenBatch()
+        {
+            if (SelectedCompany == null)
+            {
+                Dialogs.Info("Sélectionnez d'abord une entreprise.");
+                return;
+            }
+
+            Dialogs.ShowBatchPayroll(new BatchPayrollViewModel(_services));
         }
 
         public ObservableCollection<Company> Companies { get; }
@@ -144,6 +161,7 @@ namespace OptiPaie.Desktop.ViewModels
         public ICommand ExportPdfCommand { get; }
         public ICommand ResetCommand { get; }
         public ICommand ManageItemsCommand { get; }
+        public ICommand BatchCommand { get; }
 
         public void OnActivated()
         {

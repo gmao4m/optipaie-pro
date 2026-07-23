@@ -935,4 +935,21 @@
   <data name="User_NotFound" xml:space="preserve"><value>Utilisateur introuvable.</value></data>
   <data name="User_LastAdmin" xml:space="preserve"><value>Au moins un administrateur actif est requis.</value></data>
   <data name="User_BadCredentials" xml:space="preserve"><value>Nom d'utilisateur ou mot de passe incorrect.</value></data>
+  <data name="Batch_Title" xml:space="preserve"><value>Traiter tout le mois</value></data>
+  <data name="Batch_Subtitle" xml:space="preserve"><value>Établir la paie de tous les employés en une seule action</value></data>
+  <data name="Batch_Total" xml:space="preserve"><value>Employés</value></data>
+  <data name="Batch_ReadyCount" xml:space="preserve"><value>Prêts</value></data>
+  <data name="Batch_Ready" xml:space="preserve"><value>Prêt</value></data>
+  <data name="Batch_Warning" xml:space="preserve"><value>À vérifier</value></data>
+  <data name="Batch_Blocked" xml:space="preserve"><value>Bloqués</value></data>
+  <data name="Batch_Run" xml:space="preserve"><value>Lancer le traitement</value></data>
+  <data name="Batch_Recheck" xml:space="preserve"><value>Revérifier</value></data>
+  <data name="Batch_Succeeded" xml:space="preserve"><value>Réussis</value></data>
+  <data name="Batch_Skipped" xml:space="preserve"><value>Ignorés</value></data>
+  <data name="Batch_Failed" xml:space="preserve"><value>Échoués</value></data>
+  <data name="Batch_Detail" xml:space="preserve"><value>Détail</value></data>
+  <data name="Batch_Open" xml:space="preserve"><value>Ouvrir le bulletin</value></data>
+  <data name="Batch_ExportAll" xml:space="preserve"><value>Exporter tous les PDF</value></data>
+  <data name="Batch_AlreadyArchived" xml:space="preserve"><value>La paie de cette période est déjà archivée. Aucun nouveau traitement n'est possible.</value></data>
+  <data name="Batch_Processing" xml:space="preserve"><value>Traitement en cours…</value></data>
 </root>
