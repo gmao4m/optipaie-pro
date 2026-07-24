@@ -963,4 +963,22 @@
   <data name="Att_Late" xml:space="preserve"><value>متأخرون</value></data>
   <data name="Leave_Entitlement" xml:space="preserve"><value>الحق</value></data>
   <data name="Shell_Nav_Attendance" xml:space="preserve"><value>الحضور</value></data>
+  <data name="Common_More" xml:space="preserve"><value>المزيد…</value></data>
+  <data name="Common_Export" xml:space="preserve"><value>تصدير</value></data>
+  <data name="Ats_HireRow" xml:space="preserve"><value>توظيف المرشح</value></data>
+  <data name="Ats_RejectRow" xml:space="preserve"><value>رفض المرشح</value></data>
+  <data name="Hint_RowActions" xml:space="preserve"><value>انقر نقرًا مزدوجًا للفتح · نقر بالزر الأيمن للإجراءات</value></data>
+  <data name="Contract_ActivateRow" xml:space="preserve"><value>تفعيل العقد</value></data>
+  <data name="Contract_RenewRow" xml:space="preserve"><value>تجديد العقد</value></data>
+  <data name="Contract_TerminateRow" xml:space="preserve"><value>إنهاء العقد</value></data>
+  <data name="Loan_OpenDetail" xml:space="preserve"><value>فتح التفاصيل</value></data>
+  <data name="Asset_AssignRow" xml:space="preserve"><value>إسناد إلى موظف</value></data>
+  <data name="Asset_ReturnRow" xml:space="preserve"><value>تسجيل الإرجاع</value></data>
+  <data name="Asset_HistoryRow" xml:space="preserve"><value>عرض السجل</value></data>
+  <data name="Training_ParticipantsRow" xml:space="preserve"><value>إدارة المشاركين</value></data>
+  <data name="Leave_ApproveRow" xml:space="preserve"><value>الموافقة على الطلب</value></data>
+  <data name="Leave_RejectRow" xml:space="preserve"><value>رفض الطلب</value></data>
+  <data name="Ats_PipelineRow" xml:space="preserve"><value>فتح الترشيحات</value></data>
+  <data name="Archive_PreviewRow" xml:space="preserve"><value>معاينة الكشف</value></data>
+  <data name="Archive_PrintRow" xml:space="preserve"><value>طباعة الكشف</value></data>
 </root>

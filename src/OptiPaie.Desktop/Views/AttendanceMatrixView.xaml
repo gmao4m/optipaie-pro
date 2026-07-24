@@ -76,8 +76,7 @@
                           ItemsSource="{Binding StatusFilters}" SelectedItem="{Binding SelectedStatusFilter}" DisplayMemberPath="Label" />
                 <TextBox Style="{StaticResource AppTextBox}" Width="180" Height="32" Margin="0,0,8,0"
                          Text="{Binding Search, UpdateSourceTrigger=PropertyChanged}" />
-                <Button Style="{StaticResource SecondaryButton}" Height="32" Margin="0,0,8,0" Content="{loc:Loc Att_CurrentMonth}" Command="{Binding TodayCommand}" />
-                <Button Style="{StaticResource SecondaryButton}" Height="32" Content="{loc:Loc Common_Refresh}" Command="{Binding RefreshCommand}" />
+                <Button Style="{StaticResource SecondaryButton}" Height="32" Content="{loc:Loc Att_CurrentMonth}" Command="{Binding TodayCommand}" />
             </WrapPanel>
         </Border>
 
@@ -140,8 +139,15 @@
                 <Button Style="{StaticResource SecondaryButton}" Height="32" Margin="0,0,6,0" Content="{loc:Loc Att_SelectAll}" Command="{Binding SelectAllCommand}" />
                 <Button Style="{StaticResource SecondaryButton}" Height="32" Margin="0,0,6,0" Content="{loc:Loc Att_ClearSelection}" Command="{Binding ClearSelectionCommand}" />
                 <Border Width="1" Background="{DynamicResource Border}" Margin="10,2" />
-                <Button Style="{StaticResource SecondaryButton}" Height="32" Margin="0,0,6,0" Content="{loc:Loc Att_MonthReports}" Command="{Binding MonthSummaryCommand}" />
-                <Button Style="{StaticResource SecondaryButton}" Height="32" Content="{loc:Loc Shell_Nav_Settings}" Command="{Binding SettingsCommand}" />
+                <!-- Secondary/global actions in one overflow instead of a row of buttons. -->
+                <Menu Background="Transparent" VerticalAlignment="Center">
+                    <MenuItem Header="{loc:Loc Common_More}" Height="32" Padding="8,0" VerticalContentAlignment="Center">
+                        <MenuItem Header="{loc:Loc Att_MonthReports}" Command="{Binding MonthSummaryCommand}" />
+                        <MenuItem Header="{loc:Loc Common_Refresh}" Command="{Binding RefreshCommand}" />
+                        <Separator />
+                        <MenuItem Header="{loc:Loc Shell_Nav_Settings}" Command="{Binding SettingsCommand}" />
+                    </MenuItem>
+                </Menu>
             </WrapPanel>
         </Border>
 

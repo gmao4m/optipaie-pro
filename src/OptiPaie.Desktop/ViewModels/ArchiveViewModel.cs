@@ -65,13 +65,13 @@ namespace OptiPaie.Desktop.ViewModels
         public int SelectedYear
         {
             get => _selectedYear;
-            set => Set(ref _selectedYear, value);
+            set { if (Set(ref _selectedYear, value)) Search(); }
         }
 
         public int SelectedMonth
         {
             get => _selectedMonth;
-            set => Set(ref _selectedMonth, value);
+            set { if (Set(ref _selectedMonth, value)) Search(); }
         }
 
         public ArchiveRow SelectedRow

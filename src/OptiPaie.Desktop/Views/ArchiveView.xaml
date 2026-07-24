@@ -32,7 +32,7 @@
                     <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Payroll_Month}" Margin="0,0,0,5" />
                     <ComboBox Style="{StaticResource AppComboBox}" ItemsSource="{Binding Months}" SelectedValue="{Binding SelectedMonth}" SelectedValuePath="Value" DisplayMemberPath="Label" />
                 </StackPanel>
-                <Button Grid.Column="3" Style="{StaticResource PrimaryButton}" VerticalAlignment="Bottom" Content="{loc:Loc Common_Search}" Command="{Binding SearchCommand}" />
+                <!-- The list refreshes automatically when the period changes (no Search button needed). -->
             </Grid>
         </Border>
 
@@ -41,6 +41,15 @@
                 <ListBox BorderThickness="0" Background="Transparent" HorizontalContentAlignment="Stretch"
                          ItemsSource="{Binding Rows}" SelectedItem="{Binding SelectedRow}"
                          ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                    <ListBox.InputBindings>
+                        <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding PreviewCommand}" />
+                    </ListBox.InputBindings>
+                    <ListBox.ContextMenu>
+                        <ContextMenu DataContext="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                            <MenuItem Header="{loc:Loc Archive_PreviewRow}" Command="{Binding PreviewCommand}" />
+                            <MenuItem Header="{loc:Loc Archive_PrintRow}" Command="{Binding PrintCommand}" />
+                        </ContextMenu>
+                    </ListBox.ContextMenu>
                     <ListBox.ItemContainerStyle>
                         <Style TargetType="ListBoxItem">
                             <Setter Property="Margin" Value="8,1" />
@@ -90,10 +99,7 @@
             </Grid>
         </Border>
 
-        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0"
-                    Visibility="{Binding HasSelection, Converter={StaticResource BoolToVis}}">
-            <Button Style="{StaticResource SecondaryButton}" Content="{loc:Loc Common_Preview}" Command="{Binding PreviewCommand}" />
-            <Button Style="{StaticResource PrimaryButton}" Margin="10,0,0,0" Content="{loc:Loc Common_Print}" Command="{Binding PrintCommand}" />
-        </StackPanel>
+        <TextBlock Grid.Row="3" Margin="0,14,0,0" Style="{StaticResource Caption}" HorizontalAlignment="Right"
+                   Foreground="{DynamicResource TextMuted}" Text="{loc:Loc Hint_RowActions}" />
     </Grid>
 </UserControl>

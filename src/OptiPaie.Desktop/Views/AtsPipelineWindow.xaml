@@ -46,6 +46,14 @@
                   BorderBrush="{DynamicResource Border}" BorderThickness="1"
                   HorizontalGridLinesBrush="{DynamicResource Border}" VerticalGridLinesBrush="{DynamicResource Border}"
                   ColumnHeaderStyle="{StaticResource GridHeader}">
+            <DataGrid.ContextMenu>
+                <ContextMenu DataContext="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                    <MenuItem Header="{loc:Loc Ats_HireRow}" Command="{Binding HireCommand}" />
+                    <MenuItem Header="{loc:Loc Ats_RejectRow}" Command="{Binding RejectCommand}" />
+                    <Separator />
+                    <MenuItem Header="{loc:Loc Common_Delete}" Command="{Binding DeleteCommand}" />
+                </ContextMenu>
+            </DataGrid.ContextMenu>
             <DataGrid.Columns>
                 <DataGridTextColumn Header="{loc:Loc AtsPipe_Candidate}" Binding="{Binding FullName}" Width="*" />
                 <DataGridTextColumn Header="{loc:Loc Company_Phone}" Binding="{Binding Phone}" Width="120" />
@@ -62,8 +70,6 @@
                 <ComboBox Style="{StaticResource AppComboBox}" Width="140" Height="32" VerticalAlignment="Center"
                           ItemsSource="{Binding Stages}" SelectedItem="{Binding SelectedStage}" DisplayMemberPath="Label" />
                 <Button Style="{StaticResource SecondaryButton}" Height="32" Margin="6,0,0,0" Content="{loc:Loc AtsPipe_Move}" Command="{Binding MoveCommand}" />
-                <Button Style="{StaticResource SecondaryButton}" Height="32" Margin="6,0,0,0" Content="{loc:Loc AtsPipe_Reject}" Command="{Binding RejectCommand}" />
-                <Button Style="{StaticResource SecondaryButton}" Height="32" Margin="6,0,0,0" Content="{loc:Loc Common_Delete}" Command="{Binding DeleteCommand}" />
                 <Button Style="{StaticResource AccentButton}" Height="32" Margin="6,0,0,0" Content="{loc:Loc AtsPipe_Hire}" Command="{Binding HireCommand}" />
                 <Button Style="{StaticResource SecondaryButton}" Height="32" Margin="6,0,0,0" Content="{loc:Loc Common_Close}" Command="{Binding CloseCommand}" />
             </StackPanel>

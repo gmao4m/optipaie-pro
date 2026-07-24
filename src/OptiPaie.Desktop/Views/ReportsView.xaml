@@ -27,9 +27,9 @@
                 <ComboBox Style="{StaticResource AppComboBox}" Width="120" Height="32" Margin="0,0,8,0"
                           ItemsSource="{Binding Months}" SelectedValue="{Binding SelectedMonth}"
                           SelectedValuePath="Value" DisplayMemberPath="Label" IsEnabled="{Binding MonthEnabled}" />
-                <ComboBox Style="{StaticResource AppComboBox}" Width="90" Height="32" Margin="0,0,8,0"
+                <ComboBox Style="{StaticResource AppComboBox}" Width="90" Height="32"
                           ItemsSource="{Binding Years}" SelectedItem="{Binding SelectedYear}" />
-                <Button Style="{StaticResource SecondaryButton}" Height="32" Content="{loc:Loc Reports_Generate}" Command="{Binding GenerateCommand}" />
+                <!-- The report regenerates automatically when the report or period changes. -->
             </WrapPanel>
         </Border>
 
@@ -52,10 +52,13 @@
         <!-- Actions -->
         <Grid Grid.Row="4" Margin="0,12,0,0">
             <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Center" HorizontalAlignment="Left" Text="{Binding StatusMessage}" />
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Style="{StaticResource SecondaryButton}" Content="{loc:Loc Reports_ExportCsv}" Command="{Binding ExportCsvCommand}" />
-                <Button Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Content="{loc:Loc Common_ExportPdf}" Command="{Binding ExportPdfCommand}" />
-            </StackPanel>
+            <!-- One export action with a format choice, instead of two competing buttons. -->
+            <Menu Background="Transparent" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <MenuItem Header="{loc:Loc Common_Export}" Height="32" Padding="10,0" VerticalContentAlignment="Center">
+                    <MenuItem Header="{loc:Loc Common_ExportPdf}" Command="{Binding ExportPdfCommand}" />
+                    <MenuItem Header="{loc:Loc Reports_ExportCsv}" Command="{Binding ExportCsvCommand}" />
+                </MenuItem>
+            </Menu>
         </Grid>
     </Grid>
 </UserControl>

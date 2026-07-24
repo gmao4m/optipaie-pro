@@ -82,6 +82,20 @@
                   BorderBrush="{DynamicResource Border}" BorderThickness="1"
                   HorizontalGridLinesBrush="{DynamicResource Border}" VerticalGridLinesBrush="{DynamicResource Border}"
                   ColumnHeaderStyle="{StaticResource GridHeader}">
+            <DataGrid.InputBindings>
+                <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding DetailCommand}" />
+            </DataGrid.InputBindings>
+            <DataGrid.ContextMenu>
+                <ContextMenu DataContext="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                    <MenuItem Header="{loc:Loc Loan_OpenDetail}" Command="{Binding DetailCommand}" />
+                    <MenuItem Header="{loc:Loc Common_Edit}" Command="{Binding EditCommand}" />
+                    <MenuItem Header="{loc:Loc Loan_Suspend}" Command="{Binding SuspendCommand}" />
+                    <MenuItem Header="{loc:Loc Loan_Resume}" Command="{Binding ResumeCommand}" />
+                    <MenuItem Header="{loc:Loc Common_Cancel}" Command="{Binding CancelCommand}" />
+                    <Separator />
+                    <MenuItem Header="{loc:Loc Common_Delete}" Command="{Binding DeleteCommand}" />
+                </ContextMenu>
+            </DataGrid.ContextMenu>
             <DataGrid.Columns>
                 <DataGridTextColumn Header="{loc:Loc Payroll_Employee}" Binding="{Binding EmployeeName}" Width="*" />
                 <DataGridTextColumn Header="{loc:Loc Common_Type}" Binding="{Binding TypeLabel}" Width="140" />
@@ -108,14 +122,8 @@
         <!-- Actions -->
         <Grid Grid.Row="3" Margin="0,14,0,0">
             <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Center" HorizontalAlignment="Left" Text="{Binding StatusMessage}" />
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Style="{StaticResource SecondaryButton}" Content="{loc:Loc Loan_Detail}" Command="{Binding DetailCommand}" />
-                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="{loc:Loc Common_Edit}" Command="{Binding EditCommand}" />
-                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="{loc:Loc Loan_Suspend}" Command="{Binding SuspendCommand}" />
-                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="{loc:Loc Loan_Resume}" Command="{Binding ResumeCommand}" />
-                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="{loc:Loc Common_Cancel}" Command="{Binding CancelCommand}" />
-                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="{loc:Loc Common_Delete}" Command="{Binding DeleteCommand}" />
-            </StackPanel>
+            <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Center" HorizontalAlignment="Right"
+                       Foreground="{DynamicResource TextMuted}" Text="{loc:Loc Hint_RowActions}" />
         </Grid>
     </Grid>
 </UserControl>

@@ -73,6 +73,19 @@
                   BorderBrush="{DynamicResource Border}" BorderThickness="1"
                   HorizontalGridLinesBrush="{DynamicResource Border}" VerticalGridLinesBrush="{DynamicResource Border}"
                   ColumnHeaderStyle="{StaticResource GridHeader}">
+            <DataGrid.InputBindings>
+                <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding PipelineCommand}" />
+            </DataGrid.InputBindings>
+            <DataGrid.ContextMenu>
+                <ContextMenu DataContext="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                    <MenuItem Header="{loc:Loc Ats_PipelineRow}" Command="{Binding PipelineCommand}" />
+                    <MenuItem Header="{loc:Loc Common_Edit}" Command="{Binding EditCommand}" />
+                    <MenuItem Header="{loc:Loc Ats_CloseOffer}" Command="{Binding CloseCommand}" />
+                    <MenuItem Header="{loc:Loc Ats_Reopen}" Command="{Binding ReopenCommand}" />
+                    <Separator />
+                    <MenuItem Header="{loc:Loc Common_Delete}" Command="{Binding DeleteCommand}" />
+                </ContextMenu>
+            </DataGrid.ContextMenu>
             <DataGrid.Columns>
                 <DataGridTextColumn Header="{loc:Loc Employee_Poste}" Binding="{Binding Title}" Width="*" />
                 <DataGridTextColumn Header="{loc:Loc Users_ColDepartment}" Binding="{Binding Department}" Width="160" />
@@ -96,13 +109,8 @@
 
         <Grid Grid.Row="3" Margin="0,14,0,0">
             <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Center" HorizontalAlignment="Left" Text="{Binding StatusMessage}" />
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Style="{StaticResource SecondaryButton}" Content="{loc:Loc Common_Edit}" Command="{Binding EditCommand}" />
-                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="{loc:Loc Ats_CloseOffer}" Command="{Binding CloseCommand}" />
-                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="{loc:Loc Ats_Reopen}" Command="{Binding ReopenCommand}" />
-                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="{loc:Loc Common_Delete}" Command="{Binding DeleteCommand}" />
-                <Button Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Content="{loc:Loc Dashboard_Kpi_Candidates}" Command="{Binding PipelineCommand}" />
-            </StackPanel>
+            <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Center" HorizontalAlignment="Right"
+                       Foreground="{DynamicResource TextMuted}" Text="{loc:Loc Hint_RowActions}" />
         </Grid>
     </Grid>
 </UserControl>

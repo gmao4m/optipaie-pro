@@ -41,6 +41,9 @@
                     <ListBox Grid.Row="1" BorderThickness="0" Background="Transparent"
                              ItemsSource="{Binding Companies}" SelectedItem="{Binding SelectedCompany}"
                              ScrollViewer.HorizontalScrollBarVisibility="Disabled" HorizontalContentAlignment="Stretch">
+                        <ListBox.InputBindings>
+                            <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding EditCommand}" />
+                        </ListBox.InputBindings>
                         <ListBox.ItemContainerStyle>
                             <Style TargetType="ListBoxItem">
                                 <Setter Property="Margin" Value="6,1" />

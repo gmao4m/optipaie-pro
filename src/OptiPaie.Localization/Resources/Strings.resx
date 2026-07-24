@@ -963,4 +963,22 @@
   <data name="Att_Late" xml:space="preserve"><value>Retards</value></data>
   <data name="Leave_Entitlement" xml:space="preserve"><value>Droit</value></data>
   <data name="Shell_Nav_Attendance" xml:space="preserve"><value>Présence</value></data>
+  <data name="Common_Export" xml:space="preserve"><value>Exporter</value></data>
+  <data name="Ats_HireRow" xml:space="preserve"><value>Recruter le candidat</value></data>
+  <data name="Ats_RejectRow" xml:space="preserve"><value>Rejeter le candidat</value></data>
+  <data name="Common_More" xml:space="preserve"><value>Plus…</value></data>
+  <data name="Hint_RowActions" xml:space="preserve"><value>Double-cliquez pour ouvrir · clic droit pour les actions</value></data>
+  <data name="Contract_ActivateRow" xml:space="preserve"><value>Activer le contrat</value></data>
+  <data name="Contract_RenewRow" xml:space="preserve"><value>Renouveler le contrat</value></data>
+  <data name="Contract_TerminateRow" xml:space="preserve"><value>Résilier le contrat</value></data>
+  <data name="Loan_OpenDetail" xml:space="preserve"><value>Ouvrir le détail</value></data>
+  <data name="Asset_AssignRow" xml:space="preserve"><value>Attribuer à un employé</value></data>
+  <data name="Asset_ReturnRow" xml:space="preserve"><value>Enregistrer le retour</value></data>
+  <data name="Asset_HistoryRow" xml:space="preserve"><value>Voir l'historique</value></data>
+  <data name="Training_ParticipantsRow" xml:space="preserve"><value>Gérer les participants</value></data>
+  <data name="Leave_ApproveRow" xml:space="preserve"><value>Approuver la demande</value></data>
+  <data name="Leave_RejectRow" xml:space="preserve"><value>Rejeter la demande</value></data>
+  <data name="Ats_PipelineRow" xml:space="preserve"><value>Ouvrir les candidatures</value></data>
+  <data name="Archive_PreviewRow" xml:space="preserve"><value>Aperçu du bulletin</value></data>
+  <data name="Archive_PrintRow" xml:space="preserve"><value>Imprimer le bulletin</value></data>
 </root>

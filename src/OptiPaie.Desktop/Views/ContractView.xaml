@@ -111,6 +111,20 @@
                   BorderBrush="{DynamicResource Border}" BorderThickness="1"
                   HorizontalGridLinesBrush="{DynamicResource Border}" VerticalGridLinesBrush="{DynamicResource Border}"
                   ColumnHeaderStyle="{StaticResource GridHeader}">
+            <DataGrid.InputBindings>
+                <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding EditCommand}" />
+            </DataGrid.InputBindings>
+            <DataGrid.ContextMenu>
+                <ContextMenu DataContext="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                    <MenuItem Header="{loc:Loc Common_Edit}" Command="{Binding EditCommand}" />
+                    <MenuItem Header="{loc:Loc Contract_ActivateRow}" Command="{Binding ActivateCommand}" />
+                    <MenuItem Header="{loc:Loc Contract_RenewRow}" Command="{Binding RenewCommand}" />
+                    <MenuItem Header="{loc:Loc Contract_TerminateRow}" Command="{Binding TerminateCommand}" />
+                    <MenuItem Header="{loc:Loc Common_ExportPdf}" Command="{Binding PdfCommand}" />
+                    <Separator />
+                    <MenuItem Header="{loc:Loc Common_Delete}" Command="{Binding DeleteCommand}" />
+                </ContextMenu>
+            </DataGrid.ContextMenu>
             <DataGrid.Columns>
                 <DataGridTextColumn Header="{loc:Loc Payroll_Employee}" Binding="{Binding EmployeeName}" Width="*" />
                 <DataGridTemplateColumn Header="{loc:Loc Common_Type}" Width="90">
@@ -144,14 +158,8 @@
 
         <Grid Grid.Row="3" Margin="0,14,0,0">
             <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Center" HorizontalAlignment="Left" Text="{Binding StatusMessage}" />
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Style="{StaticResource SecondaryButton}" Content="PDF" Command="{Binding PdfCommand}" />
-                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="{loc:Loc Common_Edit}" Command="{Binding EditCommand}" />
-                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="{loc:Loc Contract_Terminate}" Command="{Binding TerminateCommand}" />
-                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="{loc:Loc Contract_Renew}" Command="{Binding RenewCommand}" />
-                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="{loc:Loc Common_Delete}" Command="{Binding DeleteCommand}" />
-                <Button Style="{StaticResource AccentButton}" Margin="8,0,0,0" Content="{loc:Loc Contract_Activate}" Command="{Binding ActivateCommand}" />
-            </StackPanel>
+            <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Center" HorizontalAlignment="Right"
+                       Foreground="{DynamicResource TextMuted}" Text="{loc:Loc Hint_RowActions}" />
         </Grid>
     </Grid>
 </UserControl>

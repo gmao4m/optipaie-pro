@@ -84,6 +84,21 @@
                   BorderBrush="{DynamicResource Border}" BorderThickness="1"
                   HorizontalGridLinesBrush="{DynamicResource Border}" VerticalGridLinesBrush="{DynamicResource Border}"
                   ColumnHeaderStyle="{StaticResource GridHeader}">
+            <DataGrid.InputBindings>
+                <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding EditCommand}" />
+            </DataGrid.InputBindings>
+            <DataGrid.ContextMenu>
+                <ContextMenu DataContext="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                    <MenuItem Header="{loc:Loc Common_Edit}" Command="{Binding EditCommand}" />
+                    <MenuItem Header="{loc:Loc Asset_AssignRow}" Command="{Binding AssignCommand}" />
+                    <MenuItem Header="{loc:Loc Asset_ReturnRow}" Command="{Binding ReturnCommand}" />
+                    <MenuItem Header="{loc:Loc Asset_HistoryRow}" Command="{Binding HistoryCommand}" />
+                    <Separator />
+                    <MenuItem Header="{loc:Loc Asset_Repair}" Command="{Binding RepairCommand}" />
+                    <MenuItem Header="{loc:Loc Asset_Retire}" Command="{Binding RetireCommand}" />
+                    <MenuItem Header="{loc:Loc Common_Delete}" Command="{Binding DeleteCommand}" />
+                </ContextMenu>
+            </DataGrid.ContextMenu>
             <DataGrid.Columns>
                 <DataGridTextColumn Header="{loc:Loc Asset_Title}" Binding="{Binding Name}" Width="*" />
                 <DataGridTextColumn Header="{loc:Loc Asset_Category}" Binding="{Binding CategoryLabel}" Width="120" ElementStyle="{StaticResource CenterText}" />
@@ -107,15 +122,8 @@
 
         <Grid Grid.Row="3" Margin="0,14,0,0">
             <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Center" HorizontalAlignment="Left" Text="{Binding StatusMessage}" />
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Style="{StaticResource SecondaryButton}" Content="{loc:Loc Asset_History}" Command="{Binding HistoryCommand}" />
-                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="{loc:Loc Common_Edit}" Command="{Binding EditCommand}" />
-                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="{loc:Loc Asset_Repair}" Command="{Binding RepairCommand}" />
-                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="{loc:Loc Asset_Retire}" Command="{Binding RetireCommand}" />
-                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="{loc:Loc Common_Delete}" Command="{Binding DeleteCommand}" />
-                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="{loc:Loc Asset_Return}" Command="{Binding ReturnCommand}" />
-                <Button Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Content="{loc:Loc Asset_Assign}" Command="{Binding AssignCommand}" />
-            </StackPanel>
+            <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Center" HorizontalAlignment="Right"
+                       Foreground="{DynamicResource TextMuted}" Text="{loc:Loc Hint_RowActions}" />
         </Grid>
     </Grid>
 </UserControl>
