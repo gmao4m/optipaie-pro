@@ -6,6 +6,7 @@ using System.Windows.Threading;
 using OptiPaie.Common.Constants;
 using OptiPaie.Core.Licensing;
 using OptiPaie.Core.Updates;
+using OptiPaie.Desktop.Common;
 using OptiPaie.Desktop.Composition;
 using OptiPaie.Desktop.Shell;
 using OptiPaie.Desktop.ViewModels;
@@ -31,6 +32,11 @@ namespace OptiPaie.Desktop
 
         protected override void OnStartup(StartupEventArgs e)
         {
+            // Install last-resort crash capture FIRST, so any failure during startup,
+            // composition, or later navigation is written to disk (see Common/CrashLog).
+            CrashLog.Install(this);
+            CrashLog.Breadcrumb("OnStartup");
+
             // Velopack install/update hooks must run before anything else. In a normal
             // launch this returns immediately; during install/update Velopack handles
             // its hook arguments and exits. Never touches business data.

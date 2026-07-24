@@ -54,6 +54,7 @@ namespace OptiPaie.Desktop.ViewModels
 
         public PerformanceViewModel(AppServices services)
         {
+            Common.CrashLog.Breadcrumb("Performance VM: constructing");
             _services = services;
 
             for (int y = DateTime.Today.Year - 5; y <= DateTime.Today.Year + 1; y++) Years.Add(y);
@@ -91,19 +92,26 @@ namespace OptiPaie.Desktop.ViewModels
             // degrades that tab to empty rather than tearing down the whole module (and,
             // via the shell's activation guard, never the app). The entry path is proven
             // crash-free by PerformanceEntryPathTests, but real-world data is unpredictable.
-            SafeRefresh(Cycles.Refresh);
-            SafeRefresh(Modeles.Refresh);
-            SafeRefresh(Dashboard.Refresh);
-            SafeRefresh(Calibration.Refresh);
-            SafeRefresh(Objectifs.Refresh);
-            SafeRefresh(Comparaison.Refresh);
-            SafeRefresh(Parcours.Refresh);
+            SafeRefresh("Cycles", Cycles.Refresh);
+            SafeRefresh("Modeles", Modeles.Refresh);
+            SafeRefresh("Dashboard", Dashboard.Refresh);
+            SafeRefresh("Calibration", Calibration.Refresh);
+            SafeRefresh("Objectifs", Objectifs.Refresh);
+            SafeRefresh("Comparaison", Comparaison.Refresh);
+            SafeRefresh("Parcours", Parcours.Refresh);
         }
 
-        private static void SafeRefresh(Action refresh)
+        private static void SafeRefresh(string tab, Action refresh)
         {
+            // A breadcrumb per tab, flushed to disk BEFORE the load runs, so even an
+            // uncatchable failure (e.g. StackOverflow) names the exact tab that ran last.
+            Common.CrashLog.Breadcrumb("Performance tab refresh: " + tab);
             try { refresh(); }
-            catch (Exception ex) { System.Diagnostics.Debug.WriteLine("Performance tab refresh failed: " + ex); }
+            catch (Exception ex)
+            {
+                Common.CrashLog.Fatal("Performance tab '" + tab + "' refresh", ex);
+                System.Diagnostics.Debug.WriteLine("Performance tab refresh failed: " + ex);
+            }
         }
 
         public ObservableCollection<Company> Companies { get; } = new ObservableCollection<Company>();
@@ -138,11 +146,14 @@ namespace OptiPaie.Desktop.ViewModels
 
         public void OnActivated()
         {
+            Common.CrashLog.Breadcrumb("Performance.OnActivated: start");
             // The active company comes from the single global selector in the header.
             _selectedCompany = _services.CompanyContext.Active;
             Raise(nameof(SelectedCompany));
             Load();
+            Common.CrashLog.Breadcrumb("Performance.OnActivated: reviews loaded, refreshing tabs");
             RefreshTabs();
+            Common.CrashLog.Breadcrumb("Performance.OnActivated: done (view render follows)");
         }
 
         private void Load()

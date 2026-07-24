@@ -103,7 +103,7 @@
                                             <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="13.5" TextTrimming="CharacterEllipsis" />
                                         </DockPanel>
                                         <TextBlock Text="{Binding TypeLabel}" FontSize="11.5" Foreground="{DynamicResource TextMuted}" Margin="0,2,0,4" />
-                                        <ProgressBar Style="{StaticResource Bar}" Value="{Binding CompletionValue}" />
+                                        <ProgressBar Style="{StaticResource Bar}" Value="{Binding CompletionValue, Mode=OneWay}" />
                                         <TextBlock Text="{Binding CompletionText}" FontSize="11" Foreground="{DynamicResource TextSecondary}" Margin="0,3,0,0" />
                                     </StackPanel>
                                 </DataTemplate>
@@ -124,7 +124,7 @@
                                         <Border Style="{StaticResource Card}" Padding="12,8" Margin="0,0,8,8" Width="180">
                                             <StackPanel>
                                                 <TextBlock Text="{Binding Department}" FontWeight="SemiBold" FontSize="12.5" />
-                                                <ProgressBar Style="{StaticResource Bar}" Margin="0,5,0,3" Value="{Binding CompletionValue}" />
+                                                <ProgressBar Style="{StaticResource Bar}" Margin="0,5,0,3" Value="{Binding CompletionValue, Mode=OneWay}" />
                                                 <TextBlock Text="{Binding CompletionText}" FontSize="11" Foreground="{DynamicResource TextMuted}" />
                                             </StackPanel>
                                         </Border>
@@ -300,7 +300,7 @@
                                                     <ColumnDefinition Width="70" />
                                                 </Grid.ColumnDefinitions>
                                                 <TextBlock Grid.Column="0" Text="{Binding Department}" VerticalAlignment="Center" FontSize="12.5" />
-                                                <ProgressBar Grid.Column="1" Style="{StaticResource Bar}" VerticalAlignment="Center" Foreground="{Binding Brush}" Value="{Binding BarValue}" />
+                                                <ProgressBar Grid.Column="1" Style="{StaticResource Bar}" VerticalAlignment="Center" Foreground="{Binding Brush}" Value="{Binding BarValue, Mode=OneWay}" />
                                                 <TextBlock Grid.Column="2" Text="{Binding AverageText}" HorizontalAlignment="Right" VerticalAlignment="Center" FontFamily="{StaticResource MonoFont}" FontSize="12.5" />
                                             </Grid>
                                         </DataTemplate>
@@ -317,7 +317,7 @@
                                                     <ColumnDefinition Width="70" />
                                                 </Grid.ColumnDefinitions>
                                                 <TextBlock Grid.Column="0" Text="{Binding Label}" VerticalAlignment="Center" FontSize="12.5" />
-                                                <ProgressBar Grid.Column="1" Style="{StaticResource Bar}" VerticalAlignment="Center" Value="{Binding BarValue}" />
+                                                <ProgressBar Grid.Column="1" Style="{StaticResource Bar}" VerticalAlignment="Center" Value="{Binding BarValue, Mode=OneWay}" />
                                                 <TextBlock Grid.Column="2" Text="{Binding AverageText}" HorizontalAlignment="Right" VerticalAlignment="Center" FontFamily="{StaticResource MonoFont}" FontSize="12.5" />
                                             </Grid>
                                         </DataTemplate>
@@ -382,7 +382,7 @@
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel VerticalAlignment="Center" Margin="8,0">
-                                            <ProgressBar Style="{StaticResource Bar}" Value="{Binding ProgressValue}" />
+                                            <ProgressBar Style="{StaticResource Bar}" Value="{Binding ProgressValue, Mode=OneWay}" />
                                             <TextBlock Text="{Binding ProgressText}" FontSize="11" Foreground="{DynamicResource TextMuted}" Margin="0,3,0,0" HorizontalAlignment="Center" />
                                         </StackPanel>
                                     </DataTemplate>
