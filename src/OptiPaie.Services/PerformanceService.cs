@@ -1842,7 +1842,9 @@ namespace OptiPaie.Services
         {
             switch (type)
             {
+                case PerformanceCycleType.Monthly: return "Mensuelle";
                 case PerformanceCycleType.Quarterly: return "Trimestrielle";
+                case PerformanceCycleType.SemiAnnual: return "Semestrielle";
                 case PerformanceCycleType.Annual: return "Annuelle";
                 case PerformanceCycleType.Probation: return "Fin d'essai";
                 default: return "Personnalisée";

@@ -6,6 +6,8 @@ namespace OptiPaie.Core.Enums
         Quarterly = 1,
         Annual = 2,
         Probation = 3,
-        Custom = 4
+        Custom = 4,
+        Monthly = 5,
+        SemiAnnual = 6
     }
 }

@@ -65,11 +65,17 @@ namespace OptiPaie.Desktop.ViewModels.Performance
             _companyId = companyId;
             _name = "Campagne " + DateTime.Today.Year;
 
+            CycleTypes.Add(new LabeledOption<PerformanceCycleType>(PerformanceCycleType.Monthly, "Mensuelle"));
             CycleTypes.Add(new LabeledOption<PerformanceCycleType>(PerformanceCycleType.Quarterly, "Trimestrielle"));
+            CycleTypes.Add(new LabeledOption<PerformanceCycleType>(PerformanceCycleType.SemiAnnual, "Semestrielle"));
             CycleTypes.Add(new LabeledOption<PerformanceCycleType>(PerformanceCycleType.Annual, "Annuelle"));
             CycleTypes.Add(new LabeledOption<PerformanceCycleType>(PerformanceCycleType.Probation, "Fin d'essai"));
             CycleTypes.Add(new LabeledOption<PerformanceCycleType>(PerformanceCycleType.Custom, "Personnalisée"));
-            _cycleType = CycleTypes[0];
+            // Semi-annual is the recommended default cadence.
+            _cycleType = CycleTypes.First(t => t.Value == PerformanceCycleType.SemiAnnual);
+
+            // Period auto-defaults to the current semester (freely editable below).
+            _periodLabel = (DateTime.Today.Month <= 6 ? "S1 " : "S2 ") + DateTime.Today.Year;
 
             foreach (string dept in _services.Employees.GetByCompany(companyId, false)
                          .Select(e => string.IsNullOrWhiteSpace(e.Department) ? "Non affecté" : e.Department.Trim())
