@@ -795,6 +795,12 @@
   <data name="Tmpl_Name" xml:space="preserve"><value>Nom du modèle</value></data>
   <data name="Tmpl_Scale" xml:space="preserve"><value>Échelle /</value></data>
   <data name="Tmpl_Weight" xml:space="preserve"><value>Poids %</value></data>
+  <data name="Tmpl_Kpi" xml:space="preserve"><value>KPI</value></data>
+  <data name="Tmpl_HigherBetter" xml:space="preserve"><value>+ = mieux</value></data>
+  <data name="Tmpl_DefaultTarget" xml:space="preserve"><value>Cible</value></data>
+  <data name="Tmpl_Normalize" xml:space="preserve"><value>Répartir à 100 %</value></data>
+  <data name="Tmpl_Equalize" xml:space="preserve"><value>Poids égaux</value></data>
+  <data name="Tmpl_SimpleMode" xml:space="preserve"><value>Mode simple</value></data>
   <data name="PerfEdit_Weight" xml:space="preserve"><value>Poids</value></data>
   <data name="PerfEdit_ScoreCol" xml:space="preserve"><value>Note /20</value></data>
   <data name="PerfEdit_Comment" xml:space="preserve"><value>Commentaire</value></data>

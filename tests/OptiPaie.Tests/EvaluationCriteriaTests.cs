@@ -217,6 +217,27 @@ namespace OptiPaie.Tests
         // ---------------------------------------------------------------- template duplication
 
         [Test]
+        public void SaveTemplate_PersistsAKpiCriterionWithItsTarget()
+        {
+            var template = new PerformanceTemplate
+            {
+                CompanyId = _companyId, Name = "Grille sur mesure", DepartmentTag = "Commercial", ScaleMax = 5m
+            };
+            var criteria = new List<PerformanceTemplateCriterion>
+            {
+                new PerformanceTemplateCriterion { Label = "Chiffre d'affaires", WeightPercent = 60m, CriterionType = CriterionType.Kpi, HigherIsBetter = true, DefaultTarget = 500000m },
+                new PerformanceTemplateCriterion { Label = "Relation client", WeightPercent = 40m, CriterionType = CriterionType.Behavioral }
+            };
+
+            long id = _service.SaveTemplate(template, criteria).Value;
+
+            TemplateDetail saved = _service.GetTemplateDetail(id);
+            PerformanceTemplateCriterion kpi = saved.Criteria.First(c => c.Label == "Chiffre d'affaires");
+            Assert.That(kpi.CriterionType, Is.EqualTo(CriterionType.Kpi));
+            Assert.That(kpi.DefaultTarget, Is.EqualTo(500000m));
+        }
+
+        [Test]
         public void DuplicateTemplate_PreservesTheKpiCriterionType()
         {
             long sourceId = _service.GetTemplates(_companyId).First(t => t.GroupKey == "dept-commercial").TemplateId;

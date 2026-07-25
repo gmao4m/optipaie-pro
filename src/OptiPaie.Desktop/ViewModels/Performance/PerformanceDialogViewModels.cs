@@ -147,15 +147,47 @@ namespace OptiPaie.Desktop.ViewModels.Performance
 
     public sealed class TemplateCriterionRowViewModel : ObservableObject
     {
+        private static readonly CultureInfo Fr = CultureInfo.GetCultureInfo("fr-FR");
         private readonly Action _changed;
         private string _label;
         private decimal _weight;
-        public TemplateCriterionRowViewModel(Action changed, string label = "", decimal weight = 0m)
+        private bool _isKpi;
+        private bool _higherIsBetter;
+        private string _targetText;
+
+        public TemplateCriterionRowViewModel(Action changed, string label = "", decimal weight = 0m,
+            CriterionType type = CriterionType.Behavioral, bool higherIsBetter = true, decimal? defaultTarget = null)
         {
-            _changed = changed; _label = label; _weight = weight;
+            _changed = changed;
+            _label = label;
+            _weight = weight;
+            _isKpi = type == CriterionType.Kpi;
+            _higherIsBetter = higherIsBetter;
+            _targetText = defaultTarget.HasValue ? defaultTarget.Value.ToString("0.##", Fr) : string.Empty;
         }
+
         public string Label { get => _label; set => Set(ref _label, value); }
         public decimal Weight { get => _weight; set { if (Set(ref _weight, value)) _changed?.Invoke(); } }
+
+        /// <summary>KPI (numeric target/achieved) vs behavioral (rated 1-5).</summary>
+        public bool IsKpi { get => _isKpi; set { if (Set(ref _isKpi, value)) Raise(nameof(ShowKpiOptions)); } }
+        public bool ShowKpiOptions => _isKpi;
+        public bool HigherIsBetter { get => _higherIsBetter; set => Set(ref _higherIsBetter, value); }
+
+        /// <summary>Optional default target that pre-fills a review (KPI only).</summary>
+        public string TargetText { get => _targetText; set => Set(ref _targetText, value); }
+
+        public CriterionType Type => _isKpi ? CriterionType.Kpi : CriterionType.Behavioral;
+
+        public decimal? DefaultTarget
+        {
+            get
+            {
+                if (!_isKpi || string.IsNullOrWhiteSpace(_targetText)) return null;
+                string cleaned = _targetText.Replace(" ", string.Empty).Replace(",", ".");
+                return decimal.TryParse(cleaned, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal v) ? v : (decimal?)null;
+            }
+        }
     }
 
     public sealed class TemplateEditorViewModel : ObservableObject
@@ -172,6 +204,8 @@ namespace OptiPaie.Desktop.ViewModels.Performance
         private string _departmentTag;
         private decimal _scaleMax = 20m;
         private string _weightTotalText = "0 %";
+        private bool _weightBalanced;
+        private bool _simpleMode;
 
         public TemplateEditorViewModel(AppServices services, long companyId, long sourceTemplateId, bool duplicate)
         {
@@ -190,13 +224,16 @@ namespace OptiPaie.Desktop.ViewModels.Performance
                 _groupKey = duplicate ? null : detail.Template.GroupKey;
                 foreach (PerformanceTemplateCriterion c in detail.Criteria)
                 {
-                    Criteria.Add(new TemplateCriterionRowViewModel(Recompute, c.Label, c.WeightPercent));
+                    Criteria.Add(new TemplateCriterionRowViewModel(Recompute, c.Label, c.WeightPercent,
+                        c.CriterionType, c.HigherIsBetter, c.DefaultTarget));
                 }
             }
 
             Title = duplicate ? "Dupliquer le modèle" : "Modifier le modèle";
-            AddCriterionCommand = new RelayCommand(() => { Criteria.Add(new TemplateCriterionRowViewModel(Recompute, "Nouveau critère", 0m)); Recompute(); });
-            RemoveCriterionCommand = new RelayCommand(p => { if (p is TemplateCriterionRowViewModel r) { Criteria.Remove(r); Recompute(); } });
+            AddCriterionCommand = new RelayCommand(AddCriterion);
+            RemoveCriterionCommand = new RelayCommand(RemoveCriterion);
+            NormalizeCommand = new RelayCommand(Normalize);
+            EqualizeCommand = new RelayCommand(() => { EqualizeWeights(); Recompute(); });
             SaveCommand = new RelayCommand(Save);
             CancelCommand = new RelayCommand(() => RequestClose?.Invoke(false));
             Recompute();
@@ -212,15 +249,85 @@ namespace OptiPaie.Desktop.ViewModels.Performance
         public decimal ScaleMax { get => _scaleMax; set => Set(ref _scaleMax, value); }
         public string WeightTotalText { get => _weightTotalText; private set => Set(ref _weightTotalText, value); }
 
+        /// <summary>True when the weights sum to 100 % (± 0.5); drives the colour feedback.</summary>
+        public bool WeightBalanced { get => _weightBalanced; private set => Set(ref _weightBalanced, value); }
+
+        /// <summary>Simple mode: all criteria share an equal weight (no manual weight editing).</summary>
+        public bool SimpleMode
+        {
+            get => _simpleMode;
+            set
+            {
+                if (Set(ref _simpleMode, value))
+                {
+                    if (value) EqualizeWeights();
+                    Recompute();
+                    Raise(nameof(WeightsEditable));
+                }
+            }
+        }
+
+        public bool WeightsEditable => !_simpleMode;
+
         public ICommand AddCriterionCommand { get; }
         public ICommand RemoveCriterionCommand { get; }
+        public ICommand NormalizeCommand { get; }
+        public ICommand EqualizeCommand { get; }
         public ICommand SaveCommand { get; }
         public ICommand CancelCommand { get; }
+
+        private void AddCriterion()
+        {
+            Criteria.Add(new TemplateCriterionRowViewModel(Recompute, "Nouveau critère", 0m));
+            if (_simpleMode) EqualizeWeights();
+            Recompute();
+        }
+
+        private void RemoveCriterion(object p)
+        {
+            if (p is TemplateCriterionRowViewModel r)
+            {
+                Criteria.Remove(r);
+                if (_simpleMode) EqualizeWeights();
+                Recompute();
+            }
+        }
+
+        /// <summary>Scales the current weights proportionally so they sum to exactly 100 %.</summary>
+        private void Normalize()
+        {
+            if (Criteria.Count == 0) return;
+            decimal total = Criteria.Sum(c => c.Weight);
+            if (total <= 0m) { EqualizeWeights(); Recompute(); return; }
+
+            decimal acc = 0m;
+            for (int k = 0; k < Criteria.Count; k++)
+            {
+                if (k == Criteria.Count - 1) Criteria[k].Weight = Math.Round(100m - acc, 2, MidpointRounding.AwayFromZero);
+                else { decimal w = Math.Round(Criteria[k].Weight / total * 100m, 2, MidpointRounding.AwayFromZero); Criteria[k].Weight = w; acc += w; }
+            }
+            Recompute();
+        }
+
+        /// <summary>Gives every criterion the same weight (100 / n), with any rounding on the last.</summary>
+        private void EqualizeWeights()
+        {
+            int n = Criteria.Count;
+            if (n == 0) return;
+            decimal each = Math.Round(100m / n, 2, MidpointRounding.AwayFromZero);
+            decimal acc = 0m;
+            for (int k = 0; k < n; k++)
+            {
+                if (k == n - 1) Criteria[k].Weight = Math.Round(100m - acc, 2, MidpointRounding.AwayFromZero);
+                else { Criteria[k].Weight = each; acc += each; }
+            }
+        }
 
         private void Recompute()
         {
             decimal total = Criteria.Sum(c => c.Weight);
-            WeightTotalText = "Total des poids : " + total.ToString("0.##", Fr) + " % (doit faire 100 %)";
+            WeightBalanced = Math.Abs(total - 100m) <= 0.5m;
+            WeightTotalText = "Total des poids : " + total.ToString("0.##", Fr) + " % / 100 %";
         }
 
         private void Save()
@@ -236,7 +343,14 @@ namespace OptiPaie.Desktop.ViewModels.Performance
                 Kind = TemplateKind.Custom,
                 ScaleMax = _scaleMax <= 0m ? 20m : _scaleMax
             };
-            var criteria = Criteria.Select(c => new PerformanceTemplateCriterion { Label = c.Label, WeightPercent = c.Weight }).ToList();
+            var criteria = Criteria.Select(c => new PerformanceTemplateCriterion
+            {
+                Label = c.Label,
+                WeightPercent = c.Weight,
+                CriterionType = c.Type,
+                HigherIsBetter = c.HigherIsBetter,
+                DefaultTarget = c.DefaultTarget
+            }).ToList();
 
             Result<long> r = _services.Performance.SaveTemplate(template, criteria);
             if (r.IsFailure) { Dialogs.Error(r.Error); return; }

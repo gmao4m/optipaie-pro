@@ -60,7 +60,19 @@
                   ColumnHeaderStyle="{StaticResource GridHeader}">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="{loc:Loc Perf_Criterion}" Binding="{Binding Label, UpdateSourceTrigger=PropertyChanged}" Width="*" />
-                <DataGridTextColumn Header="{loc:Loc Tmpl_Weight}" Binding="{Binding Weight, UpdateSourceTrigger=PropertyChanged}" Width="90" />
+                <DataGridCheckBoxColumn Header="{loc:Loc Tmpl_Kpi}" Binding="{Binding IsKpi, UpdateSourceTrigger=PropertyChanged}" Width="48" />
+                <DataGridCheckBoxColumn Header="{loc:Loc Tmpl_HigherBetter}" Binding="{Binding HigherIsBetter, UpdateSourceTrigger=PropertyChanged}" Width="70" />
+                <DataGridTextColumn Header="{loc:Loc Tmpl_DefaultTarget}" Binding="{Binding TargetText, UpdateSourceTrigger=PropertyChanged}" Width="72" />
+                <DataGridTemplateColumn Header="{loc:Loc Tmpl_Weight}" Width="76">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBox BorderThickness="0" Background="Transparent" VerticalContentAlignment="Center" Padding="6,0"
+                                     Foreground="{DynamicResource TextPrimary}"
+                                     Text="{Binding Weight, UpdateSourceTrigger=PropertyChanged}"
+                                     IsReadOnly="{Binding DataContext.SimpleMode, RelativeSource={RelativeSource AncestorType=DataGrid}}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
                 <DataGridTemplateColumn Width="40" CanUserResize="False">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
@@ -74,8 +86,30 @@
         </DataGrid>
 
         <Grid Grid.Row="3" Margin="0,10,0,0">
-            <Button HorizontalAlignment="Left" Style="{StaticResource SecondaryButton}" Content="{loc:Loc Perf_AddCriterion}" Command="{Binding AddCriterionCommand}" />
-            <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondary}" Text="{Binding WeightTotalText}" />
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0" Orientation="Horizontal">
+                <Button Style="{StaticResource SecondaryButton}" Content="{loc:Loc Perf_AddCriterion}" Command="{Binding AddCriterionCommand}" />
+                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="{loc:Loc Tmpl_Normalize}" Command="{Binding NormalizeCommand}" />
+                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="{loc:Loc Tmpl_Equalize}" Command="{Binding EqualizeCommand}" />
+            </StackPanel>
+            <CheckBox Grid.Column="1" Margin="14,0,0,0" VerticalAlignment="Center" IsChecked="{Binding SimpleMode}"
+                      Content="{loc:Loc Tmpl_SimpleMode}" FontSize="12" Foreground="{DynamicResource TextSecondary}" VerticalContentAlignment="Center" />
+            <TextBlock Grid.Column="2" VerticalAlignment="Center" FontWeight="SemiBold" Text="{Binding WeightTotalText}">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Foreground" Value="{DynamicResource Deduction}" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding WeightBalanced}" Value="True">
+                                <Setter Property="Foreground" Value="{DynamicResource Accent}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
         </Grid>
 
         <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">

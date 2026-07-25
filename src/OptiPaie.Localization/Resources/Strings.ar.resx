@@ -795,6 +795,12 @@
   <data name="Tmpl_Name" xml:space="preserve"><value>اسم النموذج</value></data>
   <data name="Tmpl_Scale" xml:space="preserve"><value>السلّم /</value></data>
   <data name="Tmpl_Weight" xml:space="preserve"><value>الوزن ٪</value></data>
+  <data name="Tmpl_Kpi" xml:space="preserve"><value>مؤشر</value></data>
+  <data name="Tmpl_HigherBetter" xml:space="preserve"><value>+ = أفضل</value></data>
+  <data name="Tmpl_DefaultTarget" xml:space="preserve"><value>الهدف</value></data>
+  <data name="Tmpl_Normalize" xml:space="preserve"><value>توزيع إلى 100٪</value></data>
+  <data name="Tmpl_Equalize" xml:space="preserve"><value>أوزان متساوية</value></data>
+  <data name="Tmpl_SimpleMode" xml:space="preserve"><value>الوضع البسيط</value></data>
   <data name="PerfEdit_Weight" xml:space="preserve"><value>الوزن</value></data>
   <data name="PerfEdit_ScoreCol" xml:space="preserve"><value>العلامة /20</value></data>
   <data name="PerfEdit_Comment" xml:space="preserve"><value>تعليق</value></data>
