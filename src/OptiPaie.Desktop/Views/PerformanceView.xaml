@@ -266,7 +266,12 @@
             <TabItem Header="{loc:Loc Shell_Nav_Dashboard}">
                 <ScrollViewer DataContext="{Binding Dashboard}" Margin="0,14,0,0" VerticalScrollBarVisibility="Auto">
                     <StackPanel>
-                        <TextBlock Style="{StaticResource H2}" Text="{Binding Headline}" />
+                        <Grid>
+                            <TextBlock Style="{StaticResource H2}" Text="{Binding Headline}" VerticalAlignment="Center" />
+                            <Button HorizontalAlignment="Right" Style="{StaticResource SecondaryButton}"
+                                    Content="{loc:Loc Common_ExportPdf}" Command="{Binding ExportPdfCommand}"
+                                    Visibility="{Binding HasData, Converter={StaticResource BoolToVis}}" />
+                        </Grid>
                         <TextBlock Style="{StaticResource Caption}" Margin="0,14,0,0" Text="{loc:Loc Perf_NoData}"
                                    Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVis}}" />
                         <Grid Margin="0,14,0,0" Visibility="{Binding HasData, Converter={StaticResource BoolToVis}}">

@@ -33,6 +33,7 @@ namespace OptiPaie.Desktop.Documents
             Employee employee = _model.Employee;
             PerformanceDetail detail = _model.Detail;
             PerformanceReview review = detail.Review;
+            string scaleMax = (review.ScaleMax <= 0m ? 20m : review.ScaleMax).ToString("0.##", Fr);
 
             container.Page(page =>
             {
@@ -87,16 +88,22 @@ namespace OptiPaie.Desktop.Documents
                         {
                             h.Cell().Element(Head).Text("Critère");
                             h.Cell().Element(Head).AlignCenter().Text("Poids");
-                            h.Cell().Element(Head).AlignCenter().Text("Note /20");
+                            h.Cell().Element(Head).AlignCenter().Text("Note /" + scaleMax);
                             h.Cell().Element(Head).Text("Commentaire");
                         });
 
                         foreach (PerformanceCriterion c in detail.Criteria)
                         {
+                            string cellComment = c.CriterionType == Core.Enums.CriterionType.Kpi && c.KpiTarget.HasValue
+                                ? "Cible " + c.KpiTarget.Value.ToString("0.##", Fr) + " · Réalisé " +
+                                  (c.KpiAchieved.HasValue ? c.KpiAchieved.Value.ToString("0.##", Fr) : "—") +
+                                  (string.IsNullOrWhiteSpace(c.Comment) ? string.Empty : " · " + c.Comment)
+                                : (c.Comment ?? string.Empty);
+
                             table.Cell().Element(Body).Text(c.Label ?? string.Empty);
                             table.Cell().Element(Body).AlignCenter().Text(c.Weight.ToString("0.##", Fr));
                             table.Cell().Element(Body).AlignCenter().Text(c.Score.ToString("0.##", Fr));
-                            table.Cell().Element(Body).Text(c.Comment ?? string.Empty);
+                            table.Cell().Element(Body).Text(cellComment);
                         }
                     });
 
@@ -105,7 +112,7 @@ namespace OptiPaie.Desktop.Documents
                         row.RelativeItem().Text(t =>
                         {
                             t.Span("Note globale : ").SemiBold();
-                            t.Span(review.OverallScore.ToString("0.##", Fr) + " / 20").FontSize(13).SemiBold();
+                            t.Span(review.OverallScore.ToString("0.##", Fr) + " / " + scaleMax).FontSize(13).SemiBold();
                         });
                         row.RelativeItem().AlignRight().Text(t =>
                         {

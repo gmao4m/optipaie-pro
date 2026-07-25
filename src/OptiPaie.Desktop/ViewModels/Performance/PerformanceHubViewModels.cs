@@ -1,19 +1,23 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using Microsoft.Win32;
 using OptiPaie.Core.Dtos;
 using OptiPaie.Core.Entities;
 using OptiPaie.Core.Enums;
 using OptiPaie.Core.Primitives;
 using OptiPaie.Desktop.Common;
 using OptiPaie.Desktop.Composition;
+using OptiPaie.Desktop.Documents;
 using OptiPaie.Desktop.Mvvm;
 using OptiPaie.Desktop.Views;
+using QuestPDF.Fluent;
 
 namespace OptiPaie.Desktop.ViewModels.Performance
 {
@@ -334,12 +338,16 @@ namespace OptiPaie.Desktop.ViewModels.Performance
         private readonly Func<long> _companyId;
         private string _headline = string.Empty;
         private bool _hasData;
+        private PerformanceDashboard _dashboard;
 
         public DashboardTabViewModel(AppServices services, Func<long> companyId)
         {
             _services = services;
             _companyId = companyId;
+            ExportPdfCommand = new RelayCommand(ExportPdf, () => _hasData);
         }
+
+        public ICommand ExportPdfCommand { get; }
 
         public ObservableCollection<PerformerRowViewModel> Top { get; } = new ObservableCollection<PerformerRowViewModel>();
         public ObservableCollection<PerformerRowViewModel> Bottom { get; } = new ObservableCollection<PerformerRowViewModel>();
@@ -355,6 +363,7 @@ namespace OptiPaie.Desktop.ViewModels.Performance
             Top.Clear(); Bottom.Clear(); Departments.Clear(); Trend.Clear();
             long companyId = _companyId();
             PerformanceDashboard d = companyId > 0 ? _services.Performance.GetDashboard(companyId) : null;
+            _dashboard = d;
 
             if (d == null || d.ReviewCount == 0)
             {
@@ -374,6 +383,45 @@ namespace OptiPaie.Desktop.ViewModels.Performance
             HasData = true;
             Raise(nameof(IsEmpty));
             Headline = "Moyenne entreprise : " + PerfUi.Pct(d.CompanyAveragePercent) + "  ·  " + d.ReviewCount + " évaluation(s)";
+        }
+
+        /// <summary>Exports the company-wide synthesis (department summary + ranking) as a PDF.</summary>
+        private void ExportPdf()
+        {
+            long companyId = _companyId();
+            if (_dashboard == null || _dashboard.ReviewCount == 0 || companyId <= 0)
+            {
+                return;
+            }
+
+            Company company = _services.Companies.Get(companyId);
+            var dialog = new SaveFileDialog
+            {
+                Filter = "Document PDF (*.pdf)|*.pdf",
+                FileName = "Synthese_evaluations_" + DateTime.Today.ToString("yyyyMMdd", CultureInfo.InvariantCulture) + ".pdf"
+            };
+            if (dialog.ShowDialog() != true)
+            {
+                return;
+            }
+
+            try
+            {
+                var document = new PerformanceRankingDocument(new PerformanceRankingModel
+                {
+                    Company = company,
+                    ScopeLabel = "Situation au " + DateTime.Today.ToString("dd/MM/yyyy", CultureInfo.GetCultureInfo("fr-FR")),
+                    Dashboard = _dashboard
+                });
+                Document.Create(document.Compose).GeneratePdf(dialog.FileName);
+                try { Process.Start(new ProcessStartInfo(dialog.FileName) { UseShellExecute = true }); }
+                catch (Exception ex) { _services.Logger.Warn("Ouverture PDF impossible : " + ex.Message); }
+            }
+            catch (Exception ex)
+            {
+                _services.Logger.Error("Export synthèse évaluations", ex);
+                Dialogs.Error("Impossible de générer le PDF : " + ex.Message);
+            }
         }
     }
 
