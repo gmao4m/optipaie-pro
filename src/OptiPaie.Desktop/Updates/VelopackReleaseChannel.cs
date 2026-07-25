@@ -34,7 +34,19 @@ namespace OptiPaie.Desktop.Updates
                 _initialised = true;
                 try
                 {
-                    if (_options != null && _options.IsConfigured)
+                    // Preferred: read the SAME GitHub Releases feed the release pipeline
+                    // publishes to (RELEASES + releases.win.json + *-full.nupkg on each release),
+                    // so a new tag is seen by every installed app on next launch.
+                    if (_options != null && !string.IsNullOrWhiteSpace(_options.GitHubRepo))
+                    {
+                        string repo = _options.GitHubRepo.Trim();
+                        string repoUrl = repo.StartsWith("http", StringComparison.OrdinalIgnoreCase)
+                            ? repo
+                            : "https://github.com/" + repo.TrimStart('/');
+                        var source = new Velopack.Sources.GithubSource(repoUrl, null, false);
+                        _manager = new Velopack.UpdateManager(source);
+                    }
+                    else if (_options != null && !string.IsNullOrWhiteSpace(_options.FeedUrl))
                     {
                         _manager = new Velopack.UpdateManager(_options.FeedUrl);
                     }
