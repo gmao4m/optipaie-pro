@@ -157,6 +157,10 @@
                                    Foreground="{DynamicResource TextMuted}" />
 
                         <ItemsControl ItemsSource="{Binding ModuleNav}" ItemTemplate="{StaticResource NavItemTemplate}" />
+
+                        <!-- Reference/output screens (Archive, Rapports) below the modules. -->
+                        <Border Height="1" Background="{DynamicResource Border}" Margin="6,12" />
+                        <ItemsControl ItemsSource="{Binding BottomNav}" ItemTemplate="{StaticResource NavItemTemplate}" />
                     </StackPanel>
                 </ScrollViewer>
             </DockPanel>

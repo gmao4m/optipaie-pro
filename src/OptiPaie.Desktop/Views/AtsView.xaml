@@ -1,7 +1,8 @@
 <UserControl x:Class="OptiPaie.Desktop.Views.AtsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:loc="clr-namespace:OptiPaie.Desktop.Localization">
+             xmlns:loc="clr-namespace:OptiPaie.Desktop.Localization"
+             xmlns:beh="clr-namespace:OptiPaie.Desktop.Behaviors">
     <UserControl.Resources>
         <Style x:Key="GridHeader" TargetType="DataGridColumnHeader">
             <Setter Property="Background" Value="{DynamicResource SurfaceMuted}" />
@@ -73,6 +74,11 @@
                   BorderBrush="{DynamicResource Border}" BorderThickness="1"
                   HorizontalGridLinesBrush="{DynamicResource Border}" VerticalGridLinesBrush="{DynamicResource Border}"
                   ColumnHeaderStyle="{StaticResource GridHeader}">
+            <DataGrid.RowStyle>
+                <Style TargetType="DataGridRow">
+                    <Setter Property="Cursor" Value="Hand" />
+                </Style>
+            </DataGrid.RowStyle>
             <DataGrid.InputBindings>
                 <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding PipelineCommand}" />
             </DataGrid.InputBindings>
@@ -101,6 +107,31 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
+                <DataGridTemplateColumn Width="92" CanUserResize="False" CanUserSort="False">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                <Button Style="{StaticResource RowIconButton}" Content="⋯" ToolTip="{loc:Loc Common_MoreActions}"
+                                        beh:RowActions.SelectRow="True" beh:RowActions.OpenMenuOnClick="True"
+                                        Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=DataGrid}}">
+                                    <Button.ContextMenu>
+                                        <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
+                                            <MenuItem Header="{loc:Loc Ats_PipelineRow}" Command="{Binding PipelineCommand}" />
+                                            <MenuItem Header="{loc:Loc Common_Edit}" Command="{Binding EditCommand}" />
+                                            <MenuItem Header="{loc:Loc Ats_CloseOffer}" Command="{Binding CloseCommand}" />
+                                            <MenuItem Header="{loc:Loc Ats_Reopen}" Command="{Binding ReopenCommand}" />
+                                            <Separator />
+                                            <MenuItem Header="{loc:Loc Common_Delete}" Command="{Binding DeleteCommand}" />
+                                        </ContextMenu>
+                                    </Button.ContextMenu>
+                                </Button>
+                                <Button Style="{StaticResource RowIconButton}" Content="›" ToolTip="{loc:Loc Common_Open}"
+                                        beh:RowActions.SelectRow="True"
+                                        Command="{Binding DataContext.PipelineCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
 
@@ -109,8 +140,6 @@
 
         <Grid Grid.Row="3" Margin="0,14,0,0">
             <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Center" HorizontalAlignment="Left" Text="{Binding StatusMessage}" />
-            <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Center" HorizontalAlignment="Right"
-                       Foreground="{DynamicResource TextMuted}" Text="{loc:Loc Hint_RowActions}" />
         </Grid>
     </Grid>
 </UserControl>

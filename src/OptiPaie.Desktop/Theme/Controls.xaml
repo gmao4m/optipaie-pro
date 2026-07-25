@@ -6,12 +6,18 @@
         <ResourceDictionary Source="Typography.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
-    <!-- Card -->
+    <!-- Card — soft rounded surface with a gentle elevation shadow (friendly, not sharp). -->
     <Style x:Key="Card" TargetType="Border">
         <Setter Property="Background" Value="{DynamicResource Surface}" />
         <Setter Property="BorderBrush" Value="{DynamicResource Border}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="CornerRadius" Value="12" />
+        <Setter Property="Effect">
+            <Setter.Value>
+                <DropShadowEffect Color="{DynamicResource ShadowColor}" BlurRadius="18" ShadowDepth="2"
+                                  Direction="270" Opacity="0.08" RenderingBias="Quality" />
+            </Setter.Value>
+        </Setter>
     </Style>
 
     <!-- Primary (brand) button -->
@@ -27,7 +33,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Border x:Name="b" Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                    <Border x:Name="b" Background="{TemplateBinding Background}" CornerRadius="10" Padding="{TemplateBinding Padding}">
                         <TextBlock x:Name="cp" Text="{TemplateBinding Content}" FontFamily="{TemplateBinding FontFamily}" FontSize="{TemplateBinding FontSize}" FontWeight="{TemplateBinding FontWeight}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource TextOnBrand}" />
                     </Border>
                     <ControlTemplate.Triggers>
@@ -61,7 +67,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Border x:Name="b" Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                    <Border x:Name="b" Background="{TemplateBinding Background}" CornerRadius="10" Padding="{TemplateBinding Padding}">
                         <TextBlock x:Name="cp" Text="{TemplateBinding Content}" FontFamily="{TemplateBinding FontFamily}" FontSize="{TemplateBinding FontSize}" FontWeight="{TemplateBinding FontWeight}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource TextOnBrand}" />
                     </Border>
                     <ControlTemplate.Triggers>
@@ -95,7 +101,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Border x:Name="b" Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                    <Border x:Name="b" Background="{TemplateBinding Background}" CornerRadius="10" Padding="{TemplateBinding Padding}">
                         <TextBlock x:Name="cp" Text="{TemplateBinding Content}" FontFamily="{TemplateBinding FontFamily}" FontSize="{TemplateBinding FontSize}" FontWeight="{TemplateBinding FontWeight}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource TextOnBrand}" />
                     </Border>
                     <ControlTemplate.Triggers>
@@ -127,7 +133,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Border x:Name="b" Background="{TemplateBinding Background}" BorderBrush="{DynamicResource BorderStrong}" BorderThickness="1" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                    <Border x:Name="b" Background="{TemplateBinding Background}" BorderBrush="{DynamicResource BorderStrong}" BorderThickness="1" CornerRadius="10" Padding="{TemplateBinding Padding}">
                         <TextBlock x:Name="cp" Text="{TemplateBinding Content}" FontFamily="{TemplateBinding FontFamily}" FontSize="{TemplateBinding FontSize}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimary}" />
                     </Border>
                     <ControlTemplate.Triggers>
@@ -147,6 +153,33 @@
         </Setter>
     </Style>
 
+    <!-- Small subtle in-row action button (the "Ouvrir" chevron / the "⋯" menu). Transparent
+         until hovered; hand cursor so the row reads as openable. -->
+    <Style x:Key="RowIconButton" TargetType="Button">
+        <Setter Property="Width" Value="30" />
+        <Setter Property="Height" Value="30" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FontSize" Value="17" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="b" Background="{TemplateBinding Background}" CornerRadius="8">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="b" Property="Background" Value="{DynamicResource BrandSoft}" />
+                            <Setter Property="Foreground" Value="{DynamicResource BrandText}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <!-- Navigation item (auto single-select via RadioButton) -->
     <Style x:Key="NavItem" TargetType="RadioButton">
         <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
@@ -159,7 +192,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="RadioButton">
-                    <Border x:Name="b" Background="Transparent" CornerRadius="8" Padding="12,0">
+                    <Border x:Name="b" Background="Transparent" CornerRadius="10" Padding="12,0">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <Path x:Name="ic" Width="19" Height="19" Stretch="Uniform"
                                   Fill="{DynamicResource TextSecondary}" Data="{TemplateBinding Tag}" />
@@ -197,7 +230,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="TextBox">
-                    <Border x:Name="b" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8">
+                    <Border x:Name="b" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="10">
                         <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}" VerticalAlignment="Center" />
                     </Border>
                     <ControlTemplate.Triggers>
@@ -298,32 +331,39 @@
          "StatusKind" bucket (success / danger / accent / neutral). Shared by
          every list screen (Contrats, Formation, …) for one consistent look.
          ================================================================== -->
+    <!-- The label colour is inherited from the pill (TextElement.Foreground set per kind),
+         so a soft-tinted pill shows a matching darker/lighter readable label. -->
     <Style x:Key="PillText" TargetType="TextBlock">
-        <Setter Property="Foreground" Value="White" />
         <Setter Property="FontSize" Value="11" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="HorizontalAlignment" Value="Center" />
         <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
 
+    <!-- Modern, calm soft-tinted status pills: light tinted background + matching darker text. -->
     <Style x:Key="StatusPill" TargetType="Border">
         <Setter Property="CornerRadius" Value="9" />
-        <Setter Property="Padding" Value="10,2" />
+        <Setter Property="Padding" Value="10,3" />
         <Setter Property="HorizontalAlignment" Value="Center" />
         <Setter Property="VerticalAlignment" Value="Center" />
-        <Setter Property="Background" Value="{DynamicResource StatusNeutral}" />
+        <Setter Property="Background" Value="{DynamicResource SurfaceMuted}" />
+        <Setter Property="TextElement.Foreground" Value="{DynamicResource TextSecondary}" />
         <Style.Triggers>
             <DataTrigger Binding="{Binding StatusKind}" Value="success">
-                <Setter Property="Background" Value="{DynamicResource StatusSuccess}" />
+                <Setter Property="Background" Value="{DynamicResource StatusSuccessSoft}" />
+                <Setter Property="TextElement.Foreground" Value="{DynamicResource StatusSuccessText}" />
             </DataTrigger>
             <DataTrigger Binding="{Binding StatusKind}" Value="danger">
-                <Setter Property="Background" Value="{DynamicResource StatusDanger}" />
+                <Setter Property="Background" Value="{DynamicResource StatusDangerSoft}" />
+                <Setter Property="TextElement.Foreground" Value="{DynamicResource StatusDangerText}" />
             </DataTrigger>
             <DataTrigger Binding="{Binding StatusKind}" Value="pending">
-                <Setter Property="Background" Value="{DynamicResource StatusPending}" />
+                <Setter Property="Background" Value="{DynamicResource StatusPendingSoft}" />
+                <Setter Property="TextElement.Foreground" Value="{DynamicResource StatusPendingText}" />
             </DataTrigger>
             <DataTrigger Binding="{Binding StatusKind}" Value="accent">
-                <Setter Property="Background" Value="{DynamicResource Accent}" />
+                <Setter Property="Background" Value="{DynamicResource AccentSoft}" />
+                <Setter Property="TextElement.Foreground" Value="{DynamicResource Accent}" />
             </DataTrigger>
         </Style.Triggers>
     </Style>

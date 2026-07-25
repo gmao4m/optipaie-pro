@@ -59,6 +59,8 @@
   <data name="Common_Add" xml:space="preserve"><value>إضافة</value></data>
   <data name="Common_Edit" xml:space="preserve"><value>تعديل</value></data>
   <data name="Common_Delete" xml:space="preserve"><value>حذف</value></data>
+  <data name="Common_Open" xml:space="preserve"><value>فتح</value></data>
+  <data name="Common_MoreActions" xml:space="preserve"><value>إجراءات أخرى</value></data>
   <data name="Common_Search" xml:space="preserve"><value>بحث</value></data>
   <data name="Common_Close" xml:space="preserve"><value>إغلاق</value></data>
   <data name="Common_Print" xml:space="preserve"><value>طباعة</value></data>

@@ -8,15 +8,27 @@
             <Setter Property="BorderBrush" Value="{DynamicResource Border}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="CornerRadius" Value="12" />
-            <Setter Property="Padding" Value="16,13" />
+            <Setter Property="Padding" Value="16,14" />
             <Setter Property="Margin" Value="0,0,12,12" />
-            <Setter Property="Width" Value="182" />
+            <Setter Property="Width" Value="208" />
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect Color="{DynamicResource ShadowColor}" BlurRadius="16" ShadowDepth="2" Direction="270" Opacity="0.07" RenderingBias="Quality" />
+                </Setter.Value>
+            </Setter>
         </Style>
         <Style x:Key="KpiValue" TargetType="TextBlock">
             <Setter Property="FontFamily" Value="{StaticResource MonoFont}" />
-            <Setter Property="FontSize" Value="24" />
+            <Setter Property="FontSize" Value="23" />
             <Setter Property="FontWeight" Value="SemiBold" />
-            <Setter Property="Margin" Value="0,4,0,0" />
+            <Setter Property="Margin" Value="0,2,0,0" />
+        </Style>
+        <!-- soft-tinted accent circle for each KPI -->
+        <Style x:Key="KpiIcon" TargetType="Border">
+            <Setter Property="Width" Value="38" />
+            <Setter Property="Height" Value="38" />
+            <Setter Property="CornerRadius" Value="19" />
+            <Setter Property="VerticalAlignment" Value="Top" />
         </Style>
     </UserControl.Resources>
 
@@ -42,55 +54,127 @@
                 </StackPanel>
             </Grid>
 
-            <!-- KPI cards -->
+            <!-- KPI cards — each with a soft-tinted accent circle + icon so the board feels alive. -->
             <WrapPanel Grid.Row="1" Orientation="Horizontal" Margin="0,18,0,0">
                 <Border Style="{StaticResource Kpi}">
-                    <StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_Headcount}" />
-                        <TextBlock Style="{StaticResource KpiValue}" Text="{Binding Employees}" /></StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Style="{StaticResource KpiIcon}" Background="{DynamicResource BrandSoft}">
+                            <Path Width="18" Height="18" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="{DynamicResource BrandText}" Data="{StaticResource IconUsers}" /></Border>
+                        <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                            <TextBlock Style="{StaticResource Caption}" TextWrapping="Wrap" Text="{loc:Loc Dashboard_Kpi_Headcount}" />
+                            <TextBlock Style="{StaticResource KpiValue}" Text="{Binding Employees}" /></StackPanel>
+                    </Grid>
                 </Border>
                 <Border Style="{StaticResource Kpi}">
-                    <StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_PresentToday}" />
-                        <TextBlock Style="{StaticResource KpiValue}" Foreground="{DynamicResource Salary}" Text="{Binding PresentToday}" /></StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Style="{StaticResource KpiIcon}" Background="{DynamicResource StatusSuccessSoft}">
+                            <Path Width="18" Height="18" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="{DynamicResource StatusSuccessText}" Data="{StaticResource IconCheck}" /></Border>
+                        <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                            <TextBlock Style="{StaticResource Caption}" TextWrapping="Wrap" Text="{loc:Loc Dashboard_Kpi_PresentToday}" />
+                            <TextBlock Style="{StaticResource KpiValue}" Foreground="{DynamicResource Salary}" Text="{Binding PresentToday}" /></StackPanel>
+                    </Grid>
                 </Border>
                 <Border Style="{StaticResource Kpi}">
-                    <StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_OnLeave}" />
-                        <TextBlock Style="{StaticResource KpiValue}" Foreground="{DynamicResource Employer}" Text="{Binding OnLeave}" /></StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Style="{StaticResource KpiIcon}" Background="{DynamicResource AccentSoft}">
+                            <Path Width="18" Height="18" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="{DynamicResource Accent}" Data="{StaticResource IconPlane}" /></Border>
+                        <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                            <TextBlock Style="{StaticResource Caption}" TextWrapping="Wrap" Text="{loc:Loc Dashboard_Kpi_OnLeave}" />
+                            <TextBlock Style="{StaticResource KpiValue}" Foreground="{DynamicResource Employer}" Text="{Binding OnLeave}" /></StackPanel>
+                    </Grid>
                 </Border>
                 <Border Style="{StaticResource Kpi}">
-                    <StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_OnMission}" />
-                        <TextBlock Style="{StaticResource KpiValue}" Foreground="{DynamicResource Employer}" Text="{Binding OnMission}" /></StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Style="{StaticResource KpiIcon}" Background="{DynamicResource AccentSoft}">
+                            <Path Width="18" Height="18" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="{DynamicResource Accent}" Data="{StaticResource IconGlobe}" /></Border>
+                        <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                            <TextBlock Style="{StaticResource Caption}" TextWrapping="Wrap" Text="{loc:Loc Dashboard_Kpi_OnMission}" />
+                            <TextBlock Style="{StaticResource KpiValue}" Foreground="{DynamicResource Employer}" Text="{Binding OnMission}" /></StackPanel>
+                    </Grid>
                 </Border>
                 <Border Style="{StaticResource Kpi}">
-                    <StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_ActiveContracts}" />
-                        <TextBlock Style="{StaticResource KpiValue}" Text="{Binding ActiveContracts}" /></StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Style="{StaticResource KpiIcon}" Background="{DynamicResource BrandSoft}">
+                            <Path Width="18" Height="18" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="{DynamicResource BrandText}" Data="{StaticResource IconFileCheck}" /></Border>
+                        <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                            <TextBlock Style="{StaticResource Caption}" TextWrapping="Wrap" Text="{loc:Loc Dashboard_Kpi_ActiveContracts}" />
+                            <TextBlock Style="{StaticResource KpiValue}" Text="{Binding ActiveContracts}" /></StackPanel>
+                    </Grid>
                 </Border>
                 <Border Style="{StaticResource Kpi}">
-                    <StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_ExpiringContracts}" />
-                        <TextBlock Style="{StaticResource KpiValue}" Foreground="{DynamicResource Warning}" Text="{Binding Expiring}" /></StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Style="{StaticResource KpiIcon}" Background="{DynamicResource StatusPendingSoft}">
+                            <Path Width="18" Height="18" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="{DynamicResource StatusPendingText}" Data="{StaticResource IconClock}" /></Border>
+                        <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                            <TextBlock Style="{StaticResource Caption}" TextWrapping="Wrap" Text="{loc:Loc Dashboard_Kpi_ExpiringContracts}" />
+                            <TextBlock Style="{StaticResource KpiValue}" Foreground="{DynamicResource Warning}" Text="{Binding Expiring}" /></StackPanel>
+                    </Grid>
                 </Border>
                 <Border Style="{StaticResource Kpi}">
-                    <StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_PendingLeave}" />
-                        <TextBlock Style="{StaticResource KpiValue}" Foreground="{DynamicResource Warning}" Text="{Binding PendingLeave}" /></StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Style="{StaticResource KpiIcon}" Background="{DynamicResource StatusPendingSoft}">
+                            <Path Width="18" Height="18" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="{DynamicResource StatusPendingText}" Data="{StaticResource IconCalendar}" /></Border>
+                        <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                            <TextBlock Style="{StaticResource Caption}" TextWrapping="Wrap" Text="{loc:Loc Dashboard_Kpi_PendingLeave}" />
+                            <TextBlock Style="{StaticResource KpiValue}" Foreground="{DynamicResource Warning}" Text="{Binding PendingLeave}" /></StackPanel>
+                    </Grid>
                 </Border>
                 <Border Style="{StaticResource Kpi}">
-                    <StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_LoanOutstanding}" />
-                        <TextBlock Style="{StaticResource KpiValue}" Foreground="{DynamicResource Deduction}" Text="{Binding LoanOutstanding}" /></StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Style="{StaticResource KpiIcon}" Background="{DynamicResource StatusDangerSoft}">
+                            <Path Width="18" Height="18" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="{DynamicResource StatusDangerText}" Data="{StaticResource IconWallet}" /></Border>
+                        <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                            <TextBlock Style="{StaticResource Caption}" TextWrapping="Wrap" Text="{loc:Loc Dashboard_Kpi_LoanOutstanding}" />
+                            <TextBlock Style="{StaticResource KpiValue}" Foreground="{DynamicResource Deduction}" Text="{Binding LoanOutstanding}" /></StackPanel>
+                    </Grid>
                 </Border>
                 <Border Style="{StaticResource Kpi}">
-                    <StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_OpenPostings}" />
-                        <TextBlock Style="{StaticResource KpiValue}" Text="{Binding OpenPostings}" /></StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Style="{StaticResource KpiIcon}" Background="{DynamicResource BrandSoft}">
+                            <Path Width="18" Height="18" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="{DynamicResource BrandText}" Data="{StaticResource IconClipboard}" /></Border>
+                        <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                            <TextBlock Style="{StaticResource Caption}" TextWrapping="Wrap" Text="{loc:Loc Dashboard_Kpi_OpenPostings}" />
+                            <TextBlock Style="{StaticResource KpiValue}" Text="{Binding OpenPostings}" /></StackPanel>
+                    </Grid>
                 </Border>
                 <Border Style="{StaticResource Kpi}">
-                    <StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_Candidates}" />
-                        <TextBlock Style="{StaticResource KpiValue}" Text="{Binding Candidates}" /></StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Style="{StaticResource KpiIcon}" Background="{DynamicResource AccentSoft}">
+                            <Path Width="18" Height="18" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="{DynamicResource Accent}" Data="{StaticResource IconUserPlus}" /></Border>
+                        <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                            <TextBlock Style="{StaticResource Caption}" TextWrapping="Wrap" Text="{loc:Loc Dashboard_Kpi_Candidates}" />
+                            <TextBlock Style="{StaticResource KpiValue}" Text="{Binding Candidates}" /></StackPanel>
+                    </Grid>
                 </Border>
                 <Border Style="{StaticResource Kpi}">
-                    <StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_AssetsAssigned}" />
-                        <TextBlock Style="{StaticResource KpiValue}" Text="{Binding AssetsAssigned}" /></StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Style="{StaticResource KpiIcon}" Background="{DynamicResource BrandSoft}">
+                            <Path Width="18" Height="18" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="{DynamicResource BrandText}" Data="{StaticResource IconLaptop}" /></Border>
+                        <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                            <TextBlock Style="{StaticResource Caption}" TextWrapping="Wrap" Text="{loc:Loc Dashboard_Kpi_AssetsAssigned}" />
+                            <TextBlock Style="{StaticResource KpiValue}" Text="{Binding AssetsAssigned}" /></StackPanel>
+                    </Grid>
                 </Border>
                 <Border Style="{StaticResource Kpi}">
-                    <StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_TrainingUpcoming}" />
-                        <TextBlock Style="{StaticResource KpiValue}" Text="{Binding TrainingUpcoming}" /></StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Style="{StaticResource KpiIcon}" Background="{DynamicResource StatusSuccessSoft}">
+                            <Path Width="18" Height="18" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="{DynamicResource StatusSuccessText}" Data="{StaticResource IconSchool}" /></Border>
+                        <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                            <TextBlock Style="{StaticResource Caption}" TextWrapping="Wrap" Text="{loc:Loc Dashboard_Kpi_TrainingUpcoming}" />
+                            <TextBlock Style="{StaticResource KpiValue}" Text="{Binding TrainingUpcoming}" /></StackPanel>
+                    </Grid>
                 </Border>
             </WrapPanel>
 

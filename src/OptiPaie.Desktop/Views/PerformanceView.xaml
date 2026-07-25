@@ -151,8 +151,6 @@
                                     <DataGridTextColumn Header="{loc:Loc Contract_Expiry}" Binding="{Binding DueText}" Width="90" ElementStyle="{StaticResource Center}" />
                                 </DataGrid.Columns>
                             </DataGrid>
-                            <TextBlock Grid.Row="2" Style="{StaticResource Caption}" HorizontalAlignment="Right" Margin="0,12,0,0"
-                                       Foreground="{DynamicResource TextMuted}" Text="{loc:Loc Hint_RowActions}" />
                         </Grid>
                     </Grid>
                 </Grid>
@@ -255,8 +253,6 @@
                         </ListBox>
                     </ScrollViewer>
                     <Grid Grid.Row="2" Margin="0,12,0,0">
-                        <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Center" HorizontalAlignment="Left"
-                                   Foreground="{DynamicResource TextMuted}" Text="{loc:Loc Hint_RowActions}" />
                         <Button Style="{StaticResource PrimaryButton}" HorizontalAlignment="Right" Content="{loc:Loc Perf_Duplicate}" Command="{Binding DuplicateCommand}" />
                     </Grid>
                 </Grid>

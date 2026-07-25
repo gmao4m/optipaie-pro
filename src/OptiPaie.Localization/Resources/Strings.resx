@@ -59,6 +59,8 @@
   <data name="Common_Add" xml:space="preserve"><value>Ajouter</value></data>
   <data name="Common_Edit" xml:space="preserve"><value>Modifier</value></data>
   <data name="Common_Delete" xml:space="preserve"><value>Supprimer</value></data>
+  <data name="Common_Open" xml:space="preserve"><value>Ouvrir</value></data>
+  <data name="Common_MoreActions" xml:space="preserve"><value>Plus d'actions</value></data>
   <data name="Common_Search" xml:space="preserve"><value>Rechercher</value></data>
   <data name="Common_Close" xml:space="preserve"><value>Fermer</value></data>
   <data name="Common_Print" xml:space="preserve"><value>Imprimer</value></data>

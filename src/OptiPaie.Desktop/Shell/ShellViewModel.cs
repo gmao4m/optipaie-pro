@@ -188,6 +188,9 @@ namespace OptiPaie.Desktop.Shell
         /// <summary>Premium modules, generated from the registry (locked or unlocked).</summary>
         public ObservableCollection<NavItemViewModel> ModuleNav { get; } = new ObservableCollection<NavItemViewModel>();
 
+        /// <summary>Reference/output screens (Archive, Rapports) — rendered below the modules.</summary>
+        public ObservableCollection<NavItemViewModel> BottomNav { get; } = new ObservableCollection<NavItemViewModel>();
+
         /// <summary>Settings, pinned to the bottom of the rail.</summary>
         public ObservableCollection<NavItemViewModel> SettingsNav { get; } = new ObservableCollection<NavItemViewModel>();
 
@@ -202,6 +205,7 @@ namespace OptiPaie.Desktop.Shell
             // Rebuildable: called at startup and again on a language switch.
             CoreNav.Clear();
             ModuleNav.Clear();
+            BottomNav.Clear();
             SettingsNav.Clear();
             _allNav.Clear();
 
@@ -210,16 +214,15 @@ namespace OptiPaie.Desktop.Shell
             bool isAdmin = _services.Session.IsAdmin;
             bool rtl = _services.Localization.IsRightToLeft;
 
+            // Tableau de bord is the single landing screen (Accueil is merged into it).
+            // Choosing the company context comes first conceptually, so Entreprises sits at top.
             AddCore("dashboard", L("Shell_Nav_Dashboard"), "IconTrend");
-            AddCore("home", L("Shell_Nav_Home"), "IconHome");
-            AddCore("employees", L("Shell_Nav_Employees"), "IconUsers");
-            AddCore("payroll", L("Shell_Nav_Payroll"), "IconCash");
             if (isAdmin)
             {
                 AddCore("companies", L("Shell_Nav_Companies"), "IconBuilding");
             }
-            AddCore("archive", L("Shell_Nav_Archive"), "IconArchive");
-            AddCore("reports", L("Shell_Nav_Reports"), "IconFile");
+            AddCore("employees", L("Shell_Nav_Employees"), "IconUsers");
+            AddCore("payroll", L("Shell_Nav_Payroll"), "IconCash");
 
             foreach (ModuleDescriptor module in _registry.Upsells)
             {
@@ -228,6 +231,10 @@ namespace OptiPaie.Desktop.Shell
                 ModuleNav.Add(item);
                 _allNav.Add(item);
             }
+
+            // Reference/output screens live below the modules.
+            AddBottom("archive", L("Shell_Nav_Archive"), "IconArchive");
+            AddBottom("reports", L("Shell_Nav_Reports"), "IconFile");
 
             if (isAdmin)
             {
@@ -268,6 +275,13 @@ namespace OptiPaie.Desktop.Shell
         {
             NavItemViewModel item = NewItem(key, title, iconKey, false);
             CoreNav.Add(item);
+            _allNav.Add(item);
+        }
+
+        private void AddBottom(string key, string title, string iconKey)
+        {
+            NavItemViewModel item = NewItem(key, title, iconKey, false);
+            BottomNav.Add(item);
             _allNav.Add(item);
         }
 
@@ -339,8 +353,9 @@ namespace OptiPaie.Desktop.Shell
                     }
                     else
                     {
-                        key = "home";
-                        target = _home ?? (_home = new HomeViewModel(_services, Navigate));
+                        // Tableau de bord is the single landing screen (Accueil merged into it).
+                        key = "dashboard";
+                        target = _dashboard ?? (_dashboard = new DashboardViewModel(_services, Navigate));
                     }
                     break;
             }
