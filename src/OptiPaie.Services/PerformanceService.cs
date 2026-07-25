@@ -577,6 +577,9 @@ namespace OptiPaie.Services
                             TemplateId = id,
                             Label = c.Label,
                             WeightPercent = c.WeightPercent,
+                            CriterionType = c.CriterionType,
+                            HigherIsBetter = c.HigherIsBetter,
+                            DefaultTarget = c.DefaultTarget,
                             SortOrder = order++
                         });
                     }
@@ -742,6 +745,9 @@ namespace OptiPaie.Services
                     TemplateId = templateId,
                     Label = c.Label,
                     WeightPercent = c.WeightPercent,
+                    CriterionType = c.CriterionType,
+                    HigherIsBetter = c.HigherIsBetter,
+                    DefaultTarget = c.DefaultTarget,
                     SortOrder = order++
                 });
             }

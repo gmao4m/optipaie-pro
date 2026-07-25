@@ -450,18 +450,33 @@ namespace OptiPaie.Services
             long topReviewId = 0;
             foreach (CycleReviewRow row in detail.Reviews)
             {
-                // A realistic spread of scores on the /20 scale.
-                decimal score = 11m + ((i * 7) % 8); // 11..18
                 PerformanceReview review = _performance.Get(row.ReviewId);
+                decimal scaleMax = review.ScaleMax <= 0m ? 20m : review.ScaleMax;
+
+                // A realistic spread of performance levels as a fraction of the scale, so it
+                // works whatever the grid's scale is (the department grids are on 1-5).
+                decimal band = 0.62m + ((i * 7) % 8) * 0.045m; // 0.62 .. 0.935
+
                 var criteria = new List<PerformanceCriterion>();
                 foreach (PerformanceCriterion c in GetCriteria(row.ReviewId))
                 {
-                    c.Score = score;
+                    if (c.CriterionType == CriterionType.Kpi)
+                    {
+                        // Target/achieved chosen so the derived score lands near the band.
+                        c.KpiTarget = 100m;
+                        c.KpiAchieved = Math.Round(100m * (band + 0.2m), MidpointRounding.AwayFromZero);
+                    }
+                    else
+                    {
+                        decimal s = Math.Round(band * scaleMax, MidpointRounding.AwayFromZero);
+                        c.Score = s < 1m ? 1m : (s > scaleMax ? scaleMax : s);
+                    }
                     criteria.Add(c);
                 }
+
                 review.Reviewer = string.IsNullOrWhiteSpace(review.Reviewer) ? "Direction" : review.Reviewer;
-                _performance.Save(review, criteria);
-                _performance.Complete(row.ReviewId);
+                Must(_performance.Save(review, criteria), "évaluation de l'employé #" + row.EmployeeId);
+                Must(_performance.Complete(row.ReviewId), "finalisation de l'évaluation #" + row.ReviewId);
 
                 if (row.EmployeeId == by["touati"].Id) topReviewId = row.ReviewId;
                 i++;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
+using OptiPaie.Core.Dtos;
 using OptiPaie.Core.Entities;
 using OptiPaie.Core.Enums;
 using OptiPaie.Core.Interfaces.Repositories;
@@ -211,6 +212,20 @@ namespace OptiPaie.Tests
             Assert.That(kpi.Score, Is.EqualTo(5m));
             Assert.That(kpi.KpiTarget, Is.EqualTo(1000000m));
             Assert.That(kpi.KpiAchieved, Is.EqualTo(1200000m));
+        }
+
+        // ---------------------------------------------------------------- template duplication
+
+        [Test]
+        public void DuplicateTemplate_PreservesTheKpiCriterionType()
+        {
+            long sourceId = _service.GetTemplates(_companyId).First(t => t.GroupKey == "dept-commercial").TemplateId;
+
+            long copyId = _service.DuplicateTemplate(sourceId, _companyId, "Ma grille commerciale").Value;
+
+            TemplateDetail copy = _service.GetTemplateDetail(copyId);
+            Assert.That(copy.Criteria.Any(c => c.CriterionType == CriterionType.Kpi), Is.True,
+                "duplicating a grid must keep its KPI criteria numeric, not silently behavioral");
         }
 
         [Test]

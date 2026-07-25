@@ -177,6 +177,12 @@ namespace OptiPaie.Tests
             Assert.That(dashboard.TopPerformers.Count, Is.GreaterThanOrEqualTo(1));
             Assert.That(dashboard.ReviewCount, Is.EqualTo(20));
 
+            // The department grids score on 1-5; the seeded reviews must land on real,
+            // non-zero scores (a regression guard: mismatched scale silently saved 0/5).
+            Assert.That(dashboard.CompanyAveragePercent, Is.GreaterThan(40m),
+                "seeded reviews carry realistic scores, not 0");
+            Assert.That(dashboard.TopPerformers.First().ScorePercent, Is.GreaterThan(0m));
+
             Employee touati = _employees.GetByCompany(companyId).First(e => e.LastNameFr == "TOUATI");
             CareerTimeline timeline = _performance.GetCareerTimeline(touati.Id);
             Assert.That(timeline.Items.Any(i => i.Kind == "reward"), Is.True, "a bonus on the career timeline");
