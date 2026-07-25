@@ -871,7 +871,7 @@
   <data name="ModAct_Prompt" xml:space="preserve"><value>أدخل مفتاح تفعيل الوحدة</value></data>
   <data name="ModAct_Key" xml:space="preserve"><value>مفتاح التفعيل</value></data>
   <data name="ModAct_Format" xml:space="preserve"><value>الصيغة: MOD-XXXXX-XXXXX-XXXXX-XXXXX</value></data>
-  <data name="Act_Format" xml:space="preserve"><value>الصيغة: XXXXX-XXXXX-XXXXX-XXXXX</value></data>
+  <data name="Act_Format" xml:space="preserve"><value>الصيغة: PAY-XXXX-XXXX-XXXX</value></data>
   <data name="Act_Activate" xml:space="preserve"><value>تفعيل الرخصة</value></data>
   <data name="Act_Or" xml:space="preserve"><value>أو</value></data>
   <data name="Act_TrialEnded" xml:space="preserve"><value>انتهت التجربة</value></data>

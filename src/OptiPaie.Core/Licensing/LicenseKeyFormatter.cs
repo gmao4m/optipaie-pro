@@ -3,17 +3,21 @@ using System.Text;
 namespace OptiPaie.Core.Licensing
 {
     /// <summary>
-    /// Formatting and validation for the enterprise license-key format
-    /// <c>XXXXX-XXXXX-XXXXX-XXXXX</c> (four groups of five uppercase alphanumerics).
-    /// Used to auto-format the activation textbox and validate before sending.
+    /// Formatting and validation for the license-key format issued by the backend
+    /// (<c>gen_license_key</c>): a product prefix + three groups of four, e.g.
+    /// <c>PAY-XXXX-XXXX-XXXX</c>. The client auto-formats the activation textbox and
+    /// validates completeness before sending; the backend does the authoritative check.
     /// </summary>
     public static class LicenseKeyFormatter
     {
-        public const int GroupSize = 5;
-        public const int GroupCount = 4;
+        /// <summary>Length of the product prefix (e.g. "PAY").</summary>
+        public const int PrefixLength = 3;
 
-        /// <summary>Total alphanumeric characters (excluding dashes).</summary>
-        public const int RawLength = GroupSize * GroupCount;
+        public const int GroupSize = 4;
+        public const int GroupCount = 3;
+
+        /// <summary>Total alphanumeric characters (prefix + groups, excluding dashes).</summary>
+        public const int RawLength = PrefixLength + GroupSize * GroupCount;
 
         /// <summary>Keeps only A-Z / 0-9, upper-cased, capped at <see cref="RawLength"/>.</summary>
         public static string Clean(string input)
@@ -40,14 +44,15 @@ namespace OptiPaie.Core.Licensing
             return sb.ToString();
         }
 
-        /// <summary>Formats free input into <c>XXXXX-XXXXX-XXXXX-XXXXX</c> as far as it goes.</summary>
+        /// <summary>Formats free input into <c>PAY-XXXX-XXXX-XXXX</c> as far as it goes.</summary>
         public static string Format(string input)
         {
             string raw = Clean(input);
-            var sb = new StringBuilder(RawLength + GroupCount - 1);
+            var sb = new StringBuilder(RawLength + GroupCount);
             for (int i = 0; i < raw.Length; i++)
             {
-                if (i > 0 && i % GroupSize == 0)
+                // Dash after the prefix, then after each group of four.
+                if (i == PrefixLength || (i > PrefixLength && (i - PrefixLength) % GroupSize == 0))
                 {
                     sb.Append('-');
                 }

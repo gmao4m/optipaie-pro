@@ -871,7 +871,7 @@
   <data name="ModAct_Prompt" xml:space="preserve"><value>Saisissez votre clé d'activation de module</value></data>
   <data name="ModAct_Key" xml:space="preserve"><value>Clé d'activation</value></data>
   <data name="ModAct_Format" xml:space="preserve"><value>Format : MOD-XXXXX-XXXXX-XXXXX-XXXXX</value></data>
-  <data name="Act_Format" xml:space="preserve"><value>Format : XXXXX-XXXXX-XXXXX-XXXXX</value></data>
+  <data name="Act_Format" xml:space="preserve"><value>Format : PAY-XXXX-XXXX-XXXX</value></data>
   <data name="Act_Activate" xml:space="preserve"><value>Activer la licence</value></data>
   <data name="Act_Or" xml:space="preserve"><value>OU</value></data>
   <data name="Act_TrialEnded" xml:space="preserve"><value>Essai terminé</value></data>
