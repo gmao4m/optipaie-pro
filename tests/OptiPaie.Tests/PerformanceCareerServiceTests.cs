@@ -113,12 +113,13 @@ namespace OptiPaie.Tests
         // ---------------------------------------------------------------- template library
 
         [Test]
-        public void BuiltInLibrary_IsSeededWithSevenWeightedTemplates()
+        public void BuiltInLibrary_IsSeededWithWeightedTemplates()
         {
             IReadOnlyList<TemplateSummary> templates = _service.GetTemplates(_companyId);
             List<TemplateSummary> builtIns = templates.Where(t => t.IsBuiltIn).ToList();
 
-            Assert.That(builtIns.Count, Is.EqualTo(7), "seven built-in templates ship out of the box");
+            // 7 original library templates (0022) + 5 department evaluation grids (0027).
+            Assert.That(builtIns.Count, Is.EqualTo(12), "twelve built-in templates ship out of the box");
             Assert.That(builtIns.All(t => t.CriteriaCount > 0), Is.True);
 
             foreach (TemplateSummary t in builtIns)
@@ -512,7 +513,9 @@ namespace OptiPaie.Tests
 
         private long GeneralTemplateId()
         {
-            return _service.GetTemplates(_companyId).First(t => t.Kind == TemplateKind.General).TemplateId;
+            // The original /20 general library template (migration 0027 adds a second, /5
+            // "dept-generale" grid that is also Kind.General), so pin it by GroupKey.
+            return _service.GetTemplates(_companyId).First(t => t.GroupKey == "builtin-general").TemplateId;
         }
     }
 }

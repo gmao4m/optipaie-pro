@@ -180,11 +180,69 @@ namespace OptiPaie.Services
                     Label = tc.Label,
                     Weight = tc.WeightPercent,
                     Score = 0m,
+                    CriterionType = tc.CriterionType,
+                    HigherIsBetter = tc.HigherIsBetter,
+                    KpiTarget = tc.CriterionType == CriterionType.Kpi ? tc.DefaultTarget : null,
                     SortOrder = order++
                 });
             }
 
             return id;
+        }
+
+        public Result<long> CreateForEmployee(long employeeId, int periodYear, string periodLabel, string reviewer, long? cycleId, DateTime? dueDate)
+        {
+            using (IUnitOfWork uow = _unitOfWorkFactory.Create())
+            {
+                Employee employee = uow.Employees.GetById(employeeId);
+                if (employee == null)
+                {
+                    return Result.Fail<long>("Employé introuvable.", "Performance_EmployeeNotFound");
+                }
+
+                if (periodYear < 2000 || periodYear > 2100)
+                {
+                    return Result.Fail<long>("Année de période invalide.", "Performance_YearInvalid");
+                }
+
+                // Resolve the evaluation grid: a company-specific department default wins,
+                // otherwise the department name maps to its built-in grid (Générale as fallback).
+                string groupKey = null;
+                long? reviewerEmployeeId = null;
+                PerformanceDeptSetting ds = uow.Performance.GetDeptSettings(employee.CompanyId)
+                    .FirstOrDefault(x => string.Equals(Norm(x.Department), Norm(employee.Department), StringComparison.OrdinalIgnoreCase));
+                if (ds != null)
+                {
+                    reviewerEmployeeId = ds.DefaultReviewerEmployeeId;
+                    if (!string.IsNullOrWhiteSpace(ds.DefaultTemplateGroupKey)) groupKey = ds.DefaultTemplateGroupKey;
+                }
+                if (string.IsNullOrWhiteSpace(groupKey)) groupKey = DeptGroupKey(employee.Department);
+
+                PerformanceTemplate template =
+                    uow.Performance.GetCurrentTemplateByGroup(groupKey, employee.CompanyId)
+                    ?? uow.Performance.GetCurrentTemplateByGroup("dept-generale", employee.CompanyId)
+                    ?? uow.Performance.GetCurrentTemplateByGroup("builtin-general", employee.CompanyId);
+                if (template == null)
+                {
+                    return Result.Fail<long>("Aucune grille d'évaluation disponible.", "Performance_TemplateNotFound");
+                }
+
+                List<PerformanceTemplateCriterion> criteria = uow.Performance.GetTemplateCriteria(template.Id).ToList();
+
+                uow.BeginTransaction();
+                try
+                {
+                    long id = InsertReviewFromTemplate(uow, employeeId, template, criteria, periodYear,
+                        periodLabel, reviewer, reviewerEmployeeId, cycleId, dueDate);
+                    uow.Commit();
+                    return Result.Ok(id);
+                }
+                catch
+                {
+                    uow.Rollback();
+                    throw;
+                }
+            }
         }
 
         public Result Save(PerformanceReview review, IEnumerable<PerformanceCriterion> criteria)
@@ -223,6 +281,22 @@ namespace OptiPaie.Services
                 }
 
                 decimal scaleMax = existing.ScaleMax <= 0m ? 20m : existing.ScaleMax;
+
+                // KPI criteria are numeric: the stored score is always DERIVED from the
+                // target/achieved the evaluator entered, never taken from the UI directly.
+                foreach (PerformanceCriterion c in list)
+                {
+                    if (c.CriterionType == CriterionType.Kpi)
+                    {
+                        c.Score = KpiScoreOnScale(c.KpiTarget, c.KpiAchieved, c.HigherIsBetter, scaleMax);
+                    }
+                    else
+                    {
+                        c.KpiTarget = null;
+                        c.KpiAchieved = null;
+                    }
+                }
+
                 foreach (PerformanceCriterion c in list)
                 {
                     if (c.Score < 0m || c.Score > scaleMax)
@@ -1592,6 +1666,46 @@ namespace OptiPaie.Services
 
             decimal weighted = criteria.Sum(c => c.Score * c.Weight);
             return Math.Round(weighted / totalWeight, 2, MidpointRounding.AwayFromZero);
+        }
+
+        /// <summary>
+        /// Converts a KPI criterion's achievement into a score on the review's scale.
+        /// The 1-5 anchor is ratio 0.4 → 1, ratio 1.0 → 4, ratio 1.2 → 5 (score5 = 5·ratio − 1,
+        /// clamped to [1,5]); e.g. achieved 100 000 vs target 90 000 → ratio 1.11 → 4.6/5.
+        /// For "lower is better" criteria the ratio is target/achieved. Returns 0 (unscored)
+        /// until both a non-zero target and an achieved value are present.
+        /// </summary>
+        public static decimal KpiScoreOnScale(decimal? target, decimal? achieved, bool higherIsBetter, decimal scaleMax)
+        {
+            if (scaleMax <= 0m) scaleMax = 5m;
+            if (!target.HasValue || !achieved.HasValue || target.Value == 0m)
+            {
+                return 0m;
+            }
+
+            decimal ratio = higherIsBetter
+                ? achieved.Value / target.Value
+                : (achieved.Value <= 0m ? 2m : target.Value / achieved.Value);
+
+            decimal score5 = 5m * ratio - 1m;
+            if (score5 < 1m) score5 = 1m;
+            if (score5 > 5m) score5 = 5m;
+
+            return Math.Round(score5 * (scaleMax / 5m), 2, MidpointRounding.AwayFromZero);
+        }
+
+        public decimal ScoreKpi(decimal? target, decimal? achieved, bool higherIsBetter, decimal scaleMax)
+            => KpiScoreOnScale(target, achieved, higherIsBetter, scaleMax);
+
+        /// <summary>Maps a department name to its built-in evaluation grid group key (fallback: Générale).</summary>
+        internal static string DeptGroupKey(string department)
+        {
+            string d = (department ?? string.Empty).Trim().ToLowerInvariant();
+            if (d.Contains("production") || d.Contains("atelier")) return "dept-production";
+            if (d.Contains("commerc") || d.Contains("vente")) return "dept-commercial";
+            if (d.Contains("admin") || d.Contains("finance") || d.Contains("compt") || d.Contains("rh")) return "dept-administration";
+            if (d.Contains("informati") || d == "it" || d.Contains("techni") || d.Contains("develop")) return "dept-informatique";
+            return "dept-generale";
         }
 
         private static decimal Percent(decimal score, decimal scaleMax)

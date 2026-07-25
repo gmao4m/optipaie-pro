@@ -24,6 +24,13 @@ namespace OptiPaie.Core.Interfaces.Services
         Result<long> CreateFromTemplate(long employeeId, long templateId, int periodYear, string periodLabel,
             string reviewer, long? reviewerEmployeeId, long? cycleId, DateTime? dueDate, bool selfAssessment);
 
+        /// <summary>
+        /// Creates a draft review for an employee using their department's evaluation grid
+        /// (company default → department built-in grid → Générale). The primary entry point
+        /// for the "open the evaluation directly" flow.
+        /// </summary>
+        Result<long> CreateForEmployee(long employeeId, int periodYear, string periodLabel, string reviewer, long? cycleId, DateTime? dueDate);
+
         /// <summary>Saves the review header and its criteria (only while it is a draft).</summary>
         Result Save(PerformanceReview review, IEnumerable<PerformanceCriterion> criteria);
 
@@ -49,6 +56,9 @@ namespace OptiPaie.Core.Interfaces.Services
 
         /// <summary>The rating band for a score normalised to its scale.</summary>
         string RateScaled(decimal score, decimal scaleMax);
+
+        /// <summary>Converts a KPI criterion's target/achieved into a score on the given scale (see the 1-5 anchor mapping).</summary>
+        decimal ScoreKpi(decimal? target, decimal? achieved, bool higherIsBetter, decimal scaleMax);
 
         // -- templates ---------------------------------------------------------
 

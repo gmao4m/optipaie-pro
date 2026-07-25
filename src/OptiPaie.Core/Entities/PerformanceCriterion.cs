@@ -16,8 +16,20 @@ namespace OptiPaie.Core.Entities
         /// <summary>Relative weight in the overall score (default 1).</summary>
         public decimal Weight { get; set; }
 
-        /// <summary>Score on a /20 scale.</summary>
+        /// <summary>Score on the review's scale (see <see cref="PerformanceReview.ScaleMax"/>). For a KPI criterion this is derived from target/achieved.</summary>
         public decimal Score { get; set; }
+
+        /// <summary>Behavioral (rated directly) or KPI/numeric (derived from target &amp; achieved).</summary>
+        public Enums.CriterionType CriterionType { get; set; } = Enums.CriterionType.Behavioral;
+
+        /// <summary>KPI only: the objective for the period.</summary>
+        public decimal? KpiTarget { get; set; }
+
+        /// <summary>KPI only: what was actually achieved.</summary>
+        public decimal? KpiAchieved { get; set; }
+
+        /// <summary>KPI only: true when a higher achieved value is better.</summary>
+        public bool HigherIsBetter { get; set; } = true;
 
         /// <summary>Optional per-criterion comment.</summary>
         public string Comment { get; set; }

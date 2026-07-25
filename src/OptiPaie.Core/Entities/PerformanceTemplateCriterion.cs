@@ -15,6 +15,15 @@ namespace OptiPaie.Core.Entities
         /// <summary>Percentage weight in the overall score (0..100).</summary>
         public decimal WeightPercent { get; set; }
 
+        /// <summary>Behavioral (rated 1-5) or KPI/numeric (target + achieved → 1-5).</summary>
+        public Enums.CriterionType CriterionType { get; set; } = Enums.CriterionType.Behavioral;
+
+        /// <summary>KPI only: true when a higher achieved value is better (sales), false when lower is better (defects).</summary>
+        public bool HigherIsBetter { get; set; } = true;
+
+        /// <summary>KPI only: optional target that pre-fills the review (the achieved value is entered per period).</summary>
+        public decimal? DefaultTarget { get; set; }
+
         public int SortOrder { get; set; }
 
         public bool IsDeleted { get; set; }

@@ -133,8 +133,10 @@ namespace OptiPaie.Data.Repositories
         public long InsertCriterion(PerformanceCriterion criterion)
         {
             const string sql =
-                "INSERT INTO PerformanceCriteria (ReviewId, Label, Weight, Score, Comment, SortOrder, IsDeleted) " +
-                "VALUES (@ReviewId, @Label, @Weight, @Score, @Comment, @SortOrder, @IsDeleted); " +
+                "INSERT INTO PerformanceCriteria (ReviewId, Label, Weight, Score, Comment, SortOrder, IsDeleted, " +
+                "CriterionType, HigherIsBetter, KpiTarget, KpiAchieved) " +
+                "VALUES (@ReviewId, @Label, @Weight, @Score, @Comment, @SortOrder, @IsDeleted, " +
+                "@CriterionType, @HigherIsBetter, @KpiTarget, @KpiAchieved); " +
                 "SELECT last_insert_rowid();";
 
             long id = Connection.ExecuteScalar<long>(sql, criterion, Transaction);
@@ -147,7 +149,9 @@ namespace OptiPaie.Data.Repositories
             const string sql =
                 "UPDATE PerformanceCriteria SET " +
                 "Label = @Label, Weight = @Weight, Score = @Score, Comment = @Comment, " +
-                "SortOrder = @SortOrder, IsDeleted = @IsDeleted " +
+                "SortOrder = @SortOrder, IsDeleted = @IsDeleted, " +
+                "CriterionType = @CriterionType, HigherIsBetter = @HigherIsBetter, " +
+                "KpiTarget = @KpiTarget, KpiAchieved = @KpiAchieved " +
                 "WHERE Id = @Id;";
 
             Connection.Execute(sql, criterion, Transaction);
@@ -265,8 +269,10 @@ namespace OptiPaie.Data.Repositories
         public long InsertTemplateCriterion(PerformanceTemplateCriterion criterion)
         {
             const string sql =
-                "INSERT INTO PerformanceTemplateCriteria (TemplateId, Label, WeightPercent, SortOrder, IsDeleted) " +
-                "VALUES (@TemplateId, @Label, @WeightPercent, @SortOrder, @IsDeleted); " +
+                "INSERT INTO PerformanceTemplateCriteria (TemplateId, Label, WeightPercent, SortOrder, IsDeleted, " +
+                "CriterionType, HigherIsBetter, DefaultTarget) " +
+                "VALUES (@TemplateId, @Label, @WeightPercent, @SortOrder, @IsDeleted, " +
+                "@CriterionType, @HigherIsBetter, @DefaultTarget); " +
                 "SELECT last_insert_rowid();";
 
             long id = Connection.ExecuteScalar<long>(sql, criterion, Transaction);
