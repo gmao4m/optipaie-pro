@@ -23,11 +23,29 @@ namespace OptiPaie.Desktop.ViewModels
 
             SaveCommand = new RelayCommand(Save);
             CancelCommand = new RelayCommand(() => RequestClose?.Invoke(false));
+
+            var departments = employee.CompanyId > 0
+                ? new List<string>(_services.Departments.GetNamesForCompany(employee.CompanyId))
+                : new List<string>();
+
+            // Always keep the employee's current department in the list, so an already-set
+            // value (e.g. a legacy import) still shows in the dropdown instead of blanking out.
+            string current = employee.Department?.Trim();
+            if (!string.IsNullOrEmpty(current) &&
+                !departments.Exists(d => string.Equals(d, current, StringComparison.OrdinalIgnoreCase)))
+            {
+                departments.Insert(0, current);
+            }
+
+            Departments = departments;
         }
 
         public Employee Employee { get; }
 
         public string Title => _isNew ? "Nouvel employé" : "Modifier l'employé";
+
+        /// <summary>The active company's departments — the dropdown offered for the employee's Department.</summary>
+        public IReadOnlyList<string> Departments { get; }
 
         public List<EnumOption> Genders { get; } = EnumLabels.Genders();
         public List<EnumOption> Contracts { get; } = EnumLabels.Contracts();

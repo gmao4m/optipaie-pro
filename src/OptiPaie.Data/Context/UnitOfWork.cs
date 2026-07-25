@@ -35,6 +35,7 @@ namespace OptiPaie.Data.Context
         private IContractRepository _contracts;
         private IPerformanceRepository _performance;
         private IAssetRepository _assets;
+        private IDepartmentRepository _departments;
         private ITrainingRepository _training;
         private IAtsRepository _ats;
         private IWorkCertificateRepository _certificates;
@@ -75,6 +76,7 @@ namespace OptiPaie.Data.Context
         public IPerformanceRepository Performance => _performance ?? (_performance = new PerformanceRepository(this));
 
         public IAssetRepository Assets => _assets ?? (_assets = new AssetRepository(this));
+        public IDepartmentRepository Departments => _departments ?? (_departments = new DepartmentRepository(this));
 
         public ITrainingRepository Training => _training ?? (_training = new TrainingRepository(this));
 

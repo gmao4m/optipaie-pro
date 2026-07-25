@@ -1,4 +1,5 @@
 using System;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows.Input;
 using Microsoft.Win32;
@@ -26,9 +27,94 @@ namespace OptiPaie.Desktop.ViewModels
             CancelCommand = new RelayCommand(() => RequestClose?.Invoke(false));
             PickLogoCommand = new RelayCommand(PickLogo);
             ClearLogoCommand = new RelayCommand(ClearLogo);
+            AddDepartmentCommand = new RelayCommand(AddDepartment);
+
+            LoadDepartments();
         }
 
         public Company Company { get; }
+
+        // ---------------------------------------------------------------- departments
+
+        /// <summary>The company's departments — the backbone of the evaluation module and the employee dropdown.</summary>
+        public ObservableCollection<DepartmentRowViewModel> Departments { get; } = new ObservableCollection<DepartmentRowViewModel>();
+
+        private string _newDepartmentName = string.Empty;
+
+        /// <summary>The name typed into the "add department" box.</summary>
+        public string NewDepartmentName
+        {
+            get => _newDepartmentName;
+            set { if (_newDepartmentName != value) { _newDepartmentName = value; Raise(); } }
+        }
+
+        /// <summary>Departments are FK'd to a saved company, so the list is live only once it exists.</summary>
+        public bool CanManageDepartments => Company.Id > 0;
+
+        /// <summary>Shown in place of the editor for a brand-new, unsaved company.</summary>
+        public bool ShowDepartmentHint => Company.Id <= 0;
+
+        public ICommand AddDepartmentCommand { get; }
+
+        private void LoadDepartments()
+        {
+            Departments.Clear();
+            if (!CanManageDepartments)
+            {
+                return;
+            }
+
+            foreach (Department department in _services.Departments.GetForCompany(Company.Id))
+            {
+                Departments.Add(new DepartmentRowViewModel(department, RenameDepartment, RemoveDepartment));
+            }
+        }
+
+        private void AddDepartment()
+        {
+            if (string.IsNullOrWhiteSpace(NewDepartmentName))
+            {
+                return;
+            }
+
+            Result<long> result = _services.Departments.Save(
+                new Department { CompanyId = Company.Id, Name = NewDepartmentName.Trim() });
+            if (!result.IsSuccess)
+            {
+                Dialogs.Error(result.Error);
+                return;
+            }
+
+            NewDepartmentName = string.Empty;
+            LoadDepartments();
+        }
+
+        private void RenameDepartment(DepartmentRowViewModel row)
+        {
+            Result<long> result = _services.Departments.Save(row.ToEntity());
+            if (!result.IsSuccess)
+            {
+                Dialogs.Error(result.Error);
+            }
+
+            LoadDepartments();
+        }
+
+        private void RemoveDepartment(DepartmentRowViewModel row)
+        {
+            if (!Dialogs.Confirm($"Supprimer le département « {row.Name} » ?"))
+            {
+                return;
+            }
+
+            Result result = _services.Departments.Remove(row.Id);
+            if (!result.IsSuccess)
+            {
+                Dialogs.Error(result.Error);
+            }
+
+            LoadDepartments();
+        }
 
         public string Title => _isNew ? "Nouvelle entreprise" : "Modifier l'entreprise";
 

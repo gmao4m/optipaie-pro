@@ -84,6 +84,10 @@
   <data name="Company_GroupContact" xml:space="preserve"><value>Coordonnées</value></data>
   <data name="Company_GroupLegal" xml:space="preserve"><value>Identifiants légaux</value></data>
   <data name="Company_GroupBank" xml:space="preserve"><value>Banque &amp; logo</value></data>
+  <data name="Company_GroupDepartments" xml:space="preserve"><value>Départements</value></data>
+  <data name="Company_DepartmentHint" xml:space="preserve"><value>Enregistrez l'entreprise pour gérer ses départements. Une liste par défaut sera créée automatiquement.</value></data>
+  <data name="Company_DepartmentAdd" xml:space="preserve"><value>Nom du nouveau département</value></data>
+  <data name="Common_Rename" xml:space="preserve"><value>Renommer</value></data>
   <data name="Employee_GroupIdentity" xml:space="preserve"><value>Identité</value></data>
   <data name="Employee_GroupContract" xml:space="preserve"><value>Dates &amp; contrat</value></data>
   <data name="Employee_GroupJob" xml:space="preserve"><value>Poste &amp; rémunération</value></data>

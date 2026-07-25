@@ -84,6 +84,10 @@
   <data name="Company_GroupContact" xml:space="preserve"><value>معلومات الاتصال</value></data>
   <data name="Company_GroupLegal" xml:space="preserve"><value>المعرّفات القانونية</value></data>
   <data name="Company_GroupBank" xml:space="preserve"><value>البنك والشعار</value></data>
+  <data name="Company_GroupDepartments" xml:space="preserve"><value>الأقسام</value></data>
+  <data name="Company_DepartmentHint" xml:space="preserve"><value>احفظ المؤسسة لإدارة أقسامها. سيتم إنشاء قائمة افتراضية تلقائيًا.</value></data>
+  <data name="Company_DepartmentAdd" xml:space="preserve"><value>اسم القسم الجديد</value></data>
+  <data name="Common_Rename" xml:space="preserve"><value>إعادة تسمية</value></data>
   <data name="Employee_GroupIdentity" xml:space="preserve"><value>الهوية</value></data>
   <data name="Employee_GroupContract" xml:space="preserve"><value>التواريخ والعقد</value></data>
   <data name="Employee_GroupJob" xml:space="preserve"><value>المنصب والأجر</value></data>

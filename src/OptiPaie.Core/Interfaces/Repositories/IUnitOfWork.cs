@@ -63,6 +63,8 @@ namespace OptiPaie.Core.Interfaces.Repositories
         /// <summary>Asset repository (premium module, shares Employees/Companies).</summary>
         IAssetRepository Assets { get; }
 
+        IDepartmentRepository Departments { get; }
+
         /// <summary>Training repository (premium module, shares Employees/Companies).</summary>
         ITrainingRepository Training { get; }
 

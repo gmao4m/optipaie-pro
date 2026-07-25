@@ -101,7 +101,8 @@
                             </StackPanel>
                             <StackPanel Margin="8,0,0,14">
                                 <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Loc Users_ColDepartment}" />
-                                <TextBox Style="{StaticResource AppTextBox}" Text="{Binding Employee.Department}" />
+                                <ComboBox Style="{StaticResource AppComboBox}" ItemsSource="{Binding Departments}"
+                                          Text="{Binding Employee.Department}" IsEditable="True" />
                             </StackPanel>
                             <StackPanel Margin="0,0,8,14">
                                 <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Loc Employee_Category}" />

@@ -51,6 +51,7 @@ namespace OptiPaie.Desktop.Composition
             var contractService = new ContractService(unitOfWorkFactory);
             var performanceService = new PerformanceService(unitOfWorkFactory, attendanceService);
             var assetService = new AssetService(unitOfWorkFactory);
+            var departmentService = new DepartmentService(unitOfWorkFactory);
             var trainingService = new TrainingService(unitOfWorkFactory);
             var atsService = new AtsService(unitOfWorkFactory);
             var certificateService = new WorkCertificateService(unitOfWorkFactory);
@@ -131,6 +132,7 @@ namespace OptiPaie.Desktop.Composition
                 contractService,
                 performanceService,
                 assetService,
+                departmentService,
                 trainingService,
                 atsService,
                 certificateService,

@@ -38,6 +38,7 @@ namespace OptiPaie.Desktop.Composition
             IContractService contracts,
             IPerformanceService performance,
             IAssetService assets,
+            IDepartmentService departments,
             ITrainingService training,
             IAtsService ats,
             IWorkCertificateService certificates,
@@ -70,6 +71,7 @@ namespace OptiPaie.Desktop.Composition
             Contracts = contracts;
             Performance = performance;
             Assets = assets;
+            Departments = departments;
             Training = training;
             Ats = ats;
             Certificates = certificates;
@@ -141,6 +143,9 @@ namespace OptiPaie.Desktop.Composition
 
         /// <summary>Assets module (premium) — company property assigned to shared employees.</summary>
         public IAssetService Assets { get; }
+
+        /// <summary>Per-company departments — the backbone of the evaluation module and the employee dropdown.</summary>
+        public IDepartmentService Departments { get; }
 
         /// <summary>Training module (premium) — sessions with shared-employee enrolments.</summary>
         public ITrainingService Training { get; }

@@ -137,6 +137,51 @@
                     </StackPanel>
                 </Border>
 
+                <Border Style="{StaticResource Card}" Padding="20" Margin="0,0,0,16">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource SectionTitle}" Text="{loc:Loc Company_GroupDepartments}" />
+
+                        <TextBlock Visibility="{Binding ShowDepartmentHint, Converter={StaticResource BoolToVis}}"
+                                   TextWrapping="Wrap" FontSize="12" Foreground="{DynamicResource TextMuted}"
+                                   Text="{loc:Loc Company_DepartmentHint}" />
+
+                        <StackPanel Visibility="{Binding CanManageDepartments, Converter={StaticResource BoolToVis}}">
+                            <ItemsControl ItemsSource="{Binding Departments}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,0,0,8">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBox Grid.Column="0" Style="{StaticResource AppTextBox}"
+                                                     Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
+                                            <Button Grid.Column="1" Margin="8,0,0,0" Style="{StaticResource SecondaryButton}"
+                                                    Content="{loc:Loc Common_Rename}" Command="{Binding RenameCommand}" />
+                                            <Button Grid.Column="2" Margin="8,0,0,0" Style="{StaticResource SecondaryButton}"
+                                                    Content="{loc:Loc Common_Delete}" Foreground="{DynamicResource Deduction}"
+                                                    Command="{Binding RemoveCommand}" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <TextBlock Style="{StaticResource FieldLabel}" Margin="0,8,0,5" Text="{loc:Loc Company_DepartmentAdd}" />
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBox Grid.Column="0" Style="{StaticResource AppTextBox}"
+                                         Text="{Binding NewDepartmentName, UpdateSourceTrigger=PropertyChanged}" />
+                                <Button Grid.Column="1" Margin="8,0,0,0" Style="{StaticResource PrimaryButton}"
+                                        Content="{loc:Loc Common_Add}" Command="{Binding AddDepartmentCommand}" />
+                            </Grid>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
                 <Border Style="{StaticResource Card}" Padding="20">
                     <StackPanel>
                         <TextBlock Style="{StaticResource SectionTitle}" Text="{loc:Loc Company_Logo}" />
