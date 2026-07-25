@@ -64,6 +64,20 @@ namespace OptiPaie.Desktop
 
                 Services.Localization.SetLanguage(language);
 
+                // WPF binding StringFormat ignores the thread culture and formats via each
+                // element's Language (default en-US), so amounts/dates showed US-style
+                // ("60,000.00 DA"). Make elements inherit the app culture so numbers and
+                // dates read the Algerian way ("60 000,00 DA", dd/MM/yyyy). Format only.
+                try
+                {
+                    System.Windows.FrameworkElement.LanguageProperty.OverrideMetadata(
+                        typeof(System.Windows.FrameworkElement),
+                        new System.Windows.FrameworkPropertyMetadata(
+                            System.Windows.Markup.XmlLanguage.GetLanguage(
+                                Services.Localization.CurrentCulture.IetfLanguageTag)));
+                }
+                catch { /* already overridden — ignore */ }
+
                 // Bridge the localization service to data binding so {loc:Loc ...} text
                 // resolves for the active language and updates live on a language switch.
                 Localization.TranslationSource.Instance.Attach(Services.Localization);

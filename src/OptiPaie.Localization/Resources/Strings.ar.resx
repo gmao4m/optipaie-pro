@@ -981,4 +981,8 @@
   <data name="Ats_PipelineRow" xml:space="preserve"><value>فتح الترشيحات</value></data>
   <data name="Archive_PreviewRow" xml:space="preserve"><value>معاينة الكشف</value></data>
   <data name="Archive_PrintRow" xml:space="preserve"><value>طباعة الكشف</value></data>
+  <data name="Employees_OpenFile" xml:space="preserve"><value>فتح الملف</value></data>
+  <data name="Employees_EditRow" xml:space="preserve"><value>تعديل البطاقة</value></data>
+  <data name="Employees_DeleteRow" xml:space="preserve"><value>حذف الموظف</value></data>
+  <data name="Employees_ListEmpty" xml:space="preserve"><value>لا يوجد موظفون — انقر « موظف جديد » لإضافة الأول.</value></data>
 </root>

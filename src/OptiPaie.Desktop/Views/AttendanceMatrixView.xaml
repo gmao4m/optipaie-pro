@@ -98,18 +98,8 @@
                 <StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Att_WorkingDays}" />
                     <TextBlock Style="{StaticResource KpiValue}" Text="{Binding KpiWorkingDays}" /></StackPanel>
             </Border>
-            <Border Style="{StaticResource Kpi}">
-                <StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_PresentToday}" />
-                    <TextBlock Style="{StaticResource KpiValue}" Foreground="{DynamicResource Salary}" Text="{Binding KpiPresentToday}" /></StackPanel>
-            </Border>
-            <Border Style="{StaticResource Kpi}">
-                <StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_OnLeave}" />
-                    <TextBlock Style="{StaticResource KpiValue}" Foreground="{DynamicResource Employer}" Text="{Binding KpiOnLeave}" /></StackPanel>
-            </Border>
-            <Border Style="{StaticResource Kpi}">
-                <StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_OnMission}" />
-                    <TextBlock Style="{StaticResource KpiValue}" Foreground="{DynamicResource Employer}" Text="{Binding KpiOnMission}" /></StackPanel>
-            </Border>
+            <!-- The "today" figures (present/on-leave/on-mission today) live on the Dashboard;
+                 this is a whole-MONTH editing screen, so it shows the month's rates only. -->
             <Border Style="{StaticResource Kpi}">
                 <StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_Headcount}" />
                     <TextBlock Style="{StaticResource KpiValue}" Text="{Binding KpiEmployees}" /></StackPanel>
@@ -136,12 +126,13 @@
                 <Button Style="{StaticResource SecondaryButton}" Height="32" Margin="0,0,6,0"
                         Content="{loc:Loc Att_ApplyMonth}" Command="{Binding ApplyMonthToSelectionCommand}"
                         ToolTip="Cochez des employés, choisissez un statut dans la palette, puis remplissez tout le mois (jours ouvrés) pour eux d'un seul clic." />
-                <Button Style="{StaticResource SecondaryButton}" Height="32" Margin="0,0,6,0" Content="{loc:Loc Att_SelectAll}" Command="{Binding SelectAllCommand}" />
-                <Button Style="{StaticResource SecondaryButton}" Height="32" Margin="0,0,6,0" Content="{loc:Loc Att_ClearSelection}" Command="{Binding ClearSelectionCommand}" />
                 <Border Width="1" Background="{DynamicResource Border}" Margin="10,2" />
-                <!-- Secondary/global actions in one overflow instead of a row of buttons. -->
+                <!-- Selection helpers + secondary/global actions in one overflow, not a row of buttons. -->
                 <Menu Background="Transparent" VerticalAlignment="Center">
                     <MenuItem Header="{loc:Loc Common_More}" Height="32" Padding="8,0" VerticalContentAlignment="Center">
+                        <MenuItem Header="{loc:Loc Att_SelectAll}" Command="{Binding SelectAllCommand}" />
+                        <MenuItem Header="{loc:Loc Att_ClearSelection}" Command="{Binding ClearSelectionCommand}" />
+                        <Separator />
                         <MenuItem Header="{loc:Loc Att_MonthReports}" Command="{Binding MonthSummaryCommand}" />
                         <MenuItem Header="{loc:Loc Common_Refresh}" Command="{Binding RefreshCommand}" />
                         <Separator />

@@ -35,6 +35,7 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
                     <Grid Grid.Row="0" Margin="12">
@@ -45,13 +46,22 @@
                                    IsHitTestVisible="False" Visibility="{Binding Search, Converter={StaticResource EmptyToVis}}" />
                     </Grid>
 
-                    <ListBox Grid.Row="1" BorderThickness="0" Background="Transparent"
+                    <ListBox x:Name="EmployeeList" Grid.Row="1" BorderThickness="0" Background="Transparent"
                              ItemsSource="{Binding Employees}" SelectedItem="{Binding SelectedEmployee}"
                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                             HorizontalContentAlignment="Stretch">
+                             HorizontalContentAlignment="Stretch"
+                             PreviewMouseRightButtonDown="List_RightClickSelect">
                         <ListBox.InputBindings>
                             <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding OpenProfileCommand}" />
                         </ListBox.InputBindings>
+                        <ListBox.ContextMenu>
+                            <ContextMenu DataContext="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                                <MenuItem Header="{loc:Loc Employees_OpenFile}" Command="{Binding OpenProfileCommand}" />
+                                <MenuItem Header="{loc:Loc Employees_EditRow}" Command="{Binding EditCommand}" />
+                                <Separator />
+                                <MenuItem Header="{loc:Loc Employees_DeleteRow}" Command="{Binding DeleteCommand}" />
+                            </ContextMenu>
+                        </ListBox.ContextMenu>
                         <ListBox.ItemContainerStyle>
                             <Style TargetType="ListBoxItem">
                                 <Setter Property="Padding" Value="0" />
@@ -95,6 +105,18 @@
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
+
+                    <!-- No employees yet — invite the first one. -->
+                    <StackPanel Grid.Row="1" VerticalAlignment="Center" Margin="24"
+                                Visibility="{Binding HasItems, ElementName=EmployeeList, Converter={StaticResource InverseBoolToVis}}">
+                        <TextBlock Style="{StaticResource Caption}" TextAlignment="Center" TextWrapping="Wrap"
+                                   Text="{loc:Loc Employees_ListEmpty}" />
+                    </StackPanel>
+
+                    <!-- How to act, so nothing needs a toolbar. -->
+                    <TextBlock Grid.Row="2" Margin="14,4,14,12" Style="{StaticResource Caption}" TextWrapping="Wrap"
+                               Foreground="{DynamicResource TextMuted}" Text="{loc:Loc Hint_RowActions}"
+                               Visibility="{Binding HasItems, ElementName=EmployeeList, Converter={StaticResource BoolToVis}}" />
                 </Grid>
             </Border>
 
@@ -110,14 +132,10 @@
                     </StackPanel>
                 </Border>
 
-                <!-- Profile + actions -->
-                <DockPanel Visibility="{Binding HasSelection, Converter={StaticResource BoolToVis}}">
-                    <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
-                        <Button Style="{StaticResource SecondaryButton}" Command="{Binding DeleteCommand}" Content="{loc:Loc Common_Delete}" Foreground="{DynamicResource Deduction}" />
-                        <Button Style="{StaticResource SecondaryButton}" Margin="12,0,0,0" Command="{Binding EditCommand}" Content="{loc:Loc Common_Edit}" />
-                        <Button Style="{StaticResource PrimaryButton}" Margin="12,0,0,0" Command="{Binding OpenProfileCommand}" Content="{loc:Loc Profile_Title}" />
-                    </StackPanel>
-                    <Border Style="{StaticResource Card}" Padding="24" VerticalAlignment="Top">
+                <!-- Read-only preview. The full 360° dossier opens by double-clicking a row
+                     (or right-click → Ouvrir le dossier); edit/delete live on that menu too. -->
+                <Border Style="{StaticResource Card}" Padding="24" VerticalAlignment="Top"
+                        Visibility="{Binding HasSelection, Converter={StaticResource BoolToVis}}">
                     <StackPanel DataContext="{Binding SelectedEmployee}">
                         <StackPanel Orientation="Horizontal">
                             <Border Width="52" Height="52" CornerRadius="26" Background="{DynamicResource BrandSoft}">
@@ -166,8 +184,7 @@
                             </StackPanel>
                         </UniformGrid>
                     </StackPanel>
-                    </Border>
-                </DockPanel>
+                </Border>
             </Grid>
         </Grid>
     </Grid>
