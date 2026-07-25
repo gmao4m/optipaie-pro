@@ -19,10 +19,29 @@ using QuestPDF.Fluent;
 
 namespace OptiPaie.Desktop.ViewModels.Performance
 {
+    /// <summary>One selectable 1-5 rating on a behavioral criterion, with its bilingual anchor.</summary>
+    public sealed class ScoreChoiceViewModel : ObservableObject
+    {
+        private bool _isSelected;
+
+        public ScoreChoiceViewModel(int value, string anchor, Action<int> pick)
+        {
+            Value = value;
+            Anchor = anchor;
+            PickCommand = new RelayCommand(() => pick(value));
+        }
+
+        public int Value { get; }
+        public string Anchor { get; }
+        public bool IsSelected { get => _isSelected; set => Set(ref _isSelected, value); }
+        public ICommand PickCommand { get; }
+    }
+
     /// <summary>
-    /// One criterion card in the review form: a big, colour-coded score set with a slider
-    /// (0..scale), the criterion's share of the overall score, and a comment area. Raising
-    /// the score re-computes the review's live overall through <paramref name="changed"/>.
+    /// One criterion card in the review form. A <b>behavioral</b> criterion is rated 1-5 through
+    /// a segmented control with visible anchors; a <b>KPI</b> criterion takes a target and an
+    /// achieved value and shows the auto-computed score. Either way the big, colour-coded score
+    /// and the anchor update live, and re-compute the review's overall through <c>changed</c>.
     /// </summary>
     public sealed class ReviewCriterionCardViewModel : ObservableObject
     {
@@ -33,24 +52,60 @@ namespace OptiPaie.Desktop.ViewModels.Performance
         private static readonly Brush Muted = Frozen("#8B8F99");
 
         private readonly Action _changed;
+        private readonly Func<decimal?, decimal?, bool, decimal, decimal> _kpiScorer;
+        private readonly string[] _anchors;
+
         private decimal _score;
         private string _comment;
+        private string _targetText;
+        private string _achievedText;
 
-        public ReviewCriterionCardViewModel(PerformanceCriterion criterion, decimal scaleMax, Action changed)
+        public ReviewCriterionCardViewModel(PerformanceCriterion criterion, decimal scaleMax, Action changed,
+            Func<decimal?, decimal?, bool, decimal, decimal> kpiScorer, string[] anchors)
         {
             _changed = changed;
+            _kpiScorer = kpiScorer;
+            _anchors = anchors;
+
             Id = criterion.Id;
             Label = criterion.Label;
             Weight = criterion.Weight;
             ScaleMax = scaleMax <= 0m ? 20m : scaleMax;
+            CriterionType = criterion.CriterionType;
+            HigherIsBetter = criterion.HigherIsBetter;
             _score = criterion.Score;
             _comment = criterion.Comment;
+            _targetText = criterion.KpiTarget.HasValue ? criterion.KpiTarget.Value.ToString("0.##", Fr) : string.Empty;
+            _achievedText = criterion.KpiAchieved.HasValue ? criterion.KpiAchieved.Value.ToString("0.##", Fr) : string.Empty;
+
+            if (IsBehavioral && UseChoices)
+            {
+                for (int v = 1; v <= (int)ScaleMax; v++)
+                {
+                    string anchor = (_anchors != null && v <= _anchors.Length) ? _anchors[v - 1] : v.ToString();
+                    Choices.Add(new ScoreChoiceViewModel(v, anchor, SetScore));
+                }
+                SyncChoices();
+            }
         }
 
         public long Id { get; }
         public string Label { get; }
         public decimal Weight { get; }
         public decimal ScaleMax { get; }
+        public CriterionType CriterionType { get; }
+        public bool HigherIsBetter { get; }
+
+        public bool IsKpi => CriterionType == CriterionType.Kpi;
+        public bool IsBehavioral => CriterionType != CriterionType.Kpi;
+
+        /// <summary>1-5 segmented buttons (the primary control on the new department grids).</summary>
+        public bool UseChoices => IsBehavioral && ScaleMax >= 2m && ScaleMax <= 5m;
+
+        /// <summary>Fallback slider for legacy behavioral reviews on a larger scale (e.g. /20).</summary>
+        public bool UseSlider => IsBehavioral && !UseChoices;
+
+        public ObservableCollection<ScoreChoiceViewModel> Choices { get; } = new ObservableCollection<ScoreChoiceViewModel>();
 
         /// <summary>Share of the overall score (set by the parent once all weights are known).</summary>
         private decimal _sharePercent;
@@ -72,8 +127,20 @@ namespace OptiPaie.Desktop.ViewModels.Performance
                     Raise(nameof(ScoreText));
                     Raise(nameof(SliderValue));
                     Raise(nameof(ScoreBrush));
+                    Raise(nameof(AnchorText));
+                    SyncChoices();
                     _changed?.Invoke();
                 }
+            }
+        }
+
+        private void SetScore(int value) => Score = value;
+
+        private void SyncChoices()
+        {
+            foreach (ScoreChoiceViewModel c in Choices)
+            {
+                c.IsSelected = c.Value == (int)Math.Round(_score, MidpointRounding.AwayFromZero);
             }
         }
 
@@ -87,6 +154,42 @@ namespace OptiPaie.Desktop.ViewModels.Performance
         public double ScaleMaxDouble => (double)ScaleMax;
 
         public string ScoreText => _score.ToString("0.##", Fr) + " / " + ScaleMax.ToString("0.##", Fr);
+
+        /// <summary>The bilingual band anchor for the current score (Insuffisant … Excellent).</summary>
+        public string AnchorText
+        {
+            get
+            {
+                if (_score <= 0m || _anchors == null || _anchors.Length < 5) return string.Empty;
+                int band = (int)Math.Round(_score / ScaleMax * 5m, MidpointRounding.AwayFromZero);
+                if (band < 1) band = 1;
+                if (band > 5) band = 5;
+                return _anchors[band - 1];
+            }
+        }
+
+        // -- KPI inputs --------------------------------------------------------
+
+        public string TargetText
+        {
+            get => _targetText;
+            set { if (Set(ref _targetText, value)) ApplyKpiScore(); }
+        }
+
+        public string AchievedText
+        {
+            get => _achievedText;
+            set { if (Set(ref _achievedText, value)) ApplyKpiScore(); }
+        }
+
+        private void ApplyKpiScore()
+        {
+            if (!IsKpi || _kpiScorer == null) return;
+            Score = _kpiScorer(ParseNum(_targetText), ParseNum(_achievedText), HigherIsBetter, ScaleMax);
+        }
+
+        private decimal? Target => ParseNum(_targetText);
+        private decimal? Achieved => ParseNum(_achievedText);
 
         public Brush ScoreBrush
         {
@@ -104,7 +207,25 @@ namespace OptiPaie.Desktop.ViewModels.Performance
 
         public PerformanceCriterion ToEntity()
         {
-            return new PerformanceCriterion { Label = Label, Weight = Weight, Score = _score, Comment = _comment };
+            return new PerformanceCriterion
+            {
+                Label = Label,
+                Weight = Weight,
+                Score = _score,
+                Comment = _comment,
+                CriterionType = CriterionType,
+                HigherIsBetter = HigherIsBetter,
+                KpiTarget = IsKpi ? Target : null,
+                KpiAchieved = IsKpi ? Achieved : null
+            };
+        }
+
+        private static decimal? ParseNum(string s)
+        {
+            if (string.IsNullOrWhiteSpace(s)) return null;
+            string cleaned = s.Replace(" ", string.Empty).Replace(",", ".");
+            return decimal.TryParse(cleaned, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal v)
+                ? v : (decimal?)null;
         }
 
         private static Brush Frozen(string hex)
@@ -140,12 +261,16 @@ namespace OptiPaie.Desktop.ViewModels.Performance
         private string _selfComments;
         private string _selfScoreText;
         private string _overallText = "0 / 20";
+        private string _overallPercentText = string.Empty;
         private string _ratingText = string.Empty;
         private Brush _overallBrush = Amber;
         private string _attendanceText = string.Empty;
         private bool _isCompleted;
+        private bool _showOutOf20;
+        private decimal _overall;
         private string _suggestionText = string.Empty;
         private readonly List<string> _trainingTitles = new List<string>();
+        private string[] _anchors;
 
         public PerformanceReviewFormViewModel(AppServices services, long reviewId)
         {
@@ -178,8 +303,16 @@ namespace OptiPaie.Desktop.ViewModels.Performance
         public string SelfScoreText { get => _selfScoreText; set => Set(ref _selfScoreText, value); }
 
         public string OverallText { get => _overallText; private set => Set(ref _overallText, value); }
+        public string OverallPercentText { get => _overallPercentText; private set => Set(ref _overallPercentText, value); }
         public string RatingText { get => _ratingText; private set => Set(ref _ratingText, value); }
         public Brush OverallBrush { get => _overallBrush; private set => Set(ref _overallBrush, value); }
+
+        /// <summary>Toggle: show the score out of 20 instead of its native scale (typically /5).</summary>
+        public bool ShowOutOf20
+        {
+            get => _showOutOf20;
+            set { if (Set(ref _showOutOf20, value)) RefreshOverallDisplay(); }
+        }
 
         public string AttendanceText { get => _attendanceText; private set => Set(ref _attendanceText, value); }
         public bool HasAttendance => !string.IsNullOrEmpty(_attendanceText);
@@ -222,9 +355,14 @@ namespace OptiPaie.Desktop.ViewModels.Performance
             IsCompleted = _review.Status == PerformanceStatus.Completed;
             Title = IsCompleted ? "Évaluation finalisée" : "Évaluation";
 
+            _anchors = new[]
+            {
+                L("Eval_Anchor1"), L("Eval_Anchor2"), L("Eval_Anchor3"), L("Eval_Anchor4"), L("Eval_Anchor5")
+            };
+
             foreach (PerformanceCriterion c in detail.Criteria)
             {
-                Criteria.Add(new ReviewCriterionCardViewModel(c, ScaleMax, Recompute));
+                Criteria.Add(new ReviewCriterionCardViewModel(c, ScaleMax, Recompute, _services.Performance.ScoreKpi, _anchors));
             }
 
             if (detail.Attendance != null)
@@ -263,7 +401,7 @@ namespace OptiPaie.Desktop.ViewModels.Performance
         private void Recompute()
         {
             decimal totalWeight = Criteria.Sum(c => c.Weight);
-            decimal overall = totalWeight > 0m
+            _overall = totalWeight > 0m
                 ? Math.Round(Criteria.Sum(c => c.Score * c.Weight) / totalWeight, 2, MidpointRounding.AwayFromZero)
                 : 0m;
 
@@ -272,14 +410,32 @@ namespace OptiPaie.Desktop.ViewModels.Performance
                 c.SharePercent = totalWeight > 0m ? Math.Round(c.Weight / totalWeight * 100m, 1, MidpointRounding.AwayFromZero) : 0m;
             }
 
-            OverallText = overall.ToString("0.##", Fr) + " / " + ScaleMax.ToString("0.##", Fr);
-            RatingText = _services.Performance.RateScaled(overall, ScaleMax);
-
-            decimal pct = ScaleMax > 0m ? overall / ScaleMax * 100m : 0m;
-            OverallBrush = pct >= 70m ? Green : (pct >= 50m ? Amber : Red);
-
+            RefreshOverallDisplay();
             UpdateSuggestion();
         }
+
+        /// <summary>Formats the header score in the chosen scale, plus percent and rating band.</summary>
+        private void RefreshOverallDisplay()
+        {
+            decimal pct = ScaleMax > 0m ? _overall / ScaleMax * 100m : 0m;
+
+            if (_showOutOf20)
+            {
+                decimal on20 = ScaleMax > 0m ? Math.Round(_overall / ScaleMax * 20m, 2, MidpointRounding.AwayFromZero) : 0m;
+                OverallText = on20.ToString("0.##", Fr) + " / 20";
+            }
+            else
+            {
+                OverallText = _overall.ToString("0.##", Fr) + " / " + ScaleMax.ToString("0.##", Fr);
+            }
+
+            OverallPercentText = pct.ToString("0.#", Fr) + " %";
+            RatingText = _services.Performance.RateScaled(_overall, ScaleMax);
+            OverallBrush = pct >= 70m ? Green : (pct >= 50m ? Amber : Red);
+        }
+
+        /// <summary>Localized string lookup for VM-side text (bilingual anchors).</summary>
+        private string L(string key) => _services.Localization != null ? _services.Localization.GetString(key) : key;
 
         /// <summary>
         /// Performance → Training: if a criterion scores below half its scale, suggest a matching

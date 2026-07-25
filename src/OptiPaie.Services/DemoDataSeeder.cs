@@ -306,10 +306,11 @@ namespace OptiPaie.Services
 
         private void ConfigureDepartments(long companyId, Dictionary<string, EmpSpec> by)
         {
-            SaveDept(companyId, "Production", "builtin-production", by["benali"].Id);
-            SaveDept(companyId, "Commercial", "builtin-sales", by["hamadi"].Id);
-            SaveDept(companyId, "Administration", "builtin-admin", by["zeroual"].Id);
-            SaveDept(companyId, "Informatique", "builtin-technical", by["meziane"].Id);
+            // Point each department at its new 1-5 evaluation grid (migration 0027).
+            SaveDept(companyId, "Production", "dept-production", by["benali"].Id);
+            SaveDept(companyId, "Commercial", "dept-commercial", by["hamadi"].Id);
+            SaveDept(companyId, "Administration", "dept-administration", by["zeroual"].Id);
+            SaveDept(companyId, "Informatique", "dept-informatique", by["meziane"].Id);
         }
 
         private void SaveDept(long companyId, string dept, string templateGroupKey, long reviewerId)

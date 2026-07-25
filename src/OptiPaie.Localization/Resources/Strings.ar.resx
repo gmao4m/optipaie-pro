@@ -803,6 +803,15 @@
   <data name="PerfReview_PeriodLabel" xml:space="preserve"><value>الفترة:</value></data>
   <data name="PerfReview_GlobalScore" xml:space="preserve"><value>العلامة الإجمالية</value></data>
   <data name="PerfReview_CriteriaHeader" xml:space="preserve"><value>معايير التقييم</value></data>
+  <data name="Eval_Anchor1" xml:space="preserve"><value>ضعيف</value></data>
+  <data name="Eval_Anchor2" xml:space="preserve"><value>مقبول</value></data>
+  <data name="Eval_Anchor3" xml:space="preserve"><value>جيد</value></data>
+  <data name="Eval_Anchor4" xml:space="preserve"><value>جيد جدًا</value></data>
+  <data name="Eval_Anchor5" xml:space="preserve"><value>ممتاز</value></data>
+  <data name="Eval_Target" xml:space="preserve"><value>الهدف</value></data>
+  <data name="Eval_Achieved" xml:space="preserve"><value>المُنجز</value></data>
+  <data name="Eval_AutoScore" xml:space="preserve"><value>النتيجة محسوبة تلقائيًا</value></data>
+  <data name="Eval_ShowOutOf20" xml:space="preserve"><value>العرض على 20</value></data>
   <data name="PerfReview_ObsHeader" xml:space="preserve"><value>الملاحظات والأهداف</value></data>
   <data name="PerfReview_SelfHeader" xml:space="preserve"><value>التقييم الذاتي (يُدخله قسم الموارد البشرية)</value></data>
   <data name="PerfReview_EmpScore" xml:space="preserve"><value>علامة الموظف</value></data>

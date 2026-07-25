@@ -24,7 +24,7 @@
                     <TextBlock Text="{Binding EmployeeMeta}" FontSize="12.5" Margin="0,3,0,0" Foreground="#B9C2D6" />
                     <TextBlock Margin="0,2,0,0" FontSize="12" Foreground="#B9C2D6">
                         <Run Text="{loc:Loc PerfReview_PeriodLabel}" />
-                        <Run Text="{Binding PeriodLabel}" FontWeight="SemiBold" />
+                        <Run Text="{Binding PeriodLabel, Mode=OneWay}" FontWeight="SemiBold" />
                     </TextBlock>
                 </StackPanel>
                 <Border HorizontalAlignment="Right" VerticalAlignment="Center" Background="#22FFFFFF" CornerRadius="12" Padding="20,10">
@@ -32,10 +32,13 @@
                         <TextBlock Text="{loc:Loc PerfReview_GlobalScore}" FontSize="11" Foreground="#B9C2D6" HorizontalAlignment="Right" />
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,2,0,0">
                             <TextBlock Text="{Binding OverallText}" FontSize="30" FontWeight="Bold" Foreground="{DynamicResource TextOnBrand}" />
+                            <TextBlock Text="{Binding OverallPercentText}" FontSize="14" Margin="10,0,0,4" VerticalAlignment="Bottom" Foreground="#B9C2D6" />
                         </StackPanel>
                         <Border HorizontalAlignment="Right" Margin="0,4,0,0" CornerRadius="7" Padding="10,3" Background="{Binding OverallBrush}">
                             <TextBlock Text="{Binding RatingText}" FontSize="12" FontWeight="SemiBold" Foreground="White" />
                         </Border>
+                        <CheckBox Content="{loc:Loc Eval_ShowOutOf20}" IsChecked="{Binding ShowOutOf20}" Margin="0,8,0,0"
+                                  HorizontalAlignment="Right" FontSize="11.5" Foreground="#B9C2D6" VerticalContentAlignment="Center" />
                     </StackPanel>
                 </Border>
             </Grid>
@@ -99,11 +102,92 @@
                                     </StackPanel>
 
                                     <StackPanel Grid.Column="2" VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding ScoreText}" HorizontalAlignment="Right" FontSize="26" FontWeight="Bold"
-                                                   FontFamily="{StaticResource MonoFont}" Foreground="{Binding ScoreBrush}" />
-                                        <Slider Margin="0,6,0,0" Minimum="0" Maximum="{Binding ScaleMaxDouble}"
-                                                Value="{Binding SliderValue, Mode=TwoWay}" TickFrequency="1" IsSnapToTickEnabled="True"
-                                                IsEnabled="{Binding DataContext.IsEditable, RelativeSource={RelativeSource AncestorType=ItemsControl}}" />
+
+                                        <!-- Behavioral 1-5: segmented control with visible anchor -->
+                                        <StackPanel Visibility="{Binding UseChoices, Converter={StaticResource BoolVis}}">
+                                            <ItemsControl ItemsSource="{Binding Choices}" HorizontalAlignment="Right">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <StackPanel Orientation="Horizontal" />
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Button Command="{Binding PickCommand}" Width="46" Height="44" Margin="3,0"
+                                                                Content="{Binding Value}"
+                                                                IsEnabled="{Binding DataContext.IsEditable, RelativeSource={RelativeSource AncestorType=ItemsControl, AncestorLevel=2}}">
+                                                            <Button.Style>
+                                                                <Style TargetType="Button">
+                                                                    <Setter Property="FontSize" Value="18" />
+                                                                    <Setter Property="FontWeight" Value="Bold" />
+                                                                    <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
+                                                                    <Setter Property="Cursor" Value="Hand" />
+                                                                    <Setter Property="Template">
+                                                                        <Setter.Value>
+                                                                            <ControlTemplate TargetType="Button">
+                                                                                <Border x:Name="bd" CornerRadius="9" BorderThickness="1"
+                                                                                        Background="{DynamicResource SurfaceMuted}" BorderBrush="{DynamicResource Border}">
+                                                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                                                </Border>
+                                                                                <ControlTemplate.Triggers>
+                                                                                    <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                                                        <Setter TargetName="bd" Property="Background" Value="{DynamicResource Accent}" />
+                                                                                        <Setter TargetName="bd" Property="BorderBrush" Value="{DynamicResource Accent}" />
+                                                                                        <Setter Property="Foreground" Value="White" />
+                                                                                    </DataTrigger>
+                                                                                </ControlTemplate.Triggers>
+                                                                            </ControlTemplate>
+                                                                        </Setter.Value>
+                                                                    </Setter>
+                                                                </Style>
+                                                            </Button.Style>
+                                                        </Button>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                            <TextBlock Text="{Binding AnchorText}" HorizontalAlignment="Right" Margin="0,7,3,0"
+                                                       FontSize="13.5" FontWeight="SemiBold" Foreground="{Binding ScoreBrush}" />
+                                        </StackPanel>
+
+                                        <!-- Behavioral legacy (larger scale): slider -->
+                                        <StackPanel Visibility="{Binding UseSlider, Converter={StaticResource BoolVis}}">
+                                            <TextBlock Text="{Binding ScoreText}" HorizontalAlignment="Right" FontSize="26" FontWeight="Bold"
+                                                       FontFamily="{StaticResource MonoFont}" Foreground="{Binding ScoreBrush}" />
+                                            <Slider Margin="0,6,0,0" Minimum="0" Maximum="{Binding ScaleMaxDouble}"
+                                                    Value="{Binding SliderValue, Mode=TwoWay}" TickFrequency="1" IsSnapToTickEnabled="True"
+                                                    IsEnabled="{Binding DataContext.IsEditable, RelativeSource={RelativeSource AncestorType=ItemsControl}}" />
+                                        </StackPanel>
+
+                                        <!-- KPI: target + achieved -> auto-computed score -->
+                                        <StackPanel Visibility="{Binding IsKpi, Converter={StaticResource BoolVis}}">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="10" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel Grid.Column="0">
+                                                    <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Eval_Target}" />
+                                                    <TextBox Style="{StaticResource AppTextBox}" Height="34" Margin="0,3,0,0" VerticalContentAlignment="Center"
+                                                             Text="{Binding TargetText, UpdateSourceTrigger=PropertyChanged}"
+                                                             IsEnabled="{Binding DataContext.IsEditable, RelativeSource={RelativeSource AncestorType=ItemsControl}}" />
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="2">
+                                                    <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Eval_Achieved}" />
+                                                    <TextBox Style="{StaticResource AppTextBox}" Height="34" Margin="0,3,0,0" VerticalContentAlignment="Center"
+                                                             Text="{Binding AchievedText, UpdateSourceTrigger=PropertyChanged}"
+                                                             IsEnabled="{Binding DataContext.IsEditable, RelativeSource={RelativeSource AncestorType=ItemsControl}}" />
+                                                </StackPanel>
+                                            </Grid>
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
+                                                <TextBlock Text="{Binding ScoreText}" FontSize="22" FontWeight="Bold"
+                                                           FontFamily="{StaticResource MonoFont}" Foreground="{Binding ScoreBrush}" />
+                                                <TextBlock Text="{Binding AnchorText}" VerticalAlignment="Bottom" Margin="8,0,0,3"
+                                                           FontSize="12" FontWeight="SemiBold" Foreground="{Binding ScoreBrush}" />
+                                            </StackPanel>
+                                            <TextBlock Text="{loc:Loc Eval_AutoScore}" HorizontalAlignment="Right" Margin="0,2,0,0"
+                                                       FontSize="10.5" Foreground="{DynamicResource TextMuted}" />
+                                        </StackPanel>
                                     </StackPanel>
                                 </Grid>
                             </Border>

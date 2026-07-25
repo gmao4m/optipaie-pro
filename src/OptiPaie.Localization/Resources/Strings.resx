@@ -803,6 +803,15 @@
   <data name="PerfReview_PeriodLabel" xml:space="preserve"><value>Période :</value></data>
   <data name="PerfReview_GlobalScore" xml:space="preserve"><value>Note globale</value></data>
   <data name="PerfReview_CriteriaHeader" xml:space="preserve"><value>CRITÈRES D'ÉVALUATION</value></data>
+  <data name="Eval_Anchor1" xml:space="preserve"><value>Insuffisant</value></data>
+  <data name="Eval_Anchor2" xml:space="preserve"><value>Passable</value></data>
+  <data name="Eval_Anchor3" xml:space="preserve"><value>Bien</value></data>
+  <data name="Eval_Anchor4" xml:space="preserve"><value>Très bien</value></data>
+  <data name="Eval_Anchor5" xml:space="preserve"><value>Excellent</value></data>
+  <data name="Eval_Target" xml:space="preserve"><value>Cible</value></data>
+  <data name="Eval_Achieved" xml:space="preserve"><value>Réalisé</value></data>
+  <data name="Eval_AutoScore" xml:space="preserve"><value>Score calculé automatiquement</value></data>
+  <data name="Eval_ShowOutOf20" xml:space="preserve"><value>Afficher sur /20</value></data>
   <data name="PerfReview_ObsHeader" xml:space="preserve"><value>OBSERVATIONS &amp; OBJECTIFS</value></data>
   <data name="PerfReview_SelfHeader" xml:space="preserve"><value>AUTO-ÉVALUATION (SAISIE PAR LES RH)</value></data>
   <data name="PerfReview_EmpScore" xml:space="preserve"><value>Note de l'employé</value></data>
