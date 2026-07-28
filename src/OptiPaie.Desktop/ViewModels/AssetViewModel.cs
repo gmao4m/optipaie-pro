@@ -189,21 +189,16 @@ namespace OptiPaie.Desktop.ViewModels
                 return;
             }
 
-            ShowEditor(new AssetEditViewModel(_services, _selectedCompany.Id, null));
+            if (AssetActions.Create(_services, _selectedCompany.Id))
+            {
+                Load();
+                StatusMessage = "Matériel enregistré.";
+            }
         }
 
         private void Edit()
         {
-            ShowEditor(new AssetEditViewModel(_services, _selectedCompany.Id, _services.Assets.Get(_selectedAsset.Id)));
-        }
-
-        private void ShowEditor(AssetEditViewModel vm)
-        {
-            var window = new AssetEditWindow { DataContext = vm, Owner = Application.Current.MainWindow };
-            App.ApplyFlowDirection(window);
-            vm.RequestClose = ok => window.DialogResult = ok;
-
-            if (window.ShowDialog() == true)
+            if (AssetActions.Edit(_services, _selectedCompany.Id, _selectedAsset.Id))
             {
                 Load();
                 StatusMessage = "Matériel enregistré.";
@@ -212,58 +207,32 @@ namespace OptiPaie.Desktop.ViewModels
 
         private void Assign()
         {
-            IReadOnlyList<Employee> employees = _services.Employees.GetByCompany(_selectedCompany.Id, false);
-            if (employees.Count == 0)
+            if (AssetActions.Assign(_services, _selectedCompany.Id, _selectedAsset.Id))
             {
-                Dialogs.Info("Aucun employé actif dans cette entreprise.");
-                return;
+                Load();
+                StatusMessage = "Matériel attribué.";
             }
-
-            var vm = new AssetAssignViewModel(employees);
-            var window = new AssetAssignWindow { DataContext = vm, Owner = Application.Current.MainWindow };
-            App.ApplyFlowDirection(window);
-            vm.RequestClose = ok => window.DialogResult = ok;
-
-            if (window.ShowDialog() != true || vm.SelectedEmployee == null) return;
-
-            Run(_services.Assets.Assign(_selectedAsset.Id, vm.SelectedEmployee.Id, vm.Date, vm.Condition, vm.Notes),
-                "Matériel attribué à " + (vm.SelectedEmployee.LastNameFr + " " + vm.SelectedEmployee.FirstNameFr).Trim() + ".");
         }
 
         private void Return()
         {
-            // Current holders (an exclusive asset has one; a shared asset can have several).
-            var holders = _services.Assets.GetHistory(_selectedAsset.Id)
-                .Where(a => a.ReturnedDate == null).ToList();
-            if (holders.Count == 0)
+            if (AssetActions.Return(_services, _selectedAsset.Id))
             {
-                Dialogs.Info("Ce matériel n'est attribué à personne.");
-                return;
+                Load();
+                StatusMessage = "Retour enregistré.";
             }
-
-            var vm = new AssetReturnViewModel(holders);
-            var window = new AssetReturnWindow { DataContext = vm, Owner = Application.Current.MainWindow };
-            App.ApplyFlowDirection(window);
-            vm.RequestClose = ok => window.DialogResult = ok;
-
-            if (window.ShowDialog() != true) return;
-
-            // A shared asset with several holders returns only the chosen one; otherwise
-            // the single holder is implied.
-            Result result = holders.Count > 1 && vm.SelectedHolder != null
-                ? _services.Assets.ReturnFrom(_selectedAsset.Id, vm.SelectedHolder.EmployeeId, vm.Date, vm.Condition)
-                : _services.Assets.Return(_selectedAsset.Id, vm.Date, vm.Condition);
-
-            Run(result, "Retour enregistré.");
         }
 
         private void OpenHistory()
         {
-            var vm = new AssetHistoryViewModel(_services, _selectedAsset.Id, _selectedAsset.Name);
+            var vm = new AssetHistoryViewModel(_services, _selectedCompany.Id, _selectedAsset.Id);
             var window = new AssetHistoryWindow { DataContext = vm, Owner = Application.Current.MainWindow };
             App.ApplyFlowDirection(window);
             vm.RequestClose = () => window.Close();
             window.ShowDialog();
+
+            // The detail view can hand over / return / edit, so refresh the list afterwards.
+            Load();
         }
 
         private void SetStatus(AssetStatus status) =>

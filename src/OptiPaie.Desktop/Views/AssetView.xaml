@@ -91,7 +91,7 @@
                 </Style>
             </DataGrid.RowStyle>
             <DataGrid.InputBindings>
-                <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding EditCommand}" />
+                <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding HistoryCommand}" />
             </DataGrid.InputBindings>
             <DataGrid.ContextMenu>
                 <ContextMenu DataContext="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
@@ -142,7 +142,7 @@
                                 </Button>
                                 <Button Style="{StaticResource RowIconButton}" Content="›" ToolTip="{loc:Loc Common_Open}"
                                         beh:RowActions.SelectRow="True"
-                                        Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" />
+                                        Command="{Binding DataContext.HistoryCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" />
                             </StackPanel>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>

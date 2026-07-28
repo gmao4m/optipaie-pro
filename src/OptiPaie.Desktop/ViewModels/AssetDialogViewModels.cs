@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
+using System.Windows.Data;
 using System.Windows.Input;
 using OptiPaie.Core.Dtos;
 using OptiPaie.Core.Entities;
@@ -28,6 +30,7 @@ namespace OptiPaie.Desktop.ViewModels
         private readonly AppServices _services;
         private readonly Asset _asset;
         private readonly long _companyId;
+        private readonly bool _isNew;
 
         private string _name;
         private AssetCategoryOption _category;
@@ -37,11 +40,20 @@ namespace OptiPaie.Desktop.ViewModels
         private string _notes;
         private bool _isShared;
 
+        // Optional immediate hand-over (creation only): the picker is filled from the
+        // active company's employees, and choosing one assigns the asset on save.
+        private readonly ObservableCollection<Employee> _employees = new ObservableCollection<Employee>();
+        private ICollectionView _employeesView;
+        private Employee _selectedHolder;
+        private DateTime? _handoverDate;
+        private string _holderSearch;
+
         public AssetEditViewModel(AppServices services, long companyId, Asset existing)
         {
             _services = services;
             _companyId = companyId;
             _asset = existing ?? new Asset();
+            _isNew = existing == null;
 
             foreach (AssetCategory c in Enum.GetValues(typeof(AssetCategory))) Categories.Add(new AssetCategoryOption(c));
 
@@ -61,7 +73,14 @@ namespace OptiPaie.Desktop.ViewModels
                 _category = Categories.FirstOrDefault(o => o.Value == AssetCategory.Laptop);
                 _purchaseDate = DateTime.Today;
                 _value = "0";
+                _handoverDate = DateTime.Today;
                 Title = services.Localization.GetString("Asset_New");
+
+                // Populate the holder picker from the active company's employees so a
+                // brand-new asset can be handed over on the spot (empty state handled in XAML).
+                foreach (Employee e in services.Employees.GetByCompany(companyId, false)) _employees.Add(e);
+                _employeesView = CollectionViewSource.GetDefaultView(_employees);
+                _employeesView.Filter = FilterHolder;
             }
 
             SaveCommand = new RelayCommand(Save);
@@ -83,8 +102,48 @@ namespace OptiPaie.Desktop.ViewModels
         /// <summary>Shared: several employees may hold this asset at once (e.g. a pool vehicle).</summary>
         public bool IsShared { get => _isShared; set => Set(ref _isShared, value); }
 
+        /// <summary>True only when creating — drives the optional hand-over section's visibility.</summary>
+        public bool IsNew => _isNew;
+
+        /// <summary>True when the active company has at least one employee to hand the asset to.</summary>
+        public bool HasEmployees => _employees.Count > 0;
+
+        /// <summary>True once a holder is picked — reveals the hand-over date field.</summary>
+        public bool HasHolder => _selectedHolder != null;
+
+        /// <summary>The (filterable) employee picker for the optional immediate hand-over.</summary>
+        public ICollectionView Employees => _employeesView;
+
+        /// <summary>The employee to hand the new asset to, or null to leave it available.</summary>
+        public Employee SelectedHolder
+        {
+            get => _selectedHolder;
+            set { if (Set(ref _selectedHolder, value)) Raise(nameof(HasHolder)); }
+        }
+
+        /// <summary>Hand-over date, defaulting to today; only used when a holder is chosen.</summary>
+        public DateTime? HandoverDate { get => _handoverDate; set => Set(ref _handoverDate, value); }
+
+        /// <summary>Type-to-filter text for the holder picker.</summary>
+        public string HolderSearch
+        {
+            get => _holderSearch;
+            set { if (Set(ref _holderSearch, value)) _employeesView?.Refresh(); }
+        }
+
         public ICommand SaveCommand { get; }
         public ICommand CancelCommand { get; }
+
+        private bool FilterHolder(object item)
+        {
+            if (string.IsNullOrWhiteSpace(_holderSearch)) return true;
+            var e = item as Employee;
+            if (e == null) return false;
+            if (e == _selectedHolder) return true; // never hide the current pick
+            string q = _holderSearch.Trim();
+            string full = ((e.LastNameFr ?? "") + " " + (e.FirstNameFr ?? "")).Trim();
+            return full.IndexOf(q, StringComparison.OrdinalIgnoreCase) >= 0;
+        }
 
         private void Save()
         {
@@ -109,6 +168,20 @@ namespace OptiPaie.Desktop.ViewModels
             {
                 Dialogs.Error(result.Error);
                 return;
+            }
+
+            // If a holder was chosen on a brand-new asset, hand it over now. The act of
+            // assigning is what sets the status to Attribué and writes the first history row.
+            if (_isNew && _selectedHolder != null)
+            {
+                Result assign = _services.Assets.Assign(result.Value, _selectedHolder.Id,
+                    _handoverDate ?? DateTime.Today, null, null);
+                if (assign.IsFailure)
+                {
+                    // The asset was created; only the hand-over failed. Report it and keep the
+                    // asset (it stays Disponible so the user can assign it from the list).
+                    Dialogs.Error(assign.Error);
+                }
             }
 
             RequestClose?.Invoke(true);
@@ -185,30 +258,106 @@ namespace OptiPaie.Desktop.ViewModels
         public ICommand CancelCommand { get; }
     }
 
-    /// <summary>Read-only assignment history of one asset.</summary>
+    /// <summary>
+    /// Asset detail view: the asset's current status and holder, its facts, the full
+    /// assignment history, and the first-class hand-over / return / edit actions. Opened by
+    /// double-clicking a row (or its chevron), it is the hub for one asset.
+    /// </summary>
     public sealed class AssetHistoryViewModel : ObservableObject
     {
+        private static readonly CultureInfo Fr = CultureInfo.GetCultureInfo("fr-FR");
+
+        private readonly AppServices _services;
+        private readonly long _companyId;
+        private readonly long _assetId;
+
         private string _statusMessage = string.Empty;
+        private string _assetName;
+        private string _statusLabel;
+        private string _statusKind = "neutral";
+        private string _holderLine = "—";
+        private string _categoryLabel;
+        private string _valueText;
+        private string _serialNumber = "—";
+        private bool _isAvailable;
+        private bool _isAssigned;
 
-        public AssetHistoryViewModel(AppServices services, long assetId, string assetName)
+        public AssetHistoryViewModel(AppServices services, long companyId, long assetId)
         {
-            AssetName = assetName;
+            _services = services;
+            _companyId = companyId;
+            _assetId = assetId;
 
-            foreach (AssetAssignmentSummary a in services.Assets.GetHistory(assetId))
-            {
-                History.Add(a);
-            }
-
-            _statusMessage = History.Count + " attribution(s)";
+            AssignCommand = new RelayCommand(() => Act(AssetActions.Assign(_services, _companyId, _assetId)), () => _isAvailable);
+            ReturnCommand = new RelayCommand(() => Act(AssetActions.Return(_services, _assetId)), () => _isAssigned);
+            EditCommand = new RelayCommand(() => Act(AssetActions.Edit(_services, _companyId, _assetId)));
             CloseCommand = new RelayCommand(() => RequestClose?.Invoke());
+
+            Reload();
         }
 
         public Action RequestClose { get; set; }
 
-        public string AssetName { get; }
         public ObservableCollection<AssetAssignmentSummary> History { get; } = new ObservableCollection<AssetAssignmentSummary>();
+
+        public string AssetName { get => _assetName; private set => Set(ref _assetName, value); }
+        public string StatusLabel { get => _statusLabel; private set => Set(ref _statusLabel, value); }
+        public string StatusKind { get => _statusKind; private set => Set(ref _statusKind, value); }
+        public string HolderLine { get => _holderLine; private set => Set(ref _holderLine, value); }
+        public string CategoryLabel { get => _categoryLabel; private set => Set(ref _categoryLabel, value); }
+        public string ValueText { get => _valueText; private set => Set(ref _valueText, value); }
+        public string SerialNumber { get => _serialNumber; private set => Set(ref _serialNumber, value); }
+        public bool IsAvailable { get => _isAvailable; private set => Set(ref _isAvailable, value); }
+        public bool IsAssigned { get => _isAssigned; private set => Set(ref _isAssigned, value); }
         public string StatusMessage { get => _statusMessage; private set => Set(ref _statusMessage, value); }
 
+        public ICommand AssignCommand { get; }
+        public ICommand ReturnCommand { get; }
+        public ICommand EditCommand { get; }
         public ICommand CloseCommand { get; }
+
+        private void Act(bool changed)
+        {
+            if (changed) Reload();
+        }
+
+        private void Reload()
+        {
+            AssetSummary summary = _services.Assets.GetSummary(_assetId);
+            if (summary != null)
+            {
+                AssetName = summary.Name;
+                StatusLabel = AssetLabels.Status(summary.Status);
+                StatusKind = KindOf(summary.Status);
+                CategoryLabel = AssetLabels.Category(summary.Category);
+                ValueText = summary.PurchaseValue.ToString("N2", Fr);
+                SerialNumber = string.IsNullOrWhiteSpace(summary.SerialNumber) ? "—" : summary.SerialNumber;
+                IsAvailable = summary.Status == AssetStatus.Available;
+                IsAssigned = summary.Status == AssetStatus.Assigned;
+            }
+
+            History.Clear();
+            IReadOnlyList<AssetAssignmentSummary> all = _services.Assets.GetHistory(_assetId);
+            foreach (AssetAssignmentSummary a in all) History.Add(a);
+
+            var open = all.Where(a => a.ReturnedDate == null).ToList();
+            HolderLine = open.Count == 0
+                ? "—"
+                : (open.Count == 1 ? open[0].EmployeeName : open.Count + " détenteurs");
+
+            StatusMessage = History.Count + " attribution(s)";
+            CommandManager.InvalidateRequerySuggested();
+        }
+
+        private static string KindOf(AssetStatus status)
+        {
+            switch (status)
+            {
+                case AssetStatus.Available: return "success";
+                case AssetStatus.Assigned: return "accent";
+                case AssetStatus.UnderRepair: return "pending";
+                default: return "neutral";
+            }
+        }
     }
 }

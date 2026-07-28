@@ -497,4 +497,76 @@
         <Setter Property="TextWrapping" Value="Wrap" />
     </Style>
 
+    <!-- ==================================================================
+         Context menus — the row "⋯" action menus. WPF's default menu falls
+         back to the OS theme (a bright system popup). In the app's dark mode
+         that renders as an empty white box with near-invisible text — the
+         reported bug. These implicit styles theme every ContextMenu / MenuItem
+         in the app for BOTH light and dark. Every menu in the app is a row
+         context menu (submenu-item role), so a single item template covers all.
+         ================================================================== -->
+    <Style TargetType="ContextMenu">
+        <Setter Property="Background" Value="{DynamicResource Surface}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Border}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ContextMenu">
+                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="1" CornerRadius="10" Padding="5" MinWidth="180">
+                        <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle" />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="MenuItem">
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Padding" Value="11,7" />
+        <Setter Property="FontSize" Value="12.5" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="MenuItem">
+                    <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                            Padding="{TemplateBinding Padding}" CornerRadius="6" SnapsToDevicePixels="True">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <ContentPresenter Grid.Column="0" ContentSource="Header" VerticalAlignment="Center"
+                                              RecognizesAccessKey="True" TextElement.Foreground="{TemplateBinding Foreground}" />
+                            <TextBlock Grid.Column="1" Margin="26,0,0,0" VerticalAlignment="Center"
+                                       Text="{TemplateBinding InputGestureText}" Foreground="{DynamicResource TextSecondary}" />
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsHighlighted" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource BrandSoft}" />
+                            <Setter Property="Foreground" Value="{DynamicResource BrandText}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Bd" Property="Opacity" Value="0.45" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Separator inside a menu — scoped via SeparatorStyleKey so app-wide
+         separators (toolbars, forms) are untouched. -->
+    <Style x:Key="{x:Static MenuItem.SeparatorStyleKey}" TargetType="Separator">
+        <Setter Property="Margin" Value="6,5" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Separator">
+                    <Border Height="1" Background="{DynamicResource Border}" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
 </ResourceDictionary>

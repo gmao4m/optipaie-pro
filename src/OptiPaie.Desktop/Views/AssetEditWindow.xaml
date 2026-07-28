@@ -58,6 +58,41 @@
 
             <CheckBox Margin="0,12,0,0" IsChecked="{Binding IsShared}" Content="{loc:Loc Asset_SharedToggle}"
                       Foreground="{DynamicResource TextPrimary}" FontSize="12.5" VerticalContentAlignment="Center" />
+
+            <!-- Optional immediate hand-over — only when creating a new asset. -->
+            <StackPanel Visibility="{Binding IsNew, Converter={StaticResource BoolToVis}}">
+                <Border Height="1" Background="{DynamicResource Border}" Margin="0,18,0,0" />
+                <TextBlock Style="{StaticResource Caption}" Margin="0,14,0,0" FontWeight="SemiBold"
+                           Foreground="{DynamicResource TextPrimary}" Text="{loc:Loc AssetEdit_AssignNow}" />
+
+                <!-- With employees: the holder picker (searchable) -->
+                <StackPanel Visibility="{Binding HasEmployees, Converter={StaticResource BoolToVis}}">
+                    <TextBlock Style="{StaticResource Caption}" Margin="0,10,0,0" Text="{loc:Loc Asset_Holder}" />
+                    <TextBox Style="{StaticResource AppTextBox}" Margin="0,4,0,0"
+                             Text="{Binding HolderSearch, UpdateSourceTrigger=PropertyChanged}" />
+                    <ComboBox Style="{StaticResource AppComboBox}" Height="32" Margin="0,6,0,0"
+                              ItemsSource="{Binding Employees}" SelectedItem="{Binding SelectedHolder}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock>
+                                    <Run Text="{Binding LastNameFr}" /><Run Text=" " /><Run Text="{Binding FirstNameFr}" />
+                                </TextBlock>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+
+                    <!-- Hand-over date: only once a holder is chosen -->
+                    <StackPanel Visibility="{Binding HasHolder, Converter={StaticResource BoolToVis}}">
+                        <TextBlock Style="{StaticResource Caption}" Margin="0,12,0,0" Text="{loc:Loc AssetAssign_Date}" />
+                        <DatePicker Height="32" Margin="0,4,0,0" SelectedDate="{Binding HandoverDate}" />
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- No employees: inline guidance instead of an empty picker -->
+                <TextBlock Visibility="{Binding HasEmployees, Converter={StaticResource InverseBoolToVis}}"
+                           Margin="0,10,0,0" TextWrapping="Wrap" FontSize="12.5"
+                           Foreground="{DynamicResource TextSecondary}" Text="{loc:Loc AssetEdit_NoEmployees}" />
+            </StackPanel>
         </StackPanel>
         </ScrollViewer>
 

@@ -747,6 +747,8 @@
   <data name="ContractEdit_SignDate" xml:space="preserve"><value>تاريخ التوقيع</value></data>
   <data name="AssetEdit_Name" xml:space="preserve"><value>اسم الأصل</value></data>
   <data name="AssetEdit_AcquisitionDate" xml:space="preserve"><value>تاريخ الاقتناء</value></data>
+  <data name="AssetEdit_AssignNow" xml:space="preserve"><value>تسليم لموظف الآن (اختياري)</value></data>
+  <data name="AssetEdit_NoEmployees" xml:space="preserve"><value>لا يوجد موظفون — أضف موظفين أولاً.</value></data>
   <data name="CertEdit_Type" xml:space="preserve"><value>نوع الشهادة</value></data>
   <data name="CertEdit_Reference" xml:space="preserve"><value>المرجع (اتركه فارغاً للترقيم التلقائي)</value></data>
   <data name="CertEdit_Purpose" xml:space="preserve"><value>الغرض / المُرسل إليه</value></data>
@@ -996,7 +998,7 @@
   <data name="Loan_OpenDetail" xml:space="preserve"><value>فتح التفاصيل</value></data>
   <data name="Asset_AssignRow" xml:space="preserve"><value>إسناد إلى موظف</value></data>
   <data name="Asset_ReturnRow" xml:space="preserve"><value>تسجيل الإرجاع</value></data>
-  <data name="Asset_HistoryRow" xml:space="preserve"><value>عرض السجل</value></data>
+  <data name="Asset_HistoryRow" xml:space="preserve"><value>عرض التفاصيل</value></data>
   <data name="Training_ParticipantsRow" xml:space="preserve"><value>إدارة المشاركين</value></data>
   <data name="Leave_ApproveRow" xml:space="preserve"><value>الموافقة على الطلب</value></data>
   <data name="Leave_RejectRow" xml:space="preserve"><value>رفض الطلب</value></data>

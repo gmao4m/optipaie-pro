@@ -106,10 +106,15 @@ namespace OptiPaie.Services
                 }
                 else
                 {
-                    // Exclusive: one holder at a time.
+                    // Exclusive: one holder at a time. Name the current holder so the block is clear.
                     if (asset.Status == AssetStatus.Assigned || openAssignments.Count > 0)
                     {
-                        return Result.Fail("Ce matériel est déjà attribué — enregistrez d'abord son retour.", "Asset_AlreadyAssigned");
+                        string holder = openAssignments.Count > 0 ? EmployeeName(uow, openAssignments[0].EmployeeId) : null;
+                        return Result.Fail(
+                            string.IsNullOrEmpty(holder)
+                                ? "Ce matériel est déjà attribué — enregistrez d'abord son retour."
+                                : "Ce matériel est attribué à " + holder + " — enregistrez d'abord son retour.",
+                            "Asset_AlreadyAssigned");
                     }
                 }
 

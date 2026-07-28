@@ -747,6 +747,8 @@
   <data name="ContractEdit_SignDate" xml:space="preserve"><value>Date de signature</value></data>
   <data name="AssetEdit_Name" xml:space="preserve"><value>Nom du bien</value></data>
   <data name="AssetEdit_AcquisitionDate" xml:space="preserve"><value>Date d'acquisition</value></data>
+  <data name="AssetEdit_AssignNow" xml:space="preserve"><value>Attribuer à un employé maintenant (optionnel)</value></data>
+  <data name="AssetEdit_NoEmployees" xml:space="preserve"><value>Aucun employé — ajoutez d'abord des employés.</value></data>
   <data name="CertEdit_Type" xml:space="preserve"><value>Type d'attestation</value></data>
   <data name="CertEdit_Reference" xml:space="preserve"><value>Référence (laisser vide pour numérotation auto)</value></data>
   <data name="CertEdit_Purpose" xml:space="preserve"><value>Objet / destinataire</value></data>
@@ -996,7 +998,7 @@
   <data name="Loan_OpenDetail" xml:space="preserve"><value>Ouvrir le détail</value></data>
   <data name="Asset_AssignRow" xml:space="preserve"><value>Attribuer à un employé</value></data>
   <data name="Asset_ReturnRow" xml:space="preserve"><value>Enregistrer le retour</value></data>
-  <data name="Asset_HistoryRow" xml:space="preserve"><value>Voir l'historique</value></data>
+  <data name="Asset_HistoryRow" xml:space="preserve"><value>Voir les détails</value></data>
   <data name="Training_ParticipantsRow" xml:space="preserve"><value>Gérer les participants</value></data>
   <data name="Leave_ApproveRow" xml:space="preserve"><value>Approuver la demande</value></data>
   <data name="Leave_RejectRow" xml:space="preserve"><value>Rejeter la demande</value></data>

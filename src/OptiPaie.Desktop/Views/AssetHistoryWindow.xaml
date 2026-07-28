@@ -30,8 +30,37 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0">
-            <TextBlock Style="{StaticResource H2}" Text="{Binding AssetName}" />
-            <TextBlock Style="{StaticResource Caption}" Margin="0,4,0,0" Text="{loc:Loc AssetHist_Title}" />
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Style="{StaticResource H2}" Text="{Binding AssetName}" VerticalAlignment="Center" />
+                <Border Style="{StaticResource StatusPill}" Margin="12,2,0,0" VerticalAlignment="Center">
+                    <TextBlock Style="{StaticResource PillText}" Text="{Binding StatusLabel}" />
+                </Border>
+            </StackPanel>
+
+            <!-- Facts row: holder · category · serial · value -->
+            <WrapPanel Orientation="Horizontal" Margin="0,9,0,0">
+                <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Asset_Holder}" VerticalAlignment="Center" />
+                <TextBlock Margin="6,0,0,0" FontSize="12.5" FontWeight="SemiBold" VerticalAlignment="Center"
+                           Foreground="{DynamicResource TextPrimary}" Text="{Binding HolderLine}" />
+                <TextBlock Style="{StaticResource Caption}" Margin="20,0,0,0" Text="{loc:Loc Asset_Category}" VerticalAlignment="Center" />
+                <TextBlock Margin="6,0,0,0" FontSize="12.5" VerticalAlignment="Center"
+                           Foreground="{DynamicResource TextPrimary}" Text="{Binding CategoryLabel}" />
+                <TextBlock Style="{StaticResource Caption}" Margin="20,0,0,0" Text="{loc:Loc Asset_Serial}" VerticalAlignment="Center" />
+                <TextBlock Margin="6,0,0,0" FontSize="12.5" VerticalAlignment="Center"
+                           Foreground="{DynamicResource TextPrimary}" Text="{Binding SerialNumber}" />
+                <TextBlock Style="{StaticResource Caption}" Margin="20,0,0,0" Text="{loc:Loc Asset_Value}" VerticalAlignment="Center" />
+                <TextBlock Margin="6,0,0,0" FontFamily="{StaticResource MonoFont}" FontSize="12.5" VerticalAlignment="Center"
+                           Foreground="{DynamicResource TextPrimary}" Text="{Binding ValueText}" />
+            </WrapPanel>
+
+            <!-- First-class actions on the asset -->
+            <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
+                <Button Style="{StaticResource PrimaryButton}" Height="32" Content="{loc:Loc Asset_AssignRow}" Command="{Binding AssignCommand}" />
+                <Button Style="{StaticResource SecondaryButton}" Height="32" Margin="8,0,0,0" Content="{loc:Loc Asset_ReturnRow}" Command="{Binding ReturnCommand}" />
+                <Button Style="{StaticResource SecondaryButton}" Height="32" Margin="8,0,0,0" Content="{loc:Loc Common_Edit}" Command="{Binding EditCommand}" />
+            </StackPanel>
+
+            <TextBlock Style="{StaticResource Caption}" Margin="0,16,0,0" Text="{loc:Loc AssetHist_Title}" />
         </StackPanel>
 
         <DataGrid Grid.Row="1" Margin="0,16,0,0" ItemsSource="{Binding History}" AutoGenerateColumns="False"
