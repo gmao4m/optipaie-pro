@@ -17,15 +17,17 @@
                        Text="{loc:Loc ContractTerm_Hint}" />
         </StackPanel>
 
-        <StackPanel Grid.Row="1" Margin="0,18,0,0">
-            <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Common_EffectiveDate}" />
-            <DatePicker Height="32" Margin="0,4,0,0" SelectedDate="{Binding EffectiveDate}" />
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,18,0,0" Padding="0,0,6,0">
+            <StackPanel>
+                <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Common_EffectiveDate}" />
+                <DatePicker Height="32" Margin="0,4,0,0" SelectedDate="{Binding EffectiveDate}" />
 
-            <TextBlock Style="{StaticResource Caption}" Margin="0,12,0,0" Text="{loc:Loc Leave_Reason}" />
-            <TextBox Style="{StaticResource AppTextBox}" Height="56" Margin="0,4,0,0"
-                     AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top"
-                     Text="{Binding Reason, UpdateSourceTrigger=PropertyChanged}" />
-        </StackPanel>
+                <TextBlock Style="{StaticResource Caption}" Margin="0,12,0,0" Text="{loc:Loc Leave_Reason}" />
+                <TextBox Style="{StaticResource AppTextBox}" Height="56" Margin="0,4,0,0"
+                         AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top"
+                         Text="{Binding Reason, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+        </ScrollViewer>
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">
             <Button Style="{StaticResource SecondaryButton}" Content="{loc:Loc Common_Cancel}" Command="{Binding CancelCommand}" />

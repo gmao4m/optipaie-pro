@@ -472,7 +472,7 @@
   <data name="Dashboard_Kpi_LoanOutstanding" xml:space="preserve"><value>أرصدة القروض (دج)</value></data>
   <data name="Dashboard_Kpi_OpenPostings" xml:space="preserve"><value>مناصب مفتوحة</value></data>
   <data name="Dashboard_Kpi_Candidates" xml:space="preserve"><value>المترشحون</value></data>
-  <data name="Dashboard_Kpi_AssetsAssigned" xml:space="preserve"><value>المعدات المخصصة</value></data>
+  <data name="Dashboard_Kpi_AssetsAssigned" xml:space="preserve"><value>الأصول المخصصة</value></data>
   <data name="Dashboard_Kpi_TrainingUpcoming" xml:space="preserve"><value>تكوينات قادمة</value></data>
 
   <!-- Home view -->
@@ -606,9 +606,10 @@
   <data name="Enum_ContractStatus_Renewed" xml:space="preserve"><value>مجدَّد</value></data>
 
   <!-- Assets module -->
-  <data name="Asset_Title" xml:space="preserve"><value>المعدات</value></data>
-  <data name="Asset_Subtitle" xml:space="preserve"><value>تتبّع معدات المؤسسة وتخصيصها للموظفين.</value></data>
-  <data name="Asset_New" xml:space="preserve"><value>معدات جديدة</value></data>
+  <data name="Asset_Title" xml:space="preserve"><value>الأصول والمعدات</value></data>
+  <data name="Asset_Subtitle" xml:space="preserve"><value>تتبّع أصول ومعدات المؤسسة وتخصيصها للموظفين.</value></data>
+  <data name="Asset_New" xml:space="preserve"><value>أصل جديد</value></data>
+  <data name="Asset_Edit" xml:space="preserve"><value>تعديل الأصل</value></data>
   <data name="Asset_Available" xml:space="preserve"><value>المتوفرة</value></data>
   <data name="Asset_Assigned" xml:space="preserve"><value>المخصصة</value></data>
   <data name="Asset_TotalValue" xml:space="preserve"><value>القيمة الإجمالية (دج)</value></data>
@@ -744,7 +745,7 @@
   <data name="LoanEdit_Reason" xml:space="preserve"><value>السبب / المرجع</value></data>
   <data name="ContractEdit_Probation" xml:space="preserve"><value>فترة التجربة (أيام)</value></data>
   <data name="ContractEdit_SignDate" xml:space="preserve"><value>تاريخ التوقيع</value></data>
-  <data name="AssetEdit_Name" xml:space="preserve"><value>اسم المعدات</value></data>
+  <data name="AssetEdit_Name" xml:space="preserve"><value>اسم الأصل</value></data>
   <data name="AssetEdit_AcquisitionDate" xml:space="preserve"><value>تاريخ الاقتناء</value></data>
   <data name="CertEdit_Type" xml:space="preserve"><value>نوع الشهادة</value></data>
   <data name="CertEdit_Reference" xml:space="preserve"><value>المرجع (اتركه فارغاً للترقيم التلقائي)</value></data>
@@ -768,7 +769,7 @@
   <data name="ContractRenew_NewSalary" xml:space="preserve"><value>الأجر القاعدي الجديد (دج)</value></data>
   <data name="ContractTerm_Title" xml:space="preserve"><value>فسخ العقد</value></data>
   <data name="ContractTerm_Hint" xml:space="preserve"><value>سيُسجَّل تاريخ الخروج في بطاقة الموظف.</value></data>
-  <data name="AssetAssign_Title" xml:space="preserve"><value>تخصيص المعدات</value></data>
+  <data name="AssetAssign_Title" xml:space="preserve"><value>تخصيص الأصل</value></data>
   <data name="AssetAssign_Date" xml:space="preserve"><value>تاريخ التخصيص</value></data>
   <data name="AssetAssign_Condition" xml:space="preserve"><value>الحالة عند التسليم</value></data>
   <data name="AssetReturn_Title" xml:space="preserve"><value>إرجاع المعدات</value></data>

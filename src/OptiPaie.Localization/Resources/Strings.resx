@@ -472,7 +472,7 @@
   <data name="Dashboard_Kpi_LoanOutstanding" xml:space="preserve"><value>Encours prêts (DA)</value></data>
   <data name="Dashboard_Kpi_OpenPostings" xml:space="preserve"><value>Postes ouverts</value></data>
   <data name="Dashboard_Kpi_Candidates" xml:space="preserve"><value>Candidats</value></data>
-  <data name="Dashboard_Kpi_AssetsAssigned" xml:space="preserve"><value>Matériel attribué</value></data>
+  <data name="Dashboard_Kpi_AssetsAssigned" xml:space="preserve"><value>Biens attribués</value></data>
   <data name="Dashboard_Kpi_TrainingUpcoming" xml:space="preserve"><value>Formations à venir</value></data>
 
   <!-- Home view -->
@@ -606,9 +606,10 @@
   <data name="Enum_ContractStatus_Renewed" xml:space="preserve"><value>Renouvelé</value></data>
 
   <!-- Assets module -->
-  <data name="Asset_Title" xml:space="preserve"><value>Matériel</value></data>
-  <data name="Asset_Subtitle" xml:space="preserve"><value>Suivez le matériel de l'entreprise et son attribution aux employés.</value></data>
-  <data name="Asset_New" xml:space="preserve"><value>Nouveau matériel</value></data>
+  <data name="Asset_Title" xml:space="preserve"><value>Biens &amp; équipements</value></data>
+  <data name="Asset_Subtitle" xml:space="preserve"><value>Suivez les biens et équipements de l'entreprise et leur attribution aux employés.</value></data>
+  <data name="Asset_New" xml:space="preserve"><value>Nouveau bien</value></data>
+  <data name="Asset_Edit" xml:space="preserve"><value>Modifier le bien</value></data>
   <data name="Asset_Available" xml:space="preserve"><value>Disponibles</value></data>
   <data name="Asset_Assigned" xml:space="preserve"><value>Attribués</value></data>
   <data name="Asset_TotalValue" xml:space="preserve"><value>Valeur totale (DA)</value></data>
@@ -744,7 +745,7 @@
   <data name="LoanEdit_Reason" xml:space="preserve"><value>Motif / référence</value></data>
   <data name="ContractEdit_Probation" xml:space="preserve"><value>Période d'essai (jours)</value></data>
   <data name="ContractEdit_SignDate" xml:space="preserve"><value>Date de signature</value></data>
-  <data name="AssetEdit_Name" xml:space="preserve"><value>Nom du matériel</value></data>
+  <data name="AssetEdit_Name" xml:space="preserve"><value>Nom du bien</value></data>
   <data name="AssetEdit_AcquisitionDate" xml:space="preserve"><value>Date d'acquisition</value></data>
   <data name="CertEdit_Type" xml:space="preserve"><value>Type d'attestation</value></data>
   <data name="CertEdit_Reference" xml:space="preserve"><value>Référence (laisser vide pour numérotation auto)</value></data>
@@ -768,7 +769,7 @@
   <data name="ContractRenew_NewSalary" xml:space="preserve"><value>Nouveau salaire de base (DA)</value></data>
   <data name="ContractTerm_Title" xml:space="preserve"><value>Résilier le contrat</value></data>
   <data name="ContractTerm_Hint" xml:space="preserve"><value>La date de sortie sera enregistrée sur la fiche de l'employé.</value></data>
-  <data name="AssetAssign_Title" xml:space="preserve"><value>Attribuer le matériel</value></data>
+  <data name="AssetAssign_Title" xml:space="preserve"><value>Attribuer le bien</value></data>
   <data name="AssetAssign_Date" xml:space="preserve"><value>Date d'attribution</value></data>
   <data name="AssetAssign_Condition" xml:space="preserve"><value>État à la remise</value></data>
   <data name="AssetReturn_Title" xml:space="preserve"><value>Retour du matériel</value></data>

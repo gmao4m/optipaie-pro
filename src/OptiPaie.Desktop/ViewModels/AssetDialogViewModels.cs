@@ -54,14 +54,14 @@ namespace OptiPaie.Desktop.ViewModels
                 _value = existing.PurchaseValue.ToString(CultureInfo.InvariantCulture);
                 _notes = existing.Notes;
                 _isShared = existing.IsShared;
-                Title = "Modifier le matériel";
+                Title = services.Localization.GetString("Asset_Edit");
             }
             else
             {
                 _category = Categories.FirstOrDefault(o => o.Value == AssetCategory.Laptop);
                 _purchaseDate = DateTime.Today;
                 _value = "0";
-                Title = "Nouveau matériel";
+                Title = services.Localization.GetString("Asset_New");
             }
 
             SaveCommand = new RelayCommand(Save);
