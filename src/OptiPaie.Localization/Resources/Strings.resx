@@ -463,6 +463,11 @@
   <data name="Dashboard_AttendanceMatrix" xml:space="preserve"><value>Matrice de présence</value></data>
   <data name="Dashboard_Leave" xml:space="preserve"><value>Congés</value></data>
   <data name="Dashboard_Kpi_Headcount" xml:space="preserve"><value>Effectif</value></data>
+  <data name="Dashboard_Kpi_Masse" xml:space="preserve"><value>Masse salariale</value></data>
+  <data name="Dashboard_Kpi_AvgSalary" xml:space="preserve"><value>Salaire moyen</value></data>
+  <data name="Dashboard_MasseTrend" xml:space="preserve"><value>Évolution de la masse salariale</value></data>
+  <data name="Dashboard_Last6Months" xml:space="preserve"><value>6 derniers mois</value></data>
+  <data name="Dashboard_DeptDistribution" xml:space="preserve"><value>Répartition par département</value></data>
   <data name="Dashboard_Kpi_PresentToday" xml:space="preserve"><value>Présents aujourd'hui</value></data>
   <data name="Dashboard_Kpi_OnLeave" xml:space="preserve"><value>En congé</value></data>
   <data name="Dashboard_Kpi_OnMission" xml:space="preserve"><value>En mission</value></data>
@@ -914,6 +919,14 @@
   <data name="Att_RateLate" xml:space="preserve"><value>Taux de retard</value></data>
   <data name="Att_WorkingDays" xml:space="preserve"><value>Jours ouvrés</value></data>
   <data name="Att_StatusLabel" xml:space="preserve"><value>Statut :</value></data>
+  <data name="Att_St_Present" xml:space="preserve"><value>Présent</value></data>
+  <data name="Att_St_Absent" xml:space="preserve"><value>Absent</value></data>
+  <data name="Att_St_Late" xml:space="preserve"><value>Retard</value></data>
+  <data name="Att_St_Mission" xml:space="preserve"><value>Mission</value></data>
+  <data name="Att_St_Leave" xml:space="preserve"><value>Congé payé</value></data>
+  <data name="Att_St_Holiday" xml:space="preserve"><value>Jour férié</value></data>
+  <data name="Att_St_Rest" xml:space="preserve"><value>Repos / week-end</value></data>
+  <data name="Att_Col_Department" xml:space="preserve"><value>Département</value></data>
   <data name="Att_ApplyMonth" xml:space="preserve"><value>Remplir le mois (employés cochés)</value></data>
   <data name="Att_SelectAll" xml:space="preserve"><value>Tout cocher</value></data>
   <data name="Att_ClearSelection" xml:space="preserve"><value>Décocher</value></data>

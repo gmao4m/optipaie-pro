@@ -463,6 +463,11 @@
   <data name="Dashboard_AttendanceMatrix" xml:space="preserve"><value>مصفوفة الحضور</value></data>
   <data name="Dashboard_Leave" xml:space="preserve"><value>العطل</value></data>
   <data name="Dashboard_Kpi_Headcount" xml:space="preserve"><value>التعداد</value></data>
+  <data name="Dashboard_Kpi_Masse" xml:space="preserve"><value>كتلة الأجور</value></data>
+  <data name="Dashboard_Kpi_AvgSalary" xml:space="preserve"><value>متوسط الأجر</value></data>
+  <data name="Dashboard_MasseTrend" xml:space="preserve"><value>تطوّر كتلة الأجور</value></data>
+  <data name="Dashboard_Last6Months" xml:space="preserve"><value>آخر 6 أشهر</value></data>
+  <data name="Dashboard_DeptDistribution" xml:space="preserve"><value>التوزيع حسب القسم</value></data>
   <data name="Dashboard_Kpi_PresentToday" xml:space="preserve"><value>الحاضرون اليوم</value></data>
   <data name="Dashboard_Kpi_OnLeave" xml:space="preserve"><value>في عطلة</value></data>
   <data name="Dashboard_Kpi_OnMission" xml:space="preserve"><value>في مهمة</value></data>
@@ -914,6 +919,14 @@
   <data name="Att_RateLate" xml:space="preserve"><value>نسبة التأخير</value></data>
   <data name="Att_WorkingDays" xml:space="preserve"><value>أيام العمل</value></data>
   <data name="Att_StatusLabel" xml:space="preserve"><value>الحالة:</value></data>
+  <data name="Att_St_Present" xml:space="preserve"><value>حاضر</value></data>
+  <data name="Att_St_Absent" xml:space="preserve"><value>غائب</value></data>
+  <data name="Att_St_Late" xml:space="preserve"><value>متأخر</value></data>
+  <data name="Att_St_Mission" xml:space="preserve"><value>مهمة</value></data>
+  <data name="Att_St_Leave" xml:space="preserve"><value>عطلة مدفوعة</value></data>
+  <data name="Att_St_Holiday" xml:space="preserve"><value>عطلة رسمية</value></data>
+  <data name="Att_St_Rest" xml:space="preserve"><value>راحة / نهاية الأسبوع</value></data>
+  <data name="Att_Col_Department" xml:space="preserve"><value>القسم</value></data>
   <data name="Att_ApplyMonth" xml:space="preserve"><value>ملء الشهر (الموظفون المحددون)</value></data>
   <data name="Att_SelectAll" xml:space="preserve"><value>تحديد الكل</value></data>
   <data name="Att_ClearSelection" xml:space="preserve"><value>إلغاء التحديد</value></data>

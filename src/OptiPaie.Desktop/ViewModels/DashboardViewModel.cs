@@ -1,8 +1,13 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Linq;
+using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 using OptiPaie.Core.Dtos;
+using OptiPaie.Core.Entities;
 using OptiPaie.Desktop.Composition;
 using OptiPaie.Desktop.Mvvm;
 
@@ -24,6 +29,7 @@ namespace OptiPaie.Desktop.ViewModels
         private string _employees = "0", _activeContracts = "0", _expiring = "0", _pendingLeave = "0";
         private string _activeLoans = "0", _loanOutstanding = "0", _presentToday = "0", _onLeave = "0", _onMission = "0";
         private string _openPostings = "0", _candidates = "0", _assetsAssigned = "0", _trainingUpcoming = "0", _companies = "0";
+        private string _masseSalariale = "0", _salaireMoyen = "0";
         private string _dateLabel = string.Empty;
         private string _approvalsHeader = "À traiter", _deadlinesHeader = "Échéances à venir";
 
@@ -59,6 +65,20 @@ namespace OptiPaie.Desktop.ViewModels
         public string Candidates { get => _candidates; private set => Set(ref _candidates, value); }
         public string AssetsAssigned { get => _assetsAssigned; private set => Set(ref _assetsAssigned, value); }
         public string TrainingUpcoming { get => _trainingUpcoming; private set => Set(ref _trainingUpcoming, value); }
+
+        /// <summary>Total monthly base-salary mass (masse salariale) of the active company.</summary>
+        public string MasseSalariale { get => _masseSalariale; private set => Set(ref _masseSalariale, value); }
+
+        /// <summary>Average base salary across the active company's employees.</summary>
+        public string SalaireMoyen { get => _salaireMoyen; private set => Set(ref _salaireMoyen, value); }
+
+        /// <summary>Masse salariale over the last 6 months (bar chart).</summary>
+        public ObservableCollection<SalaryBar> SalaryTrend { get; } = new ObservableCollection<SalaryBar>();
+
+        /// <summary>Employee distribution by department (donut chart + legend).</summary>
+        public ObservableCollection<DeptSlice> DeptSlices { get; } = new ObservableCollection<DeptSlice>();
+
+        public bool HasChartData => DeptSlices.Count > 0;
 
         public string ApprovalsHeader { get => _approvalsHeader; private set => Set(ref _approvalsHeader, value); }
         public string DeadlinesHeader { get => _deadlinesHeader; private set => Set(ref _deadlinesHeader, value); }
@@ -125,6 +145,134 @@ namespace OptiPaie.Desktop.ViewModels
             Raise(nameof(HasApprovals));
             Raise(nameof(HasDeadlines));
             Raise(nameof(HasActivity));
+
+            BuildSalaryWidgets();
+        }
+
+        /// <summary>
+        /// Computes the payroll KPIs and the two charts (masse salariale trend + department
+        /// distribution) for the active company. Read-only aggregation of base salaries — it
+        /// never runs the payroll engine.
+        /// </summary>
+        private void BuildSalaryWidgets()
+        {
+            SalaryTrend.Clear();
+            DeptSlices.Clear();
+
+            long companyId = _services.CompanyContext.ActiveId;
+            if (companyId <= 0)
+            {
+                MasseSalariale = SalaireMoyen = "0";
+                Raise(nameof(HasChartData));
+                return;
+            }
+
+            IReadOnlyList<Employee> active = _services.Employees.GetByCompany(companyId, false);
+            decimal masse = active.Sum(e => e.BaseSalary);
+            MasseSalariale = FormatDa(masse);
+            SalaireMoyen = FormatDa(active.Count > 0 ? Math.Round(masse / active.Count) : 0m);
+
+            // Masse salariale over the last 6 months, reconstructed from hire/exit dates (the
+            // roster including leavers, so a month reflects who was actually employed then).
+            IReadOnlyList<Employee> roster = _services.Employees.GetByCompany(companyId, true);
+            CultureInfo culture = _services.Localization.CurrentCulture;
+            DateTime firstThisMonth = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+            var monthly = new List<decimal>();
+            var labels = new List<string>();
+            for (int i = 5; i >= 0; i--)
+            {
+                DateTime start = firstThisMonth.AddMonths(-i);
+                DateTime end = start.AddMonths(1).AddDays(-1);
+                decimal amt = roster.Where(e => e.HireDate.Date <= end && (e.ExitDate == null || e.ExitDate.Value.Date >= start))
+                                    .Sum(e => e.BaseSalary);
+                monthly.Add(amt);
+                labels.Add(Capitalize(start.ToString("MMM", culture)));
+            }
+
+            decimal peak = monthly.Count > 0 ? monthly.Max() : 0m;
+            decimal trough = monthly.Count > 0 ? monthly.Min() : 0m;
+            if (peak <= 0m) peak = 1m;
+            Brush barBrush = Res("Brand", Color.FromRgb(0x5B, 0x5B, 0xD6));
+            for (int i = 0; i < monthly.Count; i++)
+            {
+                // Normalise between the period's min and max so a small but real trend is
+                // legible; the exact amount is printed on every bar, so this only scales height.
+                double frac = peak > trough ? (double)((monthly[i] - trough) / (peak - trough)) : 1.0;
+                SalaryTrend.Add(new SalaryBar
+                {
+                    MonthLabel = labels[i],
+                    HeightPx = 62.0 + frac * 90.0,
+                    AmountText = (monthly[i] / 1000m).ToString("N0", Fr) + " K",
+                    Fill = barBrush
+                });
+            }
+
+            // Department distribution donut (largest slice first).
+            var groups = active
+                .GroupBy(e => string.IsNullOrWhiteSpace(e.Department) ? "—" : e.Department.Trim())
+                .Select(g => new { Name = g.Key, Count = g.Count() })
+                .OrderByDescending(g => g.Count)
+                .ToList();
+
+            int total = groups.Sum(g => g.Count);
+            Brush[] palette =
+            {
+                Res("Brand", Color.FromRgb(0x5B, 0x5B, 0xD6)),
+                Res("Accent", Color.FromRgb(0x3E, 0x63, 0xDD)),
+                Res("Salary", Color.FromRgb(0x30, 0xA4, 0x6C)),
+                Res("Warning", Color.FromRgb(0xF5, 0xA6, 0x23)),
+                Res("Employer", Color.FromRgb(0x6C, 0x87, 0xEC)),
+                Res("Deduction", Color.FromRgb(0xE5, 0x48, 0x4D))
+            };
+
+            double angle = -90.0; // start at 12 o'clock
+            int ci = 0;
+            foreach (var g in groups)
+            {
+                double frac = total > 0 ? (double)g.Count / total : 0.0;
+                double sweep = frac * 360.0;
+                if (sweep >= 359.9) sweep = 359.9; // a single full ring can't be one arc
+                DeptSlices.Add(new DeptSlice
+                {
+                    Name = g.Name,
+                    Count = g.Count,
+                    CountText = g.Count.ToString(),
+                    PercentText = Math.Round(frac * 100).ToString("0", Fr) + "%",
+                    Fill = palette[ci % palette.Length],
+                    PathData = DonutArc(96, 96, 84, 52, angle, angle + sweep)
+                });
+                angle += sweep;
+                ci++;
+            }
+
+            Raise(nameof(HasChartData));
+        }
+
+        private string FormatDa(decimal amount) => amount.ToString("N0", Fr) + " DA";
+
+        /// <summary>Resolves a themed brush by resource key, falling back to a fixed colour headlessly.</summary>
+        private static Brush Res(string key, Color fallback)
+        {
+            Brush b = Application.Current != null ? Application.Current.TryFindResource(key) as Brush : null;
+            if (b != null) return b;
+            var solid = new SolidColorBrush(fallback);
+            solid.Freeze();
+            return solid;
+        }
+
+        /// <summary>Builds the SVG-style path for one donut ring segment (angles in degrees, clockwise from top).</summary>
+        private static string DonutArc(double cx, double cy, double outerR, double innerR, double a0, double a1)
+        {
+            CultureInfo ci = CultureInfo.InvariantCulture;
+            double r0 = a0 * Math.PI / 180.0, r1 = a1 * Math.PI / 180.0;
+            double ox0 = cx + outerR * Math.Cos(r0), oy0 = cy + outerR * Math.Sin(r0);
+            double ox1 = cx + outerR * Math.Cos(r1), oy1 = cy + outerR * Math.Sin(r1);
+            double ix1 = cx + innerR * Math.Cos(r1), iy1 = cy + innerR * Math.Sin(r1);
+            double ix0 = cx + innerR * Math.Cos(r0), iy0 = cy + innerR * Math.Sin(r0);
+            int large = (a1 - a0) > 180.0 ? 1 : 0;
+            return string.Format(ci,
+                "M {0:0.##},{1:0.##} A {2:0.##},{2:0.##} 0 {3} 1 {4:0.##},{5:0.##} L {6:0.##},{7:0.##} A {8:0.##},{8:0.##} 0 {3} 0 {9:0.##},{10:0.##} Z",
+                ox0, oy0, outerR, large, ox1, oy1, ix1, iy1, innerR, ix0, iy0);
         }
 
         private void Open(string moduleKey)
@@ -143,5 +291,25 @@ namespace OptiPaie.Desktop.ViewModels
     {
         public string Text { get; set; }
         public string Detail { get; set; }
+    }
+
+    /// <summary>One bar of the masse-salariale trend chart.</summary>
+    public sealed class SalaryBar
+    {
+        public string MonthLabel { get; set; }
+        public double HeightPx { get; set; }
+        public string AmountText { get; set; }
+        public Brush Fill { get; set; }
+    }
+
+    /// <summary>One department segment of the distribution donut (+ its legend row).</summary>
+    public sealed class DeptSlice
+    {
+        public string Name { get; set; }
+        public int Count { get; set; }
+        public string CountText { get; set; }
+        public string PercentText { get; set; }
+        public string PathData { get; set; }
+        public Brush Fill { get; set; }
     }
 }

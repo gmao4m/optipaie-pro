@@ -259,6 +259,7 @@ namespace OptiPaie.Services
 
         private void CreateContracts(List<EmpSpec> roster, DateTime today)
         {
+            int cddSeq = 0;
             foreach (EmpSpec s in roster)
             {
                 DateTime start = s.HireDate;
@@ -280,7 +281,10 @@ namespace OptiPaie.Services
                 }
                 else if (s.Contract == ContractType.Cdd)
                 {
-                    end = start.AddYears(3);
+                    // Upcoming renewals (not expired) — spread over the next few months so the
+                    // deadlines widget shows healthy renewals to process, never overdue ones.
+                    end = today.AddDays(45 + cddSeq * 35);
+                    cddSeq++;
                 }
 
                 var contract = new EmploymentContract
@@ -487,6 +491,8 @@ namespace OptiPaie.Services
                 today.AddMonths(-2), "Excellente évaluation annuelle", null);
             _performance.LogPromotion(by["saadi"].Id, "Technicien de maintenance", "Technicien senior",
                 today.AddMonths(-5), "Montée en compétences", null);
+            _performance.LogPromotion(by["bouzid"].Id, "Développeur", "Développeur senior",
+                today.AddMonths(-4), "Excellente performance technique", null);
 
             // Rewards / bonuses.
             _performance.LogReward(by["touati"].Id, 25000m, "Prime de rendement", today.AddMonths(-1), "Dépassement des objectifs de vente");
@@ -636,6 +642,36 @@ namespace OptiPaie.Services
 
             // Mark the session finished (Save creates it as Planned).
             _training.SetStatus(security, TrainingStatus.Completed);
+
+            // A completed IT course (rounds out the Informatique team's dossiers).
+            long dev = Must(_training.Save(new TrainingSession
+            {
+                CompanyId = companyId,
+                Title = "Développement .NET avancé",
+                Category = "Informatique",
+                Provider = "Institut national de la formation professionnelle",
+                Status = TrainingStatus.Completed,
+                StartDate = today.AddMonths(-5),
+                EndDate = today.AddMonths(-5).AddDays(5),
+                Location = "Alger",
+                Cost = 180000m
+            }), "formation développement");
+
+            int di = 1;
+            foreach (string code in new[] { "bouzid", "slimani", "medjani" })
+            {
+                Result enrollDev = _training.Enroll(dev, by[code].Id);
+                if (enrollDev.IsSuccess)
+                {
+                    TrainingParticipantSummary p = _training.GetParticipants(dev).FirstOrDefault(x => x.EmployeeId == by[code].Id);
+                    if (p != null)
+                    {
+                        _training.SetResult(p.ParticipantId, TrainingResult.Completed, "Réussi", "CERT-DEV-" + today.Year + "-" + di.ToString("00"));
+                    }
+                }
+                di++;
+            }
+            _training.SetStatus(dev, TrainingStatus.Completed);
 
             // A planned course (to show the pipeline).
             long office = Must(_training.Save(new TrainingSession

@@ -81,16 +81,18 @@ namespace OptiPaie.Desktop.ViewModels.Attendance
         {
             switch (status)
             {
-                case AttendanceStatus.Present: return "Présent";
-                case AttendanceStatus.Absent: return "Absent";
-                case AttendanceStatus.Late: return "Retard";
-                case AttendanceStatus.Mission: return "Mission";
-                case AttendanceStatus.Leave: return "Congé payé";
-                case AttendanceStatus.Holiday: return "Jour férié";
-                case AttendanceStatus.Rest: return "Repos / week-end";
+                case AttendanceStatus.Present: return L("Att_St_Present");
+                case AttendanceStatus.Absent: return L("Att_St_Absent");
+                case AttendanceStatus.Late: return L("Att_St_Late");
+                case AttendanceStatus.Mission: return L("Att_St_Mission");
+                case AttendanceStatus.Leave: return L("Att_St_Leave");
+                case AttendanceStatus.Holiday: return L("Att_St_Holiday");
+                case AttendanceStatus.Rest: return L("Att_St_Rest");
                 default: return string.Empty;
             }
         }
+
+        private static string L(string key) => OptiPaie.Desktop.Localization.TranslationSource.Instance[key];
 
         /// <summary>The palette order shown in the toolbar (the paintable statuses).</summary>
         public static IReadOnlyList<AttendanceStatus> Palette { get; } = new[]

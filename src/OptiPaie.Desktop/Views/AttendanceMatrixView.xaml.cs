@@ -46,8 +46,8 @@ namespace OptiPaie.Desktop.Views
             Grid.Columns.Add(SelectColumn());
             Grid.Columns.Add(TextColumn("N°", "Number", 56));
             Grid.Columns.Add(NameColumn());
-            Grid.Columns.Add(TextColumn("Département", "Department", 130));
-            Grid.Columns.Add(TextColumn("Poste", "Position", 130));
+            Grid.Columns.Add(TextColumn(L("Att_Col_Department"), "Department", 130));
+            Grid.Columns.Add(TextColumn(L("Employee_Poste"), "Position", 130));
             Grid.FrozenColumnCount = 5;
 
             for (int day = 1; day <= _vm.DayCount; day++)
@@ -84,11 +84,13 @@ namespace OptiPaie.Desktop.Views
 
             return new DataGridTemplateColumn
             {
-                Header = "Employé",
+                Header = L("Payroll_Employee"),
                 Width = new DataGridLength(190),
                 CellTemplate = (DataTemplate)XamlReader.Parse(xaml)
             };
         }
+
+        private static string L(string key) => OptiPaie.Desktop.Localization.TranslationSource.Instance[key];
 
         private static DataGridTemplateColumn SelectColumn()
         {

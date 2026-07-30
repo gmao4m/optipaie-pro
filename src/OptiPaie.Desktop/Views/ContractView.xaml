@@ -129,7 +129,7 @@
             </DataGrid.ContextMenu>
             <DataGrid.Columns>
                 <DataGridTextColumn Header="{loc:Loc Payroll_Employee}" Binding="{Binding EmployeeName}" Width="*" />
-                <DataGridTemplateColumn Header="{loc:Loc Common_Type}" Width="90">
+                <DataGridTemplateColumn Header="{loc:Loc Common_Type}" Width="175">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Border Style="{StaticResource TypePill}">
