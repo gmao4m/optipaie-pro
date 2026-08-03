@@ -446,6 +446,33 @@
   <data name="Cnas_Mov_Date" xml:space="preserve"><value>Date</value></data>
   <data name="Cnas_Dac_ExportError" xml:space="preserve"><value>Impossible de générer le PDF :</value></data>
   <data name="Cnas_Dac_ExportSaved" xml:space="preserve"><value>PDF enregistré :</value></data>
+  <data name="Cnas_Tab_Das" xml:space="preserve"><value>DAS</value></data>
+  <data name="Cnas_Das_Subtitle" xml:space="preserve"><value>Déclaration annuelle des salaires — deux fichiers à déposer sur le portail CNAS.</value></data>
+  <data name="Cnas_Das_Banner" xml:space="preserve"><value>Format reproduit d'après des fichiers réels de 2021. Vérifiez le premier dépôt.</value></data>
+  <data name="Cnas_Das_Generate" xml:space="preserve"><value>Générer les fichiers DAS</value></data>
+  <data name="Cnas_Das_EstimatedTitle" xml:space="preserve"><value>Durée estimée (heures non pointées) pour ces salariés — l'export reste possible. Cliquez un nom pour ouvrir sa fiche.</value></data>
+  <data name="Cnas_Das_RefusalHeadline" xml:space="preserve"><value>Export impossible : {0} salarié(s) à corriger.</value></data>
+  <data name="Cnas_Das_RefusalHint" xml:space="preserve"><value>Corrigez les points ci-dessous puis relancez. Cliquez un salarié pour ouvrir sa fiche.</value></data>
+  <data name="Cnas_Das_Blk_NssMissing" xml:space="preserve"><value>N° de sécurité sociale manquant</value></data>
+  <data name="Cnas_Das_Blk_NssMalformed" xml:space="preserve"><value>N° de sécurité sociale invalide (12 chiffres attendus)</value></data>
+  <data name="Cnas_Das_Blk_BirthDateMissing" xml:space="preserve"><value>Date de naissance manquante</value></data>
+  <data name="Cnas_Das_Blk_NameNotAscii" xml:space="preserve"><value>Nom avec caractère non pris en charge (accents, arabe) — le format n'accepte que l'alphabet latin de base</value></data>
+  <data name="Cnas_Das_Blk_AmountExceedsField" xml:space="preserve"><value>Salaire trimestriel au-delà de 99 999,99 DA (capacité du champ dépassée)</value></data>
+  <data name="Cnas_Das_Blk_EmployerNumberMissing" xml:space="preserve"><value>N° employeur CNAS manquant</value></data>
+  <data name="Cnas_Das_Blk_EmployerNumberMalformed" xml:space="preserve"><value>N° employeur CNAS invalide (10 chiffres attendus)</value></data>
+  <data name="Cnas_Das_Blk_TotalsInconsistent" xml:space="preserve"><value>Incohérence interne des totaux — contactez le support</value></data>
+  <data name="Cnas_Das_Blk_WorkerCountInconsistent" xml:space="preserve"><value>Incohérence interne de l'effectif — contactez le support</value></data>
+  <data name="Cnas_Das_Blk_DacCrossCheckFailed" xml:space="preserve"><value>Écart entre la DAS et le cumul DAC de l'année — contactez le support</value></data>
+  <data name="Cnas_Das_SuccessTitle" xml:space="preserve"><value>Fichiers DAS générés — vérifiez avant de déposer</value></data>
+  <data name="Cnas_Das_RecapYear" xml:space="preserve"><value>Année déclarée</value></data>
+  <data name="Cnas_Das_RecapEffectif" xml:space="preserve"><value>Salariés déclarés</value></data>
+  <data name="Cnas_Das_RecapAnnual" xml:space="preserve"><value>Total annuel</value></data>
+  <data name="Cnas_Das_RecapQuarters" xml:space="preserve"><value>Totaux trimestriels</value></data>
+  <data name="Cnas_Das_FilesWritten" xml:space="preserve"><value>Fichiers écrits :</value></data>
+  <data name="Cnas_Das_OpenFolder" xml:space="preserve"><value>Ouvrir le dossier</value></data>
+  <data name="Cnas_Das_VerifyFailed" xml:space="preserve"><value>Vérification après écriture échouée — fichiers supprimés :</value></data>
+  <data name="Cnas_Das_WriteError" xml:space="preserve"><value>Impossible d'écrire les fichiers :</value></data>
+  <data name="Cnas_Das_ChooseFolder" xml:space="preserve"><value>Choisissez le dossier de destination (les deux fichiers y seront écrits avec leurs noms officiels)</value></data>
   <data name="Shell_Nav_Settings" xml:space="preserve"><value>Paramètres</value></data>
   <data name="Shell_Nav_PremiumHeader" xml:space="preserve"><value>MODULES PREMIUM</value></data>
 

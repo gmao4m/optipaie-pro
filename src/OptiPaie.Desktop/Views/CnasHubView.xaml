@@ -10,5 +10,8 @@
         <TabItem Header="{loc:Loc Cnas_Tab_Dac}">
             <views:CnasDacView DataContext="{Binding Dac}" Margin="0,8,0,0" />
         </TabItem>
+        <TabItem Header="{loc:Loc Cnas_Tab_Das}">
+            <views:CnasDasView DataContext="{Binding Das}" Margin="0,8,0,0" />
+        </TabItem>
     </TabControl>
 </UserControl>

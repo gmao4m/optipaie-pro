@@ -446,6 +446,33 @@
   <data name="Cnas_Mov_Date" xml:space="preserve"><value>التاريخ</value></data>
   <data name="Cnas_Dac_ExportError" xml:space="preserve"><value>تعذّر إنشاء ملف PDF:</value></data>
   <data name="Cnas_Dac_ExportSaved" xml:space="preserve"><value>تم حفظ ملف PDF:</value></data>
+  <data name="Cnas_Tab_Das" xml:space="preserve"><value>التصريح السنوي</value></data>
+  <data name="Cnas_Das_Subtitle" xml:space="preserve"><value>التصريح السنوي بالأجور — ملفّان يودعان على بوابة CNAS.</value></data>
+  <data name="Cnas_Das_Banner" xml:space="preserve"><value>الصيغة مُعاد إنتاجها من ملفات حقيقية لسنة 2021. تحقّق من الإيداع الأول.</value></data>
+  <data name="Cnas_Das_Generate" xml:space="preserve"><value>إنشاء ملفات التصريح السنوي</value></data>
+  <data name="Cnas_Das_EstimatedTitle" xml:space="preserve"><value>مدّة مقدّرة (ساعات غير مسجّلة) لهؤلاء العمال — التصدير ممكن. انقر اسماً لفتح بطاقته.</value></data>
+  <data name="Cnas_Das_RefusalHeadline" xml:space="preserve"><value>التصدير غير ممكن: {0} عامل(ين) يجب تصحيحهم.</value></data>
+  <data name="Cnas_Das_RefusalHint" xml:space="preserve"><value>صحّح النقاط أدناه ثم أعد المحاولة. انقر عاملاً لفتح بطاقته.</value></data>
+  <data name="Cnas_Das_Blk_NssMissing" xml:space="preserve"><value>رقم الضمان الاجتماعي مفقود</value></data>
+  <data name="Cnas_Das_Blk_NssMalformed" xml:space="preserve"><value>رقم الضمان الاجتماعي غير صالح (12 رقماً متوقعاً)</value></data>
+  <data name="Cnas_Das_Blk_BirthDateMissing" xml:space="preserve"><value>تاريخ الميلاد مفقود</value></data>
+  <data name="Cnas_Das_Blk_NameNotAscii" xml:space="preserve"><value>الاسم يحتوي على حرف غير مدعوم — الصيغة لا تقبل إلا الأبجدية اللاتينية الأساسية</value></data>
+  <data name="Cnas_Das_Blk_AmountExceedsField" xml:space="preserve"><value>الأجر الفصلي يتجاوز 99 999,99 دج (تجاوز سعة الحقل)</value></data>
+  <data name="Cnas_Das_Blk_EmployerNumberMissing" xml:space="preserve"><value>رقم المُشغّل CNAS مفقود</value></data>
+  <data name="Cnas_Das_Blk_EmployerNumberMalformed" xml:space="preserve"><value>رقم المُشغّل CNAS غير صالح (10 أرقام متوقعة)</value></data>
+  <data name="Cnas_Das_Blk_TotalsInconsistent" xml:space="preserve"><value>تعارض داخلي في المجاميع — اتصل بالدعم</value></data>
+  <data name="Cnas_Das_Blk_WorkerCountInconsistent" xml:space="preserve"><value>تعارض داخلي في العدد — اتصل بالدعم</value></data>
+  <data name="Cnas_Das_Blk_DacCrossCheckFailed" xml:space="preserve"><value>فرق بين التصريح السنوي وتراكم DAC للسنة — اتصل بالدعم</value></data>
+  <data name="Cnas_Das_SuccessTitle" xml:space="preserve"><value>تم إنشاء ملفات التصريح — تحقّق قبل الإيداع</value></data>
+  <data name="Cnas_Das_RecapYear" xml:space="preserve"><value>السنة المصرّح بها</value></data>
+  <data name="Cnas_Das_RecapEffectif" xml:space="preserve"><value>العمال المصرّح بهم</value></data>
+  <data name="Cnas_Das_RecapAnnual" xml:space="preserve"><value>الإجمالي السنوي</value></data>
+  <data name="Cnas_Das_RecapQuarters" xml:space="preserve"><value>مجاميع الفصول</value></data>
+  <data name="Cnas_Das_FilesWritten" xml:space="preserve"><value>الملفات المكتوبة:</value></data>
+  <data name="Cnas_Das_OpenFolder" xml:space="preserve"><value>فتح المجلد</value></data>
+  <data name="Cnas_Das_VerifyFailed" xml:space="preserve"><value>فشل التحقق بعد الكتابة — حُذفت الملفات:</value></data>
+  <data name="Cnas_Das_WriteError" xml:space="preserve"><value>تعذّرت كتابة الملفات:</value></data>
+  <data name="Cnas_Das_ChooseFolder" xml:space="preserve"><value>اختر مجلد الوجهة (سيُكتب الملفّان فيه بأسمائهما الرسمية)</value></data>
   <data name="Shell_Nav_Settings" xml:space="preserve"><value>الإعدادات</value></data>
   <data name="Shell_Nav_PremiumHeader" xml:space="preserve"><value>الوحدات المتقدمة</value></data>
 
