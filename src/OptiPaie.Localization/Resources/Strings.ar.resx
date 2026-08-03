@@ -457,7 +457,8 @@
   <data name="Cnas_Das_Blk_NssMalformed" xml:space="preserve"><value>رقم الضمان الاجتماعي غير صالح (12 رقماً متوقعاً)</value></data>
   <data name="Cnas_Das_Blk_BirthDateMissing" xml:space="preserve"><value>تاريخ الميلاد مفقود</value></data>
   <data name="Cnas_Das_Blk_NameNotAscii" xml:space="preserve"><value>الاسم يحتوي على حرف غير مدعوم — الصيغة لا تقبل إلا الأبجدية اللاتينية الأساسية</value></data>
-  <data name="Cnas_Das_Blk_AmountExceedsField" xml:space="preserve"><value>الأجر الفصلي يتجاوز 99 999,99 دج (تجاوز سعة الحقل)</value></data>
+  <data name="Cnas_Das_Blk_AmountExceedsField" xml:space="preserve"><value>أجر فصلي يتجاوز حدّ صيغة CNAS (99 999,99 دج)</value></data>
+  <data name="Cnas_Das_CapExplain" xml:space="preserve"><value>هذا ليس عطلاً في البرنامج. صيغة ملف CNAS التي نعيد إنتاجها (من ملفات حقيقية لسنة 2021) تحدّد أجر كل فصل بـ 99 999,99 دج. وبدل كتابة مبلغ مقتطع — يجعل تصريحك خاطئاً — يفضّل البرنامج التوقف. عاملٌ يتجاوز هذا الحدّ هو بالضبط الحالة التي تنقصنا: اتصل بنا بها، فذلك يعني على الأرجح أن البوابة الحالية تقبل مبالغ أكبر، وسنوسّع الحقل.</value></data>
   <data name="Cnas_Das_Blk_EmployerNumberMissing" xml:space="preserve"><value>رقم المُشغّل CNAS مفقود</value></data>
   <data name="Cnas_Das_Blk_EmployerNumberMalformed" xml:space="preserve"><value>رقم المُشغّل CNAS غير صالح (10 أرقام متوقعة)</value></data>
   <data name="Cnas_Das_Blk_TotalsInconsistent" xml:space="preserve"><value>تعارض داخلي في المجاميع — اتصل بالدعم</value></data>

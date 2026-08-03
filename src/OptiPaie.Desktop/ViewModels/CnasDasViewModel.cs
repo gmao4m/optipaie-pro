@@ -29,7 +29,7 @@ namespace OptiPaie.Desktop.ViewModels
         private readonly AppServices _services;
 
         private int _year = DateTime.Today.Year;
-        private bool _hasCompany, _hasEstimated, _hasRefusal, _hasResult;
+        private bool _hasCompany, _hasEstimated, _hasRefusal, _hasResult, _hasCapBlocker;
         private string _statusMessage = string.Empty, _refusalHeadline = string.Empty;
         private string _resultYear = string.Empty, _resultEffectif = string.Empty, _resultAnnual = string.Empty;
         private string _resultQuarters = string.Empty, _resultFiles = string.Empty;
@@ -57,6 +57,10 @@ namespace OptiPaie.Desktop.ViewModels
         public bool HasCompany { get => _hasCompany; private set => Set(ref _hasCompany, value); }
         public bool HasEstimatedDurations { get => _hasEstimated; private set => Set(ref _hasEstimated, value); }
         public bool HasRefusal { get => _hasRefusal; private set => Set(ref _hasRefusal, value); }
+
+        /// <summary>True when a blocker is the per-quarter amount cap — the screen adds a calm,
+        /// non-bug explanation (format limit + "contact us", turning the block into a signal).</summary>
+        public bool HasAmountCapBlocker { get => _hasCapBlocker; private set => Set(ref _hasCapBlocker, value); }
         public bool HasResult { get => _hasResult; private set => Set(ref _hasResult, value); }
         public string StatusMessage { get => _statusMessage; private set => Set(ref _statusMessage, value); }
         public string RefusalHeadline { get => _refusalHeadline; private set => Set(ref _refusalHeadline, value); }
@@ -198,6 +202,7 @@ namespace OptiPaie.Desktop.ViewModels
                 BlockerGroups.Add(new CnasDasBlockerGroup(L("Cnas_Das_Blk_" + g.Key), g.Count(), rows));
             }
             RefusalHeadline = string.Format(L("Cnas_Das_RefusalHeadline"), validation.EmployeesToFix);
+            HasAmountCapBlocker = validation.Blockers.Any(b => b.Type == DasBlockerType.AmountExceedsField);
             HasRefusal = true;
         }
 

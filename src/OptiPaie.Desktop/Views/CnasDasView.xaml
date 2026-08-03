@@ -93,6 +93,17 @@
                     <StackPanel>
                         <TextBlock FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource StatusDangerText}" Text="{Binding RefusalHeadline}" />
                         <TextBlock Style="{StaticResource Caption}" Margin="0,3,0,0" TextWrapping="Wrap" Text="{loc:Loc Cnas_Das_RefusalHint}" />
+
+                        <!-- Plafond de montant : ce n'est pas un bug — on l'explique et on invite au contact. -->
+                        <Border Background="{DynamicResource Surface}" CornerRadius="8" Padding="14,11" Margin="0,10,0,0"
+                                BorderBrush="{DynamicResource Border}" BorderThickness="1"
+                                Visibility="{Binding HasAmountCapBlocker, Converter={StaticResource BoolToVis}}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="ℹ" FontSize="15" VerticalAlignment="Top" Margin="0,1,10,0" Foreground="{DynamicResource TextSecondary}" />
+                                <TextBlock Style="{StaticResource Caption}" TextWrapping="Wrap" MaxWidth="840" Text="{loc:Loc Cnas_Das_CapExplain}" />
+                            </StackPanel>
+                        </Border>
+
                         <ItemsControl ItemsSource="{Binding BlockerGroups}" Margin="0,10,0,0">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>

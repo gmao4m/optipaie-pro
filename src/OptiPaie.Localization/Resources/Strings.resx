@@ -457,7 +457,8 @@
   <data name="Cnas_Das_Blk_NssMalformed" xml:space="preserve"><value>N° de sécurité sociale invalide (12 chiffres attendus)</value></data>
   <data name="Cnas_Das_Blk_BirthDateMissing" xml:space="preserve"><value>Date de naissance manquante</value></data>
   <data name="Cnas_Das_Blk_NameNotAscii" xml:space="preserve"><value>Nom avec caractère non pris en charge (accents, arabe) — le format n'accepte que l'alphabet latin de base</value></data>
-  <data name="Cnas_Das_Blk_AmountExceedsField" xml:space="preserve"><value>Salaire trimestriel au-delà de 99 999,99 DA (capacité du champ dépassée)</value></data>
+  <data name="Cnas_Das_Blk_AmountExceedsField" xml:space="preserve"><value>Salaire trimestriel au-delà de la limite du format CNAS (99 999,99 DA)</value></data>
+  <data name="Cnas_Das_CapExplain" xml:space="preserve"><value>Ce n'est pas une panne du logiciel. Le format de fichier CNAS que nous reproduisons (d'après de vrais fichiers de 2021) limite le salaire de chaque trimestre à 99 999,99 DA. Plutôt que d'écrire un montant tronqué — qui rendrait votre déclaration fausse — le logiciel préfère s'arrêter. Un salarié au-dessus de ce plafond est justement le cas qui nous manque : contactez-nous avec, car cela signifie probablement que le portail actuel accepte des montants plus élevés, et nous élargirons le champ.</value></data>
   <data name="Cnas_Das_Blk_EmployerNumberMissing" xml:space="preserve"><value>N° employeur CNAS manquant</value></data>
   <data name="Cnas_Das_Blk_EmployerNumberMalformed" xml:space="preserve"><value>N° employeur CNAS invalide (10 chiffres attendus)</value></data>
   <data name="Cnas_Das_Blk_TotalsInconsistent" xml:space="preserve"><value>Incohérence interne des totaux — contactez le support</value></data>
