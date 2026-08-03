@@ -21,6 +21,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Anonymized DAS reference fixtures for the byte-exact "juge de paix" test. -->
+    <None Update="Fixtures\Das\das_sample_detail.txt" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="Fixtures\Das\das_sample_entete.txt" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\OptiPaie.Core\OptiPaie.Core.csproj" />
     <ProjectReference Include="..\..\src\OptiPaie.Common\OptiPaie.Common.csproj" />
     <ProjectReference Include="..\..\src\OptiPaie.Data\OptiPaie.Data.csproj" />

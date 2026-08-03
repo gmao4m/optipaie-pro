@@ -40,6 +40,19 @@ namespace OptiPaie.Services.Cnas
     /// centimes, right-aligned, space-filled, never zero-padded, never truncated. Text is
     /// left-aligned. Dates are jjmmaaaa, or 8 spaces when absent.
     /// </para>
+    /// <para>
+    /// ALIGNEMENT = PARAMÈTRE, PAS RÈGLE EN DUR. Every field carries its own <see cref="DasAlign"/>
+    /// here; the encoder never hard-codes alignment. Default for amounts = DROITE. If a real deposit
+    /// is ever rejected for alignment, flip the value HERE — never rewrite the encoder.
+    /// </para>
+    /// <para>
+    /// ANOMALIE DE RÉFÉRENCE (arbitrage 2026-08-03). Alignement des salaires = DROITE. Tous les
+    /// champs numériques des fichiers réels 2021 (durées, totaux trimestriels, total annuel, nombre
+    /// de travailleurs, salaires nuls) sont cadrés à droite — SAUF une cellule : ligne 3, salaire T3,
+    /// valeur 933333, cadrée à GAUCHE. Une cellule contre onze : anomalie du logiciel d'origine, NON
+    /// reproduite. L'encodeur reste cadré à droite ; le juge de paix marque cet offset précis comme
+    /// anomalie connue (jamais une tolérance générale).
+    /// </para>
     /// </summary>
     public static class DasFileSpec
     {
@@ -51,6 +64,9 @@ namespace OptiPaie.Services.Cnas
 
         /// <summary>Detail position 194 — value "0" on the reference lines, role unknown. À CONFIRMER.</summary>
         public const string EndIndicator = "0";
+
+        /// <summary>Duration unit written after each quarter duration. Reference files use "H" (heures). À CONFIRMER.</summary>
+        public const string DurationUnit = "H";
 
         /// <summary>Header type marker (position 10): "N" (normal) or "C". Reference file uses "N".</summary>
         public const string HeaderTypeNormal = "N";
