@@ -220,7 +220,7 @@ namespace OptiPaie.Tests
             long companyId = SeedOk();
 
             IReadOnlyList<TrainingSummary> sessions = _training.GetByCompany(companyId);
-            Assert.That(sessions.Count, Is.EqualTo(2));
+            Assert.That(sessions.Count, Is.EqualTo(3));
             Assert.That(sessions.Any(s => s.Status == TrainingStatus.Completed), Is.True);
 
             Employee amrani = _employees.GetByCompany(companyId).First(e => e.LastNameFr == "AMRANI");
