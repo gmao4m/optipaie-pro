@@ -153,5 +153,44 @@ namespace OptiPaie.Tests
             Assert.That(text, Is.EqualTo("AAA\r\nBBB\r\nCCC")); // CR LF between lines, none after the last
             Assert.That(text.EndsWith("\r\n"), Is.False);
         }
+
+        // ---------------------------------------------------------------- Post-write verify
+
+        private static byte[] GoodHeader() => DasAsciiWriter.WriteHeader(new string('A', DasFileSpec.HeaderLength));
+        private static byte[] GoodDetail() =>
+            DasAsciiWriter.WriteDetail(new[] { new string('B', DasFileSpec.DetailLength), new string('C', DasFileSpec.DetailLength) });
+
+        [Test]
+        public void Structure_accepts_well_formed_files()
+        {
+            Assert.That(DasStructure.Verify(GoodHeader(), GoodDetail(), out string reason), Is.True, reason);
+        }
+
+        [Test]
+        public void Structure_rejects_a_wrong_detail_line_length()
+        {
+            byte[] detail = DasAsciiWriter.WriteDetail(new[] { new string('B', DasFileSpec.DetailLength - 1) });
+            Assert.That(DasStructure.Verify(GoodHeader(), detail, out string reason), Is.False);
+            Assert.That(reason, Does.Contain("ligne"));
+        }
+
+        [Test]
+        public void Structure_rejects_a_trailing_crlf_on_detail()
+        {
+            byte[] detail = Encoding.ASCII.GetBytes(new string('B', DasFileSpec.DetailLength) + "\r\n");
+            Assert.That(DasStructure.Verify(GoodHeader(), detail, out string reason), Is.False);
+            Assert.That(reason, Does.Contain("CR LF final"));
+        }
+
+        [Test]
+        public void Structure_rejects_a_bom()
+        {
+            byte[] good = GoodHeader();
+            byte[] withBom = new byte[good.Length + 3];
+            withBom[0] = 0xEF; withBom[1] = 0xBB; withBom[2] = 0xBF;
+            Array.Copy(good, 0, withBom, 3, good.Length);
+            Assert.That(DasStructure.Verify(withBom, GoodDetail(), out string reason), Is.False);
+            Assert.That(reason, Does.Contain("BOM"));
+        }
     }
 }

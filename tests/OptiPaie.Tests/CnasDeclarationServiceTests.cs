@@ -502,5 +502,105 @@ namespace OptiPaie.Tests
             Assert.That(das.AnnualTotal, Is.EqualTo(50000m)); // only company A, never B's 90000
             Assert.That(das.Employees.Select(e => e.EmployeeId), Does.Not.Contain(b));
         }
+
+        // ------------------------------------------------ Contrôleur d'export DAS (étape 8)
+
+        [Test]
+        public void ValidateDasForExport_throws_when_no_company_is_specified()
+        {
+            Assert.Throws<ArgumentException>(() => _service.ValidateDasForExport(0, Year));
+        }
+
+        [Test]
+        public void ValidateDasForExport_is_valid_for_clean_data()
+        {
+            long companyId = AddCompany("SARL Propre", "1234567890");
+            long e = AddEmployee(companyId, "PROPRE", "012345678901", new DateTime(1985, 1, 1), 60000m);
+            _payroll.Generate(_batch.BuildRequest(companyId, e, Year, Month));
+
+            DasExportValidation v = _service.ValidateDasForExport(companyId, Year);
+
+            Assert.That(v.IsValid, Is.True);
+            Assert.That(v.Blockers, Is.Empty);
+        }
+
+        [Test]
+        public void ValidateDasForExport_blocks_bad_employer_and_missing_identity_nominatively()
+        {
+            long companyId = AddCompany("SARL Sale", "12-34"); // employer not 10 digits
+            long noNss = AddEmployee(companyId, "SANSNSS", null, new DateTime(1985, 1, 1), 60000m);
+            long noBirth = AddEmployee(companyId, "SANSNAISS", "012345678902", null, 60000m);
+            _payroll.Generate(_batch.BuildRequest(companyId, noNss, Year, Month));
+            _payroll.Generate(_batch.BuildRequest(companyId, noBirth, Year, Month));
+
+            DasExportValidation v = _service.ValidateDasForExport(companyId, Year);
+
+            Assert.That(v.IsValid, Is.False);
+            Assert.That(v.Blockers.Any(b => b.Type == DasBlockerType.EmployerNumberMalformed), Is.True);
+            Assert.That(v.Blockers.Any(b => b.Type == DasBlockerType.NssMissing && b.EmployeeId == noNss), Is.True);
+            Assert.That(v.Blockers.Any(b => b.Type == DasBlockerType.BirthDateMissing && b.EmployeeId == noBirth), Is.True);
+            // Nominative: the employee's name travels with the blocker (for the actionable list).
+            Assert.That(v.Blockers.First(b => b.EmployeeId == noNss).EmployeeName, Does.Contain("SANSNSS"));
+            Assert.That(v.EmployeesToFix, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void ValidateDasForExport_refuses_a_quarter_amount_beyond_the_field_and_never_truncates()
+        {
+            long companyId = AddCompany("SARL Riche", "1234567890");
+            long high = AddEmployee(companyId, "GROSSALAIRE", "012345678901", new DateTime(1985, 1, 1), 100000m); // > 99 999,99 / trimestre
+            _payroll.Generate(_batch.BuildRequest(companyId, high, Year, Month));
+
+            DasExportValidation v = _service.ValidateDasForExport(companyId, Year);
+            DasBlocker blocker = v.Blockers.FirstOrDefault(b => b.Type == DasBlockerType.AmountExceedsField);
+
+            Assert.That(blocker, Is.Not.Null);
+            Assert.That(blocker.EmployeeId, Is.EqualTo(high));
+            Assert.That(blocker.Detail, Is.EqualTo("T2")); // juin = T2
+        }
+
+        [Test]
+        public void ValidateDasForExport_flags_a_non_ascii_name()
+        {
+            long companyId = AddCompany("SARL Accent", "1234567890");
+            long accented = AddEmployee(companyId, "BENALÉ", "012345678901", new DateTime(1985, 1, 1), 60000m); // É non-ASCII
+            _payroll.Generate(_batch.BuildRequest(companyId, accented, Year, Month));
+
+            DasExportValidation v = _service.ValidateDasForExport(companyId, Year);
+
+            Assert.That(v.Blockers.Any(b => b.Type == DasBlockerType.NameNotAscii && b.EmployeeId == accented), Is.True);
+        }
+
+        [Test]
+        public void Readiness_and_export_controller_flag_the_same_identity_anomalies()
+        {
+            long companyId = AddCompany("SARL Cohérence", "1234567890");
+            long ok = AddEmployee(companyId, "OK", "012345678901", new DateTime(1985, 1, 1), 60000m);
+            long noNss = AddEmployee(companyId, "SANSNSS", null, new DateTime(1985, 1, 1), 60000m);
+            long badNss = AddEmployee(companyId, "MAUVAISNSS", "123", new DateTime(1985, 1, 1), 60000m);
+            long noBirth = AddEmployee(companyId, "SANSNAISS", "012345678904", null, 60000m);
+            foreach (long id in new[] { ok, noNss, badNss, noBirth })
+            {
+                _payroll.Generate(_batch.BuildRequest(companyId, id, Year, Month));
+            }
+
+            CnasReadinessReport readiness = _service.CheckReadiness(companyId, Year);
+            DasExportValidation export = _service.ValidateDasForExport(companyId, Year);
+
+            // The set of employees each side flags for identity issues MUST be identical —
+            // the accountant never meets at export a blocker the preparation showed green.
+            var readinessIdentity = readiness.Employees
+                .Where(e => e.NssMissing || e.NssMalformed || e.BirthDateMissing)
+                .Select(e => e.EmployeeId).OrderBy(x => x).ToList();
+            var exportIdentity = export.Blockers
+                .Where(b => b.Type == DasBlockerType.NssMissing || b.Type == DasBlockerType.NssMalformed || b.Type == DasBlockerType.BirthDateMissing)
+                .Select(b => b.EmployeeId).Distinct().OrderBy(x => x).ToList();
+
+            Assert.That(exportIdentity, Is.EqualTo(readinessIdentity));
+            Assert.That(exportIdentity, Does.Contain(noNss));
+            Assert.That(exportIdentity, Does.Contain(badNss));
+            Assert.That(exportIdentity, Does.Contain(noBirth));
+            Assert.That(exportIdentity, Does.Not.Contain(ok));
+        }
     }
 }

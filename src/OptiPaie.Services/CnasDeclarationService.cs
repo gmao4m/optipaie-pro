@@ -5,6 +5,7 @@ using OptiPaie.Common.Validation;
 using OptiPaie.Core.Dtos;
 using OptiPaie.Core.Entities;
 using OptiPaie.Core.Interfaces.Services;
+using OptiPaie.Services.Cnas;
 
 namespace OptiPaie.Services
 {
@@ -15,10 +16,8 @@ namespace OptiPaie.Services
     /// </summary>
     public sealed class CnasDeclarationService : ICnasDeclarationService
     {
-        // Working assumptions — the exact CNAS formats are NOT yet confirmed
-        // (see docs/audit-cnas-dac-das.md, section F). Kept here so they change in one place.
-        private const int ExpectedNssLength = 12;       // NSS = 12 chiffres (clé incluse) — à confirmer
-        private const int ExpectedEmployerDigits = 10;  // n° employeur = 10 chiffres — à confirmer
+        // Identity validation (NSS, birth date, employer number) lives in CnasIdentityRules —
+        // the single source of truth shared with the DAS export controller (étape 8).
 
         // Fallback used ONLY when a payslip carries no measured WorkedHours: a standard month of
         // ~40 h/week (= 173,33 h) reproduces the 520 H of a full quarter in the reference files.
@@ -76,8 +75,8 @@ namespace OptiPaie.Services
             }
 
             string employer = (company.CnasEmployerNumber ?? string.Empty).Trim();
-            bool employerMissing = employer.Length == 0;
-            bool employerMalformed = !employerMissing && DigitsOnly(employer).Length != ExpectedEmployerDigits;
+            bool employerMissing = CnasIdentityRules.IsEmployerNumberMissing(company.CnasEmployerNumber);
+            bool employerMalformed = CnasIdentityRules.IsEmployerNumberMalformed(company.CnasEmployerNumber);
 
             decimal snmg = _configuration.GetSnmg();
 
@@ -95,9 +94,8 @@ namespace OptiPaie.Services
                     continue;
                 }
 
-                string nss = (e.Nss ?? string.Empty).Trim();
-                bool nssMissing = nss.Length == 0;
-                bool nssMalformed = !nssMissing && !(nss.Length == ExpectedNssLength && nss.All(char.IsDigit));
+                bool nssMissing = CnasIdentityRules.IsNssMissing(e.Nss);
+                bool nssMalformed = CnasIdentityRules.IsNssMalformed(e.Nss);
 
                 int monthsBelow = hasPayslips ? slips.Count(p => p.BaseCotisable < snmg) : 0;
                 int payslipMonths = hasPayslips ? slips.Count : 0;
@@ -107,7 +105,7 @@ namespace OptiPaie.Services
                     (e.LastNameFr + " " + e.FirstNameFr).Trim(),
                     nssMissing,
                     nssMalformed,
-                    e.BirthDate == null,
+                    CnasIdentityRules.IsBirthDateMissing(e.BirthDate),
                     monthsBelow,
                     payslipMonths));
             }
@@ -138,8 +136,8 @@ namespace OptiPaie.Services
             }
 
             string employer = (company.CnasEmployerNumber ?? string.Empty).Trim();
-            bool employerMissing = employer.Length == 0;
-            bool employerMalformed = !employerMissing && DigitsOnly(employer).Length != ExpectedEmployerDigits;
+            bool employerMissing = CnasIdentityRules.IsEmployerNumberMissing(company.CnasEmployerNumber);
+            bool employerMalformed = CnasIdentityRules.IsEmployerNumberMalformed(company.CnasEmployerNumber);
 
             IReadOnlyList<int> monthSet = months ?? new List<int>();
             List<Payslip> slips = LoadPeriodPayslips(companyId, year, monthSet);
@@ -279,6 +277,93 @@ namespace OptiPaie.Services
                 quarterTotals.ToList(), annualTotal, employees.Count, anyEstimated);
         }
 
+        private static readonly int[] AllMonths = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+
+        public DasExportValidation ValidateDasForExport(long companyId, int year)
+        {
+            if (companyId <= 0)
+            {
+                throw new ArgumentException(
+                    "Aucune entreprise active : une déclaration CNAS doit être limitée à une entreprise explicite.",
+                    nameof(companyId));
+            }
+
+            Company company = _companies.Get(companyId);
+            if (company == null)
+            {
+                throw new ArgumentException("Entreprise introuvable.", nameof(companyId));
+            }
+
+            var blockers = new List<DasBlocker>();
+
+            // Company-level: employer number (same rules as CheckReadiness).
+            if (CnasIdentityRules.IsEmployerNumberMissing(company.CnasEmployerNumber))
+                blockers.Add(new DasBlocker(DasBlockerType.EmployerNumberMissing, 0, null, null));
+            else if (CnasIdentityRules.IsEmployerNumberMalformed(company.CnasEmployerNumber))
+                blockers.Add(new DasBlocker(DasBlockerType.EmployerNumberMalformed, 0, null, null));
+
+            CnasDasReport das = BuildDas(companyId, year);
+
+            // Per-employee: identity (shared rules), ASCII name, amount capacity.
+            foreach (CnasDasEmployee e in das.Employees)
+            {
+                string name = (e.LastName + " " + e.FirstName).Trim();
+
+                if (CnasIdentityRules.IsNssMissing(e.Nss))
+                    blockers.Add(new DasBlocker(DasBlockerType.NssMissing, e.EmployeeId, name, null));
+                else if (CnasIdentityRules.IsNssMalformed(e.Nss))
+                    blockers.Add(new DasBlocker(DasBlockerType.NssMalformed, e.EmployeeId, name, null));
+
+                if (CnasIdentityRules.IsBirthDateMissing(e.BirthDate))
+                    blockers.Add(new DasBlocker(DasBlockerType.BirthDateMissing, e.EmployeeId, name, null));
+
+                if (!IsAscii(e.LastName) || !IsAscii(e.FirstName))
+                    blockers.Add(new DasBlocker(DasBlockerType.NameNotAscii, e.EmployeeId, name, null));
+
+                foreach (CnasDasQuarter q in e.Quarters)
+                {
+                    if (DasFormat.Amount(q.Salary).Length > DasFileSpec.QuarterSalaryLength)
+                        blockers.Add(new DasBlocker(DasBlockerType.AmountExceedsField, e.EmployeeId, name, "T" + q.Number));
+                }
+            }
+
+            // Structural safety net — the built figures must be internally consistent.
+            var quarterCheck = new decimal[4];
+            foreach (CnasDasEmployee e in das.Employees)
+            {
+                decimal empAnnual = 0m;
+                for (int q = 0; q < 4; q++) { quarterCheck[q] += e.Quarters[q].Salary; empAnnual += e.Quarters[q].Salary; }
+                if (empAnnual != e.AnnualSalary)
+                    blockers.Add(new DasBlocker(DasBlockerType.TotalsInconsistent, e.EmployeeId, (e.LastName + " " + e.FirstName).Trim(), null));
+            }
+            for (int q = 0; q < 4; q++)
+            {
+                if (quarterCheck[q] != das.QuarterTotals[q])
+                    blockers.Add(new DasBlocker(DasBlockerType.TotalsInconsistent, 0, null, "T" + (q + 1)));
+            }
+            if (das.AnnualTotal != quarterCheck[0] + quarterCheck[1] + quarterCheck[2] + quarterCheck[3])
+                blockers.Add(new DasBlocker(DasBlockerType.TotalsInconsistent, 0, null, "annuel"));
+            if (das.WorkerCount != das.Employees.Count)
+                blockers.Add(new DasBlocker(DasBlockerType.WorkerCountInconsistent, 0, null, null));
+
+            // Cross-check: the DAS annual total must equal the year's DAC cumul (two independent paths).
+            decimal dacYear = BuildDac(companyId, year, AllMonths).Assiette;
+            if (das.AnnualTotal != dacYear)
+                blockers.Add(new DasBlocker(DasBlockerType.DacCrossCheckFailed, 0, null, null));
+
+            return new DasExportValidation(blockers);
+        }
+
+        private static bool IsAscii(string s)
+        {
+            if (s == null) return true;
+            foreach (char c in s)
+            {
+                if (c > (char)127) return false;
+            }
+            return true;
+        }
+
         /// <summary>A persisted payslip together with the month of the run that produced it.</summary>
         private struct MonthlySlip
         {
@@ -360,8 +445,5 @@ namespace OptiPaie.Services
 
             return byEmployee;
         }
-
-        private static string DigitsOnly(string value) =>
-            new string(value.Where(char.IsDigit).ToArray());
     }
 }

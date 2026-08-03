@@ -40,5 +40,14 @@ namespace OptiPaie.Core.Interfaces.Services
         /// no engine, no rate. Throws when no explicit company is supplied.
         /// </summary>
         CnasDasReport BuildDas(long companyId, int year);
+
+        /// <summary>
+        /// Validates a company/year for DAS export BEFORE any file is written: employer number,
+        /// per-employee NSS / birth date / ASCII name / amount capacity, the file's internal
+        /// totals, and the Σ-quarters = year-DAC cross-check. Uses the same identity rules as
+        /// <see cref="CheckReadiness"/>. Returns every blocker (nominatively where possible);
+        /// valid ⇒ the files may be written. Throws when no explicit company is supplied.
+        /// </summary>
+        DasExportValidation ValidateDasForExport(long companyId, int year);
     }
 }
