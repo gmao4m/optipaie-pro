@@ -424,8 +424,9 @@
   <data name="Cnas_Dac_Salariale" xml:space="preserve"><value>Cotisation salariale</value></data>
   <data name="Cnas_Dac_Patronale" xml:space="preserve"><value>Cotisation patronale</value></data>
   <data name="Cnas_Dac_Total" xml:space="preserve"><value>Total des cotisations</value></data>
-  <data name="Cnas_Dac_GapTitle" xml:space="preserve"><value>Écart à trancher avec votre comptable</value></data>
-  <data name="Cnas_Dac_GapHint" xml:space="preserve"><value>La configuration applique 26 % côté patronal ; la répartition officielle totalise 25 % + 0,5 %. Aucun taux n'est modifié — comparez et validez.</value></data>
+  <data name="Cnas_Dac_GapTitle" xml:space="preserve"><value>Répartition des taux — contrôle interne</value></data>
+  <data name="Cnas_Dac_GapHint" xml:space="preserve"><value>La configuration applique 26 % côté patronal ; la répartition officielle totalise 25 % + 0,5 %. Le portail calcule les cotisations à partir de l'assiette — cet écart n'entre pas dans la déclaration et aucun taux n'est modifié.</value></data>
+  <data name="Cnas_Dac_PortalNote" xml:space="preserve"><value>Le portail CNAS calcule les cotisations à partir de l'assiette et de l'effectif saisis ; la ventilation ci-dessous est un contrôle interne, jamais saisie.</value></data>
   <data name="Cnas_Dac_OfficialPatronale" xml:space="preserve"><value>Patronale — répartition officielle</value></data>
   <data name="Cnas_Dac_Gap" xml:space="preserve"><value>Écart patronal</value></data>
   <data name="Cnas_Dac_OfficialTitle" xml:space="preserve"><value>Répartition officielle (décret 94-187 modifié) — à confirmer</value></data>

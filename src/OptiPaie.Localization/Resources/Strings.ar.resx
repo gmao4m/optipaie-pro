@@ -424,8 +424,9 @@
   <data name="Cnas_Dac_Salariale" xml:space="preserve"><value>اشتراك العامل</value></data>
   <data name="Cnas_Dac_Patronale" xml:space="preserve"><value>اشتراك المُشغّل</value></data>
   <data name="Cnas_Dac_Total" xml:space="preserve"><value>مجموع الاشتراكات</value></data>
-  <data name="Cnas_Dac_GapTitle" xml:space="preserve"><value>فرق يجب حسمه مع محاسبك</value></data>
-  <data name="Cnas_Dac_GapHint" xml:space="preserve"><value>الإعدادات تطبّق 26 % لدى المُشغّل ؛ التوزيع الرسمي يبلغ 25 % + 0,5 %. لم يُعدّل أي نسبة — قارن وصادِق.</value></data>
+  <data name="Cnas_Dac_GapTitle" xml:space="preserve"><value>توزيع النسب — مراقبة داخلية</value></data>
+  <data name="Cnas_Dac_GapHint" xml:space="preserve"><value>الإعدادات تطبّق 26 % لدى المُشغّل ؛ التوزيع الرسمي يبلغ 25 % + 0,5 %. تحسب البوابة الاشتراكات من الوعاء — هذا الفرق لا يدخل في التصريح ولم تُعدّل أي نسبة.</value></data>
+  <data name="Cnas_Dac_PortalNote" xml:space="preserve"><value>تحسب بوابة CNAS الاشتراكات من الوعاء وعدد العمال المُدخَلين ؛ التوزيع أدناه مراقبة داخلية، لا يُدخَل أبداً.</value></data>
   <data name="Cnas_Dac_OfficialPatronale" xml:space="preserve"><value>المُشغّل — التوزيع الرسمي</value></data>
   <data name="Cnas_Dac_Gap" xml:space="preserve"><value>الفرق (المُشغّل)</value></data>
   <data name="Cnas_Dac_OfficialTitle" xml:space="preserve"><value>التوزيع الرسمي (المرسوم 94-187 المعدّل) — للتأكيد</value></data>
