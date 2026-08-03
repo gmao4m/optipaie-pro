@@ -46,7 +46,8 @@ namespace OptiPaie.Desktop.Composition
             IReportService reports,
             INotificationService notifications,
             IAuditService audit,
-            IUserService users)
+            IUserService users,
+            ICnasDeclarationService cnasDeclarations)
         {
             Configuration = configuration;
             Logger = logger;
@@ -80,6 +81,7 @@ namespace OptiPaie.Desktop.Composition
             Notifications = notifications;
             Audit = audit;
             Users = users;
+            CnasDeclarations = cnasDeclarations;
         }
 
         /// <summary>Local user accounts &amp; the optional login gate.</summary>
@@ -167,5 +169,8 @@ namespace OptiPaie.Desktop.Composition
 
         /// <summary>Audit trail — records lifecycle changes and serves history/activity feeds.</summary>
         public IAuditService Audit { get; }
+
+        /// <summary>CNAS declarations (DAC/DAS) — read-only over persisted payroll, company-scoped.</summary>
+        public ICnasDeclarationService CnasDeclarations { get; }
     }
 }

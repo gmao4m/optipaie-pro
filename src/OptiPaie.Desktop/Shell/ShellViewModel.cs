@@ -42,6 +42,7 @@ namespace OptiPaie.Desktop.Shell
         private TrainingViewModel _training;
         private AtsViewModel _ats;
         private CertificateViewModel _certificates;
+        private CnasReadinessViewModel _cnas;
 
         private readonly Dictionary<string, PremiumModuleViewModel> _premium =
             new Dictionary<string, PremiumModuleViewModel>();
@@ -224,6 +225,10 @@ namespace OptiPaie.Desktop.Shell
             AddCore("employees", L("Shell_Nav_Employees"), "IconUsers");
             AddCore("payroll", L("Shell_Nav_Payroll"), "IconCash");
 
+            // Déclarations CNAS is a step of the payroll flow (not a report) — it sits right
+            // after Paie; the DAC and DAS will grow on the same screen.
+            AddCore("cnas", L("Shell_Nav_Cnas"), "IconFileCheck");
+
             foreach (ModuleDescriptor module in _registry.Upsells)
             {
                 NavItemViewModel item = NewItem(module.Key, module.DisplayName(rtl), IconKeyFor(module.Key), true);
@@ -342,6 +347,9 @@ namespace OptiPaie.Desktop.Shell
                     break;
                 case "reports":
                     target = _reports ?? (_reports = new ReportsViewModel(_services));
+                    break;
+                case "cnas":
+                    target = _cnas ?? (_cnas = new CnasReadinessViewModel(_services));
                     break;
                 case "home":
                     target = _home ?? (_home = new HomeViewModel(_services, Navigate));

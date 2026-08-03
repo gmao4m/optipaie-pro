@@ -395,6 +395,19 @@
   <data name="Shell_Nav_Companies" xml:space="preserve"><value>Entreprises</value></data>
   <data name="Shell_Nav_Archive" xml:space="preserve"><value>Archive</value></data>
   <data name="Shell_Nav_Reports" xml:space="preserve"><value>Rapports</value></data>
+  <data name="Shell_Nav_Cnas" xml:space="preserve"><value>Déclarations CNAS</value></data>
+  <data name="Cnas_Title" xml:space="preserve"><value>Contrôle de préparation CNAS</value></data>
+  <data name="Cnas_Subtitle" xml:space="preserve"><value>Vérifiez que les données sont complètes avant de produire la DAC/DAS.</value></data>
+  <data name="Cnas_NoCompany" xml:space="preserve"><value>Sélectionnez une entreprise pour lancer le contrôle.</value></data>
+  <data name="Cnas_Summary" xml:space="preserve"><value>{0} salarié(s) prêt(s) · {1} à corriger</value></data>
+  <data name="Cnas_AllReady" xml:space="preserve"><value>Tout est prêt pour la déclaration CNAS.</value></data>
+  <data name="Cnas_EmployerMissing" xml:space="preserve"><value>N° employeur CNAS manquant sur l'entreprise.</value></data>
+  <data name="Cnas_EmployerMalformed" xml:space="preserve"><value>N° employeur CNAS invalide (10 chiffres attendus).</value></data>
+  <data name="Cnas_Issue_NssMissing" xml:space="preserve"><value>NSS manquant</value></data>
+  <data name="Cnas_Issue_NssMalformed" xml:space="preserve"><value>NSS invalide (12 chiffres)</value></data>
+  <data name="Cnas_Issue_BirthMissing" xml:space="preserve"><value>Date de naissance manquante</value></data>
+  <data name="Cnas_Issue_BelowSnmg" xml:space="preserve"><value>{0} mois sous le SNMG (justificatif requis)</value></data>
+  <data name="Cnas_Col_Issues" xml:space="preserve"><value>Problèmes à corriger</value></data>
   <data name="Shell_Nav_Settings" xml:space="preserve"><value>Paramètres</value></data>
   <data name="Shell_Nav_PremiumHeader" xml:space="preserve"><value>MODULES PREMIUM</value></data>
 

@@ -395,6 +395,19 @@
   <data name="Shell_Nav_Companies" xml:space="preserve"><value>المؤسسات</value></data>
   <data name="Shell_Nav_Archive" xml:space="preserve"><value>الأرشيف</value></data>
   <data name="Shell_Nav_Reports" xml:space="preserve"><value>التقارير</value></data>
+  <data name="Shell_Nav_Cnas" xml:space="preserve"><value>تصريحات CNAS</value></data>
+  <data name="Cnas_Title" xml:space="preserve"><value>التحقق من جاهزية CNAS</value></data>
+  <data name="Cnas_Subtitle" xml:space="preserve"><value>تأكّد من اكتمال البيانات قبل إنتاج DAC/DAS.</value></data>
+  <data name="Cnas_NoCompany" xml:space="preserve"><value>اختر مؤسسة لبدء التحقق.</value></data>
+  <data name="Cnas_Summary" xml:space="preserve"><value>{0} موظف(ون) جاهز · {1} للتصحيح</value></data>
+  <data name="Cnas_AllReady" xml:space="preserve"><value>كل شيء جاهز للتصريح لدى CNAS.</value></data>
+  <data name="Cnas_EmployerMissing" xml:space="preserve"><value>رقم مُشغّل CNAS غير مُدخل للمؤسسة.</value></data>
+  <data name="Cnas_EmployerMalformed" xml:space="preserve"><value>رقم مُشغّل CNAS غير صالح (10 أرقام متوقعة).</value></data>
+  <data name="Cnas_Issue_NssMissing" xml:space="preserve"><value>رقم الضمان الاجتماعي غير مُدخل</value></data>
+  <data name="Cnas_Issue_NssMalformed" xml:space="preserve"><value>رقم الضمان الاجتماعي غير صالح (12 رقمًا)</value></data>
+  <data name="Cnas_Issue_BirthMissing" xml:space="preserve"><value>تاريخ الميلاد غير مُدخل</value></data>
+  <data name="Cnas_Issue_BelowSnmg" xml:space="preserve"><value>{0} شهر تحت الأجر الأدنى (يلزم مبرر)</value></data>
+  <data name="Cnas_Col_Issues" xml:space="preserve"><value>مشاكل يجب تصحيحها</value></data>
   <data name="Shell_Nav_Settings" xml:space="preserve"><value>الإعدادات</value></data>
   <data name="Shell_Nav_PremiumHeader" xml:space="preserve"><value>الوحدات المتقدمة</value></data>
 

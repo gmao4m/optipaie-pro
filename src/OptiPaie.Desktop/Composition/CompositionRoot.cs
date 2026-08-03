@@ -64,6 +64,10 @@ namespace OptiPaie.Desktop.Composition
             var notificationService = new NotificationService(
                 companyService, employeeService, contractService, leaveService, trainingService, performanceService);
 
+            // CNAS declarations (DAC/DAS) — read-only over persisted payroll + identity data.
+            var cnasDeclarationService = new CnasDeclarationService(
+                companyService, employeeService, archiveService, configurationService);
+
             // Audit trail. Wired into the lifecycle events of the modules through the
             // optional sink, so history is recorded without changing any service ctor.
             var auditService = new AuditService(unitOfWorkFactory, logger);
@@ -140,7 +144,8 @@ namespace OptiPaie.Desktop.Composition
                 reportService,
                 notificationService,
                 auditService,
-                userService);
+                userService,
+                cnasDeclarationService);
         }
     }
 }

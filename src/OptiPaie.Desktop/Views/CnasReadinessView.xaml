@@ -1,0 +1,106 @@
+<UserControl x:Class="OptiPaie.Desktop.Views.CnasReadinessView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:OptiPaie.Desktop.Localization">
+    <UserControl.Resources>
+        <Style x:Key="GridHeader" TargetType="DataGridColumnHeader">
+            <Setter Property="Background" Value="{DynamicResource SurfaceMuted}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Height" Value="34" />
+            <Setter Property="Padding" Value="10,0" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="BorderBrush" Value="{DynamicResource Border}" />
+            <Setter Property="BorderThickness" Value="0,0,1,1" />
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="24,20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Grid Grid.Row="0">
+            <StackPanel HorizontalAlignment="Left">
+                <TextBlock Style="{StaticResource H1}" Text="{loc:Loc Cnas_Title}" />
+                <TextBlock Style="{StaticResource Caption}" Margin="0,5,0,0" Text="{loc:Loc Cnas_Subtitle}" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
+                <TextBlock Text="{loc:Loc Payroll_Year}" VerticalAlignment="Center" Margin="0,0,8,0"
+                           Foreground="{DynamicResource TextMuted}" FontSize="12" />
+                <ComboBox Style="{StaticResource AppComboBox}" Width="100" Height="32"
+                          ItemsSource="{Binding Years}" SelectedItem="{Binding SelectedYear}" />
+            </StackPanel>
+        </Grid>
+
+        <!-- Banners -->
+        <StackPanel Grid.Row="1" Margin="0,18,0,0">
+            <!-- No active company -->
+            <Border Background="{DynamicResource SurfaceMuted}" CornerRadius="10" Padding="16,12"
+                    Visibility="{Binding HasCompany, Converter={StaticResource InverseBoolToVis}}">
+                <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Cnas_NoCompany}" />
+            </Border>
+
+            <!-- Company-level blocker: CNAS employer number -->
+            <Border Background="{DynamicResource StatusDangerSoft}" CornerRadius="10" Padding="16,12"
+                    Visibility="{Binding EmployerNumberIssue, Converter={StaticResource BoolToVis}}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="⚠" FontSize="15" VerticalAlignment="Center" Foreground="{DynamicResource StatusDangerText}" />
+                    <TextBlock Margin="10,0,0,0" VerticalAlignment="Center" FontSize="13" FontWeight="SemiBold"
+                               Foreground="{DynamicResource StatusDangerText}" Text="{Binding EmployerNumberMessage}" />
+                </StackPanel>
+            </Border>
+
+            <!-- Summary line -->
+            <TextBlock Margin="2,14,0,0" FontSize="13" Foreground="{DynamicResource TextSecondary}"
+                       Text="{Binding StatusMessage}"
+                       Visibility="{Binding HasCompany, Converter={StaticResource BoolToVis}}" />
+
+            <!-- Everything ready -->
+            <Border Background="{DynamicResource StatusSuccessSoft}" CornerRadius="10" Padding="16,12" Margin="0,12,0,0"
+                    Visibility="{Binding AllReady, Converter={StaticResource BoolToVis}}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="✓" FontSize="15" VerticalAlignment="Center" Foreground="{DynamicResource StatusSuccessText}" />
+                    <TextBlock Margin="10,0,0,0" VerticalAlignment="Center" FontSize="13" FontWeight="SemiBold"
+                               Foreground="{DynamicResource StatusSuccessText}" Text="{loc:Loc Cnas_AllReady}" />
+                </StackPanel>
+            </Border>
+        </StackPanel>
+
+        <!-- Work-list: employees with blocking issues -->
+        <DataGrid Grid.Row="2" Margin="0,16,0,0" ItemsSource="{Binding Rows}"
+                  Visibility="{Binding HasIssues, Converter={StaticResource BoolToVis}}"
+                  AutoGenerateColumns="False" HeadersVisibility="Column" IsReadOnly="True"
+                  CanUserAddRows="False" CanUserResizeRows="False" GridLinesVisibility="All"
+                  RowHeight="34" FontFamily="{StaticResource AppFont}" FontSize="12.5" Background="{DynamicResource Surface}"
+                  RowBackground="{DynamicResource Surface}" AlternatingRowBackground="{DynamicResource SurfaceMuted}"
+                  BorderBrush="{DynamicResource Border}" BorderThickness="1"
+                  HorizontalGridLinesBrush="{DynamicResource Border}" VerticalGridLinesBrush="{DynamicResource Border}"
+                  ColumnHeaderStyle="{StaticResource GridHeader}">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="{loc:Loc Payroll_Employee}" Binding="{Binding Employee}" Width="260">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="VerticalAlignment" Value="Center" />
+                            <Setter Property="Margin" Value="10,0,0,0" />
+                            <Setter Property="FontWeight" Value="SemiBold" />
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="{loc:Loc Cnas_Col_Issues}" Binding="{Binding Issues}" Width="*">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="VerticalAlignment" Value="Center" />
+                            <Setter Property="Margin" Value="10,0,0,0" />
+                            <Setter Property="Foreground" Value="{DynamicResource StatusDangerText}" />
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</UserControl>
