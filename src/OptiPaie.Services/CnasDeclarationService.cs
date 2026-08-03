@@ -20,6 +20,22 @@ namespace OptiPaie.Services
         private const int ExpectedNssLength = 12;       // NSS = 12 chiffres (clé incluse) — à confirmer
         private const int ExpectedEmployerDigits = 10;  // n° employeur = 10 chiffres — à confirmer
 
+        // Official CNAS contribution split (décret 94-187 modifié) — DISPLAY ONLY, "à confirmer".
+        // These are NOT applied to any payslip and change NO rate; they are shown next to the
+        // app's configured rates so the 26 % (config) vs 25,5 % (official patronale) gap can be
+        // arbitrated with an accountant. Patronale sums to 0,255 ; salariale to 0,09.
+        private static readonly (string Name, decimal Pat, decimal Sal)[] OfficialSplit =
+        {
+            ("Assurances sociales", 0.115m, 0.015m),
+            ("Accidents du travail", 0.0125m, 0m),
+            ("Retraite", 0.11m, 0.0675m),
+            ("Retraite anticipée", 0.0025m, 0.0025m),
+            ("Chômage", 0.01m, 0.005m),
+            ("Œuvres sociales", 0.005m, 0m),
+        };
+        private const decimal OfficialPatronaleRate = 0.255m; // 25 % + 0,5 % œuvres sociales
+        private const decimal OfficialSalarialeRate = 0.09m;
+
         private readonly ICompanyService _companies;
         private readonly IEmployeeService _employees;
         private readonly IArchiveService _archive;
@@ -97,6 +113,66 @@ namespace OptiPaie.Services
                 employerMissing,
                 employerMalformed,
                 rows.OrderBy(r => r.FullName, StringComparer.CurrentCultureIgnoreCase).ToList());
+        }
+
+        public CnasDacReport BuildDac(long companyId, int year, IReadOnlyList<int> months)
+        {
+            // RISK #1 — a declaration must never read across companies: no default, no null.
+            if (companyId <= 0)
+            {
+                throw new ArgumentException(
+                    "Aucune entreprise active : une déclaration CNAS doit être limitée à une entreprise explicite.",
+                    nameof(companyId));
+            }
+
+            Company company = _companies.Get(companyId);
+            if (company == null)
+            {
+                throw new ArgumentException("Entreprise introuvable.", nameof(companyId));
+            }
+
+            string employer = (company.CnasEmployerNumber ?? string.Empty).Trim();
+            bool employerMissing = employer.Length == 0;
+            bool employerMalformed = !employerMissing && DigitsOnly(employer).Length != ExpectedEmployerDigits;
+
+            IReadOnlyList<int> monthSet = months ?? new List<int>();
+            List<Payslip> slips = LoadPeriodPayslips(companyId, year, monthSet);
+
+            decimal assiette = slips.Sum(p => p.BaseCotisable);
+            decimal frozenEmployee = slips.Sum(p => p.CnasEmployee);
+            decimal frozenEmployer = slips.Sum(p => p.CnasEmployer);
+            int effectif = slips.Select(p => p.EmployeeId).Distinct().Count();
+
+            // Applied = the app's CONFIGURED rates (LegalParameters). Not modified here.
+            decimal rateSalariale = _configuration.GetCnasEmployeeRate();
+            decimal ratePatronale = _configuration.GetCnasEmployerRate();
+
+            List<CnasContributionBranch> branches = OfficialSplit
+                .Select(b => new CnasContributionBranch(b.Name, b.Pat, b.Sal, assiette))
+                .ToList();
+
+            return new CnasDacReport(
+                companyId, year, monthSet.OrderBy(m => m).ToList(),
+                employer, employerMissing, employerMalformed,
+                effectif, assiette, rateSalariale, ratePatronale,
+                frozenEmployee, frozenEmployer,
+                branches, OfficialSalarialeRate, OfficialPatronaleRate);
+        }
+
+        /// <summary>The persisted payslips of a company for the given year+months (read-only, scoped).</summary>
+        private List<Payslip> LoadPeriodPayslips(long companyId, int year, IReadOnlyList<int> months)
+        {
+            var result = new List<Payslip>();
+            foreach (PayrollRun run in _archive.SearchRuns(companyId, year, null))
+            {
+                if (run.CompanyId != companyId) continue;                       // defence in depth
+                if (months.Count > 0 && !months.Contains(run.PeriodMonth)) continue;
+
+                PayrollRun loaded = _archive.GetRun(run.Id);
+                if (loaded != null) result.AddRange(loaded.Payslips);
+            }
+
+            return result;
         }
 
         private Dictionary<long, List<Payslip>> LoadYearPayslips(long companyId, int year)

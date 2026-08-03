@@ -42,7 +42,7 @@ namespace OptiPaie.Desktop.Shell
         private TrainingViewModel _training;
         private AtsViewModel _ats;
         private CertificateViewModel _certificates;
-        private CnasReadinessViewModel _cnas;
+        private CnasHubViewModel _cnas;
 
         private readonly Dictionary<string, PremiumModuleViewModel> _premium =
             new Dictionary<string, PremiumModuleViewModel>();
@@ -349,7 +349,7 @@ namespace OptiPaie.Desktop.Shell
                     target = _reports ?? (_reports = new ReportsViewModel(_services));
                     break;
                 case "cnas":
-                    target = _cnas ?? (_cnas = new CnasReadinessViewModel(_services));
+                    target = _cnas ?? (_cnas = new CnasHubViewModel(_services));
                     break;
                 case "home":
                     target = _home ?? (_home = new HomeViewModel(_services, Navigate));

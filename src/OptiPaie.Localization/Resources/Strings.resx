@@ -408,6 +408,34 @@
   <data name="Cnas_Issue_BirthMissing" xml:space="preserve"><value>Date de naissance manquante</value></data>
   <data name="Cnas_Issue_BelowSnmg" xml:space="preserve"><value>{0} mois sous le SNMG (justificatif requis)</value></data>
   <data name="Cnas_Col_Issues" xml:space="preserve"><value>Problèmes à corriger</value></data>
+  <data name="Cnas_Tab_Readiness" xml:space="preserve"><value>Contrôle de préparation</value></data>
+  <data name="Cnas_Tab_Dac" xml:space="preserve"><value>DAC</value></data>
+  <data name="Cnas_Points" xml:space="preserve"><value>points</value></data>
+  <data name="Cnas_Dac_Subtitle" xml:space="preserve"><value>Récap à recopier sur le portail CNAS — saisie manuelle.</value></data>
+  <data name="Cnas_Cadence_Auto" xml:space="preserve"><value>Automatique</value></data>
+  <data name="Cnas_Cadence_Monthly" xml:space="preserve"><value>Mensuelle</value></data>
+  <data name="Cnas_Cadence_Quarterly" xml:space="preserve"><value>Trimestrielle</value></data>
+  <data name="Cnas_CadenceAutoInfo" xml:space="preserve"><value>Cadence automatique : {0} (selon l'effectif).</value></data>
+  <data name="Cnas_Dac_NoData" xml:space="preserve"><value>Aucun bulletin de paie pour cette période.</value></data>
+  <data name="Cnas_Dac_Employer" xml:space="preserve"><value>N° employeur CNAS</value></data>
+  <data name="Cnas_Dac_Effectif" xml:space="preserve"><value>Effectif déclaré</value></data>
+  <data name="Cnas_Dac_Applied" xml:space="preserve"><value>Assiette et cotisations (taux appliqués)</value></data>
+  <data name="Cnas_Dac_Assiette" xml:space="preserve"><value>Assiette cotisable</value></data>
+  <data name="Cnas_Dac_Salariale" xml:space="preserve"><value>Cotisation salariale</value></data>
+  <data name="Cnas_Dac_Patronale" xml:space="preserve"><value>Cotisation patronale</value></data>
+  <data name="Cnas_Dac_Total" xml:space="preserve"><value>Total des cotisations</value></data>
+  <data name="Cnas_Dac_GapTitle" xml:space="preserve"><value>Écart à trancher avec votre comptable</value></data>
+  <data name="Cnas_Dac_GapHint" xml:space="preserve"><value>La configuration applique 26 % côté patronal ; la répartition officielle totalise 25 % + 0,5 %. Aucun taux n'est modifié — comparez et validez.</value></data>
+  <data name="Cnas_Dac_OfficialPatronale" xml:space="preserve"><value>Patronale — répartition officielle</value></data>
+  <data name="Cnas_Dac_Gap" xml:space="preserve"><value>Écart patronal</value></data>
+  <data name="Cnas_Dac_OfficialTitle" xml:space="preserve"><value>Répartition officielle (décret 94-187 modifié) — à confirmer</value></data>
+  <data name="Cnas_Dac_Branch" xml:space="preserve"><value>Branche</value></data>
+  <data name="Cnas_Dac_PatRate" xml:space="preserve"><value>Taux patronal</value></data>
+  <data name="Cnas_Dac_PatAmount" xml:space="preserve"><value>Montant patronal</value></data>
+  <data name="Cnas_Dac_SalRate" xml:space="preserve"><value>Taux salarial</value></data>
+  <data name="Cnas_Dac_SalAmount" xml:space="preserve"><value>Montant salarial</value></data>
+  <data name="Cnas_Dac_RoundingWarning" xml:space="preserve"><value>Arrondi d'affichage : additionner les lignes arrondies peut s'écarter du total affiché de {0} DA au maximum. Aucun montant n'est ajusté — recopiez chaque ligne telle qu'affichée.</value></data>
+  <data name="Cnas_Dac_WithheldLine" xml:space="preserve"><value>Retenue sur bulletins : {0} · écart {1}</value></data>
   <data name="Shell_Nav_Settings" xml:space="preserve"><value>Paramètres</value></data>
   <data name="Shell_Nav_PremiumHeader" xml:space="preserve"><value>MODULES PREMIUM</value></data>
 

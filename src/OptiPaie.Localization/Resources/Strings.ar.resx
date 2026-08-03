@@ -408,6 +408,34 @@
   <data name="Cnas_Issue_BirthMissing" xml:space="preserve"><value>تاريخ الميلاد غير مُدخل</value></data>
   <data name="Cnas_Issue_BelowSnmg" xml:space="preserve"><value>{0} شهر تحت الأجر الأدنى (يلزم مبرر)</value></data>
   <data name="Cnas_Col_Issues" xml:space="preserve"><value>مشاكل يجب تصحيحها</value></data>
+  <data name="Cnas_Tab_Readiness" xml:space="preserve"><value>التحقق من الجاهزية</value></data>
+  <data name="Cnas_Tab_Dac" xml:space="preserve"><value>DAC</value></data>
+  <data name="Cnas_Points" xml:space="preserve"><value>نقطة</value></data>
+  <data name="Cnas_Dac_Subtitle" xml:space="preserve"><value>ملخّص لإعادة نسخه على بوابة CNAS — إدخال يدوي.</value></data>
+  <data name="Cnas_Cadence_Auto" xml:space="preserve"><value>تلقائي</value></data>
+  <data name="Cnas_Cadence_Monthly" xml:space="preserve"><value>شهرية</value></data>
+  <data name="Cnas_Cadence_Quarterly" xml:space="preserve"><value>فصلية</value></data>
+  <data name="Cnas_CadenceAutoInfo" xml:space="preserve"><value>وتيرة تلقائية: {0} (حسب العدد).</value></data>
+  <data name="Cnas_Dac_NoData" xml:space="preserve"><value>لا يوجد كشف راتب لهذه الفترة.</value></data>
+  <data name="Cnas_Dac_Employer" xml:space="preserve"><value>رقم مُشغّل CNAS</value></data>
+  <data name="Cnas_Dac_Effectif" xml:space="preserve"><value>العدد المصرّح</value></data>
+  <data name="Cnas_Dac_Applied" xml:space="preserve"><value>الوعاء والاشتراكات (النسب المطبقة)</value></data>
+  <data name="Cnas_Dac_Assiette" xml:space="preserve"><value>الوعاء الخاضع للاشتراك</value></data>
+  <data name="Cnas_Dac_Salariale" xml:space="preserve"><value>اشتراك العامل</value></data>
+  <data name="Cnas_Dac_Patronale" xml:space="preserve"><value>اشتراك المُشغّل</value></data>
+  <data name="Cnas_Dac_Total" xml:space="preserve"><value>مجموع الاشتراكات</value></data>
+  <data name="Cnas_Dac_GapTitle" xml:space="preserve"><value>فرق يجب حسمه مع محاسبك</value></data>
+  <data name="Cnas_Dac_GapHint" xml:space="preserve"><value>الإعدادات تطبّق 26 % لدى المُشغّل ؛ التوزيع الرسمي يبلغ 25 % + 0,5 %. لم يُعدّل أي نسبة — قارن وصادِق.</value></data>
+  <data name="Cnas_Dac_OfficialPatronale" xml:space="preserve"><value>المُشغّل — التوزيع الرسمي</value></data>
+  <data name="Cnas_Dac_Gap" xml:space="preserve"><value>الفرق (المُشغّل)</value></data>
+  <data name="Cnas_Dac_OfficialTitle" xml:space="preserve"><value>التوزيع الرسمي (المرسوم 94-187 المعدّل) — للتأكيد</value></data>
+  <data name="Cnas_Dac_Branch" xml:space="preserve"><value>الفرع</value></data>
+  <data name="Cnas_Dac_PatRate" xml:space="preserve"><value>نسبة المُشغّل</value></data>
+  <data name="Cnas_Dac_PatAmount" xml:space="preserve"><value>مبلغ المُشغّل</value></data>
+  <data name="Cnas_Dac_SalRate" xml:space="preserve"><value>نسبة العامل</value></data>
+  <data name="Cnas_Dac_SalAmount" xml:space="preserve"><value>مبلغ العامل</value></data>
+  <data name="Cnas_Dac_RoundingWarning" xml:space="preserve"><value>تقريب العرض: قد يختلف مجموع الأسطر المقرّبة عن الإجمالي المعروض بمقدار {0} دج كحد أقصى. لا يتم تعديل أي مبلغ — انسخ كل سطر كما هو معروض.</value></data>
+  <data name="Cnas_Dac_WithheldLine" xml:space="preserve"><value>المقتطع من كشوف الأجور: {0} · الفرق {1}</value></data>
   <data name="Shell_Nav_Settings" xml:space="preserve"><value>الإعدادات</value></data>
   <data name="Shell_Nav_PremiumHeader" xml:space="preserve"><value>الوحدات المتقدمة</value></data>
 

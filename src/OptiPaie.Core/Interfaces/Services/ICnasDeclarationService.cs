@@ -15,5 +15,14 @@ namespace OptiPaie.Core.Interfaces.Services
         /// ≥ SNMG). Read-only. Throws when no explicit company is supplied.
         /// </summary>
         CnasReadinessReport CheckReadiness(long companyId, int year);
+
+        /// <summary>
+        /// Builds the read-only DAC recap for one company over a period (the given months of
+        /// <paramref name="year"/> — one month for a monthly DAC, three for a quarterly one):
+        /// assiette cotisable, cotisations at the configured rates, the official branch split
+        /// (read-only), and the applied-vs-official gap. Aggregates persisted payslips only —
+        /// no engine, no rate change. Throws when no explicit company is supplied.
+        /// </summary>
+        CnasDacReport BuildDac(long companyId, int year, System.Collections.Generic.IReadOnlyList<int> months);
     }
 }
