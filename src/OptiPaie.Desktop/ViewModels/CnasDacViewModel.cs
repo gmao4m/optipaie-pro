@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
+using System.Windows.Input;
 using OptiPaie.Core.Dtos;
 using OptiPaie.Core.Entities;
+using OptiPaie.Desktop.Common;
 using OptiPaie.Desktop.Composition;
 using OptiPaie.Desktop.Mvvm;
 
@@ -42,10 +44,12 @@ namespace OptiPaie.Desktop.ViewModels
         private string _roundingWarning = string.Empty;
         private bool _salarialeWithheldVisible, _patronaleWithheldVisible;
         private string _salarialeWithheldLine = string.Empty, _patronaleWithheldLine = string.Empty;
+        private bool _hasMovements;
 
         public CnasDacViewModel(AppServices services)
         {
             _services = services;
+            OpenFicheCommand = new RelayCommand(OpenFiche);
             for (int y = DateTime.Today.Year; y >= DateTime.Today.Year - 5; y--) Years.Add(y);
 
             Cadences.Add(new CnasCadenceOption(CnasCadenceMode.Auto, L("Cnas_Cadence_Auto")));
@@ -53,6 +57,12 @@ namespace OptiPaie.Desktop.ViewModels
             Cadences.Add(new CnasCadenceOption(CnasCadenceMode.Quarterly, L("Cnas_Cadence_Quarterly")));
             _cadence = Cadences[0];
         }
+
+        /// <summary>Entrées/sorties de la période — l'annexe mouvements à recopier sur le portail.</summary>
+        public ObservableCollection<CnasMovementItem> Movements { get; } = new ObservableCollection<CnasMovementItem>();
+
+        /// <summary>Opens an employee's 360° fiche (a movement row is clicked). Read-only for CNAS.</summary>
+        public ICommand OpenFicheCommand { get; }
 
         public ObservableCollection<int> Years { get; } = new ObservableCollection<int>();
         public ObservableCollection<CnasCadenceOption> Cadences { get; } = new ObservableCollection<CnasCadenceOption>();
@@ -130,6 +140,8 @@ namespace OptiPaie.Desktop.ViewModels
         public string SalarialeWithheldLine { get => _salarialeWithheldLine; private set => Set(ref _salarialeWithheldLine, value); }
         public bool HasPatronaleWithholdingGap { get => _patronaleWithheldVisible; private set => Set(ref _patronaleWithheldVisible, value); }
         public string PatronaleWithheldLine { get => _patronaleWithheldLine; private set => Set(ref _patronaleWithheldLine, value); }
+
+        public bool HasMovements { get => _hasMovements; private set => Set(ref _hasMovements, value); }
 
         public void OnActivated() => Reload();
 
@@ -269,6 +281,26 @@ namespace OptiPaie.Desktop.ViewModels
             RoundingWarning = HasRoundingWarning
                 ? string.Format(L("Cnas_Dac_RoundingWarning"), maxResidue.ToString("0.00", Fr))
                 : string.Empty;
+
+            Movements.Clear();
+            foreach (CnasMovementRow m in _services.CnasDeclarations.BuildMovements(company.Id, _year, _period.Months))
+            {
+                Movements.Add(new CnasMovementItem(
+                    m.EmployeeId, m.IsEntry,
+                    L(m.IsEntry ? "Cnas_Mov_Entry" : "Cnas_Mov_Exit"),
+                    (m.LastName + " " + m.FirstName).Trim(),
+                    string.IsNullOrEmpty(m.Nss) ? "—" : m.Nss,
+                    new string((m.Nss ?? string.Empty).Where(char.IsDigit).ToArray()),
+                    m.Date.ToString("dd/MM/yyyy", Fr),
+                    m.Date.ToString("ddMMyyyy", Fr)));
+            }
+            HasMovements = Movements.Count > 0;
+        }
+
+        private void OpenFiche(object parameter)
+        {
+            if (!(parameter is CnasMovementItem row) || row.EmployeeId <= 0) return;
+            Dialogs.ShowEmployeeProfile(new EmployeeProfileViewModel(_services, row.EmployeeId, null));
         }
 
         // Half-away-from-zero, matching the "N2" display rounding on net48.
@@ -318,5 +350,25 @@ namespace OptiPaie.Desktop.ViewModels
         public string PatronaleCopy { get; }
         public string SalarialeAmount { get; }
         public string SalarialeCopy { get; }
+    }
+
+    /// <summary>One movements-annex row (entrée/sortie) with display + copy strings and the fiche id.</summary>
+    public sealed class CnasMovementItem
+    {
+        public CnasMovementItem(long employeeId, bool isEntry, string typeLabel, string name,
+            string nss, string nssCopy, string dateText, string dateCopy)
+        {
+            EmployeeId = employeeId; IsEntry = isEntry; TypeLabel = typeLabel; Name = name;
+            Nss = nss; NssCopy = nssCopy; DateText = dateText; DateCopy = dateCopy;
+        }
+
+        public long EmployeeId { get; }
+        public bool IsEntry { get; }
+        public string TypeLabel { get; }
+        public string Name { get; }
+        public string Nss { get; }
+        public string NssCopy { get; }
+        public string DateText { get; }
+        public string DateCopy { get; }
     }
 }

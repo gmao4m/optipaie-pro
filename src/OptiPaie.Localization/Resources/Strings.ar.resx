@@ -437,6 +437,13 @@
   <data name="Cnas_Dac_SalAmount" xml:space="preserve"><value>مبلغ العامل</value></data>
   <data name="Cnas_Dac_RoundingWarning" xml:space="preserve"><value>تقريب العرض: قد يختلف مجموع الأسطر المقرّبة عن الإجمالي المعروض بمقدار {0} دج كحد أقصى. لا يتم تعديل أي مبلغ — انسخ كل سطر كما هو معروض.</value></data>
   <data name="Cnas_Dac_WithheldLine" xml:space="preserve"><value>المقتطع من كشوف الأجور: {0} · الفرق {1}</value></data>
+  <data name="Cnas_Dac_Movements" xml:space="preserve"><value>حركات الفترة (دخول / خروج)</value></data>
+  <data name="Cnas_Dac_MovementsHint" xml:space="preserve"><value>انقر سطراً لفتح بطاقة العامل.</value></data>
+  <data name="Cnas_Mov_Type" xml:space="preserve"><value>النوع</value></data>
+  <data name="Cnas_Mov_Entry" xml:space="preserve"><value>دخول</value></data>
+  <data name="Cnas_Mov_Exit" xml:space="preserve"><value>خروج</value></data>
+  <data name="Cnas_Mov_Nss" xml:space="preserve"><value>رقم الضمان الاجتماعي</value></data>
+  <data name="Cnas_Mov_Date" xml:space="preserve"><value>التاريخ</value></data>
   <data name="Shell_Nav_Settings" xml:space="preserve"><value>الإعدادات</value></data>
   <data name="Shell_Nav_PremiumHeader" xml:space="preserve"><value>الوحدات المتقدمة</value></data>
 

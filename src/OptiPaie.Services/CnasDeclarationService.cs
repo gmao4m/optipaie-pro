@@ -159,6 +159,40 @@ namespace OptiPaie.Services
                 branches, OfficialSalarialeRate, OfficialPatronaleRate);
         }
 
+        public IReadOnlyList<CnasMovementRow> BuildMovements(long companyId, int year, IReadOnlyList<int> months)
+        {
+            // RISK #1 — a declaration must never read across companies: no default, no null.
+            if (companyId <= 0)
+            {
+                throw new ArgumentException(
+                    "Aucune entreprise active : une déclaration CNAS doit être limitée à une entreprise explicite.",
+                    nameof(companyId));
+            }
+
+            HashSet<int> monthSet = (months == null || months.Count == 0) ? null : new HashSet<int>(months);
+            bool InPeriod(DateTime d) => d.Year == year && (monthSet == null || monthSet.Contains(d.Month));
+
+            var rows = new List<CnasMovementRow>();
+            // Include inactive employees so an exit that ends the contract still surfaces.
+            foreach (Employee e in _employees.GetByCompany(companyId, true))
+            {
+                string nss = (e.Nss ?? string.Empty).Trim();
+                if (InPeriod(e.HireDate))
+                {
+                    rows.Add(new CnasMovementRow(e.Id, nss, e.LastNameFr, e.FirstNameFr, true, e.HireDate));
+                }
+                if (e.ExitDate.HasValue && InPeriod(e.ExitDate.Value))
+                {
+                    rows.Add(new CnasMovementRow(e.Id, nss, e.LastNameFr, e.FirstNameFr, false, e.ExitDate.Value));
+                }
+            }
+
+            return rows
+                .OrderBy(r => r.Date)
+                .ThenBy(r => r.LastName, StringComparer.CurrentCultureIgnoreCase)
+                .ToList();
+        }
+
         /// <summary>The persisted payslips of a company for the given year+months (read-only, scoped).</summary>
         private List<Payslip> LoadPeriodPayslips(long companyId, int year, IReadOnlyList<int> months)
         {

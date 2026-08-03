@@ -259,6 +259,63 @@
                                        VerticalAlignment="Center" Text="{Binding RoundingWarning}" />
                         </StackPanel>
                     </Border>
+
+                    <!-- Annexe mouvements de la période (entrées/sorties) — clic sur une ligne = fiche -->
+                    <StackPanel Margin="0,18,0,0" Visibility="{Binding HasMovements, Converter={StaticResource BoolToVis}}">
+                        <TextBlock Style="{StaticResource H2}" FontSize="14" Text="{loc:Loc Cnas_Dac_Movements}" />
+                        <TextBlock Style="{StaticResource Caption}" Margin="0,2,0,8" Text="{loc:Loc Cnas_Dac_MovementsHint}" />
+                        <DataGrid ItemsSource="{Binding Movements}" beh:RowActions.OpenItemCommand="{Binding OpenFicheCommand}"
+                                  AutoGenerateColumns="False" HeadersVisibility="Column" IsReadOnly="True"
+                                  CanUserAddRows="False" CanUserResizeRows="False" GridLinesVisibility="All" RowHeight="34"
+                                  FontFamily="{StaticResource AppFont}" FontSize="12" Background="{DynamicResource Surface}"
+                                  RowBackground="{DynamicResource Surface}" AlternatingRowBackground="{DynamicResource SurfaceMuted}"
+                                  BorderBrush="{DynamicResource Border}" BorderThickness="1"
+                                  HorizontalGridLinesBrush="{DynamicResource Border}" VerticalGridLinesBrush="{DynamicResource Border}"
+                                  ColumnHeaderStyle="{StaticResource GridHeader}">
+                            <DataGrid.RowStyle>
+                                <Style TargetType="DataGridRow">
+                                    <Setter Property="Cursor" Value="Hand" />
+                                </Style>
+                            </DataGrid.RowStyle>
+                            <DataGrid.Columns>
+                                <DataGridTemplateColumn Header="{loc:Loc Cnas_Mov_Type}" Width="110">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Border CornerRadius="6" Padding="8,2" Margin="8,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"
+                                                    Background="{DynamicResource SurfaceMuted}">
+                                                <TextBlock FontSize="11.5" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondary}" Text="{Binding TypeLabel}" />
+                                            </Border>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Header="{loc:Loc Payroll_Employee}" Binding="{Binding Name}" Width="*">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock"><Setter Property="VerticalAlignment" Value="Center" /><Setter Property="Margin" Value="10,0,0,0" /><Setter Property="FontWeight" Value="SemiBold" /></Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTemplateColumn Header="{loc:Loc Cnas_Mov_Nss}" Width="190">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal" Margin="10,0,0,0">
+                                                <TextBlock Style="{StaticResource FigureValue}" FontSize="12" Text="{Binding Nss}" />
+                                                <Button Style="{StaticResource CopyButton}" Width="24" Height="24" Margin="6,0,0,0" beh:CopyBehavior.Text="{Binding NssCopy}" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="{loc:Loc Cnas_Mov_Date}" Width="160">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal" Margin="10,0,0,0">
+                                                <TextBlock Style="{StaticResource FigureValue}" FontSize="12" Text="{Binding DateText}" />
+                                                <Button Style="{StaticResource CopyButton}" Width="24" Height="24" Margin="6,0,0,0" beh:CopyBehavior.Text="{Binding DateCopy}" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
                 </StackPanel>
             </StackPanel>
         </ScrollViewer>

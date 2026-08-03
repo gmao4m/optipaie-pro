@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Windows.Input;
 using OptiPaie.Core.Dtos;
 using OptiPaie.Core.Entities;
+using OptiPaie.Desktop.Common;
 using OptiPaie.Desktop.Composition;
 using OptiPaie.Desktop.Mvvm;
 
@@ -27,11 +29,15 @@ namespace OptiPaie.Desktop.ViewModels
         public CnasReadinessViewModel(AppServices services)
         {
             _services = services;
+            OpenFicheCommand = new RelayCommand(OpenFiche);
             for (int y = DateTime.Today.Year; y >= DateTime.Today.Year - 5; y--)
             {
                 Years.Add(y);
             }
         }
+
+        /// <summary>Opens an employee's 360° fiche when a blocker row is clicked. Read-only for CNAS.</summary>
+        public ICommand OpenFicheCommand { get; }
 
         public ObservableCollection<int> Years { get; } = new ObservableCollection<int>();
 
@@ -80,7 +86,7 @@ namespace OptiPaie.Desktop.ViewModels
             IReadOnlyList<CnasEmployeeReadiness> withIssues = report.EmployeesWithIssues;
             foreach (CnasEmployeeReadiness e in withIssues)
             {
-                Rows.Add(new CnasReadinessRow(e.FullName, BuildIssues(e)));
+                Rows.Add(new CnasReadinessRow(e.EmployeeId, e.FullName, BuildIssues(e)));
             }
 
             AllReady = report.IsReady;
@@ -97,17 +103,25 @@ namespace OptiPaie.Desktop.ViewModels
             if (e.MonthsBelowSnmg > 0) parts.Add(string.Format(L("Cnas_Issue_BelowSnmg"), e.MonthsBelowSnmg));
             return string.Join("   ·   ", parts);
         }
+
+        private void OpenFiche(object parameter)
+        {
+            if (!(parameter is CnasReadinessRow row) || row.EmployeeId <= 0) return;
+            Dialogs.ShowEmployeeProfile(new EmployeeProfileViewModel(_services, row.EmployeeId, null));
+        }
     }
 
     /// <summary>One row of the readiness work-list: an employee and their concatenated issues.</summary>
     public sealed class CnasReadinessRow
     {
-        public CnasReadinessRow(string employee, string issues)
+        public CnasReadinessRow(long employeeId, string employee, string issues)
         {
+            EmployeeId = employeeId;
             Employee = employee;
             Issues = issues;
         }
 
+        public long EmployeeId { get; }
         public string Employee { get; }
         public string Issues { get; }
     }

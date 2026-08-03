@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
@@ -82,6 +83,17 @@ namespace OptiPaie.Tests
             long contractId = _contracts.CreateDraftFromEmployee(id).Value;
             _contracts.Activate(contractId);
             return id;
+        }
+
+        private long AddEmployeeWithDates(long companyId, string last, DateTime hire, DateTime? exit)
+        {
+            return _employees.Create(new Employee
+            {
+                CompanyId = companyId, LastNameFr = last, FirstNameFr = "Karim", Poste = "Agent",
+                Nss = "012345678901", BirthDate = new DateTime(1985, 1, 1), Gender = Gender.Male,
+                MaritalStatus = MaritalStatus.Single, PaymentMode = PaymentMode.Cash, ContractType = ContractType.Cdi,
+                HireDate = hire, ExitDate = exit, IsActive = exit == null, BaseSalary = 50000m
+            }).Value;
         }
 
         [Test]
@@ -336,6 +348,60 @@ namespace OptiPaie.Tests
             Assert.That(m4.CotisationSalariale + m5.CotisationSalariale + m6.CotisationSalariale, Is.EqualTo(t2.CotisationSalariale));
             Assert.That(m4.OfficialCotisationPatronale + m5.OfficialCotisationPatronale + m6.OfficialCotisationPatronale,
                 Is.EqualTo(t2.OfficialCotisationPatronale));
+        }
+
+        // ---------------------------------------------------------------- Mouvements (étape 3)
+
+        [Test]
+        public void BuildMovements_throws_when_no_company_is_specified()
+        {
+            Assert.Throws<ArgumentException>(() => _service.BuildMovements(0, Year, new[] { Month }));
+        }
+
+        [Test]
+        public void BuildMovements_lists_entries_and_exits_that_fall_in_the_period()
+        {
+            long companyId = AddCompany("SARL Mouvements", "1234567890");
+            AddEmployeeWithDates(companyId, "ENTRANT", new DateTime(Year, Month, 10), null);                       // entrée
+            AddEmployeeWithDates(companyId, "SORTANT", new DateTime(Year - 1, 1, 1), new DateTime(Year, Month, 20)); // sortie
+            long both = AddEmployeeWithDates(companyId, "PASSANT", new DateTime(Year, Month, 3), new DateTime(Year, Month, 25)); // entrée + sortie
+            long stable = AddEmployeeWithDates(companyId, "STABLE", new DateTime(Year - 3, 1, 1), null);           // aucun mouvement
+
+            IReadOnlyList<CnasMovementRow> movements = _service.BuildMovements(companyId, Year, new[] { Month });
+
+            Assert.That(movements.Count, Is.EqualTo(4)); // 1 entrée + 1 sortie + (1 entrée + 1 sortie)
+            Assert.That(movements.Count(m => m.IsEntry), Is.EqualTo(2));
+            Assert.That(movements.Count(m => !m.IsEntry), Is.EqualTo(2));
+            Assert.That(movements.Select(m => m.EmployeeId), Does.Not.Contain(stable));
+            Assert.That(movements.Any(m => m.EmployeeId == both && m.IsEntry), Is.True);
+            Assert.That(movements.Any(m => m.EmployeeId == both && !m.IsEntry), Is.True);
+        }
+
+        [Test]
+        public void BuildMovements_excludes_movements_outside_the_selected_months()
+        {
+            long companyId = AddCompany("SARL Trim Mouv", "1234567890");
+            AddEmployeeWithDates(companyId, "AVRIL", new DateTime(Year, 4, 5), null);   // in T2
+            AddEmployeeWithDates(companyId, "JUILLET", new DateTime(Year, 7, 5), null); // in T3, not T2
+
+            IReadOnlyList<CnasMovementRow> t2 = _service.BuildMovements(companyId, Year, new[] { 4, 5, 6 });
+
+            Assert.That(t2.Count, Is.EqualTo(1));
+            Assert.That(t2.Single().LastName, Is.EqualTo("AVRIL"));
+        }
+
+        [Test]
+        public void BuildMovements_is_strictly_company_scoped()
+        {
+            long companyA = AddCompany("SARL A", "1111111111");
+            long companyB = AddCompany("SARL B", "2222222222");
+            AddEmployeeWithDates(companyA, "ALPHA", new DateTime(Year, Month, 10), null);
+            long bHire = AddEmployeeWithDates(companyB, "BETA", new DateTime(Year, Month, 10), null);
+
+            IReadOnlyList<CnasMovementRow> movements = _service.BuildMovements(companyA, Year, new[] { Month });
+
+            Assert.That(movements.Count, Is.EqualTo(1));
+            Assert.That(movements.Select(m => m.EmployeeId), Does.Not.Contain(bHire));
         }
     }
 }

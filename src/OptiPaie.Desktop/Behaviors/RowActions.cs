@@ -70,6 +70,42 @@ namespace OptiPaie.Desktop.Behaviors
             }
         }
 
+        // ---- OpenItemCommand --------------------------------------------------
+
+        /// <summary>
+        /// Set on a DataGrid/ListBox: a left click anywhere on a row runs the command with that
+        /// row's item — so a non-technical user just clicks the line to open it, no double-click.
+        /// Clicks that land on an inner Button (e.g. a copy button) are left alone.
+        /// </summary>
+        public static readonly DependencyProperty OpenItemCommandProperty =
+            DependencyProperty.RegisterAttached("OpenItemCommand", typeof(ICommand), typeof(RowActions),
+                new PropertyMetadata(null, OnOpenItemCommandChanged));
+
+        public static void SetOpenItemCommand(DependencyObject o, ICommand v) => o.SetValue(OpenItemCommandProperty, v);
+        public static ICommand GetOpenItemCommand(DependencyObject o) => (ICommand)o.GetValue(OpenItemCommandProperty);
+
+        private static void OnOpenItemCommandChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (!(d is UIElement el)) return;
+            if (e.NewValue != null) el.AddHandler(UIElement.MouseLeftButtonUpEvent, new MouseButtonEventHandler(OpenItemHandler), true);
+            else el.RemoveHandler(UIElement.MouseLeftButtonUpEvent, new MouseButtonEventHandler(OpenItemHandler));
+        }
+
+        private static void OpenItemHandler(object sender, MouseButtonEventArgs e)
+        {
+            var src = e.OriginalSource as DependencyObject;
+            if (FindAncestor<ButtonBase>(src) != null) return; // a copy button etc. — don't open
+
+            object item = null;
+            var row = FindAncestor<DataGridRow>(src);
+            if (row != null) item = row.Item;
+            else { var li = FindAncestor<ListBoxItem>(src); if (li != null) item = li.DataContext; }
+            if (item == null) return;
+
+            var cmd = GetOpenItemCommand((DependencyObject)sender);
+            if (cmd != null && cmd.CanExecute(item)) cmd.Execute(item);
+        }
+
         private static T FindAncestor<T>(DependencyObject d) where T : DependencyObject
         {
             while (d != null && !(d is T))

@@ -437,6 +437,13 @@
   <data name="Cnas_Dac_SalAmount" xml:space="preserve"><value>Montant salarial</value></data>
   <data name="Cnas_Dac_RoundingWarning" xml:space="preserve"><value>Arrondi d'affichage : additionner les lignes arrondies peut s'écarter du total affiché de {0} DA au maximum. Aucun montant n'est ajusté — recopiez chaque ligne telle qu'affichée.</value></data>
   <data name="Cnas_Dac_WithheldLine" xml:space="preserve"><value>Retenue sur bulletins : {0} · écart {1}</value></data>
+  <data name="Cnas_Dac_Movements" xml:space="preserve"><value>Mouvements de la période (entrées / sorties)</value></data>
+  <data name="Cnas_Dac_MovementsHint" xml:space="preserve"><value>Cliquez une ligne pour ouvrir la fiche du salarié.</value></data>
+  <data name="Cnas_Mov_Type" xml:space="preserve"><value>Type</value></data>
+  <data name="Cnas_Mov_Entry" xml:space="preserve"><value>Entrée</value></data>
+  <data name="Cnas_Mov_Exit" xml:space="preserve"><value>Sortie</value></data>
+  <data name="Cnas_Mov_Nss" xml:space="preserve"><value>N° sécurité sociale</value></data>
+  <data name="Cnas_Mov_Date" xml:space="preserve"><value>Date</value></data>
   <data name="Shell_Nav_Settings" xml:space="preserve"><value>Paramètres</value></data>
   <data name="Shell_Nav_PremiumHeader" xml:space="preserve"><value>MODULES PREMIUM</value></data>
 

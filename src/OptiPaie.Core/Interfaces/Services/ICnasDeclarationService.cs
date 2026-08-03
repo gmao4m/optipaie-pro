@@ -24,5 +24,13 @@ namespace OptiPaie.Core.Interfaces.Services
         /// no engine, no rate change. Throws when no explicit company is supplied.
         /// </summary>
         CnasDacReport BuildDac(long companyId, int year, System.Collections.Generic.IReadOnlyList<int> months);
+
+        /// <summary>
+        /// Lists the entrées/sorties (hire/exit) that fall inside a DAC period — the movements
+        /// annex the accountant copies onto the portal. Reads Employee.HireDate/ExitDate only,
+        /// strictly company-scoped. Throws when no explicit company is supplied.
+        /// </summary>
+        System.Collections.Generic.IReadOnlyList<CnasMovementRow> BuildMovements(
+            long companyId, int year, System.Collections.Generic.IReadOnlyList<int> months);
     }
 }

@@ -1,6 +1,7 @@
 <UserControl x:Class="OptiPaie.Desktop.Views.CnasReadinessView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:beh="clr-namespace:OptiPaie.Desktop.Behaviors"
              xmlns:loc="clr-namespace:OptiPaie.Desktop.Localization">
     <UserControl.Resources>
         <Style x:Key="GridHeader" TargetType="DataGridColumnHeader">
@@ -71,8 +72,9 @@
             </Border>
         </StackPanel>
 
-        <!-- Work-list: employees with blocking issues -->
+        <!-- Work-list: employees with blocking issues — clic sur une ligne = fiche -->
         <DataGrid Grid.Row="2" Margin="0,16,0,0" ItemsSource="{Binding Rows}"
+                  beh:RowActions.OpenItemCommand="{Binding OpenFicheCommand}"
                   Visibility="{Binding HasIssues, Converter={StaticResource BoolToVis}}"
                   AutoGenerateColumns="False" HeadersVisibility="Column" IsReadOnly="True"
                   CanUserAddRows="False" CanUserResizeRows="False" GridLinesVisibility="All"
@@ -81,6 +83,11 @@
                   BorderBrush="{DynamicResource Border}" BorderThickness="1"
                   HorizontalGridLinesBrush="{DynamicResource Border}" VerticalGridLinesBrush="{DynamicResource Border}"
                   ColumnHeaderStyle="{StaticResource GridHeader}">
+            <DataGrid.RowStyle>
+                <Style TargetType="DataGridRow">
+                    <Setter Property="Cursor" Value="Hand" />
+                </Style>
+            </DataGrid.RowStyle>
             <DataGrid.Columns>
                 <DataGridTextColumn Header="{loc:Loc Payroll_Employee}" Binding="{Binding Employee}" Width="260">
                     <DataGridTextColumn.ElementStyle>
