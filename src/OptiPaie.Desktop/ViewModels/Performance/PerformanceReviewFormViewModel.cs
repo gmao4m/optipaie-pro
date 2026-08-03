@@ -46,8 +46,8 @@ namespace OptiPaie.Desktop.ViewModels.Performance
     public sealed class ReviewCriterionCardViewModel : ObservableObject
     {
         private static readonly CultureInfo Fr = CultureInfo.GetCultureInfo("fr-FR");
-        private static readonly Brush Green = Frozen("#2E9E6C");
-        private static readonly Brush Amber = Frozen("#D9A441");
+        private static readonly Brush Green = Frozen("#0E9F6E");
+        private static readonly Brush Amber = Frozen("#E3B341");
         private static readonly Brush Red = Frozen("#C24444");
         private static readonly Brush Muted = Frozen("#8B8F99");
 
@@ -245,8 +245,8 @@ namespace OptiPaie.Desktop.ViewModels.Performance
     public sealed class PerformanceReviewFormViewModel : ObservableObject
     {
         private static readonly CultureInfo Fr = CultureInfo.GetCultureInfo("fr-FR");
-        private static readonly Brush Green = Freeze("#2E9E6C");
-        private static readonly Brush Amber = Freeze("#D9A441");
+        private static readonly Brush Green = Freeze("#0E9F6E");
+        private static readonly Brush Amber = Freeze("#E3B341");
         private static readonly Brush Red = Freeze("#C24444");
 
         private readonly AppServices _services;

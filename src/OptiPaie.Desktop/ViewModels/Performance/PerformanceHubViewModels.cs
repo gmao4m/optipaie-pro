@@ -25,13 +25,13 @@ namespace OptiPaie.Desktop.ViewModels.Performance
     internal static class PerfUi
     {
         private static readonly CultureInfo Fr = CultureInfo.GetCultureInfo("fr-FR");
-        public static readonly Brush Green = Freeze("#2E9E6C");
+        public static readonly Brush Green = Freeze("#0E9F6E");
         public static readonly Brush Teal = Freeze("#0F9B8E");
-        public static readonly Brush Amber = Freeze("#D9A441");
+        public static readonly Brush Amber = Freeze("#E3B341");
         public static readonly Brush Orange = Freeze("#E08A3C");
         public static readonly Brush Red = Freeze("#C24444");
         public static readonly Brush Muted = Freeze("#8B8F99");
-        public static readonly Brush Navy = Freeze("#1B2A4A");
+        public static readonly Brush Navy = Freeze("#14352A");
 
         public static Brush BandBrush(decimal percent)
         {

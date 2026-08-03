@@ -21,11 +21,13 @@ namespace OptiPaie.Desktop.Documents
     /// </summary>
     public sealed class FichePaieDocument
     {
-        // Brand identity (same tokens as the rest of the app).
-        private const string Navy = "#1B2A4A";
-        private const string Teal = "#0F9B8E";
-        private const string Ink = "#1B2430";
-        private const string Muted = "#6B7280";
+        // Brand identity (same emerald/gold palette as the rest of the app). The constant
+        // names are kept historical; their values are the current landing-page identity:
+        // a deep-emerald header/net band ("Navy") and a warm-gold highlight ("Teal").
+        private const string Navy = "#0E3B2C";
+        private const string Teal = "#E3B341";
+        private const string Ink = "#182B26";
+        private const string Muted = "#5B6B66";
         private const string Divider = "#E4E1DA";
         private const string SoftFill = "#F5F4F0";
         private const string HeadFill = "#F2F1EC";
@@ -106,7 +108,7 @@ namespace OptiPaie.Desktop.Documents
                     row.RelativeItem().AlignMiddle().Text("BULLETIN DE PAIE").FontSize(13).Bold().FontColor(White);
                     row.AutoItem().AlignMiddle().Text(t =>
                     {
-                        t.Span("Période  ").FontSize(9).FontColor("#B9C2D6");
+                        t.Span("Période  ").FontSize(9).FontColor("#CDEADF");
                         t.Span(PeriodLabel()).FontSize(11).Bold().FontColor(Teal);
                     });
                 });

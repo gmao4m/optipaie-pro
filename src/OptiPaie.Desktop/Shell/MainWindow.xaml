@@ -169,8 +169,10 @@
             </DockPanel>
         </Border>
 
-        <!-- Content area with a top bar (notification bell) -->
-        <Grid Grid.Column="1">
+        <!-- Content area with a top bar (notification bell). The column paints the cream
+             canvas so every hosted view sits on the identity background even where the view's
+             own root is transparent (list screens with spacing above their grid). -->
+        <Grid Grid.Column="1" Background="{DynamicResource Canvas}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="46" />
                 <RowDefinition Height="*" />
@@ -186,7 +188,7 @@
                               Data="{StaticResource IconBuilding}" VerticalAlignment="Center" />
                         <TextBlock Text="{loc:Loc Shell_ActiveCompany}" Margin="8,0,10,0" VerticalAlignment="Center"
                                    FontSize="11.5" Foreground="{DynamicResource TextMuted}" />
-                        <ComboBox ItemsSource="{Binding CompanyContext.Companies}"
+                        <ComboBox Style="{StaticResource AppComboBox}" ItemsSource="{Binding CompanyContext.Companies}"
                                   SelectedItem="{Binding CompanyContext.Active, Mode=TwoWay}"
                                   MinWidth="230" Height="32" VerticalContentAlignment="Center"
                                   FontSize="13" FontWeight="SemiBold" ToolTip="Changer d'entreprise (s'applique à tous les modules)">

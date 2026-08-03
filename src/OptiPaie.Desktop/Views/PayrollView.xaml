@@ -17,8 +17,8 @@
             <Setter Property="VerticalContentAlignment" Value="Center" />
         </Style>
         <Style x:Key="GridHeader" TargetType="DataGridColumnHeader">
-            <Setter Property="Background" Value="{DynamicResource SurfaceMuted}" />
-            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
+            <Setter Property="Background" Value="{DynamicResource BrandSoft}" />
+            <Setter Property="Foreground" Value="{DynamicResource BrandText}" />
             <Setter Property="FontSize" Value="12" />
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="Height" Value="34" />
@@ -141,9 +141,9 @@
                 Padding="16,12" Margin="0,14,0,0" Visibility="{Binding HasEmployee, Converter={StaticResource BoolToVis}}">
             <StackPanel>
                 <DockPanel>
-                    <Border DockPanel.Dock="Right" Background="{DynamicResource TextPrimary}" CornerRadius="8" Padding="16,8" VerticalAlignment="Center">
+                    <Border DockPanel.Dock="Right" Background="{DynamicResource Brand}" CornerRadius="8" Padding="16,8" VerticalAlignment="Center">
                         <StackPanel>
-                            <TextBlock Text="{loc:Loc Payroll_NetToPay}" Foreground="#C9CDD2" FontSize="11" />
+                            <TextBlock Text="{loc:Loc Payroll_NetToPay}" Foreground="{DynamicResource TextOnBrandMuted}" FontSize="11" />
                             <TextBlock Text="{Binding NetText}" FontFamily="{StaticResource MonoFont}" Foreground="White" FontSize="17" FontWeight="SemiBold" Margin="0,2,0,0" />
                         </StackPanel>
                     </Border>

@@ -192,7 +192,7 @@ namespace OptiPaie.Desktop.ViewModels
             decimal peak = monthly.Count > 0 ? monthly.Max() : 0m;
             decimal trough = monthly.Count > 0 ? monthly.Min() : 0m;
             if (peak <= 0m) peak = 1m;
-            Brush barBrush = Res("Brand", Color.FromRgb(0x5B, 0x5B, 0xD6));
+            Brush barBrush = Res("Brand", Color.FromRgb(0x0E, 0x9F, 0x6E));
             for (int i = 0; i < monthly.Count; i++)
             {
                 // Normalise between the period's min and max so a small but real trend is
@@ -217,10 +217,10 @@ namespace OptiPaie.Desktop.ViewModels
             int total = groups.Sum(g => g.Count);
             Brush[] palette =
             {
-                Res("Brand", Color.FromRgb(0x5B, 0x5B, 0xD6)),
-                Res("Accent", Color.FromRgb(0x3E, 0x63, 0xDD)),
-                Res("Salary", Color.FromRgb(0x30, 0xA4, 0x6C)),
-                Res("Warning", Color.FromRgb(0xF5, 0xA6, 0x23)),
+                Res("Brand", Color.FromRgb(0x0E, 0x9F, 0x6E)),
+                Res("Accent", Color.FromRgb(0xE3, 0xB3, 0x41)),
+                Res("Salary", Color.FromRgb(0x0E, 0x9F, 0x6E)),
+                Res("Warning", Color.FromRgb(0xC0, 0x8A, 0x2E)),
                 Res("Employer", Color.FromRgb(0x6C, 0x87, 0xEC)),
                 Res("Deduction", Color.FromRgb(0xE5, 0x48, 0x4D))
             };

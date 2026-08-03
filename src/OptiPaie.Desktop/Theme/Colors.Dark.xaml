@@ -4,61 +4,67 @@
     <!--
         DARK THEME palette. Same keys as Colors.xaml, dark values. Merged on top of the
         light palette at runtime by ThemeManager; because every colour is referenced via
-        DynamicResource, the whole app re-themes live. The violet identity is preserved and
-        pops against the deep neutral surfaces. Contrast is kept readable (light text on
-        dark, white on filled).
+        DynamicResource, the whole app re-themes live. The emerald identity is preserved and
+        pops against the deep green-neutral surfaces; gold stays the warm standout accent.
+        Contrast is kept readable (light text on dark, white/dark on filled).
     -->
 
-    <!-- Brand: the same vivid violet — it pops on dark and reads with white button text. -->
-    <SolidColorBrush x:Key="Brand" Color="#6E6EE8" />
-    <SolidColorBrush x:Key="BrandHover" Color="#8080F0" />
-    <SolidColorBrush x:Key="BrandPressed" Color="#5B5BD6" />
-    <SolidColorBrush x:Key="BrandSoft" Color="#28284A" />
-    <!-- Brand-as-text: a lighter violet so brand labels/icons and BrandSoft chips stay
+    <!-- Brand: emerald — pops on dark and reads with white button text. -->
+    <SolidColorBrush x:Key="Brand" Color="#10A672" />
+    <SolidColorBrush x:Key="BrandHover" Color="#1BBE85" />
+    <SolidColorBrush x:Key="BrandPressed" Color="#0E9F6E" />
+    <SolidColorBrush x:Key="BrandSoft" Color="#113329" />
+    <!-- Brand-as-text: a lighter emerald so brand labels/icons and BrandSoft chips stay
          legible on dark surfaces. -->
-    <SolidColorBrush x:Key="BrandText" Color="#B0B0F7" />
+    <SolidColorBrush x:Key="BrandText" Color="#5FD6A6" />
+    <!-- Light mint text/icons on a filled Brand band. -->
+    <SolidColorBrush x:Key="TextOnBrandMuted" Color="#CDEADF" />
 
-    <!-- Accent: bright blue, lifted for dark. -->
-    <SolidColorBrush x:Key="Accent" Color="#5472E4" />
-    <SolidColorBrush x:Key="AccentHover" Color="#6C87EC" />
-    <SolidColorBrush x:Key="AccentPressed" Color="#3E63DD" />
-    <SolidColorBrush x:Key="AccentSoft" Color="#1E2748" />
+    <!-- Accent: warm gold, held constant across themes; labels on it stay dark. -->
+    <SolidColorBrush x:Key="Accent" Color="#E3B341" />
+    <SolidColorBrush x:Key="AccentHover" Color="#EFC257" />
+    <SolidColorBrush x:Key="AccentPressed" Color="#C99A2E" />
+    <SolidColorBrush x:Key="AccentSoft" Color="#33290F" />
+    <!-- Dark text on a filled gold accent stays dark (gold is light in both themes). -->
+    <SolidColorBrush x:Key="TextOnAccent" Color="#17251E" />
+    <!-- Accent-as-text on dark: a light gold so gold-family labels/pills stay legible. -->
+    <SolidColorBrush x:Key="AccentText" Color="#EAC66A" />
 
-    <!-- Surfaces: deep neutral canvas, slightly lifted cards, subtle dividers. -->
-    <SolidColorBrush x:Key="Canvas" Color="#151517" />
-    <SolidColorBrush x:Key="Surface" Color="#1E1E22" />
-    <SolidColorBrush x:Key="SurfaceMuted" Color="#26262C" />
-    <SolidColorBrush x:Key="Border" Color="#2A2A30" />
-    <SolidColorBrush x:Key="BorderStrong" Color="#3A3A42" />
+    <!-- Surfaces: deep green-neutral canvas, slightly lifted cards, subtle dividers. -->
+    <SolidColorBrush x:Key="Canvas" Color="#121815" />
+    <SolidColorBrush x:Key="Surface" Color="#1A211D" />
+    <SolidColorBrush x:Key="SurfaceMuted" Color="#232B27" />
+    <SolidColorBrush x:Key="Border" Color="#2A332E" />
+    <SolidColorBrush x:Key="BorderStrong" Color="#3A443E" />
 
     <!-- Soft elevation shadow colour (near-black; subtle on dark). -->
     <Color x:Key="ShadowColor">#000000</Color>
 
     <!-- Text. -->
-    <SolidColorBrush x:Key="TextPrimary" Color="#EDEDEF" />
-    <SolidColorBrush x:Key="TextSecondary" Color="#9B9BA6" />
-    <SolidColorBrush x:Key="TextMuted" Color="#75757F" />
+    <SolidColorBrush x:Key="TextPrimary" Color="#EAF0EC" />
+    <SolidColorBrush x:Key="TextSecondary" Color="#9EAAA4" />
+    <SolidColorBrush x:Key="TextMuted" Color="#74807A" />
     <SolidColorBrush x:Key="TextOnBrand" Color="#FFFFFF" />
 
     <!-- Semantic status colours (lightened for dark backgrounds). -->
     <SolidColorBrush x:Key="Salary" Color="#3DBE82" />
     <SolidColorBrush x:Key="Deduction" Color="#F2686C" />
     <SolidColorBrush x:Key="Employer" Color="#6C87EC" />
-    <SolidColorBrush x:Key="Warning" Color="#F5B546" />
+    <SolidColorBrush x:Key="Warning" Color="#E3B341" />
 
     <SolidColorBrush x:Key="StatusSuccess" Color="#3DBE82" />
-    <SolidColorBrush x:Key="StatusPending" Color="#F5B546" />
+    <SolidColorBrush x:Key="StatusPending" Color="#E3B341" />
     <SolidColorBrush x:Key="StatusDanger" Color="#F2686C" />
     <SolidColorBrush x:Key="StatusNeutral" Color="#8B8D98" />
 
     <!-- Soft status tints for pills / row emphasis / gentle highlights (dark-tuned). -->
-    <SolidColorBrush x:Key="StatusSuccessSoft" Color="#173026" />
-    <SolidColorBrush x:Key="StatusPendingSoft" Color="#332915" />
+    <SolidColorBrush x:Key="StatusSuccessSoft" Color="#123325" />
+    <SolidColorBrush x:Key="StatusPendingSoft" Color="#33290F" />
     <SolidColorBrush x:Key="StatusDangerSoft" Color="#331F20" />
 
     <!-- Lighter status text used ON the dark soft tints (readable pill labels). -->
     <SolidColorBrush x:Key="StatusSuccessText" Color="#5DD6A0" />
-    <SolidColorBrush x:Key="StatusPendingText" Color="#F5C066" />
+    <SolidColorBrush x:Key="StatusPendingText" Color="#EAC66A" />
     <SolidColorBrush x:Key="StatusDangerText" Color="#F58589" />
 
     <!-- Destructive (filled) button: red with white text, tuned for dark. -->
@@ -67,7 +73,7 @@
     <SolidColorBrush x:Key="ButtonDangerPressed" Color="#B9383D" />
 
     <!-- Disabled button: a dark neutral with a still-legible muted label. -->
-    <SolidColorBrush x:Key="ButtonDisabledFill" Color="#2A2A30" />
-    <SolidColorBrush x:Key="ButtonDisabledText" Color="#8C8C97" />
+    <SolidColorBrush x:Key="ButtonDisabledFill" Color="#232B27" />
+    <SolidColorBrush x:Key="ButtonDisabledText" Color="#7C887F" />
 
 </ResourceDictionary>

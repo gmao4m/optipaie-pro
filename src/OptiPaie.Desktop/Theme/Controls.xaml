@@ -53,10 +53,11 @@
         </Setter>
     </Style>
 
-    <!-- Accent (teal) button — the product's signature CTA, for the single standout
-         positive action in a flow (e.g. "Approuver"). Use sparingly so it keeps impact. -->
+    <!-- Accent (gold) button — the product's signature CTA, for the single standout
+         positive action in a flow (e.g. "Approuver"). Gold is light, so the label is DARK
+         (TextOnAccent), never white. Use sparingly so it keeps impact. -->
     <Style x:Key="AccentButton" TargetType="Button">
-        <Setter Property="Foreground" Value="{DynamicResource TextOnBrand}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextOnAccent}" />
         <Setter Property="Background" Value="{DynamicResource Accent}" />
         <Setter Property="FontFamily" Value="{StaticResource AppFont}" />
         <Setter Property="FontSize" Value="13.5" />
@@ -68,7 +69,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
                     <Border x:Name="b" Background="{TemplateBinding Background}" CornerRadius="10" Padding="{TemplateBinding Padding}">
-                        <TextBlock x:Name="cp" Text="{TemplateBinding Content}" FontFamily="{TemplateBinding FontFamily}" FontSize="{TemplateBinding FontSize}" FontWeight="{TemplateBinding FontWeight}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource TextOnBrand}" />
+                        <TextBlock x:Name="cp" Text="{TemplateBinding Content}" FontFamily="{TemplateBinding FontFamily}" FontSize="{TemplateBinding FontSize}" FontWeight="{TemplateBinding FontWeight}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource TextOnAccent}" />
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
@@ -394,10 +395,11 @@
         </Style.Triggers>
     </Style>
 
-    <!-- Themed grid column header (grids without their own header style get this). -->
+    <!-- Themed grid column header (grids without their own header style get this).
+         Light-green band + deep-emerald label = the identity's table header. -->
     <Style TargetType="DataGridColumnHeader">
-        <Setter Property="Background" Value="{DynamicResource SurfaceMuted}" />
-        <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
+        <Setter Property="Background" Value="{DynamicResource BrandSoft}" />
+        <Setter Property="Foreground" Value="{DynamicResource BrandText}" />
         <Setter Property="FontFamily" Value="{StaticResource AppFont}" />
         <Setter Property="FontSize" Value="12" />
         <Setter Property="FontWeight" Value="SemiBold" />
@@ -475,7 +477,7 @@
             </DataTrigger>
             <DataTrigger Binding="{Binding StatusKind}" Value="accent">
                 <Setter Property="Background" Value="{DynamicResource AccentSoft}" />
-                <Setter Property="TextElement.Foreground" Value="{DynamicResource Accent}" />
+                <Setter Property="TextElement.Foreground" Value="{DynamicResource AccentText}" />
             </DataTrigger>
         </Style.Triggers>
     </Style>

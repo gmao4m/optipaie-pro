@@ -34,8 +34,8 @@
             <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
         </Style>
         <Style x:Key="GridHeader" TargetType="DataGridColumnHeader">
-            <Setter Property="Background" Value="{DynamicResource SurfaceMuted}" />
-            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
+            <Setter Property="Background" Value="{DynamicResource BrandSoft}" />
+            <Setter Property="Foreground" Value="{DynamicResource BrandText}" />
             <Setter Property="FontSize" Value="11.5" />
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="Height" Value="32" />
