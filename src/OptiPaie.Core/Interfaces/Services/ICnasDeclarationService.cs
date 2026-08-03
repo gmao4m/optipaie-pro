@@ -32,5 +32,13 @@ namespace OptiPaie.Core.Interfaces.Services
         /// </summary>
         System.Collections.Generic.IReadOnlyList<CnasMovementRow> BuildMovements(
             long companyId, int year, System.Collections.Generic.IReadOnlyList<int> months);
+
+        /// <summary>
+        /// Aggregates the annual DAS for one company: each paid employee's salary and worked hours
+        /// per quarter (hours measured from payslips, else estimated and flagged), entry/exit dates,
+        /// plus the company quarter/annual totals and headcount. Reads persisted payslips only —
+        /// no engine, no rate. Throws when no explicit company is supplied.
+        /// </summary>
+        CnasDasReport BuildDas(long companyId, int year);
     }
 }

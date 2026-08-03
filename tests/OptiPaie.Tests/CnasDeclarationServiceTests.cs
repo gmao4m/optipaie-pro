@@ -403,5 +403,104 @@ namespace OptiPaie.Tests
             Assert.That(movements.Count, Is.EqualTo(1));
             Assert.That(movements.Select(m => m.EmployeeId), Does.Not.Contain(bHire));
         }
+
+        // ---------------------------------------------------------------- DAS annuelle (étape 6)
+
+        [Test]
+        public void BuildDas_throws_when_no_company_is_specified()
+        {
+            Assert.Throws<ArgumentException>(() => _service.BuildDas(0, Year));
+        }
+
+        [Test]
+        public void BuildDas_aggregates_salary_per_quarter_annual_and_headcount()
+        {
+            long companyId = AddCompany("SARL DAS", "1234567890");
+            long e1 = AddEmployee(companyId, "ALPHA", "012345678901", new DateTime(1985, 1, 1), 60000m);
+            long e2 = AddEmployee(companyId, "BETA", "012345678902", new DateTime(1985, 1, 1), 40000m);
+            _payroll.Generate(_batch.BuildRequest(companyId, e1, Year, 2)); // T1
+            _payroll.Generate(_batch.BuildRequest(companyId, e1, Year, 5)); // T2
+            _payroll.Generate(_batch.BuildRequest(companyId, e2, Year, 8)); // T3
+
+            CnasDasReport das = _service.BuildDas(companyId, Year);
+
+            Assert.That(das.WorkerCount, Is.EqualTo(2));
+            Assert.That(das.QuarterTotals[0], Is.EqualTo(60000m)); // T1
+            Assert.That(das.QuarterTotals[1], Is.EqualTo(60000m)); // T2
+            Assert.That(das.QuarterTotals[2], Is.EqualTo(40000m)); // T3
+            Assert.That(das.QuarterTotals[3], Is.EqualTo(0m));     // T4
+            Assert.That(das.AnnualTotal, Is.EqualTo(160000m));
+
+            CnasDasEmployee a = das.Employees.Single(x => x.EmployeeId == e1);
+            Assert.That(a.AnnualSalary, Is.EqualTo(120000m));
+            Assert.That(a.Quarters.Sum(q => q.Salary), Is.EqualTo(a.AnnualSalary));
+        }
+
+        [Test]
+        public void BuildDas_annual_total_equals_the_year_dac_cumul()
+        {
+            long companyId = AddCompany("SARL DAS", "1234567890");
+            long e1 = AddEmployee(companyId, "ALPHA", "012345678901", new DateTime(1985, 1, 1), 55000m);
+            foreach (int mth in new[] { 2, 5, 8 })
+            {
+                _payroll.Generate(_batch.BuildRequest(companyId, e1, Year, mth));
+            }
+
+            decimal dasAnnual = _service.BuildDas(companyId, Year).AnnualTotal;
+            decimal dacYear = _service.BuildDac(companyId, Year, new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 }).Assiette;
+
+            Assert.That(dasAnnual, Is.EqualTo(dacYear)); // Σ DAS = cumul DAC de l'année
+            Assert.That(dasAnnual, Is.EqualTo(165000m)); // 3 × 55000
+        }
+
+        [Test]
+        public void BuildDas_flags_estimated_duration_and_keeps_it_distinct_from_measured()
+        {
+            long companyId = AddCompany("SARL DAS Heures", "1234567890");
+            long measured = AddEmployee(companyId, "MESURE", "012345678901", new DateTime(1985, 1, 1), 60000m);
+            long estimated = AddEmployee(companyId, "ESTIME", "012345678902", new DateTime(1985, 1, 1), 50000m);
+
+            // Measured: WorkedHours set on the request → real hours, never flagged.
+            var m1 = _batch.BuildRequest(companyId, measured, Year, 3); m1.WorkedHours = 150m; _payroll.Generate(m1); // T1
+            var m2 = _batch.BuildRequest(companyId, measured, Year, 6); m2.WorkedHours = 170m; _payroll.Generate(m2); // T2
+            // Estimated: no attendance hours → fallback, flagged.
+            _payroll.Generate(_batch.BuildRequest(companyId, estimated, Year, 4)); // T2
+            _payroll.Generate(_batch.BuildRequest(companyId, estimated, Year, 5)); // T2
+
+            CnasDasReport das = _service.BuildDas(companyId, Year);
+
+            CnasDasEmployee real = das.Employees.Single(e => e.EmployeeId == measured);
+            Assert.That(real.HasEstimatedDuration, Is.False);
+            Assert.That(real.Quarters[0].Hours, Is.EqualTo(150));    // T1, measured
+            Assert.That(real.Quarters[0].IsEstimated, Is.False);
+            Assert.That(real.Quarters[1].Hours, Is.EqualTo(170));    // T2, measured
+            Assert.That(real.Quarters[1].IsEstimated, Is.False);
+
+            CnasDasEmployee est = das.Employees.Single(e => e.EmployeeId == estimated);
+            Assert.That(est.HasEstimatedDuration, Is.True);
+            Assert.That(est.Quarters[1].IsEstimated, Is.True);       // T2 = months 4+5, estimated
+            Assert.That(est.Quarters[1].Hours, Is.EqualTo(347));     // round(173,33 × 2)
+            Assert.That(est.Quarters[0].IsEstimated, Is.False);      // an inactive quarter is not "estimated"
+
+            // The report signals it so the DAS screen can warn BEFORE export.
+            Assert.That(das.HasEstimatedDurations, Is.True);
+        }
+
+        [Test]
+        public void BuildDas_is_strictly_company_scoped()
+        {
+            long companyA = AddCompany("SARL A", "1111111111");
+            long companyB = AddCompany("SARL B", "2222222222");
+            long a = AddEmployee(companyA, "ALPHA", "012345678901", new DateTime(1985, 1, 1), 50000m);
+            long b = AddEmployee(companyB, "BETA", "012345678902", new DateTime(1985, 1, 1), 90000m);
+            _payroll.Generate(_batch.BuildRequest(companyA, a, Year, Month));
+            _payroll.Generate(_batch.BuildRequest(companyB, b, Year, Month));
+
+            CnasDasReport das = _service.BuildDas(companyA, Year);
+
+            Assert.That(das.WorkerCount, Is.EqualTo(1));
+            Assert.That(das.AnnualTotal, Is.EqualTo(50000m)); // only company A, never B's 90000
+            Assert.That(das.Employees.Select(e => e.EmployeeId), Does.Not.Contain(b));
+        }
     }
 }

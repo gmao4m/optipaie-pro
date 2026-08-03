@@ -20,6 +20,12 @@ namespace OptiPaie.Services
         private const int ExpectedNssLength = 12;       // NSS = 12 chiffres (clé incluse) — à confirmer
         private const int ExpectedEmployerDigits = 10;  // n° employeur = 10 chiffres — à confirmer
 
+        // Fallback used ONLY when a payslip carries no measured WorkedHours: a standard month of
+        // ~40 h/week (= 173,33 h) reproduces the 520 H of a full quarter in the reference files.
+        // It is an ESTIMATION, never measured — every quarter that uses it is flagged IsEstimated.
+        // À CONFIRMER (voir docs/cnas-das-data-gaps.md §1).
+        private const decimal EstimatedMonthlyHours = 173.33m;
+
         // Official CNAS contribution split (décret 94-187 modifié) — DISPLAY ONLY, "à confirmer".
         // These are NOT applied to any payslip and change NO rate; they are shown next to the
         // app's configured rates so the 26 % (config) vs 25,5 % (official patronale) gap can be
@@ -191,6 +197,119 @@ namespace OptiPaie.Services
                 .OrderBy(r => r.Date)
                 .ThenBy(r => r.LastName, StringComparer.CurrentCultureIgnoreCase)
                 .ToList();
+        }
+
+        public CnasDasReport BuildDas(long companyId, int year)
+        {
+            // RISK #1 — a declaration must never read across companies: no default, no null.
+            if (companyId <= 0)
+            {
+                throw new ArgumentException(
+                    "Aucune entreprise active : une déclaration CNAS doit être limitée à une entreprise explicite.",
+                    nameof(companyId));
+            }
+
+            Company company = _companies.Get(companyId);
+            if (company == null)
+            {
+                throw new ArgumentException("Entreprise introuvable.", nameof(companyId));
+            }
+
+            string employer = (company.CnasEmployerNumber ?? string.Empty).Trim();
+
+            Dictionary<long, Employee> employeesById = _employees.GetByCompany(companyId, true)
+                .ToDictionary(e => e.Id);
+            Dictionary<long, List<MonthlySlip>> byEmployee = LoadYearByMonth(companyId, year);
+
+            var employees = new List<CnasDasEmployee>();
+            var quarterTotals = new decimal[4];
+            bool anyEstimated = false;
+
+            foreach (KeyValuePair<long, List<MonthlySlip>> kv in byEmployee)
+            {
+                if (!employeesById.TryGetValue(kv.Key, out Employee e))
+                {
+                    continue; // a payslip without a matching current employee — skip defensively
+                }
+
+                var salary = new decimal[4];
+                var hours = new decimal[4];
+                var estimated = new bool[4];
+                foreach (MonthlySlip ms in kv.Value)
+                {
+                    int q = (ms.Month - 1) / 3; // 0..3
+                    if (q < 0 || q > 3) continue;
+                    salary[q] += ms.Slip.BaseCotisable;
+                    if (ms.Slip.WorkedHours > 0m)
+                    {
+                        hours[q] += ms.Slip.WorkedHours;      // measured
+                    }
+                    else
+                    {
+                        hours[q] += EstimatedMonthlyHours;    // estimated — flagged below
+                        estimated[q] = true;
+                    }
+                }
+
+                var quarters = new List<CnasDasQuarter>(4);
+                decimal annual = 0m;
+                bool employeeEstimated = false;
+                for (int q = 0; q < 4; q++)
+                {
+                    int wholeHours = (int)Math.Round(hours[q], 0, MidpointRounding.AwayFromZero);
+                    quarters.Add(new CnasDasQuarter(q + 1, salary[q], wholeHours, estimated[q]));
+                    annual += salary[q];
+                    quarterTotals[q] += salary[q];
+                    if (estimated[q]) employeeEstimated = true;
+                }
+                if (employeeEstimated) anyEstimated = true;
+
+                employees.Add(new CnasDasEmployee(
+                    e.Id, (e.Nss ?? string.Empty).Trim(), e.LastNameFr, e.FirstNameFr,
+                    e.BirthDate, e.HireDate, e.ExitDate, quarters, annual, employeeEstimated));
+            }
+
+            employees = employees
+                .OrderBy(x => x.LastName, StringComparer.CurrentCultureIgnoreCase)
+                .ThenBy(x => x.FirstName, StringComparer.CurrentCultureIgnoreCase)
+                .ToList();
+
+            decimal annualTotal = quarterTotals[0] + quarterTotals[1] + quarterTotals[2] + quarterTotals[3];
+            return new CnasDasReport(companyId, year, employer, employees,
+                quarterTotals.ToList(), annualTotal, employees.Count, anyEstimated);
+        }
+
+        /// <summary>A persisted payslip together with the month of the run that produced it.</summary>
+        private struct MonthlySlip
+        {
+            public MonthlySlip(int month, Payslip slip) { Month = month; Slip = slip; }
+            public int Month { get; }
+            public Payslip Slip { get; }
+        }
+
+        /// <summary>Year's payslips grouped by employee, each tagged with its run month (read-only, scoped).</summary>
+        private Dictionary<long, List<MonthlySlip>> LoadYearByMonth(long companyId, int year)
+        {
+            var byEmployee = new Dictionary<long, List<MonthlySlip>>();
+            foreach (PayrollRun run in _archive.SearchRuns(companyId, year, null))
+            {
+                if (run.CompanyId != companyId) continue; // defence in depth
+
+                PayrollRun loaded = _archive.GetRun(run.Id);
+                if (loaded == null) continue;
+
+                foreach (Payslip slip in loaded.Payslips)
+                {
+                    if (!byEmployee.TryGetValue(slip.EmployeeId, out List<MonthlySlip> list))
+                    {
+                        list = new List<MonthlySlip>();
+                        byEmployee[slip.EmployeeId] = list;
+                    }
+                    list.Add(new MonthlySlip(run.PeriodMonth, slip));
+                }
+            }
+
+            return byEmployee;
         }
 
         /// <summary>The persisted payslips of a company for the given year+months (read-only, scoped).</summary>
