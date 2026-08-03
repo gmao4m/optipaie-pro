@@ -7,6 +7,19 @@ Méthode : reconnaissance du schéma (`src/OptiPaie.Data/Sql/Migrations/*.sql`) 
 
 ---
 
+## ⚠ Hypothèses initiales corrigées par les fichiers réels — définitif, ne plus y revenir
+
+Deux points de la spécification dérivée à la main ont été **infirmés par l'analyse binaire des 2 fichiers DAS réels**. La source de vérité est le **fichier réel**, pas la spec supposée.
+
+| Point | Hypothèse initiale | Corrigé par les fichiers réels |
+|---|---|---|
+| **Unité de durée** | « M » (mois), sans proration | **« H » (heures)** — 520 H = un trimestre plein (173,33 h/mois × 3), 58/64/318… pour des trimestres partiels. Voir §1. |
+| **Centre payeur** | zone entête entièrement vide | **renseigné : `16000`** (entête, positions 15‑19). Seule la zone dénomination 20‑128 est vide. Voir §5. |
+
+C'est précisément pour lever ce genre d'incertitude qu'un vrai fichier était exigé. Ces deux corrections sont verrouillées.
+
+---
+
 ## Verdict d'ensemble
 
 > **Le module DAS entier peut être livré avec ZÉRO migration de schéma.**
