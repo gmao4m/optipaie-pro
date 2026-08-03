@@ -545,6 +545,19 @@ namespace OptiPaie.Tests
         }
 
         [Test]
+        public void ValidateDasForExport_refuses_an_empty_year_with_nothing_to_declare()
+        {
+            long companyId = AddCompany("SARL Vide", "1234567890");
+            AddEmployee(companyId, "SANSPAIE", "012345678901", new DateTime(1985, 1, 1), 60000m); // exists, but no payslip generated
+
+            DasExportValidation v = _service.ValidateDasForExport(companyId, Year);
+
+            Assert.That(v.IsValid, Is.False);
+            Assert.That(v.Blockers.Any(b => b.Type == DasBlockerType.NothingToDeclare), Is.True);
+            Assert.That(v.EmployeesToFix, Is.EqualTo(0)); // company-level, not a per-salarié fix
+        }
+
+        [Test]
         public void ValidateDasForExport_refuses_a_quarter_amount_beyond_the_field_and_never_truncates()
         {
             long companyId = AddCompany("SARL Riche", "1234567890");

@@ -11,7 +11,6 @@
             <Setter Property="Width" Value="28" />
             <Setter Property="Height" Value="28" />
             <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="ToolTip" Value="Copier" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
@@ -99,7 +98,7 @@
                                 <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Cnas_Dac_Employer}" />
                                 <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
                                     <TextBlock Style="{StaticResource FigureValue}" FontSize="15" Text="{Binding EmployerNumber}" />
-                                    <Button Style="{StaticResource CopyButton}" Margin="6,0,0,0" beh:CopyBehavior.Text="{Binding EmployerNumberCopy}" />
+                                    <Button Style="{StaticResource CopyButton}" ToolTip="{loc:Loc Common_Copy}" Margin="6,0,0,0" beh:CopyBehavior.Text="{Binding EmployerNumberCopy}" />
                                 </StackPanel>
                             </StackPanel>
                         </Border>
@@ -108,7 +107,7 @@
                                 <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Cnas_Dac_Effectif}" />
                                 <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
                                     <TextBlock Style="{StaticResource FigureValue}" FontSize="15" Text="{Binding Effectif}" />
-                                    <Button Style="{StaticResource CopyButton}" Margin="6,0,0,0" beh:CopyBehavior.Text="{Binding EffectifCopy}" />
+                                    <Button Style="{StaticResource CopyButton}" ToolTip="{loc:Loc Common_Copy}" Margin="6,0,0,0" beh:CopyBehavior.Text="{Binding EffectifCopy}" />
                                 </StackPanel>
                             </StackPanel>
                         </Border>
@@ -123,7 +122,7 @@
                                 <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Cnas_Dac_Assiette}" VerticalAlignment="Center" />
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                                     <TextBlock Style="{StaticResource FigureValue}" FontSize="20" Text="{Binding Assiette}" />
-                                    <Button Style="{StaticResource CopyButton}" Margin="8,0,0,0" beh:CopyBehavior.Text="{Binding AssietteCopy}" />
+                                    <Button Style="{StaticResource CopyButton}" ToolTip="{loc:Loc Common_Copy}" Margin="8,0,0,0" beh:CopyBehavior.Text="{Binding AssietteCopy}" />
                                 </StackPanel>
                             </Grid>
                             <Border Height="1" Background="{DynamicResource Border}" Margin="0,12" />
@@ -137,7 +136,7 @@
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                                     <TextBlock Style="{StaticResource FigureValue}" FontSize="14" Text="{Binding Salariale}" />
-                                    <Button Style="{StaticResource CopyButton}" Margin="8,0,0,0" beh:CopyBehavior.Text="{Binding SalarialeCopy}" />
+                                    <Button Style="{StaticResource CopyButton}" ToolTip="{loc:Loc Common_Copy}" Margin="8,0,0,0" beh:CopyBehavior.Text="{Binding SalarialeCopy}" />
                                 </StackPanel>
                             </Grid>
                             <!-- Contrôle discret « déclaré vs retenu » (visible seulement si écart non nul) -->
@@ -154,7 +153,7 @@
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                                     <TextBlock Style="{StaticResource FigureValue}" FontSize="14" Text="{Binding Patronale}" />
-                                    <Button Style="{StaticResource CopyButton}" Margin="8,0,0,0" beh:CopyBehavior.Text="{Binding PatronaleCopy}" />
+                                    <Button Style="{StaticResource CopyButton}" ToolTip="{loc:Loc Common_Copy}" Margin="8,0,0,0" beh:CopyBehavior.Text="{Binding PatronaleCopy}" />
                                 </StackPanel>
                             </Grid>
                             <TextBlock Style="{StaticResource Caption}" FontSize="11" HorizontalAlignment="Right" TextAlignment="Right" Margin="0,1,36,0"
@@ -166,7 +165,7 @@
                                 <TextBlock FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" Text="{loc:Loc Cnas_Dac_Total}" VerticalAlignment="Center" />
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                                     <TextBlock Style="{StaticResource FigureValue}" FontSize="16" Text="{Binding Total}" />
-                                    <Button Style="{StaticResource CopyButton}" Margin="8,0,0,0" beh:CopyBehavior.Text="{Binding TotalCopy}" />
+                                    <Button Style="{StaticResource CopyButton}" ToolTip="{loc:Loc Common_Copy}" Margin="8,0,0,0" beh:CopyBehavior.Text="{Binding TotalCopy}" />
                                 </StackPanel>
                             </Grid>
                         </StackPanel>
@@ -187,7 +186,7 @@
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                                     <TextBlock Style="{StaticResource FigureValue}" FontSize="14" Text="{Binding OfficialPatronale}" />
-                                    <Button Style="{StaticResource CopyButton}" Margin="8,0,0,0" beh:CopyBehavior.Text="{Binding OfficialPatronaleCopy}" />
+                                    <Button Style="{StaticResource CopyButton}" ToolTip="{loc:Loc Common_Copy}" Margin="8,0,0,0" beh:CopyBehavior.Text="{Binding OfficialPatronaleCopy}" />
                                 </StackPanel>
                             </Grid>
                             <Grid Margin="0,8,0,0">
@@ -226,7 +225,7 @@
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,4,0">
                                             <TextBlock Style="{StaticResource FigureValue}" FontSize="12" Text="{Binding PatronaleAmount}" />
-                                            <Button Style="{StaticResource CopyButton}" Width="24" Height="24" Margin="4,0,0,0" beh:CopyBehavior.Text="{Binding PatronaleCopy}" />
+                                            <Button Style="{StaticResource CopyButton}" ToolTip="{loc:Loc Common_Copy}" Width="24" Height="24" Margin="4,0,0,0" beh:CopyBehavior.Text="{Binding PatronaleCopy}" />
                                         </StackPanel>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
@@ -241,7 +240,7 @@
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,4,0">
                                             <TextBlock Style="{StaticResource FigureValue}" FontSize="12" Text="{Binding SalarialeAmount}" />
-                                            <Button Style="{StaticResource CopyButton}" Width="24" Height="24" Margin="4,0,0,0" beh:CopyBehavior.Text="{Binding SalarialeCopy}" />
+                                            <Button Style="{StaticResource CopyButton}" ToolTip="{loc:Loc Common_Copy}" Width="24" Height="24" Margin="4,0,0,0" beh:CopyBehavior.Text="{Binding SalarialeCopy}" />
                                         </StackPanel>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
@@ -300,7 +299,7 @@
                                         <DataTemplate>
                                             <StackPanel Orientation="Horizontal" Margin="10,0,0,0">
                                                 <TextBlock Style="{StaticResource FigureValue}" FontSize="12" Text="{Binding Nss}" />
-                                                <Button Style="{StaticResource CopyButton}" Width="24" Height="24" Margin="6,0,0,0" beh:CopyBehavior.Text="{Binding NssCopy}" />
+                                                <Button Style="{StaticResource CopyButton}" ToolTip="{loc:Loc Common_Copy}" Width="24" Height="24" Margin="6,0,0,0" beh:CopyBehavior.Text="{Binding NssCopy}" />
                                             </StackPanel>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
@@ -310,7 +309,7 @@
                                         <DataTemplate>
                                             <StackPanel Orientation="Horizontal" Margin="10,0,0,0">
                                                 <TextBlock Style="{StaticResource FigureValue}" FontSize="12" Text="{Binding DateText}" />
-                                                <Button Style="{StaticResource CopyButton}" Width="24" Height="24" Margin="6,0,0,0" beh:CopyBehavior.Text="{Binding DateCopy}" />
+                                                <Button Style="{StaticResource CopyButton}" ToolTip="{loc:Loc Common_Copy}" Width="24" Height="24" Margin="6,0,0,0" beh:CopyBehavior.Text="{Binding DateCopy}" />
                                             </StackPanel>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>

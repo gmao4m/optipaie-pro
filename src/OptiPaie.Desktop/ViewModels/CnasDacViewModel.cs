@@ -322,7 +322,7 @@ namespace OptiPaie.Desktop.ViewModels
 
             var dialog = new SaveFileDialog
             {
-                Filter = "Document PDF (*.pdf)|*.pdf",
+                Filter = L("Common_PdfFilter"),
                 FileName = "DAC_" + Sanitize(company.NameFr) + "_" + _period.Label + "_" +
                            _year.ToString("0000", CultureInfo.InvariantCulture) + ".pdf"
             };
@@ -361,15 +361,18 @@ namespace OptiPaie.Desktop.ViewModels
         // Half-away-from-zero, matching the "N2" display rounding on net48.
         private static decimal Round2(decimal v) => Math.Round(v, 2, MidpointRounding.AwayFromZero);
 
-        private static string Money(decimal v) => v.ToString("N2", Fr) + " DA";
-        private static string SignedMoney(decimal v) => (v > 0m ? "+" : v < 0m ? "−" : string.Empty) + Money(Math.Abs(v));
+        // Number stays fr-FR (Latin digits, comma decimal) for portal-copy stability; only the
+        // currency word follows the UI language (DA / دج).
+        private string Money(decimal v) => v.ToString("N2", Fr) + " " + L("Common_Currency");
+        private string SignedMoney(decimal v) => (v > 0m ? "+" : v < 0m ? "−" : string.Empty) + Money(Math.Abs(v));
         private static string Copy(decimal v) => v.ToString("0.00", Fr);
         private static string Pct(decimal rate) => (rate * 100m).ToString("0.###", Fr) + " %";
 
-        private static string MonthName(int m)
+        private string MonthName(int m)
         {
-            string name = Fr.DateTimeFormat.GetMonthName(m);
-            return char.ToUpper(name[0], Fr) + name.Substring(1);
+            CultureInfo ci = _services.Localization.CurrentCulture;
+            string name = ci.DateTimeFormat.GetMonthName(m);
+            return string.IsNullOrEmpty(name) ? name : char.ToUpper(name[0], ci) + name.Substring(1);
         }
     }
 

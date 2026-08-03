@@ -16,6 +16,7 @@ namespace OptiPaie.Core.Dtos
         // Company-level.
         EmployerNumberMissing,
         EmployerNumberMalformed,
+        NothingToDeclare,
         // Structural safety net — the built figures are internally inconsistent (should never
         // reach the user; if it does, no file is written).
         TotalsInconsistent,

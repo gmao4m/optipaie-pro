@@ -53,6 +53,7 @@ namespace OptiPaie.Desktop.Shell
 
         private object _current;
         private string _activeKey;
+        private NavItemViewModel _cnasNav;
 
         public ShellViewModel(AppServices services)
         {
@@ -226,8 +227,11 @@ namespace OptiPaie.Desktop.Shell
             AddCore("payroll", L("Shell_Nav_Payroll"), "IconCash");
 
             // Déclarations CNAS is a step of the payroll flow (not a report) — it sits right
-            // after Paie; the DAC and DAS will grow on the same screen.
+            // after Paie; the DAC and DAS grow on the same screen. It follows the license:
+            // shown locked (🔒) when the app is not usable, refreshed on every license change.
             AddCore("cnas", L("Shell_Nav_Cnas"), "IconFileCheck");
+            _cnasNav = CoreNav[CoreNav.Count - 1];
+            _cnasNav.IsLocked = !_gate.IsUsable;
 
             foreach (ModuleDescriptor module in _registry.Upsells)
             {
@@ -349,7 +353,19 @@ namespace OptiPaie.Desktop.Shell
                     target = _reports ?? (_reports = new ReportsViewModel(_services));
                     break;
                 case "cnas":
-                    target = _cnas ?? (_cnas = new CnasHubViewModel(_services));
+                    // CNAS is a free step of the payroll flow, but it must follow the license:
+                    // unavailable when the license is not usable (expired/suspended/revoked/not
+                    // activated, and outside the trial). Redirect to the dashboard, like a locked
+                    // module. No new module key / token / migration — gated on IsUsable only.
+                    if (!_gate.IsUsable)
+                    {
+                        key = "dashboard";
+                        target = _dashboard ?? (_dashboard = new DashboardViewModel(_services, Navigate));
+                    }
+                    else
+                    {
+                        target = _cnas ?? (_cnas = new CnasHubViewModel(_services));
+                    }
                     break;
                 case "home":
                     target = _home ?? (_home = new HomeViewModel(_services, Navigate));
@@ -492,11 +508,16 @@ namespace OptiPaie.Desktop.Shell
                 {
                     item.IsLocked = !_gate.IsEnabled(item.Key);
                 }
+                if (_cnasNav != null)
+                {
+                    _cnasNav.IsLocked = !_gate.IsUsable;
+                }
 
                 // If a module page is currently shown, re-resolve it so a freshly
                 // enabled module swaps from the premium page to its real screen
-                // (and vice-versa on suspension) without any restart.
-                if (_activeKey != null && _registry.Exists(_activeKey))
+                // (and vice-versa on suspension) without any restart. CNAS follows the
+                // same rule (a mid-session lapse swaps it away to the dashboard at once).
+                if (_activeKey != null && (_registry.Exists(_activeKey) || _activeKey == "cnas"))
                 {
                     Navigate(_activeKey);
                 }

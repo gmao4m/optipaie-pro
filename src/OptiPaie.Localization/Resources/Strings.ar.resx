@@ -72,6 +72,8 @@
   <data name="Common_Information" xml:space="preserve"><value>معلومة</value></data>
   <data name="Common_Language" xml:space="preserve"><value>اللغة</value></data>
   <data name="Common_Currency" xml:space="preserve"><value>دج</value></data>
+  <data name="Common_Copy" xml:space="preserve"><value>نسخ</value></data>
+  <data name="Common_PdfFilter" xml:space="preserve"><value>ملف PDF ‎(*.pdf)|*.pdf</value></data>
 
   <data name="Module_Dashboard" xml:space="preserve"><value>الرئيسية</value></data>
   <data name="Module_Companies" xml:space="preserve"><value>الشركات</value></data>
@@ -461,6 +463,7 @@
   <data name="Cnas_Das_CapExplain" xml:space="preserve"><value>هذا ليس عطلاً في البرنامج. صيغة ملف CNAS التي نعيد إنتاجها (من ملفات حقيقية لسنة 2021) تحدّد أجر كل فصل بـ 99 999,99 دج. وبدل كتابة مبلغ مقتطع — يجعل تصريحك خاطئاً — يفضّل البرنامج التوقف. عاملٌ يتجاوز هذا الحدّ هو بالضبط الحالة التي تنقصنا: اتصل بنا بها، فذلك يعني على الأرجح أن البوابة الحالية تقبل مبالغ أكبر، وسنوسّع الحقل.</value></data>
   <data name="Cnas_Das_Blk_EmployerNumberMissing" xml:space="preserve"><value>رقم المُشغّل CNAS مفقود</value></data>
   <data name="Cnas_Das_Blk_EmployerNumberMalformed" xml:space="preserve"><value>رقم المُشغّل CNAS غير صالح (10 أرقام متوقعة)</value></data>
+  <data name="Cnas_Das_Blk_NothingToDeclare" xml:space="preserve"><value>لا يوجد عامل للتصريح به عن هذه السنة (لا توجد أجور مسجّلة)</value></data>
   <data name="Cnas_Das_Blk_TotalsInconsistent" xml:space="preserve"><value>تعارض داخلي في المجاميع — اتصل بالدعم</value></data>
   <data name="Cnas_Das_Blk_WorkerCountInconsistent" xml:space="preserve"><value>تعارض داخلي في العدد — اتصل بالدعم</value></data>
   <data name="Cnas_Das_Blk_DacCrossCheckFailed" xml:space="preserve"><value>فرق بين التصريح السنوي وتراكم DAC للسنة — اتصل بالدعم</value></data>
@@ -474,6 +477,9 @@
   <data name="Cnas_Das_VerifyFailed" xml:space="preserve"><value>فشل التحقق بعد الكتابة — حُذفت الملفات:</value></data>
   <data name="Cnas_Das_WriteError" xml:space="preserve"><value>تعذّرت كتابة الملفات:</value></data>
   <data name="Cnas_Das_ChooseFolder" xml:space="preserve"><value>اختر مجلد الوجهة (سيُكتب الملفّان فيه بأسمائهما الرسمية)</value></data>
+  <data name="Cnas_Das_FileFilter" xml:space="preserve"><value>ملفات DAS ‎(*.TXT)|*.TXT</value></data>
+  <data name="Cnas_Das_EncodeError" xml:space="preserve"><value>مبلغ أو مدّة يتجاوز سعة أحد حقول الصيغة. لم يُكتب أي ملف — اتصل بنا بهذه الحالة.</value></data>
+  <data name="Cnas_Das_PartialYear" xml:space="preserve"><value>السنة الجارية: تبقى الفصول غير المدفوعة فارغة. أنشئ التصريح بعد اكتمال السنة، أو تأكّد أن هذا ما تريد إيداعه.</value></data>
   <data name="Shell_Nav_Settings" xml:space="preserve"><value>الإعدادات</value></data>
   <data name="Shell_Nav_PremiumHeader" xml:space="preserve"><value>الوحدات المتقدمة</value></data>
 

@@ -66,6 +66,12 @@
                 <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Cnas_NoCompany}" />
             </Border>
 
+            <!-- Année en cours : trimestres à venir vides — heads-up calme, pas un blocage -->
+            <Border Background="{DynamicResource SurfaceMuted}" CornerRadius="10" Padding="16,12" Margin="0,10,0,0"
+                    Visibility="{Binding HasPartialYear, Converter={StaticResource BoolToVis}}">
+                <TextBlock Style="{StaticResource Caption}" TextWrapping="Wrap" Text="{loc:Loc Cnas_Das_PartialYear}" />
+            </Border>
+
             <!-- Durée estimée — NOMINATIVE, cliquable -->
             <Border Background="{DynamicResource SurfaceMuted}" CornerRadius="10" Padding="16,12" Margin="0,10,0,0"
                     Visibility="{Binding HasEstimatedDurations, Converter={StaticResource BoolToVis}}">

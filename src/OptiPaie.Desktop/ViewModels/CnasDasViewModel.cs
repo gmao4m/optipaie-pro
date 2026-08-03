@@ -29,7 +29,7 @@ namespace OptiPaie.Desktop.ViewModels
         private readonly AppServices _services;
 
         private int _year = DateTime.Today.Year;
-        private bool _hasCompany, _hasEstimated, _hasRefusal, _hasResult, _hasCapBlocker;
+        private bool _hasCompany, _hasEstimated, _hasRefusal, _hasResult, _hasCapBlocker, _hasPartialYear;
         private string _statusMessage = string.Empty, _refusalHeadline = string.Empty;
         private string _resultYear = string.Empty, _resultEffectif = string.Empty, _resultAnnual = string.Empty;
         private string _resultQuarters = string.Empty, _resultFiles = string.Empty;
@@ -62,6 +62,10 @@ namespace OptiPaie.Desktop.ViewModels
         /// non-bug explanation (format limit + "contact us", turning the block into a signal).</summary>
         public bool HasAmountCapBlocker { get => _hasCapBlocker; private set => Set(ref _hasCapBlocker, value); }
         public bool HasResult { get => _hasResult; private set => Set(ref _hasResult, value); }
+
+        /// <summary>True when the selected year is the current (not-yet-finished) one — the DAS
+        /// would be built from a partial year (later quarters empty). Shown as a calm heads-up.</summary>
+        public bool HasPartialYear { get => _hasPartialYear; private set => Set(ref _hasPartialYear, value); }
         public string StatusMessage { get => _statusMessage; private set => Set(ref _statusMessage, value); }
         public string RefusalHeadline { get => _refusalHeadline; private set => Set(ref _refusalHeadline, value); }
 
@@ -81,6 +85,8 @@ namespace OptiPaie.Desktop.ViewModels
             HasCompany = company != null;
             HasRefusal = false;
             HasResult = false;
+            _lastFolder = string.Empty; // never point "Ouvrir le dossier" at a previous company's export
+            HasPartialYear = _year >= DateTime.Today.Year; // the year isn't over → trimestres à venir vides
             BlockerGroups.Clear();
             EstimatedEmployees.Clear();
             if (!HasCompany)
@@ -93,12 +99,21 @@ namespace OptiPaie.Desktop.ViewModels
             StatusMessage = string.Empty;
 
             // Nominative "durée estimée" list — the salariés whose hours were not measured.
-            CnasDasReport das = _services.CnasDeclarations.BuildDas(company.Id, _year);
-            foreach (CnasDasEmployee e in das.Employees.Where(x => x.HasEstimatedDuration))
+            // Degrade to an empty state if the active company vanished from storage mid-session.
+            try
             {
-                EstimatedEmployees.Add(new CnasDasEstimatedItem(e.EmployeeId, (e.LastName + " " + e.FirstName).Trim()));
+                CnasDasReport das = _services.CnasDeclarations.BuildDas(company.Id, _year);
+                foreach (CnasDasEmployee e in das.Employees.Where(x => x.HasEstimatedDuration))
+                {
+                    EstimatedEmployees.Add(new CnasDasEstimatedItem(e.EmployeeId, (e.LastName + " " + e.FirstName).Trim()));
+                }
+                HasEstimatedDurations = EstimatedEmployees.Count > 0;
             }
-            HasEstimatedDurations = EstimatedEmployees.Count > 0;
+            catch (Exception ex)
+            {
+                _services.Logger.Warn("CNAS DAS reload: " + ex.Message);
+                HasEstimatedDurations = false;
+            }
         }
 
         private void Generate()
@@ -143,6 +158,14 @@ namespace OptiPaie.Desktop.ViewModels
                     return;
                 }
             }
+            catch (DasEncodingException ex)
+            {
+                // A value slipped past validation and overflows a fixed-width field (or is non-ASCII).
+                // Never a disk problem — surface it as a data/format issue, not a "write error".
+                _services.Logger.Error("Encodage DAS", ex);
+                Dialogs.Error(L("Cnas_Das_EncodeError") + " " + ex.Message);
+                return;
+            }
             catch (Exception ex)
             {
                 _services.Logger.Error("Écriture DAS", ex);
@@ -159,7 +182,7 @@ namespace OptiPaie.Desktop.ViewModels
             var dialog = new SaveFileDialog
             {
                 Title = L("Cnas_Das_ChooseFolder"),
-                Filter = "Fichiers DAS (*.TXT)|*.TXT",
+                Filter = L("Cnas_Das_FileFilter"),
                 FileName = headerName
             };
             return dialog.ShowDialog() == true ? Path.GetDirectoryName(dialog.FileName) : null;
@@ -181,7 +204,7 @@ namespace OptiPaie.Desktop.ViewModels
         {
             ResultYear = das.Year.ToString(CultureInfo.InvariantCulture);
             ResultEffectif = das.WorkerCount.ToString(Fr);
-            ResultAnnual = das.AnnualTotal.ToString("N2", Fr) + " DA";
+            ResultAnnual = das.AnnualTotal.ToString("N2", Fr) + " " + L("Common_Currency");
             ResultQuarters = string.Join("    ·    ", das.QuarterTotals.Select((t, i) => "T" + (i + 1) + " " + t.ToString("N2", Fr)));
             ResultFiles = Path.Combine(folder, headerName) + Environment.NewLine + Path.Combine(folder, detailName);
             _lastFolder = folder;

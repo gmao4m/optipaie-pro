@@ -173,6 +173,11 @@ namespace OptiPaie.Services
                     nameof(companyId));
             }
 
+            if (_companies.Get(companyId) == null) // consistency with the other entry points
+            {
+                throw new ArgumentException("Entreprise introuvable.", nameof(companyId));
+            }
+
             HashSet<int> monthSet = (months == null || months.Count == 0) ? null : new HashSet<int>(months);
             bool InPeriod(DateTime d) => d.Year == year && (monthSet == null || monthSet.Contains(d.Month));
 
@@ -303,6 +308,14 @@ namespace OptiPaie.Services
                 blockers.Add(new DasBlocker(DasBlockerType.EmployerNumberMalformed, 0, null, null));
 
             CnasDasReport das = BuildDas(companyId, year);
+
+            // Nothing to declare (empty year / no payslips): refuse HERE — the single source of
+            // truth — rather than let an all-zero header reach disk and fail the post-write check.
+            if (das.Employees.Count == 0)
+            {
+                blockers.Add(new DasBlocker(DasBlockerType.NothingToDeclare, 0, null, null));
+                return new DasExportValidation(blockers);
+            }
 
             // Per-employee: identity (shared rules), ASCII name, amount capacity.
             foreach (CnasDasEmployee e in das.Employees)

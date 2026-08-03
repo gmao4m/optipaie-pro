@@ -72,6 +72,8 @@
   <data name="Common_Information" xml:space="preserve"><value>Information</value></data>
   <data name="Common_Language" xml:space="preserve"><value>Langue</value></data>
   <data name="Common_Currency" xml:space="preserve"><value>DA</value></data>
+  <data name="Common_Copy" xml:space="preserve"><value>Copier</value></data>
+  <data name="Common_PdfFilter" xml:space="preserve"><value>Document PDF (*.pdf)|*.pdf</value></data>
 
   <data name="Module_Dashboard" xml:space="preserve"><value>Accueil</value></data>
   <data name="Module_Companies" xml:space="preserve"><value>Entreprises</value></data>
@@ -461,6 +463,7 @@
   <data name="Cnas_Das_CapExplain" xml:space="preserve"><value>Ce n'est pas une panne du logiciel. Le format de fichier CNAS que nous reproduisons (d'après de vrais fichiers de 2021) limite le salaire de chaque trimestre à 99 999,99 DA. Plutôt que d'écrire un montant tronqué — qui rendrait votre déclaration fausse — le logiciel préfère s'arrêter. Un salarié au-dessus de ce plafond est justement le cas qui nous manque : contactez-nous avec, car cela signifie probablement que le portail actuel accepte des montants plus élevés, et nous élargirons le champ.</value></data>
   <data name="Cnas_Das_Blk_EmployerNumberMissing" xml:space="preserve"><value>N° employeur CNAS manquant</value></data>
   <data name="Cnas_Das_Blk_EmployerNumberMalformed" xml:space="preserve"><value>N° employeur CNAS invalide (10 chiffres attendus)</value></data>
+  <data name="Cnas_Das_Blk_NothingToDeclare" xml:space="preserve"><value>Aucun salarié à déclarer pour cette année (aucune paie enregistrée)</value></data>
   <data name="Cnas_Das_Blk_TotalsInconsistent" xml:space="preserve"><value>Incohérence interne des totaux — contactez le support</value></data>
   <data name="Cnas_Das_Blk_WorkerCountInconsistent" xml:space="preserve"><value>Incohérence interne de l'effectif — contactez le support</value></data>
   <data name="Cnas_Das_Blk_DacCrossCheckFailed" xml:space="preserve"><value>Écart entre la DAS et le cumul DAC de l'année — contactez le support</value></data>
@@ -474,6 +477,9 @@
   <data name="Cnas_Das_VerifyFailed" xml:space="preserve"><value>Vérification après écriture échouée — fichiers supprimés :</value></data>
   <data name="Cnas_Das_WriteError" xml:space="preserve"><value>Impossible d'écrire les fichiers :</value></data>
   <data name="Cnas_Das_ChooseFolder" xml:space="preserve"><value>Choisissez le dossier de destination (les deux fichiers y seront écrits avec leurs noms officiels)</value></data>
+  <data name="Cnas_Das_FileFilter" xml:space="preserve"><value>Fichiers DAS (*.TXT)|*.TXT</value></data>
+  <data name="Cnas_Das_EncodeError" xml:space="preserve"><value>Un montant ou une durée dépasse la capacité d'un champ du format. Aucun fichier n'a été écrit — contactez-nous avec ce cas.</value></data>
+  <data name="Cnas_Das_PartialYear" xml:space="preserve"><value>Année en cours : les trimestres non encore payés resteront vides. Générez la DAS une fois l'année complète, ou vérifiez que c'est bien ce que vous voulez déposer.</value></data>
   <data name="Shell_Nav_Settings" xml:space="preserve"><value>Paramètres</value></data>
   <data name="Shell_Nav_PremiumHeader" xml:space="preserve"><value>MODULES PREMIUM</value></data>
 
