@@ -444,6 +444,8 @@
   <data name="Cnas_Mov_Exit" xml:space="preserve"><value>خروج</value></data>
   <data name="Cnas_Mov_Nss" xml:space="preserve"><value>رقم الضمان الاجتماعي</value></data>
   <data name="Cnas_Mov_Date" xml:space="preserve"><value>التاريخ</value></data>
+  <data name="Cnas_Dac_ExportError" xml:space="preserve"><value>تعذّر إنشاء ملف PDF:</value></data>
+  <data name="Cnas_Dac_ExportSaved" xml:space="preserve"><value>تم حفظ ملف PDF:</value></data>
   <data name="Shell_Nav_Settings" xml:space="preserve"><value>الإعدادات</value></data>
   <data name="Shell_Nav_PremiumHeader" xml:space="preserve"><value>الوحدات المتقدمة</value></data>
 

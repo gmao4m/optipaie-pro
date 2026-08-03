@@ -1,14 +1,18 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Windows.Input;
+using Microsoft.Win32;
 using OptiPaie.Core.Dtos;
 using OptiPaie.Core.Entities;
 using OptiPaie.Desktop.Common;
 using OptiPaie.Desktop.Composition;
+using OptiPaie.Desktop.Documents;
 using OptiPaie.Desktop.Mvvm;
+using QuestPDF.Fluent;
 
 namespace OptiPaie.Desktop.ViewModels
 {
@@ -45,11 +49,14 @@ namespace OptiPaie.Desktop.ViewModels
         private bool _salarialeWithheldVisible, _patronaleWithheldVisible;
         private string _salarialeWithheldLine = string.Empty, _patronaleWithheldLine = string.Empty;
         private bool _hasMovements;
+        private CnasDacReport _report;
+        private IReadOnlyList<CnasMovementRow> _movementRows = new List<CnasMovementRow>();
 
         public CnasDacViewModel(AppServices services)
         {
             _services = services;
             OpenFicheCommand = new RelayCommand(OpenFiche);
+            ExportPdfCommand = new RelayCommand(ExportPdf, () => HasData);
             for (int y = DateTime.Today.Year; y >= DateTime.Today.Year - 5; y--) Years.Add(y);
 
             Cadences.Add(new CnasCadenceOption(CnasCadenceMode.Auto, L("Cnas_Cadence_Auto")));
@@ -63,6 +70,9 @@ namespace OptiPaie.Desktop.ViewModels
 
         /// <summary>Opens an employee's 360° fiche (a movement row is clicked). Read-only for CNAS.</summary>
         public ICommand OpenFicheCommand { get; }
+
+        /// <summary>Prints the DAC recap to a PDF the accountant chooses the location of.</summary>
+        public ICommand ExportPdfCommand { get; }
 
         public ObservableCollection<int> Years { get; } = new ObservableCollection<int>();
         public ObservableCollection<CnasCadenceOption> Cadences { get; } = new ObservableCollection<CnasCadenceOption>();
@@ -214,6 +224,7 @@ namespace OptiPaie.Desktop.ViewModels
             if (company == null || _period == null) return;
 
             CnasDacReport d = _services.CnasDeclarations.BuildDac(company.Id, _year, _period.Months);
+            _report = d;
 
             PeriodLabel = _period.Label + " " + _year;
             EmployerNumberIssue = d.EmployerNumberMissing || d.EmployerNumberMalformed;
@@ -282,8 +293,9 @@ namespace OptiPaie.Desktop.ViewModels
                 ? string.Format(L("Cnas_Dac_RoundingWarning"), maxResidue.ToString("0.00", Fr))
                 : string.Empty;
 
+            _movementRows = _services.CnasDeclarations.BuildMovements(company.Id, _year, _period.Months);
             Movements.Clear();
-            foreach (CnasMovementRow m in _services.CnasDeclarations.BuildMovements(company.Id, _year, _period.Months))
+            foreach (CnasMovementRow m in _movementRows)
             {
                 Movements.Add(new CnasMovementItem(
                     m.EmployeeId, m.IsEntry,
@@ -301,6 +313,49 @@ namespace OptiPaie.Desktop.ViewModels
         {
             if (!(parameter is CnasMovementItem row) || row.EmployeeId <= 0) return;
             Dialogs.ShowEmployeeProfile(new EmployeeProfileViewModel(_services, row.EmployeeId, null));
+        }
+
+        private void ExportPdf()
+        {
+            Company company = _services.CompanyContext.Active;
+            if (_report == null || company == null) return;
+
+            var dialog = new SaveFileDialog
+            {
+                Filter = "Document PDF (*.pdf)|*.pdf",
+                FileName = "DAC_" + Sanitize(company.NameFr) + "_" + _period.Label + "_" +
+                           _year.ToString("0000", CultureInfo.InvariantCulture) + ".pdf"
+            };
+            if (dialog.ShowDialog() != true) return;
+
+            try
+            {
+                var document = new CnasDacDocument(_report, company.NameFr, PeriodLabel, _movementRows);
+                Document.Create(document.Compose).GeneratePdf(dialog.FileName);
+                OpenFile(dialog.FileName);
+            }
+            catch (Exception ex)
+            {
+                _services.Logger.Error("Export PDF DAC", ex);
+                Dialogs.Error(L("Cnas_Dac_ExportError") + " " + ex.Message);
+            }
+        }
+
+        private void OpenFile(string path)
+        {
+            try { Process.Start(new ProcessStartInfo(path) { UseShellExecute = true }); }
+            catch (Exception ex)
+            {
+                _services.Logger.Warn("Ouverture du PDF impossible : " + ex.Message);
+                Dialogs.Info(L("Cnas_Dac_ExportSaved") + Environment.NewLine + path);
+            }
+        }
+
+        private static string Sanitize(string name)
+        {
+            if (string.IsNullOrEmpty(name)) return "entreprise";
+            var kept = name.Where(ch => char.IsLetterOrDigit(ch) || ch == '-' || ch == '_').ToArray();
+            return kept.Length == 0 ? "entreprise" : new string(kept);
         }
 
         // Half-away-from-zero, matching the "N2" display rounding on net48.

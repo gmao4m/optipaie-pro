@@ -444,6 +444,8 @@
   <data name="Cnas_Mov_Exit" xml:space="preserve"><value>Sortie</value></data>
   <data name="Cnas_Mov_Nss" xml:space="preserve"><value>N° sécurité sociale</value></data>
   <data name="Cnas_Mov_Date" xml:space="preserve"><value>Date</value></data>
+  <data name="Cnas_Dac_ExportError" xml:space="preserve"><value>Impossible de générer le PDF :</value></data>
+  <data name="Cnas_Dac_ExportSaved" xml:space="preserve"><value>PDF enregistré :</value></data>
   <data name="Shell_Nav_Settings" xml:space="preserve"><value>Paramètres</value></data>
   <data name="Shell_Nav_PremiumHeader" xml:space="preserve"><value>MODULES PREMIUM</value></data>
 
