@@ -131,7 +131,7 @@
                                 <Border Style="{StaticResource Tile}"><StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Att_Present}" /><TextBlock Style="{StaticResource TileValue}" Foreground="{DynamicResource StatusSuccess}" Text="{Binding PresentText}" /></StackPanel></Border>
                                 <Border Style="{StaticResource Tile}"><StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Att_Absent}" /><TextBlock Style="{StaticResource TileValue}" Foreground="{DynamicResource StatusDanger}" Text="{Binding AbsentText}" /></StackPanel></Border>
                                 <Border Style="{StaticResource Tile}"><StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Att_Late}" /><TextBlock Style="{StaticResource TileValue}" Foreground="{DynamicResource StatusPending}" Text="{Binding LateText}" /></StackPanel></Border>
-                                <Border Style="{StaticResource Tile}" Margin="0"><StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Leave}" /><TextBlock Style="{StaticResource TileValue}" Foreground="{DynamicResource Employer}" Text="{Binding OnLeaveText}" /></StackPanel></Border>
+                                <Border Style="{StaticResource Tile}" Margin="0"><StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Leave}" /><TextBlock Style="{StaticResource TileValue}" Foreground="{DynamicResource TextPrimary}" Text="{Binding OnLeaveText}" /></StackPanel></Border>
                             </StackPanel>
                         </StackPanel>
                     </Border>
@@ -165,7 +165,7 @@
                                     <Border Padding="0,7" BorderBrush="{DynamicResource Border}" BorderThickness="0,0,0,1">
                                         <Grid>
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="90" /><ColumnDefinition Width="*" /><ColumnDefinition Width="120" /><ColumnDefinition Width="180" /><ColumnDefinition Width="110" />
+                                                <ColumnDefinition Width="135" /><ColumnDefinition Width="*" /><ColumnDefinition Width="120" /><ColumnDefinition Width="180" /><ColumnDefinition Width="110" />
                                             </Grid.ColumnDefinitions>
                                             <Border Grid.Column="0" Style="{StaticResource RowTypePill}"><TextBlock Style="{StaticResource PillText}" Text="{Binding TypeLabel}" /></Border>
                                             <TextBlock Grid.Column="1" Style="{StaticResource RowText}" Text="{Binding Position}" FontWeight="{Binding IsCurrent, Converter={StaticResource BoolToWeight}}" />

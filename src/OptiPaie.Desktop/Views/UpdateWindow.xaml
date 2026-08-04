@@ -49,9 +49,9 @@
             </StackPanel>
 
             <!-- Mandatory banner -->
-            <Border Grid.Row="1" Margin="0,14,0,0" CornerRadius="8" Padding="12,10" Background="#FDF0DC"
+            <Border Grid.Row="1" Margin="0,14,0,0" CornerRadius="8" Padding="12,10" Background="{DynamicResource StatusPendingSoft}"
                     Visibility="{Binding Mandatory, Converter={StaticResource BoolToVis}}">
-                <TextBlock Text="{Binding MandatoryText}" TextWrapping="Wrap" Foreground="{DynamicResource Warning}" FontSize="12.5" />
+                <TextBlock Text="{Binding MandatoryText}" TextWrapping="Wrap" Foreground="{DynamicResource StatusPendingText}" FontSize="12.5" />
             </Border>
 
             <!-- Release notes -->

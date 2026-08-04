@@ -27,10 +27,10 @@ namespace OptiPaie.Desktop.ViewModels.Performance
         private static readonly CultureInfo Fr = CultureInfo.GetCultureInfo("fr-FR");
         public static readonly Brush Green = Freeze("#0E9F6E");
         public static readonly Brush Teal = Freeze("#0F9B8E");
-        public static readonly Brush Amber = Freeze("#E3B341");
-        public static readonly Brush Orange = Freeze("#E08A3C");
+        public static readonly Brush Amber = Freeze("#A8760F");
+        public static readonly Brush Orange = Freeze("#B8681C");
         public static readonly Brush Red = Freeze("#C24444");
-        public static readonly Brush Muted = Freeze("#8B8F99");
+        public static readonly Brush Muted = Freeze("#6C7079");
         public static readonly Brush Navy = Freeze("#14352A");
 
         public static Brush BandBrush(decimal percent)

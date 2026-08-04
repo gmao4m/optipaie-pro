@@ -138,7 +138,7 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn Header="{loc:Loc Employee_Poste}" Binding="{Binding Position}" Width="150" />
+                <DataGridTextColumn Header="{loc:Loc Employee_Poste}" Binding="{Binding Position}" Width="185" />
                 <DataGridTextColumn Header="{loc:Loc Contract_Salary}" Binding="{Binding SalaryText}" Width="110" ElementStyle="{StaticResource RightText}" />
                 <DataGridTextColumn Header="{loc:Loc Loan_Start}" Binding="{Binding StartText}" Width="95" ElementStyle="{StaticResource CenterText}" />
                 <DataGridTextColumn Header="{loc:Loc Contract_End}" Binding="{Binding EndText}" Width="95" ElementStyle="{StaticResource CenterText}" />

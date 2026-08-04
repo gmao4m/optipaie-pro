@@ -40,7 +40,7 @@
     <!-- Dark text placed ON a filled gold accent (button label / icon) — readable on gold. -->
     <SolidColorBrush x:Key="TextOnAccent" Color="#17251E" />
     <!-- Dark bronze accent-as-text — gold-family label on white or on AccentSoft (readable). -->
-    <SolidColorBrush x:Key="AccentText" Color="#8A6A16" />
+    <SolidColorBrush x:Key="AccentText" Color="#7A5D10" />
 
     <!-- Surfaces: soft cream canvas, white cards, subtle warm neutral dividers -->
     <SolidColorBrush x:Key="Canvas" Color="#FBFAF5" />
@@ -55,7 +55,7 @@
     <!-- Text -->
     <SolidColorBrush x:Key="TextPrimary" Color="#182B26" />
     <SolidColorBrush x:Key="TextSecondary" Color="#5B6B66" />
-    <SolidColorBrush x:Key="TextMuted" Color="#8A968F" />
+    <SolidColorBrush x:Key="TextMuted" Color="#66726B" />
     <SolidColorBrush x:Key="TextOnBrand" Color="#FFFFFF" />
 
     <!-- Destructive (filled) action: a soft red dark enough for white text to clear 4.5:1.

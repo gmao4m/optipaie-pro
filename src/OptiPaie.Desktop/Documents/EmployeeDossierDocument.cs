@@ -47,10 +47,13 @@ namespace OptiPaie.Desktop.Documents
     /// </summary>
     public sealed class EmployeeDossierDocument
     {
-        private const string Navy = "#1B2A4A";
-        private const string Teal = "#0F9B8E";
-        private const string Ink = "#1D2733";
-        private const string Muted = "#6B7480";
+        // Emerald identity (matches the app + payslip). Names kept historical; values are
+        // the current palette. Text sits on white here, so accents are deep emerald (gold
+        // would be unreadable on white) — deep emerald title + emerald status accent.
+        private const string Navy = "#0E3B2C";
+        private const string Teal = "#057A55";
+        private const string Ink = "#182B26";
+        private const string Muted = "#5B6B66";
         private const string HeadFill = "#F2F1EC";
         private const string Line = "#D9DCE1";
 

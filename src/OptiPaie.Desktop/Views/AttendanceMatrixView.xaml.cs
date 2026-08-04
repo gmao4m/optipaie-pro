@@ -121,13 +121,13 @@ namespace OptiPaie.Desktop.Views
                 "<DataTemplate xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation' " +
                 "xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>" +
                 "<Border Background='{Binding Cells[I].Background}' ToolTip='{Binding Cells[I].Tooltip}' " +
-                "BorderBrush='#E7EBF0' BorderThickness='0,0,1,0' Cursor='Hand'>" +
+                "BorderBrush='{DynamicResource Border}' BorderThickness='0,0,1,0' Cursor='Hand'>" +
                 "<Border.InputBindings>" +
                 "<MouseBinding MouseAction='LeftClick' " +
                 "Command='{Binding DataContext.PaintCellCommand, RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}}' " +
                 "CommandParameter='{Binding Cells[I]}' /></Border.InputBindings>" +
                 "<TextBlock Text='{Binding Cells[I].Letter}' HorizontalAlignment='Center' VerticalAlignment='Center' " +
-                "FontSize='10.5' FontWeight='SemiBold' Foreground='#1B2430' /></Border></DataTemplate>";
+                "FontSize='10.5' FontWeight='SemiBold' Foreground='{Binding Cells[I].Ink}' /></Border></DataTemplate>";
             tmpl = tmpl.Replace("Cells[I]", "Cells[" + index.ToString(CultureInfo.InvariantCulture) + "]");
 
             return new DataGridTemplateColumn

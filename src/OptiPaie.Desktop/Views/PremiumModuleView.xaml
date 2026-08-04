@@ -18,7 +18,7 @@
                         <Border CornerRadius="20" Background="{DynamicResource BrandSoft}" />
                         <Path Width="46" Height="46" Stretch="Uniform" Fill="{DynamicResource BrandText}"
                               Data="{Binding Icon}" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                        <Border Width="34" Height="34" CornerRadius="17" Background="{DynamicResource TextPrimary}"
+                        <Border Width="34" Height="34" CornerRadius="17" Background="#0E3B2C"
                                 HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,-6,-6"
                                 BorderBrush="{DynamicResource Surface}" BorderThickness="3">
                             <Path Width="15" Height="15" Stretch="Uniform" Fill="{DynamicResource TextOnBrand}"
@@ -74,7 +74,7 @@
             </Border>
 
             <!-- Locked call-to-action -->
-            <Border Grid.Row="2" Margin="0,16,0,0" CornerRadius="12" Background="{DynamicResource TextPrimary}" Padding="24">
+            <Border Grid.Row="2" Margin="0,16,0,0" CornerRadius="12" Background="#0E3B2C" Padding="24">
                 <DockPanel>
                     <Button DockPanel.Dock="Right" VerticalAlignment="Center" Style="{StaticResource PrimaryButton}"
                             Command="{Binding ContactSupportCommand}" Content="{loc:Loc Premium_ContactSupport}" />
@@ -86,7 +86,7 @@
                         <StackPanel Margin="14,0,16,0" VerticalAlignment="Center">
                             <TextBlock Text="{Binding LockTitle}" Foreground="{DynamicResource TextOnBrand}"
                                        FontSize="14.5" FontWeight="SemiBold" TextWrapping="Wrap" />
-                            <TextBlock Text="{Binding LockMessage}" Foreground="#C9D2DC" Margin="0,4,0,0"
+                            <TextBlock Text="{Binding LockMessage}" Foreground="#CDEADF" Margin="0,4,0,0"
                                        TextWrapping="Wrap" />
                         </StackPanel>
                     </StackPanel>

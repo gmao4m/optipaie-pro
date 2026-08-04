@@ -106,7 +106,7 @@
                             <Path Width="18" Height="18" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="{DynamicResource Accent}" Data="{StaticResource IconPlane}" /></Border>
                         <StackPanel Grid.Column="1" Margin="12,0,0,0">
                             <TextBlock Style="{StaticResource Caption}" TextWrapping="Wrap" Text="{loc:Loc Dashboard_Kpi_OnLeave}" />
-                            <TextBlock Style="{StaticResource KpiValue}" Foreground="{DynamicResource Employer}" Text="{Binding OnLeave}" /></StackPanel>
+                            <TextBlock Style="{StaticResource KpiValue}" Foreground="{DynamicResource TextPrimary}" Text="{Binding OnLeave}" /></StackPanel>
                     </Grid>
                 </Border>
                 <Border Style="{StaticResource Kpi}">
@@ -116,7 +116,7 @@
                             <Path Width="18" Height="18" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="{DynamicResource Accent}" Data="{StaticResource IconGlobe}" /></Border>
                         <StackPanel Grid.Column="1" Margin="12,0,0,0">
                             <TextBlock Style="{StaticResource Caption}" TextWrapping="Wrap" Text="{loc:Loc Dashboard_Kpi_OnMission}" />
-                            <TextBlock Style="{StaticResource KpiValue}" Foreground="{DynamicResource Employer}" Text="{Binding OnMission}" /></StackPanel>
+                            <TextBlock Style="{StaticResource KpiValue}" Foreground="{DynamicResource TextPrimary}" Text="{Binding OnMission}" /></StackPanel>
                     </Grid>
                 </Border>
                 <Border Style="{StaticResource Kpi}">

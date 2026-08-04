@@ -57,7 +57,7 @@
                             <TextBlock Text="{Binding DayText}" Margin="6,4,0,0" FontSize="12"
                                        HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="{DynamicResource TextSecondary}" />
                             <TextBlock Text="{Binding Letter}" HorizontalAlignment="Center" VerticalAlignment="Center"
-                                       FontSize="16" FontWeight="SemiBold" Foreground="#1B2430" />
+                                       FontSize="16" FontWeight="SemiBold" Foreground="{Binding Ink}" />
                         </Grid>
                     </Border>
                 </DataTemplate>

@@ -34,6 +34,7 @@
                  IsEnabled="{Binding IsNotBusy}" CharacterCasing="Upper"
                  FontFamily="{StaticResource MonoFont}" FontSize="16" FontWeight="SemiBold"
                  Height="44" Padding="12,0" VerticalContentAlignment="Center"
+                 Foreground="{DynamicResource TextPrimary}" CaretBrush="{DynamicResource TextPrimary}"
                  Background="{DynamicResource Surface}" BorderBrush="{DynamicResource BorderStrong}" BorderThickness="1" />
         <TextBlock Grid.Row="3" Text="{loc:Loc ModAct_Format}" Style="{StaticResource Caption}" Margin="2,6,0,0" />
 
@@ -45,7 +46,7 @@
                     <Setter Property="Background" Value="{DynamicResource BrandSoft}" />
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding IsError}" Value="True">
-                            <Setter Property="Background" Value="#FCE8E6" />
+                            <Setter Property="Background" Value="{DynamicResource StatusDangerSoft}" />
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>
@@ -53,10 +54,10 @@
             <TextBlock Text="{Binding StatusMessage}" TextWrapping="Wrap" FontSize="12.5">
                 <TextBlock.Style>
                     <Style TargetType="TextBlock" BasedOn="{StaticResource Body}">
-                        <Setter Property="Foreground" Value="{DynamicResource Salary}" />
+                        <Setter Property="Foreground" Value="{DynamicResource StatusSuccessText}" />
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding IsError}" Value="True">
-                                <Setter Property="Foreground" Value="{DynamicResource Deduction}" />
+                                <Setter Property="Foreground" Value="{DynamicResource StatusDangerText}" />
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>

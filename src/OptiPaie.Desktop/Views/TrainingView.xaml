@@ -61,7 +61,7 @@
             <Border Style="{StaticResource Kpi}">
                 <StackPanel>
                     <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Training_PlannedOngoing}" />
-                    <TextBlock FontFamily="{StaticResource MonoFont}" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource Employer}" Text="{Binding PlannedText}" />
+                    <TextBlock FontFamily="{StaticResource MonoFont}" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" Text="{Binding PlannedText}" />
                 </StackPanel>
             </Border>
             <Border Style="{StaticResource Kpi}">

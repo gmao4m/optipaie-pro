@@ -23,6 +23,7 @@ namespace OptiPaie.Desktop.ViewModels.Attendance
             DayText = inMonth ? day.ToString(CultureInfo.InvariantCulture) : string.Empty;
             Background = inMonth ? AttendanceAppearance.Background(status, isWeekend, false) : Brushes.Transparent;
             Letter = inMonth ? AttendanceAppearance.Letter(status, isWeekend) : string.Empty;
+            Ink = inMonth ? AttendanceAppearance.Ink(status) : Brushes.Transparent;
         }
 
         public int Day { get; }
@@ -30,6 +31,7 @@ namespace OptiPaie.Desktop.ViewModels.Attendance
         public string DayText { get; }
         public Brush Background { get; }
         public string Letter { get; }
+        public Brush Ink { get; }
     }
 
     /// <summary>

@@ -64,8 +64,8 @@
                 <DataGridTemplateColumn Header="{loc:Loc TrainPart_Result}" Width="130">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <ComboBox ItemsSource="{Binding Results}" SelectedItem="{Binding Result, UpdateSourceTrigger=PropertyChanged}"
-                                      DisplayMemberPath="Label" BorderThickness="0" Background="Transparent" VerticalAlignment="Center" />
+                            <ComboBox Style="{StaticResource AppComboBox}" Height="28" ItemsSource="{Binding Results}" SelectedItem="{Binding Result, UpdateSourceTrigger=PropertyChanged}"
+                                      DisplayMemberPath="Label" VerticalAlignment="Center" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>

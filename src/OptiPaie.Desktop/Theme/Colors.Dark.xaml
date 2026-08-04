@@ -43,7 +43,7 @@
     <!-- Text. -->
     <SolidColorBrush x:Key="TextPrimary" Color="#EAF0EC" />
     <SolidColorBrush x:Key="TextSecondary" Color="#9EAAA4" />
-    <SolidColorBrush x:Key="TextMuted" Color="#74807A" />
+    <SolidColorBrush x:Key="TextMuted" Color="#8B9791" />
     <SolidColorBrush x:Key="TextOnBrand" Color="#FFFFFF" />
 
     <!-- Semantic status colours (lightened for dark backgrounds). -->

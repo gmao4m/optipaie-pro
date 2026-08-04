@@ -55,7 +55,7 @@
             <Border Style="{StaticResource Kpi}">
                 <StackPanel>
                     <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Ats_OpenPostings}" />
-                    <TextBlock FontFamily="{StaticResource MonoFont}" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource Employer}" Text="{Binding OpenText}" />
+                    <TextBlock FontFamily="{StaticResource MonoFont}" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" Text="{Binding OpenText}" />
                 </StackPanel>
             </Border>
             <Border Style="{StaticResource Kpi}">

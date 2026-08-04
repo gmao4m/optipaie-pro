@@ -43,6 +43,7 @@ namespace OptiPaie.Desktop.ViewModels.Attendance
                     Raise(nameof(Status));
                     Raise(nameof(Background));
                     Raise(nameof(Letter));
+                    Raise(nameof(Ink));
                     Raise(nameof(Tooltip));
                 }
             }
@@ -62,6 +63,7 @@ namespace OptiPaie.Desktop.ViewModels.Attendance
 
         public Brush Background => AttendanceAppearance.Background(_status, IsWeekend, IsFuture);
         public string Letter => AttendanceAppearance.Letter(_status, IsWeekend);
+        public Brush Ink => AttendanceAppearance.Ink(_status);
 
         public string Tooltip
         {

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Windows;
 using System.Windows.Media;
 using OptiPaie.Core.Enums;
 
@@ -29,6 +30,24 @@ namespace OptiPaie.Desktop.ViewModels.Attendance
         public static readonly Brush EmptyFill     = Frozen(0xFF, 0xFF, 0xFF); // white
         public static readonly Brush FutureFill    = Frozen(0xF4, 0xF6, 0xF8); // very light
 
+        // Dark ink for a letter sitting on a light status pastel (correct in both themes).
+        public static readonly Brush StatusInk = Frozen(0x18, 0x2B, 0x26);
+
+        // Resolve a brush from the ACTIVE theme (so neutral cells follow light/dark); falls
+        // back to the given RGB if no application/theme is present (e.g. design-time).
+        private static Brush Themed(string key, byte r, byte g, byte b)
+        {
+            Application app = Application.Current;
+            // ResourceDictionary's indexer searches merged dictionaries (Contains does not),
+            // and returns null for a missing key rather than throwing.
+            if (app != null && app.Resources[key] is Brush themed) return themed;
+            return Frozen(r, g, b);
+        }
+
+        /// <summary>Letter ink: fixed dark on a status pastel, themed on a neutral cell.</summary>
+        public static Brush Ink(AttendanceStatus? status) =>
+            status.HasValue ? StatusInk : Themed("TextSecondary", 0x5B, 0x6B, 0x66);
+
         /// <summary>Cell background, given the (optional) status, weekend and future flags.</summary>
         public static Brush Background(AttendanceStatus? status, bool isWeekend, bool isFuture)
         {
@@ -37,9 +56,10 @@ namespace OptiPaie.Desktop.ViewModels.Attendance
                 return Fill(status.Value);
             }
 
-            if (isWeekend) return WeekendFill;
-            if (isFuture) return FutureFill;
-            return EmptyFill;
+            // Neutral cells follow the theme so dark mode is not a bright white slab.
+            if (isWeekend) return Themed("SurfaceMuted", 0xCF, 0xD8, 0xDC);
+            if (isFuture) return Themed("Canvas", 0xF4, 0xF6, 0xF8);
+            return Themed("Surface", 0xFF, 0xFF, 0xFF);
         }
 
         public static Brush Fill(AttendanceStatus status)
