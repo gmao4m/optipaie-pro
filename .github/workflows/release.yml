@@ -86,9 +86,12 @@ jobs:
         shell: pwsh
         run: |
           dotnet tool install --global wix --version 5.0.2
-          wix extension add -g WixToolset.UI.wixext
-          wix extension add -g WixToolset.BootstrapperApplications.wixext
-          wix extension add -g WixToolset.Netfx.wixext
+          # Extensions MUST be pinned to the CLI version. Unpinned `wix extension add`
+          # grabs the latest (7.0.0 = WiX v6) which is incompatible with the v5 CLI
+          # (WIX6101 + exit code 1). Keep these in lockstep with the --version above.
+          wix extension add -g WixToolset.UI.wixext/5.0.2
+          wix extension add -g WixToolset.BootstrapperApplications.wixext/5.0.2
+          wix extension add -g WixToolset.Netfx.wixext/5.0.2
 
       - name: Build installer (Setup.exe + MSI)
         if: steps.gate.outputs.go == 'true'

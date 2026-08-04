@@ -8,11 +8,12 @@
 
     Prerequisites (already present on this machine):
       * .NET SDK (dotnet)
-      * WiX v5 CLI + extensions:
-          dotnet tool install --global wix
-          wix extension add -g WixToolset.UI.wixext
-          wix extension add -g WixToolset.BootstrapperApplications.wixext
-          wix extension add -g WixToolset.Netfx.wixext
+      * WiX v5 CLI + extensions (pin extensions to the CLI version, else the
+        latest 7.0.0 = WiX v6 is pulled and fails with WIX6101):
+          dotnet tool install --global wix --version 5.0.2
+          wix extension add -g WixToolset.UI.wixext/5.0.2
+          wix extension add -g WixToolset.BootstrapperApplications.wixext/5.0.2
+          wix extension add -g WixToolset.Netfx.wixext/5.0.2
 
     Usage:  powershell -ExecutionPolicy Bypass -File installer\build-installer.ps1
 #>
