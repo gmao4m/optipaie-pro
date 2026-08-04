@@ -153,7 +153,7 @@
 
         <!-- Actions -->
         <Grid Grid.Row="3" Margin="0,14,0,0">
-            <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Center" HorizontalAlignment="Left" Text="{Binding StatusMessage}" />
+            <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Center" HorizontalAlignment="Left" FlowDirection="LeftToRight" Text="{Binding StatusMessage}" />
         </Grid>
     </Grid>
 </UserControl>

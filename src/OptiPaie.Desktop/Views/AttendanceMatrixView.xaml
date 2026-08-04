@@ -157,7 +157,7 @@
 
         <!-- Legend + status -->
         <Grid Grid.Row="5" Margin="0,10,0,0">
-            <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Center" HorizontalAlignment="Left" Text="{Binding StatusMessage}" />
+            <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Center" HorizontalAlignment="Left" FlowDirection="LeftToRight" Text="{Binding StatusMessage}" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <ItemsControl ItemsSource="{Binding Palette}">
                     <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>

@@ -35,8 +35,8 @@
 
         <!-- Report header -->
         <StackPanel Grid.Row="2" Margin="2,14,0,0">
-            <TextBlock Style="{StaticResource H2}" FontSize="15" Text="{Binding Title}" />
-            <TextBlock Style="{StaticResource Caption}" Margin="0,3,0,0" Text="{Binding Subtitle}" />
+            <TextBlock Style="{StaticResource H2}" FontSize="15" FlowDirection="LeftToRight" Text="{Binding Title}" />
+            <TextBlock Style="{StaticResource Caption}" Margin="0,3,0,0" FlowDirection="LeftToRight" Text="{Binding Subtitle}" />
         </StackPanel>
 
         <!-- Preview -->
@@ -51,7 +51,7 @@
 
         <!-- Actions -->
         <Grid Grid.Row="4" Margin="0,12,0,0">
-            <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Center" HorizontalAlignment="Left" Text="{Binding StatusMessage}" />
+            <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Center" HorizontalAlignment="Left" FlowDirection="LeftToRight" Text="{Binding StatusMessage}" />
             <!-- One export action with a format choice, instead of two competing buttons. -->
             <Menu Background="Transparent" HorizontalAlignment="Right" VerticalAlignment="Center">
                 <MenuItem Header="{loc:Loc Common_Export}" Height="32" Padding="10,0" VerticalContentAlignment="Center">
