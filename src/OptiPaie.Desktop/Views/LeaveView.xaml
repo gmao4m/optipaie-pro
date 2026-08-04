@@ -122,7 +122,13 @@
             <DataGrid.Columns>
                 <DataGridTextColumn Header="{loc:Loc Payroll_Employee}" Binding="{Binding EmployeeName}" Width="*" />
                 <DataGridTextColumn Header="{loc:Loc Common_Type}" Binding="{Binding TypeLabel}" Width="150" />
-                <DataGridTextColumn Header="{loc:Loc Leave_Period}" Binding="{Binding Period}" Width="200" ElementStyle="{StaticResource CenterText}" />
+                <DataGridTextColumn Header="{loc:Loc Leave_Period}" Binding="{Binding Period}" Width="200">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock" BasedOn="{StaticResource CenterText}">
+                            <Setter Property="FlowDirection" Value="LeftToRight" />
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
                 <DataGridTextColumn Header="{loc:Loc Leave_Days}" Binding="{Binding DaysText}" Width="70" ElementStyle="{StaticResource CenterText}" />
                 <DataGridTemplateColumn Header="{loc:Loc Common_Status}" Width="110">
                     <DataGridTemplateColumn.CellTemplate>

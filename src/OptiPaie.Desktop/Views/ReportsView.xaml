@@ -41,6 +41,7 @@
 
         <!-- Preview -->
         <DataGrid Grid.Row="3" Margin="0,12,0,0" ItemsSource="{Binding Preview}" AutoGenerateColumns="True"
+                  ColumnWidth="*"
                   IsReadOnly="True" CanUserAddRows="False" CanUserResizeRows="False" GridLinesVisibility="All"
                   EnableRowVirtualization="True" EnableColumnVirtualization="True"
                   RowHeight="28" FontFamily="{StaticResource AppFont}" FontSize="12" Background="{DynamicResource Surface}"

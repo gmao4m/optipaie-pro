@@ -781,8 +781,8 @@
   <data name="Enum_CertType_Free" xml:space="preserve"><value>Document libre</value></data>
 
   <!-- Performance module (8-tab hub) -->
-  <data name="Perf_Title" xml:space="preserve"><value>Performance &amp; Carrière</value></data>
-  <data name="Perf_Subtitle" xml:space="preserve"><value>Campagnes d'évaluation, modèles, objectifs, calibrage et parcours des employés.</value></data>
+  <data name="Perf_Title" xml:space="preserve"><value>Évaluations</value></data>
+  <data name="Perf_Subtitle" xml:space="preserve"><value>Évaluez équitablement vos employés : modèles, critères pondérés, KPI et journal de comportement.</value></data>
   <data name="Perf_Tab_Campaigns" xml:space="preserve"><value>Campagnes</value></data>
   <data name="Perf_Tab_Reviews" xml:space="preserve"><value>Évaluations</value></data>
   <data name="Perf_Tab_Templates" xml:space="preserve"><value>Modèles</value></data>
@@ -1108,4 +1108,385 @@
   <data name="Employees_EditRow" xml:space="preserve"><value>Modifier la fiche</value></data>
   <data name="Employees_DeleteRow" xml:space="preserve"><value>Supprimer l'employé</value></data>
   <data name="Employees_ListEmpty" xml:space="preserve"><value>Aucun employé — cliquez sur « Nouvel employé » pour ajouter le premier.</value></data>
+  <data name="Perf_Tab_Evaluations" xml:space="preserve">
+    <value>Évaluations</value>
+  </data>
+  <data name="Perf_Tab_Reports" xml:space="preserve">
+    <value>Rapports</value>
+  </data>
+  <data name="Perf_Period" xml:space="preserve">
+    <value>Période</value>
+  </data>
+  <data name="Perf_NewPeriod" xml:space="preserve">
+    <value>Nouvelle période</value>
+  </data>
+  <data name="Perf_Close" xml:space="preserve">
+    <value>Clôturer</value>
+  </data>
+  <data name="Perf_Reopen" xml:space="preserve">
+    <value>Rouvrir</value>
+  </data>
+  <data name="Perf_LogBehavior" xml:space="preserve">
+    <value>Enregistrer un comportement</value>
+  </data>
+  <data name="Perf_BestOfPeriod" xml:space="preserve">
+    <value>Meilleur employé :</value>
+  </data>
+  <data name="Perf_Board_Status" xml:space="preserve">
+    <value>{0}/{1} évaluées</value>
+  </data>
+  <data name="Perf_BestFormat" xml:space="preserve">
+    <value>{0} — {1}/100 ({2})</value>
+  </data>
+  <data name="Perf_NoPeriod" xml:space="preserve">
+    <value>Aucune période. Créez-en une pour commencer.</value>
+  </data>
+  <data name="Perf_Col_Employee" xml:space="preserve">
+    <value>Employé</value>
+  </data>
+  <data name="Perf_Col_Dept" xml:space="preserve">
+    <value>Département</value>
+  </data>
+  <data name="Perf_Evaluate" xml:space="preserve">
+    <value>Évaluer</value>
+  </data>
+  <data name="Perf_Templates_Hint" xml:space="preserve">
+    <value>Un modèle par département ; le modèle intégré sert de point de départ.</value>
+  </data>
+  <data name="Perf_NewTemplate" xml:space="preserve">
+    <value>Nouveau modèle</value>
+  </data>
+  <data name="Perf_Col_Template" xml:space="preserve">
+    <value>Modèle</value>
+  </data>
+  <data name="Perf_Col_Mode" xml:space="preserve">
+    <value>Mode</value>
+  </data>
+  <data name="Perf_Col_Criteria" xml:space="preserve">
+    <value>Critères</value>
+  </data>
+  <data name="Perf_SetDefault" xml:space="preserve">
+    <value>Définir par défaut</value>
+  </data>
+  <data name="Perf_AllDepartments" xml:space="preserve">
+    <value>Tous les départements</value>
+  </data>
+  <data name="Perf_BuiltIn" xml:space="preserve">
+    <value>Intégré</value>
+  </data>
+  <data name="Perf_Default" xml:space="preserve">
+    <value>Par défaut</value>
+  </data>
+  <data name="Perf_ConfirmDeleteTemplate" xml:space="preserve">
+    <value>Supprimer le modèle « {0} » ?</value>
+  </data>
+  <data name="Perf_Report_General" xml:space="preserve">
+    <value>Vue générale</value>
+  </data>
+  <data name="Perf_Report_Dept" xml:space="preserve">
+    <value>Par département</value>
+  </data>
+  <data name="Perf_Report_Employee" xml:space="preserve">
+    <value>Par employé</value>
+  </data>
+  <data name="Perf_ExportPdf" xml:space="preserve">
+    <value>Exporter PDF</value>
+  </data>
+  <data name="Perf_ExportCsv" xml:space="preserve">
+    <value>Exporter Excel</value>
+  </data>
+  <data name="Perf_Behavior" xml:space="preserve">
+    <value>Comportement</value>
+  </data>
+  <data name="Perf_Recommendation" xml:space="preserve">
+    <value>Recommandation :</value>
+  </data>
+  <data name="Perf_DeptAverages" xml:space="preserve">
+    <value>Moyenne par département</value>
+  </data>
+  <data name="Perf_Ranking" xml:space="preserve">
+    <value>Classement</value>
+  </data>
+  <data name="Perf_NeedSupport" xml:space="preserve">
+    <value>À accompagner</value>
+  </data>
+  <data name="Perf_Strengths" xml:space="preserve">
+    <value>Points forts</value>
+  </data>
+  <data name="Perf_Weaknesses" xml:space="preserve">
+    <value>Points à améliorer</value>
+  </data>
+  <data name="Perf_Trend" xml:space="preserve">
+    <value>Évolution</value>
+  </data>
+  <data name="Perf_Report_GeneralSub" xml:space="preserve">
+    <value>{0} évaluations sur {1} employés</value>
+  </data>
+  <data name="Perf_Report_DeptTitle" xml:space="preserve">
+    <value>Département — {0}</value>
+  </data>
+  <data name="Perf_Report_DeptSub" xml:space="preserve">
+    <value>{0} évalués sur {1}</value>
+  </data>
+  <data name="Perf_BehaviorCount" xml:space="preserve">
+    <value>👍 {0}  ·  👎 {1}</value>
+  </data>
+  <data name="Perf_Exported" xml:space="preserve">
+    <value>Export réussi.</value>
+  </data>
+  <data name="Perf_Reco_Promotion" xml:space="preserve">
+    <value>Performance excellente — envisager une promotion ou une prime.</value>
+  </data>
+  <data name="Perf_Reco_Training" xml:space="preserve">
+    <value>Performance à renforcer — proposer une formation ciblée.</value>
+  </data>
+  <data name="Perf_Reco_Watch" xml:space="preserve">
+    <value>Baisse sur plusieurs périodes — suivre de près.</value>
+  </data>
+  <data name="Perf_Reco_Keep" xml:space="preserve">
+    <value>Performance stable — maintenir l'accompagnement.</value>
+  </data>
+  <data name="Perf_Reco_NoData" xml:space="preserve">
+    <value>Pas encore d'évaluation finalisée.</value>
+  </data>
+  <data name="Perf_PeriodEditor" xml:space="preserve">
+    <value>Période d'évaluation</value>
+  </data>
+  <data name="Perf_PeriodName" xml:space="preserve">
+    <value>Nom de la période</value>
+  </data>
+  <data name="Perf_Cadence" xml:space="preserve">
+    <value>Récurrence</value>
+  </data>
+  <data name="Perf_StartDate" xml:space="preserve">
+    <value>Date de début</value>
+  </data>
+  <data name="Perf_EndDate" xml:space="preserve">
+    <value>Date de fin</value>
+  </data>
+  <data name="Perf_ConfirmDeletePeriod" xml:space="preserve">
+    <value>Supprimer la période « {0} » ?</value>
+  </data>
+  <data name="Perf_TemplateEditor" xml:space="preserve">
+    <value>Modèle d'évaluation</value>
+  </data>
+  <data name="Perf_TemplateName" xml:space="preserve">
+    <value>Nom du modèle</value>
+  </data>
+  <data name="Perf_UseWeights" xml:space="preserve">
+    <value>Pondérations personnalisées (sinon critères égaux)</value>
+  </data>
+  <data name="Perf_SetAsDefault" xml:space="preserve">
+    <value>Modèle par défaut</value>
+  </data>
+  <data name="Perf_Criteria" xml:space="preserve">
+    <value>Critères</value>
+  </data>
+  <data name="Perf_KpiTarget" xml:space="preserve">
+    <value>Objectif KPI</value>
+  </data>
+  <data name="Perf_WeightSum" xml:space="preserve">
+    <value>Total des pondérations : {0} %</value>
+  </data>
+  <data name="Perf_Evaluation" xml:space="preserve">
+    <value>Évaluation</value>
+  </data>
+  <data name="Perf_LiveScore" xml:space="preserve">
+    <value>Score global</value>
+  </data>
+  <data name="Perf_Behaviors" xml:space="preserve">
+    <value>Journal de comportement</value>
+  </data>
+  <data name="Perf_Positive" xml:space="preserve">
+    <value>Positif</value>
+  </data>
+  <data name="Perf_Negative" xml:space="preserve">
+    <value>Négatif</value>
+  </data>
+  <data name="Perf_Observations" xml:space="preserve">
+    <value>Observations générales</value>
+  </data>
+  <data name="Perf_Complete" xml:space="preserve">
+    <value>Finaliser</value>
+  </data>
+  <data name="Perf_KpiTargetLabel" xml:space="preserve">
+    <value>Objectif</value>
+  </data>
+  <data name="Perf_KpiActual" xml:space="preserve">
+    <value>Réalisé</value>
+  </data>
+  <data name="Perf_NoBehavior" xml:space="preserve">
+    <value>Aucun comportement enregistré pour cette période.</value>
+  </data>
+  <data name="Perf_Employee" xml:space="preserve">
+    <value>Employé</value>
+  </data>
+  <data name="Perf_BehaviorPositive" xml:space="preserve">
+    <value>Comportement positif</value>
+  </data>
+  <data name="Perf_BehaviorNegative" xml:space="preserve">
+    <value>Comportement négatif</value>
+  </data>
+  <data name="Perf_Note" xml:space="preserve">
+    <value>Note</value>
+  </data>
+  <data name="Perf_Date" xml:space="preserve">
+    <value>Date</value>
+  </data>
+  <data name="Profile_RecentEvals" xml:space="preserve">
+    <value>Dernières évaluations</value>
+  </data>
+  <data name="Profile_RecentBehavior" xml:space="preserve">
+    <value>Comportement récent</value>
+  </data>
+  <data name="Enum_Cadence_Weekly" xml:space="preserve">
+    <value>Hebdomadaire</value>
+  </data>
+  <data name="Enum_Cadence_Monthly" xml:space="preserve">
+    <value>Mensuel</value>
+  </data>
+  <data name="Enum_Cadence_Yearly" xml:space="preserve">
+    <value>Annuel</value>
+  </data>
+  <data name="Enum_Category_Behavioral" xml:space="preserve">
+    <value>Comportemental</value>
+  </data>
+  <data name="Enum_Category_Technical" xml:space="preserve">
+    <value>Technique</value>
+  </data>
+  <data name="Enum_Category_Administrative" xml:space="preserve">
+    <value>Administratif</value>
+  </data>
+  <data name="Enum_Category_Kpi" xml:space="preserve">
+    <value>KPI (objectif chiffré)</value>
+  </data>
+  <data name="Enum_ScoreType_Stars5" xml:space="preserve">
+    <value>Étoiles (/5)</value>
+  </data>
+  <data name="Enum_ScoreType_Score20" xml:space="preserve">
+    <value>Note (/20)</value>
+  </data>
+  <data name="Enum_ScoreType_Percent" xml:space="preserve">
+    <value>Pourcentage (%)</value>
+  </data>
+  <data name="Enum_Weighting_Simple" xml:space="preserve">
+    <value>Critères égaux</value>
+  </data>
+  <data name="Enum_Weighting_Weighted" xml:space="preserve">
+    <value>Pondéré</value>
+  </data>
+  <data name="Enum_PeriodStatus_Open" xml:space="preserve">
+    <value>Ouverte</value>
+  </data>
+  <data name="Enum_PeriodStatus_Closed" xml:space="preserve">
+    <value>Clôturée</value>
+  </data>
+  <data name="Enum_EvalStatus_Pending" xml:space="preserve">
+    <value>En attente</value>
+  </data>
+  <data name="Enum_EvalStatus_Done" xml:space="preserve">
+    <value>Fait</value>
+  </data>
+  <data name="Enum_Band_Excellent" xml:space="preserve">
+    <value>Excellent</value>
+  </data>
+  <data name="Enum_Band_VeryGood" xml:space="preserve">
+    <value>Très bien</value>
+  </data>
+  <data name="Enum_Band_Good" xml:space="preserve">
+    <value>Bien</value>
+  </data>
+  <data name="Enum_Band_Average" xml:space="preserve">
+    <value>Moyen</value>
+  </data>
+  <data name="Enum_Band_Weak" xml:space="preserve">
+    <value>Faible</value>
+  </data>
+  <data name="Performance_EmployeeNotFound" xml:space="preserve">
+    <value>Employé introuvable.</value>
+  </data>
+  <data name="Performance_TemplateWeightSum" xml:space="preserve">
+    <value>La somme des pondérations doit faire 100 %.</value>
+  </data>
+  <data name="Performance_TemplateBuiltInReadOnly" xml:space="preserve">
+    <value>Un modèle intégré est en lecture seule — dupliquez-le.</value>
+  </data>
+  <data name="Performance_NameRequired" xml:space="preserve">
+    <value>Le nom est requis.</value>
+  </data>
+  <data name="Performance_NoCriteria" xml:space="preserve">
+    <value>Ajoutez au moins un critère.</value>
+  </data>
+  <data name="Performance_PeriodDates" xml:space="preserve">
+    <value>La date de fin précède la date de début.</value>
+  </data>
+  <data name="Performance_PeriodClosed" xml:space="preserve">
+    <value>La période est clôturée.</value>
+  </data>
+  <data name="Performance_PeriodNotFound" xml:space="preserve">
+    <value>Période introuvable.</value>
+  </data>
+  <data name="Performance_TemplateNotFound" xml:space="preserve">
+    <value>Modèle introuvable.</value>
+  </data>
+  <data name="Performance_EvaluationNotFound" xml:space="preserve">
+    <value>Évaluation introuvable.</value>
+  </data>
+  <data name="Performance_TemplateNotOwned" xml:space="preserve">
+    <value>Ce modèle n'appartient pas à l'entreprise.</value>
+  </data>
+  <data name="Perf_Tab_Overview" xml:space="preserve">
+    <value>Vue d'ensemble</value>
+  </data>
+  <data name="Perf_LogBehavior_Tip" xml:space="preserve">
+    <value>Enregistrez un 👍 ou 👎 en quelques secondes</value>
+  </data>
+  <data name="Perf_StartEvaluation" xml:space="preserve">
+    <value>Évaluer maintenant</value>
+  </data>
+  <data name="Perf_StartEvaluation_Tip" xml:space="preserve">
+    <value>Ouvre la campagne d'évaluation en cours</value>
+  </data>
+  <data name="Perf_Empty_NoEval" xml:space="preserve">
+    <value>Aucune évaluation pour le moment — créez une période et commencez.</value>
+  </data>
+  <data name="Perf_CompanyAverage" xml:space="preserve">
+    <value>Moyenne de l'entreprise</value>
+  </data>
+  <data name="Perf_Best" xml:space="preserve">
+    <value>Meilleur employé</value>
+  </data>
+  <data name="Perf_Pending" xml:space="preserve">
+    <value>Évaluations en attente</value>
+  </data>
+  <data name="Perf_NotEvaluated" xml:space="preserve">
+    <value>Jamais évalués</value>
+  </data>
+  <data name="Perf_AllClear" xml:space="preserve">
+    <value>Tout est à jour — aucune action requise.</value>
+  </data>
+  <data name="Perf_ToHandle" xml:space="preserve">
+    <value>À traiter</value>
+  </data>
+  <data name="Perf_Handle" xml:space="preserve">
+    <value>Traiter</value>
+  </data>
+  <data name="Perf_Improved" xml:space="preserve">
+    <value>En progression</value>
+  </data>
+  <data name="Perf_Declined" xml:space="preserve">
+    <value>En baisse</value>
+  </data>
+  <data name="Perf_RecentActivity" xml:space="preserve">
+    <value>Dernières activités</value>
+  </data>
+  <data name="Perf_Alert_Decline" xml:space="preserve">
+    <value>Performance en baisse — {0}</value>
+  </data>
+  <data name="Perf_Alert_Overdue" xml:space="preserve">
+    <value>Évaluation en retard — {0} : {1} employé(s) à évaluer</value>
+  </data>
+  <data name="Perf_Alert_Pending" xml:space="preserve">
+    <value>Échéance proche — {0} : {1} employé(s) à évaluer</value>
+  </data>
 </root>

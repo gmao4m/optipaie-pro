@@ -311,8 +311,8 @@
                             <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Bottom" Text="{Binding LatestReviewPeriod}" />
                         </StackPanel>
 
-                        <TextBlock Margin="0,14,0,4" Style="{StaticResource Caption}" Text="{loc:Loc Perf_Tab_Goals}" Visibility="{Binding HasGoals, Converter={StaticResource BoolToVis}}" />
-                        <ItemsControl ItemsSource="{Binding Goals}">
+                        <TextBlock Margin="0,14,0,4" Style="{StaticResource Caption}" Text="{loc:Loc Profile_RecentEvals}" Visibility="{Binding HasEvaluations, Converter={StaticResource BoolToVis}}" />
+                        <ItemsControl ItemsSource="{Binding Evaluations}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <Border Padding="0,6" BorderBrush="{DynamicResource Border}" BorderThickness="0,0,0,1">
@@ -329,8 +329,8 @@
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
 
-                        <TextBlock Margin="0,14,0,4" Style="{StaticResource Caption}" Text="{loc:Loc Perf_Tab_Career}" Visibility="{Binding HasCareer, Converter={StaticResource BoolToVis}}" />
-                        <ItemsControl ItemsSource="{Binding Career}">
+                        <TextBlock Margin="0,14,0,4" Style="{StaticResource Caption}" Text="{loc:Loc Profile_RecentBehavior}" Visibility="{Binding HasBehaviors, Converter={StaticResource BoolToVis}}" />
+                        <ItemsControl ItemsSource="{Binding Behaviors}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <Border Padding="0,6" BorderBrush="{DynamicResource Border}" BorderThickness="0,0,0,1">

@@ -7,7 +7,6 @@ using OptiPaie.Core.Dtos;
 using OptiPaie.Core.Entities;
 using OptiPaie.Core.Enums;
 using OptiPaie.Core.Interfaces.Repositories;
-using OptiPaie.Core.Interfaces.Services;
 using OptiPaie.Core.Primitives;
 using OptiPaie.Data.Context;
 using OptiPaie.Data.Migrations;
@@ -16,286 +15,346 @@ using OptiPaie.Services;
 namespace OptiPaie.Tests
 {
     /// <summary>
-    /// Performance module — integration tests against a real SQLite file. They prove the
-    /// weighted /20 scoring, the rating bands, the draft/complete lifecycle and the
-    /// ecosystem pull: a review's attendance context comes live from the Attendance
-    /// module, never duplicated.
+    /// Performance (Évaluation) module — integration tests against a real SQLite file. They
+    /// prove the fairness engine: every criterion normalises to 0-100 whatever its type, simple
+    /// vs weighted totals, KPI achievement, the five bands, plus templates, periods, evaluations,
+    /// the behaviour log, reports and reminders.
     /// </summary>
     [TestFixture]
     public sealed class PerformanceServiceTests
     {
-        private static readonly int Year = DateTime.Today.Year - 1;
-
         private string _directory;
-        private IUnitOfWorkFactory _unitOfWorkFactory;
-        private IPerformanceService _service;
-        private IAttendanceService _attendance;
-
-        private long _companyId;
-        private long _employeeId;
+        private IUnitOfWorkFactory _uowf;
+        private PerformanceService _service;
+        private long _companyId, _benali, _touati, _saadi;
 
         [SetUp]
         public void SetUp()
         {
             _directory = Path.Combine(Path.GetTempPath(), "optipaie-perf-" + Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(_directory);
-
             SqliteTypeHandlers.Register();
             var factory = new SqliteConnectionFactory(Path.Combine(_directory, "test.db"));
-            using (var connection = factory.CreateOpenConnection())
-            {
-                new MigrationRunner(connection).Run();
-            }
+            using (var c = factory.CreateOpenConnection()) new MigrationRunner(c).Run();
+            _uowf = new UnitOfWorkFactory(factory);
+            _service = new PerformanceService(_uowf);
 
-            _unitOfWorkFactory = new UnitOfWorkFactory(factory);
-            _attendance = new AttendanceService(_unitOfWorkFactory);
-            _service = new PerformanceService(_unitOfWorkFactory, _attendance);
-
-            using (IUnitOfWork uow = _unitOfWorkFactory.Create())
+            using (IUnitOfWork uow = _uowf.Create())
             {
                 uow.BeginTransaction();
                 _companyId = uow.Companies.Insert(new Company { NameFr = "SARL Test", Nif = "000000000000000" });
-                _employeeId = uow.Employees.Insert(new Employee
-                {
-                    CompanyId = _companyId,
-                    LastNameFr = "BENALI",
-                    FirstNameFr = "Karim",
-                    Gender = Gender.Male,
-                    MaritalStatus = MaritalStatus.Single,
-                    PaymentMode = PaymentMode.Cash,
-                    ContractType = ContractType.Cdi,
-                    HireDate = new DateTime(2020, 1, 1),
-                    BaseSalary = 60000m,
-                    IsActive = true
-                });
+                _benali = Emp(uow, "BENALI", "Karim", "Production");
+                _touati = Emp(uow, "TOUATI", "Lila", "Commercial");
+                _saadi = Emp(uow, "SAADI", "Farid", "Production");
                 uow.Commit();
             }
         }
+
+        private long Emp(IUnitOfWork uow, string last, string first, string dept) =>
+            uow.Employees.Insert(new Employee
+            {
+                CompanyId = _companyId, LastNameFr = last, FirstNameFr = first, Department = dept, Poste = "Poste",
+                Gender = Gender.Male, MaritalStatus = MaritalStatus.Single, PaymentMode = PaymentMode.Cash,
+                ContractType = ContractType.Cdi, HireDate = new DateTime(2020, 1, 1), BaseSalary = 60000m, IsActive = true
+            });
 
         [TearDown]
         public void TearDown()
         {
             System.Data.SQLite.SQLiteConnection.ClearAllPools();
-            try { Directory.Delete(_directory, true); } catch (IOException) { /* the OS still holds the WAL file */ }
+            try { Directory.Delete(_directory, true); } catch (IOException) { }
         }
 
-        private List<PerformanceCriterion> Criteria(long reviewId)
+        // ---- helpers --------------------------------------------------------
+
+        private static EvalCriterion Crit(string n, CriterionCategory c, ScoreType st, decimal w, decimal? kpi = null) =>
+            new EvalCriterion { Name = n, Category = c, ScoreType = st, WeightPercent = w, KpiTarget = kpi };
+
+        private long StarsTemplate(WeightingMode mode = WeightingMode.Simple, bool isDefault = true)
         {
-            using (IUnitOfWork uow = _unitOfWorkFactory.Create())
+            var crits = new List<EvalCriterion>
             {
-                return uow.Performance.GetCriteria(reviewId).ToList();
+                Crit("Qualité", CriterionCategory.Behavioral, ScoreType.Stars5, 50m),
+                Crit("Assiduité", CriterionCategory.Behavioral, ScoreType.Stars5, 50m)
+            };
+            var t = new EvalTemplate { CompanyId = _companyId, Name = "Grille", Department = "Production", WeightingMode = mode, IsDefault = isDefault };
+            Result<long> r = _service.SaveTemplate(t, crits);
+            Assert.That(r.IsSuccess, Is.True, r.Error);
+            return r.Value;
+        }
+
+        private long NewPeriod(PeriodStatus status = PeriodStatus.Open)
+        {
+            var p = new EvalPeriod { CompanyId = _companyId, Name = "Janvier", Cadence = PeriodCadence.Monthly, StartDate = new DateTime(2026, 1, 1), EndDate = new DateTime(2026, 1, 31) };
+            long id = _service.SavePeriod(p).Value;
+            if (status == PeriodStatus.Closed) _service.ClosePeriod(id);
+            return id;
+        }
+
+        /// <summary>Scores every rating line to the given stars value and every KPI to full, then completes.</summary>
+        private long DoEvaluation(long periodId, long employeeId, decimal stars)
+        {
+            long evalId = _service.CreateEvaluation(periodId, employeeId, null).Value;
+            EvaluationDetail d = _service.GetEvaluationDetail(evalId);
+            var scores = d.Scores.ToList();
+            foreach (EvaluationScore s in scores)
+            {
+                if (s.Category == CriterionCategory.Kpi) s.KpiActual = s.KpiTarget;
+                else s.RawValue = stars;
+                s.NormalizedScore = _service.ComputeLineScore(s);
             }
+            _service.SaveEvaluation(d.Evaluation, scores);
+            _service.CompleteEvaluation(evalId);
+            return evalId;
         }
 
-        // ---------------------------------------------------------------- draft creation
+        // ---- scoring --------------------------------------------------------
 
         [Test]
-        public void CreateDraft_SeedsTheDefaultCriteria()
+        public void ComputeLineScore_NormalisesEachScoreTypeTo0To100()
         {
-            Result<long> created = _service.CreateDraft(_employeeId, Year, Year.ToString(), "DRH");
-
-            Assert.That(created.IsSuccess, Is.True, created.Error);
-            List<PerformanceCriterion> criteria = Criteria(created.Value);
-            Assert.That(criteria.Count, Is.EqualTo(5), "five default criteria are seeded");
-            Assert.That(criteria.All(c => c.Weight == 1m), Is.True);
-            Assert.That(_service.Get(created.Value).Status, Is.EqualTo(PerformanceStatus.Draft));
+            Assert.That(_service.ComputeLineScore(new EvaluationScore { Category = CriterionCategory.Behavioral, ScoreType = ScoreType.Stars5, RawValue = 4m }), Is.EqualTo(80m));
+            Assert.That(_service.ComputeLineScore(new EvaluationScore { Category = CriterionCategory.Behavioral, ScoreType = ScoreType.Score20, RawValue = 15m }), Is.EqualTo(75m));
+            Assert.That(_service.ComputeLineScore(new EvaluationScore { Category = CriterionCategory.Behavioral, ScoreType = ScoreType.Percent, RawValue = 90m }), Is.EqualTo(90m));
         }
 
         [Test]
-        public void CreateDraft_UnknownEmployee_IsRejected()
+        public void ComputeLineScore_Kpi_IsAchievementCappedAt100()
         {
-            Assert.That(_service.CreateDraft(999999, Year, "x", "DRH").IsFailure, Is.True);
+            Assert.That(_service.ComputeLineScore(new EvaluationScore { Category = CriterionCategory.Kpi, KpiTarget = 100m, KpiActual = 90m, HigherIsBetter = true }), Is.EqualTo(90m));
+            Assert.That(_service.ComputeLineScore(new EvaluationScore { Category = CriterionCategory.Kpi, KpiTarget = 100m, KpiActual = 130m, HigherIsBetter = true }), Is.EqualTo(100m), "over-achievement caps at 100");
+            Assert.That(_service.ComputeLineScore(new EvaluationScore { Category = CriterionCategory.Kpi, KpiTarget = 10m, KpiActual = 20m, HigherIsBetter = false }), Is.EqualTo(50m), "lower-is-better: target/achieved");
         }
 
-        // ---------------------------------------------------------------- scoring
-
         [Test]
-        public void Save_ComputesTheWeightedAverageOnA20Scale()
+        public void ComputeTotal_SimpleIsAverage_WeightedIsWeighted()
         {
-            long id = _service.CreateDraft(_employeeId, Year, Year.ToString(), "DRH").Value;
-
-            var criteria = new List<PerformanceCriterion>
+            var scores = new List<EvaluationScore>
             {
-                new PerformanceCriterion { Label = "Qualité", Weight = 2m, Score = 16m },
-                new PerformanceCriterion { Label = "Productivité", Weight = 1m, Score = 10m }
+                new EvaluationScore { NormalizedScore = 80m, WeightPercent = 75m },
+                new EvaluationScore { NormalizedScore = 60m, WeightPercent = 25m }
             };
+            Assert.That(_service.ComputeTotal(scores, WeightingMode.Simple), Is.EqualTo(70m));
+            Assert.That(_service.ComputeTotal(scores, WeightingMode.Weighted), Is.EqualTo(75m));
+        }
 
-            Result saved = _service.Save(Header(id), criteria);
+        [TestCase(92, ClassificationBand.Excellent)]
+        [TestCase(80, ClassificationBand.VeryGood)]
+        [TestCase(65, ClassificationBand.Good)]
+        [TestCase(50, ClassificationBand.Average)]
+        [TestCase(30, ClassificationBand.Weak)]
+        public void Classify_MapsToBands(decimal score, ClassificationBand expected)
+        {
+            Assert.That(_service.Classify(score), Is.EqualTo(expected));
+        }
 
-            Assert.That(saved.IsSuccess, Is.True, saved.Error);
-            // (16*2 + 10*1) / 3 = 14.
-            Assert.That(_service.Get(id).OverallScore, Is.EqualTo(14m));
+        // ---- templates ------------------------------------------------------
+
+        [Test]
+        public void SaveTemplate_Weighted_RejectsWeightsNotSummingTo100()
+        {
+            var t = new EvalTemplate { CompanyId = _companyId, Name = "X", WeightingMode = WeightingMode.Weighted };
+            Result<long> r = _service.SaveTemplate(t, new[] { Crit("a", CriterionCategory.Behavioral, ScoreType.Stars5, 30m), Crit("b", CriterionCategory.Behavioral, ScoreType.Stars5, 30m) });
+            Assert.That(r.IsFailure, Is.True);
+            Assert.That(r.ErrorCode, Is.EqualTo("Performance_TemplateWeightSum"));
         }
 
         [Test]
-        public void Save_ScoreOutOfRange_IsRejected()
+        public void SaveTemplate_Simple_IgnoresWeightSum()
         {
-            long id = _service.CreateDraft(_employeeId, Year, Year.ToString(), "DRH").Value;
-
-            var criteria = new List<PerformanceCriterion>
-            {
-                new PerformanceCriterion { Label = "Qualité", Weight = 1m, Score = 25m }
-            };
-
-            Assert.That(_service.Save(Header(id), criteria).IsFailure, Is.True, "a /20 score cannot exceed 20");
+            var t = new EvalTemplate { CompanyId = _companyId, Name = "X", WeightingMode = WeightingMode.Simple };
+            Result<long> r = _service.SaveTemplate(t, new[] { Crit("a", CriterionCategory.Behavioral, ScoreType.Stars5, 10m) });
+            Assert.That(r.IsSuccess, Is.True, r.Error);
         }
 
         [Test]
-        public void Save_ReplacesTheCriteriaWholesale()
+        public void GetTemplates_IncludesBuiltInSeed_WhichIsReadOnly()
         {
-            long id = _service.CreateDraft(_employeeId, Year, Year.ToString(), "DRH").Value;
-
-            _service.Save(Header(id), new List<PerformanceCriterion>
-            {
-                new PerformanceCriterion { Label = "Unique", Weight = 1m, Score = 12m }
-            });
-
-            List<PerformanceCriterion> criteria = Criteria(id);
-            Assert.That(criteria.Count, Is.EqualTo(1), "the five seeded criteria were replaced by the one provided");
-            Assert.That(criteria[0].Label, Is.EqualTo("Unique"));
+            var templates = _service.GetTemplates(_companyId);
+            TemplateSummary builtIn = templates.FirstOrDefault(x => x.IsBuiltIn);
+            Assert.That(builtIn, Is.Not.Null, "the seeded built-in template is visible");
+            Result r = _service.DeleteTemplate(builtIn.TemplateId);
+            Assert.That(r.IsFailure, Is.True);
+            Assert.That(r.ErrorCode, Is.EqualTo("Performance_TemplateBuiltInReadOnly"));
         }
 
         [Test]
-        [TestCase(17, "Excellent")]
-        [TestCase(15, "Très bien")]
-        [TestCase(13, "Bien")]
-        [TestCase(11, "Assez bien")]
-        [TestCase(8, "Insuffisant")]
-        public void Rate_MapsScoresToBands(int score, string expected)
+        public void SetDefaultTemplate_ClearsTheOthers()
         {
-            Assert.That(_service.Rate(score), Is.EqualTo(expected));
+            long a = StarsTemplate(isDefault: true);
+            long b = StarsTemplate(isDefault: true);
+            _service.SetDefaultTemplate(_companyId, b);
+            var templates = _service.GetTemplates(_companyId);
+            Assert.That(templates.Count(t => t.IsDefault), Is.EqualTo(1), "exactly one default");
+            Assert.That(templates.First(t => t.TemplateId == b).IsDefault, Is.True);
         }
 
-        // ---------------------------------------------------------------- lifecycle
+        // ---- periods --------------------------------------------------------
 
         [Test]
-        public void Complete_RequiresAReviewer()
+        public void SavePeriod_RejectsEndBeforeStart()
         {
-            long id = _service.CreateDraft(_employeeId, Year, Year.ToString(), null).Value;
-            _service.Save(Header(id, reviewer: null), OneCriterion());
-
-            Assert.That(_service.Complete(id).IsFailure, Is.True);
+            var p = new EvalPeriod { CompanyId = _companyId, Name = "P", StartDate = new DateTime(2026, 2, 1), EndDate = new DateTime(2026, 1, 1) };
+            Assert.That(_service.SavePeriod(p).IsFailure, Is.True);
         }
 
         [Test]
-        public void Complete_LocksTheReviewAgainstEditing()
+        public void ClosePeriod_SetsStatusClosed()
         {
-            long id = _service.CreateDraft(_employeeId, Year, Year.ToString(), "DRH").Value;
-            _service.Save(Header(id), OneCriterion());
+            long id = NewPeriod();
+            _service.ClosePeriod(id);
+            Assert.That(_service.GetPeriod(id).Status, Is.EqualTo(PeriodStatus.Closed));
+        }
 
-            Result completed = _service.Complete(id);
-            Assert.That(completed.IsSuccess, Is.True, completed.Error);
-            Assert.That(_service.Get(id).Status, Is.EqualTo(PerformanceStatus.Completed));
+        // ---- evaluations ----------------------------------------------------
 
-            Result saveAfter = _service.Save(Header(id), OneCriterion());
-            Assert.That(saveAfter.IsFailure, Is.True, "a completed review must be reopened before editing");
+        [Test]
+        public void CreateEvaluation_SnapshotsTemplateCriteriaAsScoreLines()
+        {
+            StarsTemplate();
+            long period = NewPeriod();
+            long evalId = _service.CreateEvaluation(period, _benali, null).Value;
+            EvaluationDetail d = _service.GetEvaluationDetail(evalId);
+            Assert.That(d.Scores.Count, Is.EqualTo(2), "the two template criteria are snapshotted");
+            Assert.That(d.Scores.All(s => s.RawValue == null), Is.True, "unscored to start");
         }
 
         [Test]
-        public void Reopen_AllowsEditingAgain()
+        public void CreateEvaluation_IsIdempotentPerEmployeeAndPeriod()
         {
-            long id = _service.CreateDraft(_employeeId, Year, Year.ToString(), "DRH").Value;
-            _service.Save(Header(id), OneCriterion());
-            _service.Complete(id);
-
-            _service.Reopen(id);
-
-            Assert.That(_service.Get(id).Status, Is.EqualTo(PerformanceStatus.Draft));
-            Assert.That(_service.Save(Header(id), OneCriterion()).IsSuccess, Is.True);
+            StarsTemplate();
+            long period = NewPeriod();
+            long first = _service.CreateEvaluation(period, _benali, null).Value;
+            long second = _service.CreateEvaluation(period, _benali, null).Value;
+            Assert.That(second, Is.EqualTo(first));
         }
 
         [Test]
-        public void Delete_RemovesTheReview()
+        public void SaveAndComplete_ComputesTotalAndSurfacesInHistory()
         {
-            long id = _service.CreateDraft(_employeeId, Year, Year.ToString(), "DRH").Value;
+            StarsTemplate();
+            long period = NewPeriod();
+            DoEvaluation(period, _benali, 4m); // 4/5 = 80 on both lines → total 80
 
-            Assert.That(_service.Delete(id).IsSuccess, Is.True);
-            Assert.That(_service.Get(id), Is.Null);
-        }
-
-        // ---------------------------------------------------------------- cross-module pull
-
-        [Test]
-        public void GetDetail_PullsTheAttendanceContextLiveFromTheAttendanceModule()
-        {
-            long id = _service.CreateDraft(_employeeId, Year, Year.ToString(), "DRH").Value;
-
-            // Record attendance AFTER the review was created — the detail must reflect it.
-            _attendance.Save(new AttendanceRecord
-            {
-                EmployeeId = _employeeId, WorkDate = new DateTime(Year, 3, 2),
-                Status = AttendanceStatus.Present, CheckIn = "08:00", CheckOut = "18:00"
-            });
-            _attendance.Save(new AttendanceRecord
-            {
-                EmployeeId = _employeeId, WorkDate = new DateTime(Year, 3, 3),
-                Status = AttendanceStatus.Absent
-            });
-            _attendance.Save(new AttendanceRecord
-            {
-                EmployeeId = _employeeId, WorkDate = new DateTime(Year, 3, 4),
-                Status = AttendanceStatus.Present, CheckIn = "08:40", CheckOut = "16:00"
-            });
-
-            PerformanceDetail detail = _service.GetDetail(id);
-
-            Assert.That(detail.Attendance, Is.Not.Null, "the review reflects the latest attendance");
-            Assert.That(detail.Attendance.AbsentDays, Is.EqualTo(1));
-            Assert.That(detail.Attendance.LateCount, Is.EqualTo(1));
-            Assert.That(detail.Attendance.OvertimeHours, Is.EqualTo(2m), "10 h worked against the 8 h standard day");
+            var history = _service.GetByEmployee(_benali);
+            Assert.That(history.Count, Is.EqualTo(1));
+            Assert.That(history[0].TotalScore, Is.EqualTo(80m));
+            Assert.That(history[0].Band, Is.EqualTo(ClassificationBand.VeryGood));
+            Assert.That(history[0].Status, Is.EqualTo(EvaluationStatus.Done));
         }
 
         [Test]
-        public void GetDetail_NoAttendanceData_OmitsTheContext()
+        public void GetEvaluationBoard_HasOneRowPerActiveEmployee()
         {
-            long id = _service.CreateDraft(_employeeId, Year, Year.ToString(), "DRH").Value;
-
-            PerformanceDetail detail = _service.GetDetail(id);
-
-            Assert.That(detail.Attendance, Is.Null, "with no pointage the section is simply omitted");
-            Assert.That(detail.Criteria.Count, Is.EqualTo(5));
+            StarsTemplate();
+            long period = NewPeriod();
+            DoEvaluation(period, _benali, 5m);
+            var board = _service.GetEvaluationBoard(period);
+            Assert.That(board.Count, Is.EqualTo(3), "one row per active employee");
+            Assert.That(board.Count(r => r.Status == EvaluationStatus.Done), Is.EqualTo(1));
+            Assert.That(board.Count(r => r.Status == EvaluationStatus.Pending), Is.EqualTo(2));
         }
 
-        // ---------------------------------------------------------------- listing
+        // ---- behaviour log --------------------------------------------------
 
         [Test]
-        public void GetByCompanyYear_CarriesTheSharedNameAndRating()
+        public void LogBehavior_IsListedForTheEmployeeAndCompany()
         {
-            long id = _service.CreateDraft(_employeeId, Year, Year.ToString(), "DRH").Value;
-            _service.Save(Header(id), new List<PerformanceCriterion>
-            {
-                new PerformanceCriterion { Label = "Qualité", Weight = 1m, Score = 17m }
-            });
-            _service.Complete(id);
-
-            IReadOnlyList<PerformanceSummary> reviews = _service.GetByCompanyYear(_companyId, Year);
-
-            Assert.That(reviews.Count, Is.EqualTo(1));
-            Assert.That(reviews[0].EmployeeName, Is.EqualTo("BENALI Karim"));
-            Assert.That(reviews[0].Rating, Is.EqualTo("Excellent"));
-            Assert.That(_service.GetByCompanyYear(_companyId, Year - 3).Count, Is.EqualTo(0));
+            _service.LogBehavior(_companyId, _benali, true, "a terminé avant l'échéance", DateTime.Today);
+            _service.LogBehavior(_companyId, _benali, false, "retard", DateTime.Today);
+            var forEmp = _service.GetBehaviors(_benali);
+            Assert.That(forEmp.Count, Is.EqualTo(2));
+            Assert.That(forEmp.Count(b => b.IsPositive), Is.EqualTo(1));
+            Assert.That(_service.GetCompanyBehaviors(_companyId).Count, Is.EqualTo(2));
         }
 
-        private PerformanceReview Header(long id, string reviewer = "DRH")
+        // ---- reports & smart ------------------------------------------------
+
+        [Test]
+        public void GetGeneralReport_AggregatesLatestEvaluations()
         {
-            return new PerformanceReview
-            {
-                Id = id,
-                EmployeeId = _employeeId,
-                PeriodYear = Year,
-                PeriodLabel = Year.ToString(),
-                ReviewDate = new DateTime(Year, 12, 20),
-                Reviewer = reviewer,
-                Comments = "RAS"
-            };
+            StarsTemplate();
+            long period = NewPeriod();
+            DoEvaluation(period, _benali, 5m); // 100
+            DoEvaluation(period, _touati, 3m); // 60
+            DoEvaluation(period, _saadi, 4m);  // 80
+
+            GeneralReport r = _service.GetGeneralReport(_companyId);
+            Assert.That(r.HasData, Is.True);
+            Assert.That(r.EvaluatedCount, Is.EqualTo(3));
+            Assert.That(r.CompanyAverage, Is.EqualTo(80m)); // (100+60+80)/3
+            Assert.That(r.TopPerformers.First().EmployeeName, Does.Contain("BENALI"));
+            Assert.That(r.BestEmployee, Is.Not.Null);
+            Assert.That(r.Departments.Any(d => d.Department == "Production"), Is.True);
         }
 
-        private static List<PerformanceCriterion> OneCriterion()
+        [Test]
+        public void GetDeptReport_RanksAndFlagsSupport()
         {
-            return new List<PerformanceCriterion>
-            {
-                new PerformanceCriterion { Label = "Qualité", Weight = 1m, Score = 15m }
-            };
+            StarsTemplate();
+            long period = NewPeriod();
+            DoEvaluation(period, _benali, 5m); // Production 100
+            DoEvaluation(period, _saadi, 2m);  // Production 40 → needs support (< 60)
+
+            DeptReport r = _service.GetDeptReport(_companyId, "Production");
+            Assert.That(r.Ranking.Count, Is.EqualTo(2));
+            Assert.That(r.Ranking.First().Score, Is.EqualTo(100m), "best ranked first");
+            Assert.That(r.NeedSupport.Any(x => x.Score < 60m), Is.True);
+        }
+
+        [Test]
+        public void GetEmployeeReport_HasScoreStrengthsAndRecommendation()
+        {
+            StarsTemplate();
+            long period = NewPeriod();
+            DoEvaluation(period, _benali, 5m);
+
+            EmployeeReport r = _service.GetEmployeeReport(_benali);
+            Assert.That(r.HasData, Is.True);
+            Assert.That(r.LatestScore, Is.EqualTo(100m));
+            Assert.That(r.LatestBand, Is.EqualTo(ClassificationBand.Excellent));
+            Assert.That(r.Strengths.Count, Is.GreaterThanOrEqualTo(1));
+            Assert.That(r.RecommendationKey, Is.EqualTo("Perf_Reco_Promotion"));
+        }
+
+        [Test]
+        public void GetReminders_ReturnsPendingEmployeesForAClosingPeriod()
+        {
+            StarsTemplate();
+            var p = new EvalPeriod { CompanyId = _companyId, Name = "P", Cadence = PeriodCadence.Monthly, StartDate = DateTime.Today.AddDays(-20), EndDate = DateTime.Today.AddDays(2) };
+            long period = _service.SavePeriod(p).Value;
+            DoEvaluation(period, _benali, 4m); // benali done → not reminded
+
+            var reminders = _service.GetReminders(_companyId, DateTime.Today);
+            Assert.That(reminders.Count, Is.EqualTo(2), "the two employees still pending");
+            Assert.That(reminders.All(x => x.EmployeeName != "BENALI Karim"), Is.True);
+        }
+
+        // ---- overview (control centre) --------------------------------------
+
+        [Test]
+        public void GetOverview_SummarisesMoversSupportBestAndActivity()
+        {
+            StarsTemplate();
+            long p1 = NewPeriod();
+            DoEvaluation(p1, _benali, 3m); // 60
+            DoEvaluation(p1, _touati, 4m); // 80
+            _service.ClosePeriod(p1);
+
+            var p2p = new EvalPeriod { CompanyId = _companyId, Name = "Février", Cadence = PeriodCadence.Monthly, StartDate = new DateTime(2026, 2, 1), EndDate = new DateTime(2026, 2, 28) };
+            long p2 = _service.SavePeriod(p2p).Value;
+            DoEvaluation(p2, _benali, 5m); // 100 → improved (+40)
+            DoEvaluation(p2, _touati, 2m); // 40 → declined + needs support
+            _service.LogBehavior(_companyId, _benali, true, "bon travail", DateTime.Today);
+            _service.ClosePeriod(p2);
+
+            OverviewData d = _service.GetOverview(_companyId);
+            Assert.That(d.HasData, Is.True);
+            Assert.That(d.Improved.Any(m => m.EmployeeId == _benali && m.Delta > 0m), Is.True, "benali improved");
+            Assert.That(d.Declined.Any(m => m.EmployeeId == _touati && m.Delta < 0m), Is.True, "touati declined");
+            Assert.That(d.NeedSupport.Any(r => r.EmployeeId == _touati), Is.True, "touati needs support (< 60)");
+            Assert.That(d.BestEmployee, Is.Not.Null);
+            Assert.That(d.RecentActivity.Count, Is.GreaterThanOrEqualTo(1), "the behaviour appears in the activity feed");
         }
     }
 }

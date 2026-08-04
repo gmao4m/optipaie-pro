@@ -1,32 +1,42 @@
 <UserControl x:Class="OptiPaie.Desktop.Views.PerformanceView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:loc="clr-namespace:OptiPaie.Desktop.Localization"
-             xmlns:beh="clr-namespace:OptiPaie.Desktop.Behaviors">
+             xmlns:beh="clr-namespace:OptiPaie.Desktop.Behaviors"
+             xmlns:loc="clr-namespace:OptiPaie.Desktop.Localization">
     <UserControl.Resources>
         <Style x:Key="GridHeader" TargetType="DataGridColumnHeader">
             <Setter Property="Background" Value="{DynamicResource BrandSoft}" />
             <Setter Property="Foreground" Value="{DynamicResource BrandText}" />
             <Setter Property="FontSize" Value="12" />
             <Setter Property="FontWeight" Value="SemiBold" />
-            <Setter Property="Height" Value="32" />
+            <Setter Property="Height" Value="34" />
             <Setter Property="Padding" Value="8,0" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
             <Setter Property="BorderBrush" Value="{DynamicResource Border}" />
             <Setter Property="BorderThickness" Value="0,0,1,1" />
         </Style>
-        <Style x:Key="Center" TargetType="TextBlock">
+        <Style x:Key="CenterText" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource MonoFont}" />
             <Setter Property="TextAlignment" Value="Center" />
             <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="FlowDirection" Value="LeftToRight" />
         </Style>
-        <Style x:Key="AppGrid" TargetType="DataGrid">
+        <Style x:Key="Tile" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource Surface}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource Border}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="Padding" Value="16,11" />
+            <Setter Property="Margin" Value="0,0,12,0" />
+        </Style>
+        <Style x:Key="PerfGrid" TargetType="DataGrid">
             <Setter Property="AutoGenerateColumns" Value="False" />
             <Setter Property="HeadersVisibility" Value="Column" />
             <Setter Property="IsReadOnly" Value="True" />
             <Setter Property="CanUserAddRows" Value="False" />
             <Setter Property="CanUserResizeRows" Value="False" />
             <Setter Property="GridLinesVisibility" Value="All" />
-            <Setter Property="RowHeight" Value="32" />
+            <Setter Property="RowHeight" Value="34" />
             <Setter Property="FontFamily" Value="{StaticResource AppFont}" />
             <Setter Property="FontSize" Value="12.5" />
             <Setter Property="Background" Value="{DynamicResource Surface}" />
@@ -38,574 +48,540 @@
             <Setter Property="VerticalGridLinesBrush" Value="{DynamicResource Border}" />
             <Setter Property="ColumnHeaderStyle" Value="{StaticResource GridHeader}" />
         </Style>
-        <Style x:Key="Bar" TargetType="ProgressBar">
-            <Setter Property="Height" Value="7" />
-            <Setter Property="Maximum" Value="100" />
-            <Setter Property="Foreground" Value="{DynamicResource Accent}" />
-            <Setter Property="Background" Value="{DynamicResource SurfaceMuted}" />
-            <Setter Property="BorderThickness" Value="0" />
-        </Style>
-        <Style x:Key="Chip" TargetType="Border">
-            <Setter Property="CornerRadius" Value="6" />
-            <Setter Property="Padding" Value="8,2" />
-            <Setter Property="VerticalAlignment" Value="Center" />
+        <!-- Semantic pill coloured by the item's BandKind (green good / amber medium / red weak). -->
+        <Style x:Key="BandPill" TargetType="Border">
+            <Setter Property="CornerRadius" Value="9" />
+            <Setter Property="Padding" Value="10,3" />
             <Setter Property="HorizontalAlignment" Value="Left" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Background" Value="{DynamicResource SurfaceMuted}" />
+            <Setter Property="TextElement.Foreground" Value="{DynamicResource TextSecondary}" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding BandKind}" Value="success">
+                    <Setter Property="Background" Value="{DynamicResource StatusSuccessSoft}" />
+                    <Setter Property="TextElement.Foreground" Value="{DynamicResource StatusSuccessText}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding BandKind}" Value="pending">
+                    <Setter Property="Background" Value="{DynamicResource StatusPendingSoft}" />
+                    <Setter Property="TextElement.Foreground" Value="{DynamicResource StatusPendingText}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding BandKind}" Value="danger">
+                    <Setter Property="Background" Value="{DynamicResource StatusDangerSoft}" />
+                    <Setter Property="TextElement.Foreground" Value="{DynamicResource StatusDangerText}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <!-- Semantic pill coloured by the item's Kind (used by movers + alerts). -->
+        <Style x:Key="KindPill" TargetType="Border">
+            <Setter Property="CornerRadius" Value="9" />
+            <Setter Property="Padding" Value="10,3" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Background" Value="{DynamicResource SurfaceMuted}" />
+            <Setter Property="TextElement.Foreground" Value="{DynamicResource TextSecondary}" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Kind}" Value="success">
+                    <Setter Property="Background" Value="{DynamicResource StatusSuccessSoft}" />
+                    <Setter Property="TextElement.Foreground" Value="{DynamicResource StatusSuccessText}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Kind}" Value="pending">
+                    <Setter Property="Background" Value="{DynamicResource StatusPendingSoft}" />
+                    <Setter Property="TextElement.Foreground" Value="{DynamicResource StatusPendingText}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Kind}" Value="danger">
+                    <Setter Property="Background" Value="{DynamicResource StatusDangerSoft}" />
+                    <Setter Property="TextElement.Foreground" Value="{DynamicResource StatusDangerText}" />
+                </DataTrigger>
+            </Style.Triggers>
         </Style>
     </UserControl.Resources>
 
-    <Grid Margin="24,18">
+    <Grid Margin="24,18,24,0">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!-- Header -->
-        <Grid Grid.Row="0">
-            <StackPanel HorizontalAlignment="Left">
-                <TextBlock Style="{StaticResource H1}" Text="{loc:Loc Perf_Title}" />
-                <TextBlock Style="{StaticResource Caption}" Margin="0,4,0,0"
-                           Text="{loc:Loc Perf_Subtitle}" />
-            </StackPanel>
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
-                <TextBlock Text="{loc:Loc Payroll_Year}" VerticalAlignment="Center" Foreground="{DynamicResource TextMuted}" FontSize="12" Margin="0,0,8,0" />
-                <ComboBox Style="{StaticResource AppComboBox}" Width="90" Height="32" ItemsSource="{Binding Years}" SelectedItem="{Binding SelectedYear}" />
-            </StackPanel>
-        </Grid>
+        <StackPanel Grid.Row="0">
+            <TextBlock Style="{StaticResource H1}" Text="{loc:Loc Perf_Title}" />
+            <TextBlock Style="{StaticResource Caption}" Margin="0,5,0,0" Text="{loc:Loc Perf_Subtitle}" />
+        </StackPanel>
 
-        <TabControl Grid.Row="1" Margin="0,16,0,0" Background="Transparent" BorderThickness="0">
+        <TabControl Grid.Row="1" Margin="0,14,0,0" Background="Transparent" BorderThickness="0" SelectedIndex="{Binding SelectedTabIndex}">
 
-            <!-- ============================================ Campagnes -->
-            <TabItem Header="{loc:Loc Perf_Tab_Campaigns}">
-                <Grid DataContext="{Binding Cycles}" Margin="0,14,0,0">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-                    <Grid Grid.Row="0">
-                        <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Center" Text="{Binding StatusMessage}" />
-                        <Button Style="{StaticResource AccentButton}" HorizontalAlignment="Right" Height="34" Content="{loc:Loc Perf_LaunchCampaign}" Command="{Binding LaunchCommand}" />
-                    </Grid>
-                    <Grid Grid.Row="1" Margin="0,12,0,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="300" />
-                            <ColumnDefinition Width="16" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <!-- Cycle list -->
-                        <ListBox Grid.Column="0" BorderThickness="1" BorderBrush="{DynamicResource Border}" Background="{DynamicResource Surface}"
-                                 ItemsSource="{Binding Cycles}" SelectedItem="{Binding SelectedCycle}" HorizontalContentAlignment="Stretch">
-                            <ListBox.ItemTemplate>
-                                <DataTemplate>
-                                    <StackPanel Margin="2,6">
-                                        <DockPanel>
-                                            <Border DockPanel.Dock="Right" Style="{StaticResource Chip}" Background="{Binding StatusBrush}">
-                                                <TextBlock Text="{Binding StatusLabel}" Foreground="White" FontSize="11" FontWeight="SemiBold" />
-                                            </Border>
-                                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="13.5" TextTrimming="CharacterEllipsis" />
-                                        </DockPanel>
-                                        <TextBlock Text="{Binding TypeLabel}" FontSize="11.5" Foreground="{DynamicResource TextMuted}" Margin="0,2,0,4" />
-                                        <ProgressBar Style="{StaticResource Bar}" Value="{Binding CompletionValue, Mode=OneWay}" />
-                                        <TextBlock Text="{Binding CompletionText}" FontSize="11" Foreground="{DynamicResource TextSecondary}" Margin="0,3,0,0" />
+            <!-- ================= TAB 0 — OVERVIEW (control centre) ================= -->
+            <TabItem Header="{loc:Loc Perf_Tab_Overview}">
+                <Grid DataContext="{Binding Overview}" Margin="0,10,0,0">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel>
+                            <!-- quick actions -->
+                            <DockPanel>
+                                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                                    <Button Style="{StaticResource AccentButton}" Height="36" Margin="8,0,0,0" Content="{loc:Loc Perf_LogBehavior}"
+                                            ToolTip="{loc:Loc Perf_LogBehavior_Tip}" Command="{Binding LogBehaviorCommand}" />
+                                    <Button Style="{StaticResource PrimaryButton}" Height="36" Margin="8,0,0,0" Content="{loc:Loc Perf_StartEvaluation}"
+                                            ToolTip="{loc:Loc Perf_StartEvaluation_Tip}" Command="{Binding StartEvaluationCommand}" />
+                                </StackPanel>
+                                <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Center" Text="{Binding ActivePeriodName}" />
+                            </DockPanel>
+
+                            <!-- empty state -->
+                            <Border Margin="0,40" HorizontalAlignment="Center" Visibility="{Binding HasData, Converter={StaticResource InverseBoolToVis}}">
+                                <StackPanel HorizontalAlignment="Center" MaxWidth="380">
+                                    <TextBlock Text="📋" FontSize="34" HorizontalAlignment="Center" />
+                                    <TextBlock Style="{StaticResource EmptyStateMessage}" Margin="0,10,0,12" Text="{loc:Loc Perf_Empty_NoEval}" />
+                                    <Button Style="{StaticResource PrimaryButton}" Height="40" HorizontalAlignment="Center" MinWidth="200"
+                                            Content="{loc:Loc Perf_NewPeriod}" Command="{Binding NewPeriodCommand}" />
+                                </StackPanel>
+                            </Border>
+
+                            <!-- KPI tiles -->
+                            <UniformGrid Rows="1" Columns="4" Margin="0,14,0,0" Visibility="{Binding HasData, Converter={StaticResource BoolToVis}}">
+                                <Border Style="{StaticResource Tile}">
+                                    <StackPanel>
+                                        <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Perf_CompanyAverage}" />
+                                        <TextBlock FontFamily="{StaticResource MonoFont}" FontSize="22" FontWeight="SemiBold" FlowDirection="LeftToRight" HorizontalAlignment="Right" Foreground="{DynamicResource BrandText}" Text="{Binding CompanyAvgText}" />
+                                        <TextBlock Style="{StaticResource Caption}" Text="{Binding CompanyBandLabel}" />
                                     </StackPanel>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
+                                </Border>
+                                <Border Style="{StaticResource Tile}">
+                                    <StackPanel>
+                                        <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Perf_Best}" />
+                                        <TextBlock Text="🏆" FontSize="18" />
+                                        <TextBlock FontSize="12.5" TextWrapping="Wrap" Foreground="{DynamicResource AccentText}" Text="{Binding BestText}" />
+                                    </StackPanel>
+                                </Border>
+                                <Border Style="{StaticResource Tile}">
+                                    <StackPanel>
+                                        <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Perf_Pending}" />
+                                        <TextBlock FontFamily="{StaticResource MonoFont}" FontSize="22" FontWeight="SemiBold" Foreground="{DynamicResource StatusPendingText}" Text="{Binding PendingCount}" />
+                                    </StackPanel>
+                                </Border>
+                                <Border Style="{StaticResource Tile}">
+                                    <StackPanel>
+                                        <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Perf_NotEvaluated}" />
+                                        <TextBlock FontFamily="{StaticResource MonoFont}" FontSize="22" FontWeight="SemiBold" Text="{Binding NotEvaluatedCount}" />
+                                    </StackPanel>
+                                </Border>
+                            </UniformGrid>
 
-                        <!-- Cycle detail -->
-                        <Grid Grid.Column="2">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="*" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
-                            <ItemsControl Grid.Row="0" ItemsSource="{Binding Departments}" Margin="0,0,0,10">
-                                <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border Style="{StaticResource Card}" Padding="12,8" Margin="0,0,8,8" Width="180">
-                                            <StackPanel>
-                                                <TextBlock Text="{Binding Department}" FontWeight="SemiBold" FontSize="12.5" />
-                                                <ProgressBar Style="{StaticResource Bar}" Margin="0,5,0,3" Value="{Binding CompletionValue, Mode=OneWay}" />
-                                                <TextBlock Text="{Binding CompletionText}" FontSize="11" Foreground="{DynamicResource TextMuted}" />
-                                            </StackPanel>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                            <DataGrid Grid.Row="1" Style="{StaticResource AppGrid}" ItemsSource="{Binding Reviews}" SelectedItem="{Binding SelectedReview}">
-                                <DataGrid.InputBindings>
-                                    <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding OpenReviewCommand}" />
-                                </DataGrid.InputBindings>
-                                <DataGrid.ContextMenu>
-                                    <ContextMenu DataContext="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
-                                        <MenuItem Header="{loc:Loc Perf_OpenReview}" Command="{Binding OpenReviewCommand}" />
-                                        <Separator />
-                                        <MenuItem Header="{loc:Loc Common_Delete}" Command="{Binding DeleteCommand}" />
-                                    </ContextMenu>
-                                </DataGrid.ContextMenu>
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn Header="{loc:Loc Payroll_Employee}" Binding="{Binding EmployeeName}" Width="*" />
-                                    <DataGridTextColumn Header="{loc:Loc Users_ColDepartment}" Binding="{Binding Department}" Width="140" />
-                                    <DataGridTextColumn Header="{loc:Loc Perf_Reviewer}" Binding="{Binding Reviewer}" Width="140" />
-                                    <DataGridTextColumn Header="{loc:Loc Perf_Score}" Binding="{Binding ScoreText}" Width="150" />
-                                    <DataGridTextColumn Header="{loc:Loc Common_Status}" Binding="{Binding StatusLabel}" Width="90" ElementStyle="{StaticResource Center}" />
-                                    <DataGridTextColumn Header="{loc:Loc Contract_Expiry}" Binding="{Binding DueText}" Width="90" ElementStyle="{StaticResource Center}" />
-                                    <DataGridTemplateColumn Width="92" CanUserResize="False" CanUserSort="False">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                                    <Button Style="{StaticResource RowIconButton}" Content="⋯" ToolTip="{loc:Loc Common_MoreActions}"
-                                                            beh:RowActions.SelectRow="True" beh:RowActions.OpenMenuOnClick="True"
-                                                            Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=DataGrid}}">
-                                                        <Button.ContextMenu>
-                                                            <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
-                                                                <MenuItem Header="{loc:Loc Perf_OpenReview}" Command="{Binding OpenReviewCommand}" />
-                                                                <Separator />
-                                                                <MenuItem Header="{loc:Loc Common_Delete}" Command="{Binding DeleteCommand}" />
-                                                            </ContextMenu>
-                                                        </Button.ContextMenu>
-                                                    </Button>
-                                                    <Button Style="{StaticResource RowIconButton}" Content="›" ToolTip="{loc:Loc Common_Open}"
-                                                            beh:RowActions.SelectRow="True"
-                                                            Command="{Binding DataContext.OpenReviewCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" />
-                                                </StackPanel>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
-                                </DataGrid.Columns>
-                            </DataGrid>
-                        </Grid>
-                    </Grid>
-                </Grid>
-            </TabItem>
-
-            <!-- ============================================ Évaluations -->
-            <TabItem Header="{loc:Loc Perf_Tab_Reviews}">
-                <Grid Margin="0,14,0,0">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-                    <DataGrid Grid.Row="0" Style="{StaticResource AppGrid}" ItemsSource="{Binding Reviews}" SelectedItem="{Binding SelectedReview}">
-                        <DataGrid.InputBindings>
-                            <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding OpenCommand}" />
-                        </DataGrid.InputBindings>
-                        <DataGrid.ContextMenu>
-                            <ContextMenu DataContext="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
-                                <MenuItem Header="{loc:Loc Perf_Open}" Command="{Binding OpenCommand}" />
-                                <MenuItem Header="{loc:Loc Ats_Reopen}" Command="{Binding ReopenCommand}" />
-                                <Separator />
-                                <MenuItem Header="{loc:Loc Common_Delete}" Command="{Binding DeleteCommand}" />
-                            </ContextMenu>
-                        </DataGrid.ContextMenu>
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="{loc:Loc Payroll_Employee}" Binding="{Binding EmployeeName}" Width="*" />
-                            <DataGridTextColumn Header="{loc:Loc Leave_Period}" Binding="{Binding PeriodLabel}" Width="110" ElementStyle="{StaticResource Center}" />
-                            <DataGridTextColumn Header="{loc:Loc Perf_Reviewer}" Binding="{Binding Reviewer}" Width="150" />
-                            <DataGridTextColumn Header="{loc:Loc Recent_Date}" Binding="{Binding DateText}" Width="100" ElementStyle="{StaticResource Center}" />
-                            <DataGridTextColumn Header="{loc:Loc Perf_Score}" Binding="{Binding ScoreText}" Width="90" ElementStyle="{StaticResource Center}" />
-                            <DataGridTextColumn Header="{loc:Loc Perf_Rating}" Binding="{Binding Rating}" Width="120" ElementStyle="{StaticResource Center}" />
-                            <DataGridTextColumn Header="{loc:Loc Common_Status}" Binding="{Binding StatusLabel}" Width="100" ElementStyle="{StaticResource Center}" />
-                            <DataGridTemplateColumn Width="92" CanUserResize="False" CanUserSort="False">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                            <Button Style="{StaticResource RowIconButton}" Content="⋯" ToolTip="{loc:Loc Common_MoreActions}"
-                                                    beh:RowActions.SelectRow="True" beh:RowActions.OpenMenuOnClick="True"
-                                                    Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=DataGrid}}">
-                                                <Button.ContextMenu>
-                                                    <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
-                                                        <MenuItem Header="{loc:Loc Perf_Open}" Command="{Binding OpenCommand}" />
-                                                        <MenuItem Header="{loc:Loc Ats_Reopen}" Command="{Binding ReopenCommand}" />
-                                                        <Separator />
-                                                        <MenuItem Header="{loc:Loc Common_Delete}" Command="{Binding DeleteCommand}" />
-                                                    </ContextMenu>
-                                                </Button.ContextMenu>
-                                            </Button>
-                                            <Button Style="{StaticResource RowIconButton}" Content="›" ToolTip="{loc:Loc Common_Open}"
-                                                    beh:RowActions.SelectRow="True"
-                                                    Command="{Binding DataContext.OpenCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" />
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                        </DataGrid.Columns>
-                    </DataGrid>
-                    <Grid Grid.Row="1" Margin="0,12,0,0">
-                        <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Center" HorizontalAlignment="Left" FlowDirection="LeftToRight" Text="{Binding StatusMessage}" />
-                        <Button Style="{StaticResource PrimaryButton}" HorizontalAlignment="Right" Content="{loc:Loc Perf_NewReview}" Command="{Binding NewCommand}" />
-                    </Grid>
-                </Grid>
-            </TabItem>
-
-            <!-- ============================================ Modèles -->
-            <TabItem Header="{loc:Loc Perf_Tab_Templates}">
-                <Grid DataContext="{Binding Modeles}" Margin="0,14,0,0">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-                    <TextBlock Grid.Row="0" Style="{StaticResource Caption}" Text="{Binding StatusMessage}" />
-                    <ScrollViewer Grid.Row="1" Margin="0,10,0,0" VerticalScrollBarVisibility="Auto">
-                        <ListBox ItemsSource="{Binding Templates}" SelectedItem="{Binding Selected}" BorderThickness="0" Background="Transparent"
-                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                            <ListBox.InputBindings>
-                                <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding EditCommand}" />
-                            </ListBox.InputBindings>
-                            <ListBox.ContextMenu>
-                                <ContextMenu DataContext="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
-                                    <MenuItem Header="{loc:Loc Common_Edit}" Command="{Binding EditCommand}" />
-                                    <MenuItem Header="{loc:Loc Perf_Duplicate}" Command="{Binding DuplicateCommand}" />
-                                    <Separator />
-                                    <MenuItem Header="{loc:Loc Common_Delete}" Command="{Binding DeleteCommand}" />
-                                </ContextMenu>
-                            </ListBox.ContextMenu>
-                            <ListBox.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ListBox.ItemsPanel>
-                            <ListBox.ItemContainerStyle>
-                                <Style TargetType="ListBoxItem">
-                                    <Setter Property="Margin" Value="0,0,12,12" />
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate TargetType="ListBoxItem">
-                                                <Border x:Name="bd" Width="240" Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}"
-                                                        BorderThickness="1" CornerRadius="12" Padding="16" Cursor="Hand">
-                                                    <StackPanel>
-                                                        <DockPanel>
-                                                            <Border DockPanel.Dock="Right" Style="{StaticResource Chip}" Background="{Binding OriginBrush}">
-                                                                <TextBlock Text="{Binding OriginText}" Foreground="White" FontSize="10.5" FontWeight="SemiBold" />
-                                                            </Border>
-                                                            <Border Width="34" Height="34" CornerRadius="9" Background="{DynamicResource BrandSoft}">
-                                                                <Path Width="17" Height="17" Stretch="Uniform" Fill="{DynamicResource BrandText}" Data="{StaticResource IconFileCheck}" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                                            </Border>
-                                                        </DockPanel>
-                                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14" Margin="0,10,0,0" TextWrapping="Wrap" />
-                                                        <TextBlock Text="{Binding KindLabel}" FontSize="12" Foreground="{DynamicResource TextSecondary}" Margin="0,3,0,0" />
-                                                        <TextBlock Text="{Binding DepartmentTag}" FontSize="11.5" Foreground="{DynamicResource TextMuted}" Margin="0,2,0,0" />
-                                                        <TextBlock Text="{Binding CriteriaText}" FontSize="11.5" Foreground="{DynamicResource TextMuted}" Margin="0,8,0,0" />
-                                                    </StackPanel>
-                                                </Border>
-                                                <ControlTemplate.Triggers>
-                                                    <Trigger Property="IsSelected" Value="True">
-                                                        <Setter TargetName="bd" Property="BorderBrush" Value="{DynamicResource Accent}" />
-                                                        <Setter TargetName="bd" Property="BorderThickness" Value="2" />
-                                                    </Trigger>
-                                                </ControlTemplate.Triggers>
-                                            </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Style>
-                            </ListBox.ItemContainerStyle>
-                        </ListBox>
-                    </ScrollViewer>
-                    <Grid Grid.Row="2" Margin="0,12,0,0">
-                        <Button Style="{StaticResource PrimaryButton}" HorizontalAlignment="Right" Content="{loc:Loc Perf_Duplicate}" Command="{Binding DuplicateCommand}" />
-                    </Grid>
-                </Grid>
-            </TabItem>
-
-            <!-- ============================================ Tableau de bord -->
-            <TabItem Header="{loc:Loc Shell_Nav_Dashboard}">
-                <ScrollViewer DataContext="{Binding Dashboard}" Margin="0,14,0,0" VerticalScrollBarVisibility="Auto">
-                    <StackPanel>
-                        <Grid>
-                            <TextBlock Style="{StaticResource H2}" Text="{Binding Headline}" VerticalAlignment="Center" />
-                            <Button HorizontalAlignment="Right" Style="{StaticResource SecondaryButton}"
-                                    Content="{loc:Loc Common_ExportPdf}" Command="{Binding ExportPdfCommand}"
-                                    Visibility="{Binding HasData, Converter={StaticResource BoolToVis}}" />
-                        </Grid>
-                        <TextBlock Style="{StaticResource Caption}" Margin="0,14,0,0" Text="{loc:Loc Perf_NoData}"
-                                   Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVis}}" />
-                        <Grid Margin="0,14,0,0" Visibility="{Binding HasData, Converter={StaticResource BoolToVis}}">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="16" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Border Grid.Column="0" Style="{StaticResource Card}" Padding="16">
-                                <StackPanel>
-                                    <TextBlock Text="{loc:Loc Perf_Top10}" FontWeight="SemiBold" Foreground="{DynamicResource Salary}" Margin="0,0,0,8" />
-                                    <ItemsControl ItemsSource="{Binding Top}">
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <Grid Height="34">
-                                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                        <TextBlock Text="{Binding EmployeeName}" FontWeight="SemiBold" FontSize="13" />
-                                                        <TextBlock Text="{Binding Department}" FontSize="11" Foreground="{DynamicResource TextMuted}" Margin="8,0,0,0" VerticalAlignment="Center" />
-                                                    </StackPanel>
-                                                    <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center" FontFamily="{StaticResource MonoFont}" FontWeight="SemiBold" Foreground="{Binding Brush}" Text="{Binding PercentText}" />
-                                                </Grid>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                </StackPanel>
+                            <!-- all clear -->
+                            <Border Margin="0,14,0,0" Padding="14,10" CornerRadius="10" Background="{DynamicResource StatusSuccessSoft}"
+                                    Visibility="{Binding AllClear, Converter={StaticResource BoolToVis}}">
+                                <TextBlock Foreground="{DynamicResource StatusSuccessText}" FontWeight="SemiBold" Text="{loc:Loc Perf_AllClear}" />
                             </Border>
-                            <Border Grid.Column="2" Style="{StaticResource Card}" Padding="16">
-                                <StackPanel>
-                                    <TextBlock Text="{loc:Loc Perf_Bottom10}" FontWeight="SemiBold" Foreground="{DynamicResource Deduction}" Margin="0,0,0,8" />
-                                    <ItemsControl ItemsSource="{Binding Bottom}">
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <Grid Height="34">
-                                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                        <TextBlock Text="{Binding EmployeeName}" FontWeight="SemiBold" FontSize="13" />
-                                                        <TextBlock Text="{Binding Department}" FontSize="11" Foreground="{DynamicResource TextMuted}" Margin="8,0,0,0" VerticalAlignment="Center" />
-                                                    </StackPanel>
-                                                    <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center" FontFamily="{StaticResource MonoFont}" FontWeight="SemiBold" Foreground="{Binding Brush}" Text="{Binding PercentText}" />
-                                                </Grid>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                </StackPanel>
-                            </Border>
-                        </Grid>
-                        <Border Style="{StaticResource Card}" Padding="16" Margin="0,14,0,0" Visibility="{Binding HasData, Converter={StaticResource BoolToVis}}">
-                            <StackPanel>
-                                <TextBlock Text="{loc:Loc Perf_DeptAverage}" FontWeight="SemiBold" Margin="0,0,0,10" />
-                                <ItemsControl ItemsSource="{Binding Departments}">
+
+                            <!-- alerts to handle -->
+                            <StackPanel Margin="0,14,0,0" Visibility="{Binding HasAlerts, Converter={StaticResource BoolToVis}}">
+                                <TextBlock Style="{StaticResource Caption}" Foreground="{DynamicResource StatusDangerText}" Text="{loc:Loc Perf_ToHandle}" Margin="0,0,0,8" />
+                                <ItemsControl ItemsSource="{Binding Alerts}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <Grid Height="30">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="160" />
-                                                    <ColumnDefinition Width="*" />
-                                                    <ColumnDefinition Width="70" />
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock Grid.Column="0" Text="{Binding Department}" VerticalAlignment="Center" FontSize="12.5" />
-                                                <ProgressBar Grid.Column="1" Style="{StaticResource Bar}" VerticalAlignment="Center" Foreground="{Binding Brush}" Value="{Binding BarValue, Mode=OneWay}" />
-                                                <TextBlock Grid.Column="2" Text="{Binding AverageText}" HorizontalAlignment="Right" VerticalAlignment="Center" FontFamily="{StaticResource MonoFont}" FontSize="12.5" />
-                                            </Grid>
+                                            <Border Padding="12,9" Margin="0,0,0,8" CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource Border}" Background="{DynamicResource Surface}">
+                                                <DockPanel>
+                                                    <Button DockPanel.Dock="Right" Style="{StaticResource PrimaryButton}" Height="30" MinWidth="90" Content="{loc:Loc Perf_Handle}"
+                                                            Command="{Binding DataContext.HandleAlertCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}" />
+                                                    <Border DockPanel.Dock="Left" Style="{StaticResource KindPill}" Margin="0,0,10,0"><TextBlock Style="{StaticResource PillText}" Text="⚠" /></Border>
+                                                    <TextBlock Text="{Binding Message}" VerticalAlignment="Center" TextWrapping="Wrap" />
+                                                </DockPanel>
+                                            </Border>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
-                                <TextBlock Text="{loc:Loc Perf_YearTrend}" FontWeight="SemiBold" Margin="0,16,0,10" />
-                                <ItemsControl ItemsSource="{Binding Trend}">
+                            </StackPanel>
+
+                            <!-- movers -->
+                            <Grid Margin="0,16,0,0" Visibility="{Binding HasData, Converter={StaticResource BoolToVis}}">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="20" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Visibility="{Binding HasImproved, Converter={StaticResource BoolToVis}}">
+                                    <TextBlock Style="{StaticResource Caption}" Foreground="{DynamicResource StatusSuccessText}" Text="{loc:Loc Perf_Improved}" Margin="0,0,0,6" />
+                                    <ItemsControl ItemsSource="{Binding Improved}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Margin="0,3"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="0" Text="{Binding EmployeeName}" VerticalAlignment="Center" />
+                                                    <Border Grid.Column="1" Style="{StaticResource KindPill}"><TextBlock Style="{StaticResource PillText}"><Run Text="{Binding Arrow, Mode=OneWay}" /><Run Text=" " /><Run Text="{Binding DeltaText, Mode=OneWay}" /></TextBlock></Border>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" Visibility="{Binding HasDeclined, Converter={StaticResource BoolToVis}}">
+                                    <TextBlock Style="{StaticResource Caption}" Foreground="{DynamicResource StatusDangerText}" Text="{loc:Loc Perf_Declined}" Margin="0,0,0,6" />
+                                    <ItemsControl ItemsSource="{Binding Declined}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Margin="0,3"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="0" Text="{Binding EmployeeName}" VerticalAlignment="Center" />
+                                                    <Border Grid.Column="1" Style="{StaticResource KindPill}"><TextBlock Style="{StaticResource PillText}"><Run Text="{Binding Arrow, Mode=OneWay}" /><Run Text=" " /><Run Text="{Binding DeltaText, Mode=OneWay}" /></TextBlock></Border>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- need support -->
+                            <StackPanel Margin="0,16,0,0" Visibility="{Binding HasNeedSupport, Converter={StaticResource BoolToVis}}">
+                                <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Perf_NeedSupport}" Margin="0,0,0,6" />
+                                <ItemsControl ItemsSource="{Binding NeedSupport}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <Grid Height="30">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="160" />
-                                                    <ColumnDefinition Width="*" />
-                                                    <ColumnDefinition Width="70" />
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock Grid.Column="0" Text="{Binding Label}" VerticalAlignment="Center" FontSize="12.5" />
-                                                <ProgressBar Grid.Column="1" Style="{StaticResource Bar}" VerticalAlignment="Center" Value="{Binding BarValue, Mode=OneWay}" />
-                                                <TextBlock Grid.Column="2" Text="{Binding AverageText}" HorizontalAlignment="Right" VerticalAlignment="Center" FontFamily="{StaticResource MonoFont}" FontSize="12.5" />
+                                            <Grid Margin="0,4"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="70" /><ColumnDefinition Width="120" /></Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0" Text="{Binding EmployeeName}" VerticalAlignment="Center" />
+                                                <TextBlock Grid.Column="1" FontFamily="{StaticResource MonoFont}" TextAlignment="Right" FlowDirection="LeftToRight" Text="{Binding ScoreText}" VerticalAlignment="Center" />
+                                                <Border Grid.Column="2" Style="{StaticResource BandPill}" HorizontalAlignment="Right"><TextBlock Style="{StaticResource PillText}" Text="{Binding BandLabel}" /></Border>
                                             </Grid>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
                             </StackPanel>
-                        </Border>
-                    </StackPanel>
-                </ScrollViewer>
-            </TabItem>
 
-            <!-- ============================================ Calibrage -->
-            <TabItem Header="{loc:Loc Perf_Tab_Calibration}">
-                <Grid DataContext="{Binding Calibration}" Margin="0,14,0,0">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-                    <TextBlock Grid.Row="0" Style="{StaticResource H2}" Text="{Binding Headline}" />
-                    <TextBlock Grid.Row="1" Style="{StaticResource Caption}" Margin="0,14,0,0" Text="{loc:Loc Perf_NoFinalized}"
-                               Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVis}}" />
-                    <DataGrid Grid.Row="1" Margin="0,14,0,0" Style="{StaticResource AppGrid}" RowHeight="38" ItemsSource="{Binding Departments}"
-                              Visibility="{Binding HasData, Converter={StaticResource BoolToVis}}">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="{loc:Loc Users_ColDepartment}" Binding="{Binding Department}" Width="*" />
-                            <DataGridTextColumn Header="{loc:Loc Perf_Col_Reviews}" Binding="{Binding CountText}" Width="70" ElementStyle="{StaticResource Center}" />
-                            <DataGridTextColumn Header="{loc:Loc Perf_Average}" Binding="{Binding AverageText}" Width="90" ElementStyle="{StaticResource Center}" />
-                            <DataGridTextColumn Header="{loc:Loc Perf_Deviation}" Binding="{Binding DeltaText}" Width="90" ElementStyle="{StaticResource Center}" />
-                            <DataGridTextColumn Header="{loc:Loc Perf_Cal_Insuff}" Binding="{Binding D0}" Width="70" ElementStyle="{StaticResource Center}" />
-                            <DataGridTextColumn Header="{loc:Loc Perf_Cal_FairlyGood}" Binding="{Binding D1}" Width="70" ElementStyle="{StaticResource Center}" />
-                            <DataGridTextColumn Header="{loc:Loc Perf_Cal_Good}" Binding="{Binding D2}" Width="60" ElementStyle="{StaticResource Center}" />
-                            <DataGridTextColumn Header="{loc:Loc Perf_Cal_VeryGood}" Binding="{Binding D3}" Width="70" ElementStyle="{StaticResource Center}" />
-                            <DataGridTextColumn Header="{loc:Loc Perf_Cal_Excellent}" Binding="{Binding D4}" Width="70" ElementStyle="{StaticResource Center}" />
-                            <DataGridTemplateColumn Header="{loc:Loc Perf_Alert}" Width="110">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <Border Style="{StaticResource Chip}" Background="{Binding OutlierBrush}" Visibility="{Binding IsOutlier, Converter={StaticResource BoolToVis}}" Margin="6,0">
-                                            <TextBlock Text="{Binding OutlierText}" Foreground="White" FontSize="11" FontWeight="SemiBold" />
-                                        </Border>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                        </DataGrid.Columns>
-                    </DataGrid>
-                </Grid>
-            </TabItem>
-
-            <!-- ============================================ Objectifs -->
-            <TabItem Header="{loc:Loc Perf_Tab_Goals}">
-                <Grid DataContext="{Binding Objectifs}" Margin="0,14,0,0">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-                    <DataGrid Grid.Row="0" Style="{StaticResource AppGrid}" RowHeight="40" ItemsSource="{Binding Goals}" SelectedItem="{Binding Selected}">
-                        <DataGrid.InputBindings>
-                            <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding EditCommand}" />
-                        </DataGrid.InputBindings>
-                        <DataGrid.ContextMenu>
-                            <ContextMenu DataContext="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
-                                <MenuItem Header="{loc:Loc Common_Edit}" Command="{Binding EditCommand}" />
-                                <MenuItem Header="{loc:Loc Perf_MarkAchieved}" Command="{Binding AchieveCommand}" />
-                                <Separator />
-                                <MenuItem Header="{loc:Loc Common_Delete}" Command="{Binding DeleteCommand}" />
-                            </ContextMenu>
-                        </DataGrid.ContextMenu>
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="{loc:Loc Payroll_Employee}" Binding="{Binding EmployeeName}" Width="150" />
-                            <DataGridTextColumn Header="{loc:Loc Perf_Goal}" Binding="{Binding Title}" Width="*" />
-                            <DataGridTextColumn Header="{loc:Loc Perf_Target}" Binding="{Binding TargetMetric}" Width="140" />
-                            <DataGridTextColumn Header="{loc:Loc Contract_Expiry}" Binding="{Binding DueText}" Width="90" ElementStyle="{StaticResource Center}" />
-                            <DataGridTemplateColumn Header="{loc:Loc Perf_Progress}" Width="150">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <StackPanel VerticalAlignment="Center" Margin="8,0">
-                                            <ProgressBar Style="{StaticResource Bar}" Value="{Binding ProgressValue, Mode=OneWay}" />
-                                            <TextBlock Text="{Binding ProgressText}" FontSize="11" Foreground="{DynamicResource TextMuted}" Margin="0,3,0,0" HorizontalAlignment="Center" />
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="{loc:Loc Common_Status}" Width="100">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <Border Style="{StaticResource Chip}" Background="{Binding StatusBrush}" Margin="6,0">
-                                            <TextBlock Text="{Binding StatusLabel}" Foreground="White" FontSize="11" FontWeight="SemiBold" />
-                                        </Border>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                        </DataGrid.Columns>
-                    </DataGrid>
-                    <Grid Grid.Row="1" Margin="0,12,0,0">
-                        <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Center" HorizontalAlignment="Left" FlowDirection="LeftToRight" Text="{Binding StatusMessage}" />
-                        <Button Style="{StaticResource PrimaryButton}" HorizontalAlignment="Right" Content="{loc:Loc Perf_NewGoal}" Command="{Binding NewCommand}" />
-                    </Grid>
-                </Grid>
-            </TabItem>
-
-            <!-- ============================================ Comparaison -->
-            <TabItem Header="{loc:Loc Perf_Tab_Comparison}">
-                <Grid DataContext="{Binding Comparaison}" Margin="0,14,0,0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="240" />
-                        <ColumnDefinition Width="16" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    <Grid Grid.Column="0">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="*" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-                        <TextBlock Grid.Row="0" Style="{StaticResource Caption}" Text="{loc:Loc Shell_Nav_Employees}" Margin="0,0,0,6" />
-                        <Border Grid.Row="1" Style="{StaticResource Card}" Padding="10,6">
-                            <ScrollViewer VerticalScrollBarVisibility="Auto">
-                                <ItemsControl ItemsSource="{Binding Employees}">
+                            <!-- recent activity -->
+                            <StackPanel Margin="0,16,0,0" Visibility="{Binding HasActivity, Converter={StaticResource BoolToVis}}">
+                                <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Perf_RecentActivity}" Margin="0,0,0,6" />
+                                <ItemsControl ItemsSource="{Binding Activity}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <CheckBox Margin="0,3" IsChecked="{Binding IsChecked}">
-                                                <StackPanel>
-                                                    <TextBlock Text="{Binding Name}" FontSize="12.5" />
-                                                    <TextBlock Text="{Binding Department}" FontSize="10.5" Foreground="{DynamicResource TextMuted}" />
-                                                </StackPanel>
-                                            </CheckBox>
+                                            <Border Padding="0,6" BorderBrush="{DynamicResource Border}" BorderThickness="0,0,0,1">
+                                                <DockPanel>
+                                                    <TextBlock DockPanel.Dock="Left" Text="{Binding Glyph}" FontSize="15" Margin="0,0,10,0" VerticalAlignment="Top" />
+                                                    <TextBlock DockPanel.Dock="Right" Style="{StaticResource Caption}" FontFamily="{StaticResource MonoFont}" FlowDirection="LeftToRight" Text="{Binding DateText}" Margin="8,0,0,0" VerticalAlignment="Top" />
+                                                    <StackPanel>
+                                                        <TextBlock Text="{Binding EmployeeName}" FontWeight="SemiBold" FontSize="12.5" />
+                                                        <TextBlock Text="{Binding Note}" Foreground="{DynamicResource TextSecondary}" FontSize="12" TextWrapping="Wrap" />
+                                                    </StackPanel>
+                                                </DockPanel>
+                                            </Border>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
-                            </ScrollViewer>
-                        </Border>
-                        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,10,0,0">
-                            <Button Style="{StaticResource SecondaryButton}" Content="{loc:Loc Perf_Clear}" Command="{Binding ClearCommand}" />
-                            <Button Style="{StaticResource AccentButton}" Margin="8,0,0,0" Content="{loc:Loc Perf_Compare}" Command="{Binding CompareCommand}" />
+                            </StackPanel>
+
+                            <Rectangle Height="20" Fill="Transparent" />
                         </StackPanel>
-                    </Grid>
-                    <ScrollViewer Grid.Column="2" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
-                        <ItemsControl ItemsSource="{Binding Columns}">
-                            <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Border Style="{StaticResource Card}" Width="220" Margin="0,0,12,0" Padding="16">
-                                        <StackPanel>
-                                            <TextBlock Text="{Binding EmployeeName}" FontWeight="SemiBold" FontSize="14" TextWrapping="Wrap" />
-                                            <TextBlock Text="{Binding Poste}" FontSize="11.5" Foreground="{DynamicResource TextSecondary}" />
-                                            <TextBlock Text="{Binding Department}" FontSize="11" Foreground="{DynamicResource TextMuted}" Margin="0,0,0,10" />
-                                            <TextBlock Text="{loc:Loc Perf_LastScore}" FontSize="11" Foreground="{DynamicResource TextMuted}" Margin="0,4,0,0" />
-                                            <TextBlock Text="{Binding LatestText}" FontFamily="{StaticResource MonoFont}" FontSize="20" FontWeight="Bold" Foreground="{Binding Brush}" />
-                                            <TextBlock Text="{Binding Rating}" FontSize="12" Foreground="{DynamicResource TextSecondary}" />
-                                            <TextBlock Text="{loc:Loc Perf_Average}" FontSize="11" Foreground="{DynamicResource TextMuted}" Margin="0,10,0,0" />
-                                            <TextBlock Text="{Binding AverageText}" FontFamily="{StaticResource MonoFont}" FontSize="14" FontWeight="SemiBold" />
-                                            <TextBlock Text="{loc:Loc Perf_Tab_Reviews}" FontSize="11" Foreground="{DynamicResource TextMuted}" Margin="0,8,0,0" />
-                                            <TextBlock Text="{Binding ReviewCountText}" FontSize="14" FontWeight="SemiBold" />
-                                            <TextBlock Text="{loc:Loc Perf_Tab_Goals}" FontSize="11" Foreground="{DynamicResource TextMuted}" Margin="0,8,0,0" />
-                                            <TextBlock Text="{Binding GoalsText}" FontSize="12.5" />
-                                        </StackPanel>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
                     </ScrollViewer>
                 </Grid>
             </TabItem>
 
-            <!-- ============================================ Parcours -->
-            <TabItem Header="{loc:Loc Perf_Tab_Career}">
-                <Grid DataContext="{Binding Parcours}" Margin="0,14,0,0">
+            <!-- ================= TAB 1 — EVALUATIONS ================= -->
+            <TabItem Header="{loc:Loc Perf_Tab_Evaluations}">
+                <Grid DataContext="{Binding Evaluations}" Margin="0,10,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <!-- toolbar -->
+                    <DockPanel Grid.Row="0">
+                        <Button DockPanel.Dock="Right" Style="{StaticResource AccentButton}" Height="34" Margin="8,0,0,0"
+                                Content="{loc:Loc Perf_LogBehavior}" Command="{Binding QuickBehaviorCommand}" />
+                        <Button DockPanel.Dock="Right" Style="{StaticResource PrimaryButton}" Height="34" Margin="8,0,0,0"
+                                Content="{loc:Loc Perf_NewPeriod}" Command="{Binding NewPeriodCommand}" />
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Center" Margin="0,0,8,0" Text="{loc:Loc Perf_Period}" />
+                            <ComboBox Style="{StaticResource AppComboBox}" Width="230" Height="34"
+                                      ItemsSource="{Binding Periods}" SelectedItem="{Binding SelectedPeriod}" DisplayMemberPath="Name" />
+                            <Button Style="{StaticResource SecondaryButton}" Height="34" Margin="8,0,0,0"
+                                    Content="{Binding PeriodActionLabel}" Command="{Binding TogglePeriodCommand}" />
+                            <Button Style="{StaticResource SecondaryButton}" Height="34" Margin="8,0,0,0"
+                                    Content="{loc:Loc Common_Delete}" Command="{Binding DeletePeriodCommand}" />
+                        </StackPanel>
+                    </DockPanel>
+
+                    <!-- best of period -->
+                    <Border Grid.Row="1" Margin="0,12,0,0" Padding="14,10" CornerRadius="10"
+                            Background="{DynamicResource AccentSoft}" Visibility="{Binding HasBest, Converter={StaticResource BoolToVis}}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="🏆" FontSize="18" VerticalAlignment="Center" Margin="0,0,10,0" />
+                            <TextBlock VerticalAlignment="Center" Foreground="{DynamicResource AccentText}" FontWeight="SemiBold">
+                                <Run Text="{loc:Loc Perf_BestOfPeriod}" /><Run Text="  " /><Run Text="{Binding BestText, Mode=OneWay}" />
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- board -->
+                    <DataGrid x:Name="BoardGrid" Grid.Row="2" Margin="0,12,0,0" Style="{StaticResource PerfGrid}" ItemsSource="{Binding Board}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="{loc:Loc Perf_Col_Employee}" Binding="{Binding EmployeeName}" Width="*" />
+                            <DataGridTextColumn Header="{loc:Loc Perf_Col_Dept}" Binding="{Binding Department}" Width="170" />
+                            <DataGridTextColumn Header="{loc:Loc Perf_Score}" Binding="{Binding ScoreText}" Width="110" ElementStyle="{StaticResource CenterText}" />
+                            <DataGridTemplateColumn Header="{loc:Loc Perf_Rating}" Width="130">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Style="{StaticResource BandPill}" HorizontalAlignment="Center" Visibility="{Binding IsEvaluated, Converter={StaticResource BoolToVis}}">
+                                            <TextBlock Style="{StaticResource PillText}" Text="{Binding BandLabel}" />
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="{loc:Loc Common_Status}" Width="120">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Style="{StaticResource StatusPill}">
+                                            <TextBlock Style="{StaticResource PillText}" Text="{Binding StatusLabel}" />
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Width="215" CanUserResize="False" CanUserSort="False">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                            <Button Content="👍" Style="{StaticResource RowIconButton}" ToolTip="{loc:Loc Perf_BehaviorPositive}"
+                                                    Command="{Binding DataContext.QuickPositiveCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" CommandParameter="{Binding}" />
+                                            <Button Content="👎" Style="{StaticResource RowIconButton}" ToolTip="{loc:Loc Perf_BehaviorNegative}"
+                                                    Command="{Binding DataContext.QuickNegativeCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" CommandParameter="{Binding}" />
+                                            <Button Style="{StaticResource SecondaryButton}" Height="28" Margin="6,0,0,0" MinWidth="90" Content="{Binding ActionLabel}"
+                                                    Command="{Binding DataContext.EvaluateCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" CommandParameter="{Binding}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <TextBlock Grid.Row="2" Margin="0,18,0,0" Style="{StaticResource EmptyStateMessage}" Text="{loc:Loc Perf_NoPeriod}"
+                               Visibility="{Binding HasItems, ElementName=BoardGrid, Converter={StaticResource InverseBoolToVis}}" />
+
+                    <TextBlock Grid.Row="3" Margin="0,12" Style="{StaticResource Caption}" FlowDirection="LeftToRight"
+                               HorizontalAlignment="Left" Text="{Binding StatusMessage}" />
+                </Grid>
+            </TabItem>
+
+            <!-- ================= TAB 2 — TEMPLATES ================= -->
+            <TabItem Header="{loc:Loc Perf_Tab_Templates}">
+                <Grid DataContext="{Binding Templates}" Margin="0,10,0,0">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
-                    <Grid Grid.Row="0">
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
-                            <TextBlock Text="{loc:Loc Payroll_Employee}" VerticalAlignment="Center" Foreground="{DynamicResource TextMuted}" FontSize="12" Margin="0,0,8,0" />
-                            <ComboBox Style="{StaticResource AppComboBox}" Width="240" Height="34" ItemsSource="{Binding Employees}" SelectedItem="{Binding SelectedEmployee}" DisplayMemberPath="Name" />
+
+                    <DockPanel Grid.Row="0">
+                        <Button DockPanel.Dock="Right" Style="{StaticResource PrimaryButton}" Height="34"
+                                Content="{loc:Loc Perf_NewTemplate}" Command="{Binding NewCommand}" />
+                        <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Center" Text="{loc:Loc Perf_Templates_Hint}" />
+                    </DockPanel>
+
+                    <DataGrid x:Name="TemplatesGrid" Grid.Row="1" Margin="0,12,0,0" Style="{StaticResource PerfGrid}"
+                              ItemsSource="{Binding Templates}" SelectedItem="{Binding Selected}">
+                        <DataGrid.InputBindings>
+                            <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding EditCommand}" />
+                        </DataGrid.InputBindings>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="{loc:Loc Perf_Col_Template}" Binding="{Binding Name}" Width="*" />
+                            <DataGridTextColumn Header="{loc:Loc Perf_Col_Dept}" Binding="{Binding Department}" Width="180" />
+                            <DataGridTextColumn Header="{loc:Loc Perf_Col_Mode}" Binding="{Binding ModeLabel}" Width="150" />
+                            <DataGridTextColumn Header="{loc:Loc Perf_Col_Criteria}" Binding="{Binding CountText}" Width="90" ElementStyle="{StaticResource CenterText}" />
+                            <DataGridTemplateColumn Width="120">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Style="{StaticResource StatusPill}" Visibility="{Binding HasTag, Converter={StaticResource BoolToVis}}">
+                                            <TextBlock Style="{StaticResource PillText}" Text="{Binding TagLabel}" />
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Width="60" CanUserResize="False" CanUserSort="False">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Style="{StaticResource RowIconButton}" Content="⋯" HorizontalAlignment="Right"
+                                                beh:RowActions.SelectRow="True" beh:RowActions.OpenMenuOnClick="True"
+                                                Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=DataGrid}}">
+                                            <Button.ContextMenu>
+                                                <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
+                                                    <MenuItem Header="{loc:Loc Common_Edit}" Command="{Binding EditCommand}" />
+                                                    <MenuItem Header="{loc:Loc Perf_Duplicate}" Command="{Binding DuplicateCommand}" />
+                                                    <MenuItem Header="{loc:Loc Perf_SetDefault}" Command="{Binding SetDefaultCommand}" />
+                                                    <Separator />
+                                                    <MenuItem Header="{loc:Loc Common_Delete}" Command="{Binding DeleteCommand}" />
+                                                </ContextMenu>
+                                            </Button.ContextMenu>
+                                        </Button>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <!-- ================= TAB 3 — REPORTS ================= -->
+            <TabItem Header="{loc:Loc Perf_Tab_Reports}">
+                <Grid DataContext="{Binding Reports}" Margin="0,10,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <DockPanel Grid.Row="0">
+                        <Button DockPanel.Dock="Right" Style="{StaticResource SecondaryButton}" Height="34" Margin="8,0,0,0"
+                                Content="{loc:Loc Perf_ExportCsv}" Command="{Binding ExportCsvCommand}" />
+                        <Button DockPanel.Dock="Right" Style="{StaticResource SecondaryButton}" Height="34" Margin="8,0,0,0"
+                                Content="{loc:Loc Perf_ExportPdf}" Command="{Binding ExportPdfCommand}" />
+                        <StackPanel Orientation="Horizontal">
+                            <ComboBox Style="{StaticResource AppComboBox}" Width="180" Height="34" SelectedIndex="{Binding Mode}">
+                                <ComboBoxItem Content="{loc:Loc Perf_Report_General}" />
+                                <ComboBoxItem Content="{loc:Loc Perf_Report_Dept}" />
+                                <ComboBoxItem Content="{loc:Loc Perf_Report_Employee}" />
+                            </ComboBox>
+                            <ComboBox Style="{StaticResource AppComboBox}" Width="200" Height="34" Margin="8,0,0,0"
+                                      ItemsSource="{Binding Departments}" SelectedItem="{Binding SelectedDepartment}"
+                                      Visibility="{Binding IsDept, Converter={StaticResource BoolToVis}}" />
+                            <ComboBox Style="{StaticResource AppComboBox}" Width="220" Height="34" Margin="8,0,0,0"
+                                      ItemsSource="{Binding Employees}" SelectedItem="{Binding SelectedEmployee}" DisplayMemberPath="Name"
+                                      Visibility="{Binding IsEmployee, Converter={StaticResource BoolToVis}}" />
                         </StackPanel>
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                            <Button Style="{StaticResource SecondaryButton}" Content="{loc:Loc Perf_RewardBtn}" Command="{Binding RewardCommand}" />
-                            <Button Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Content="{loc:Loc Perf_PromotionBtn}" Command="{Binding PromotionCommand}" />
-                        </StackPanel>
-                    </Grid>
-                    <Border Grid.Row="1" Style="{StaticResource Card}" Padding="0" Margin="0,14,0,0">
-                        <ScrollViewer VerticalScrollBarVisibility="Auto">
-                            <ItemsControl ItemsSource="{Binding Items}" Margin="16">
+                    </DockPanel>
+
+                    <ScrollViewer Grid.Row="1" Margin="0,14,0,0" VerticalScrollBarVisibility="Auto">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource H2}" Text="{Binding Headline}" />
+                            <TextBlock Style="{StaticResource Caption}" Margin="0,4,0,0" Text="{Binding Subline}" />
+
+                            <!-- scalar tiles -->
+                            <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
+                                <Border Style="{StaticResource Tile}" Visibility="{Binding IsEmployee, Converter={StaticResource InverseBoolToVis}}">
+                                    <StackPanel>
+                                        <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Perf_Average}" />
+                                        <TextBlock FontFamily="{StaticResource MonoFont}" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource BrandText}" Text="{Binding CompanyAvgText}" />
+                                    </StackPanel>
+                                </Border>
+                                <Border Style="{StaticResource Tile}" Visibility="{Binding IsEmployee, Converter={StaticResource BoolToVis}}">
+                                    <StackPanel>
+                                        <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Perf_Score}" />
+                                        <TextBlock FontFamily="{StaticResource MonoFont}" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource BrandText}">
+                                            <Run Text="{Binding EmpScoreText, Mode=OneWay}" /><Run Text="  " /><Run Text="{Binding EmpBandText, Mode=OneWay}" FontSize="12" Foreground="{DynamicResource TextSecondary}" />
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Border>
+                                <Border Style="{StaticResource Tile}" Visibility="{Binding IsEmployee, Converter={StaticResource BoolToVis}}">
+                                    <StackPanel>
+                                        <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Perf_Behavior}" />
+                                        <TextBlock FontFamily="{StaticResource MonoFont}" FontSize="20" FontWeight="SemiBold" Text="{Binding EmpBehaviorText}" />
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+
+                            <!-- recommendation (employee) -->
+                            <Border Margin="0,12,0,0" Padding="14,10" CornerRadius="10" Background="{DynamicResource BrandSoft}"
+                                    Visibility="{Binding IsEmployee, Converter={StaticResource BoolToVis}}">
+                                <TextBlock Foreground="{DynamicResource BrandText}" TextWrapping="Wrap">
+                                    <Run Text="{loc:Loc Perf_Recommendation}" FontWeight="SemiBold" /><Run Text="  " /><Run Text="{Binding EmpRecommendation, Mode=OneWay}" />
+                                </TextBlock>
+                            </Border>
+
+                            <!-- best (general) -->
+                            <TextBlock Margin="0,14,0,4" Style="{StaticResource Caption}" Text="{Binding BestText}"
+                                       Visibility="{Binding IsGeneral, Converter={StaticResource BoolToVis}}" />
+
+                            <!-- department averages (general) -->
+                            <TextBlock Margin="0,14,0,6" Style="{StaticResource Caption}" Text="{loc:Loc Perf_DeptAverages}"
+                                       Visibility="{Binding IsGeneral, Converter={StaticResource BoolToVis}}" />
+                            <ItemsControl ItemsSource="{Binding DeptAverages}" Visibility="{Binding IsGeneral, Converter={StaticResource BoolToVis}}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Grid Margin="0,0,0,4">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="96" />
-                                                <ColumnDefinition Width="Auto" />
-                                                <ColumnDefinition Width="*" />
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0" Text="{Binding DateText}" FontFamily="{StaticResource MonoFont}" FontSize="12" Foreground="{DynamicResource TextMuted}" VerticalAlignment="Top" Margin="0,10,0,0" />
-                                            <StackPanel Grid.Column="1" VerticalAlignment="Stretch" HorizontalAlignment="Center" Margin="6,0,14,0">
-                                                <Border Width="12" Height="12" CornerRadius="6" Background="{Binding KindBrush}" Margin="0,12,0,0" />
-                                                <Border Width="2" Background="{DynamicResource Border}" HorizontalAlignment="Center" Height="40" />
-                                            </StackPanel>
-                                            <Border Grid.Column="2" Background="{DynamicResource SurfaceMuted}" CornerRadius="8" Padding="12,10" Margin="0,4,0,4">
-                                                <StackPanel>
-                                                    <DockPanel>
-                                                        <Border DockPanel.Dock="Right" Style="{StaticResource Chip}" Background="{Binding KindBrush}">
-                                                            <TextBlock Text="{Binding KindLabel}" Foreground="White" FontSize="10.5" FontWeight="SemiBold" />
-                                                        </Border>
-                                                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="13.5" TextTrimming="CharacterEllipsis" />
-                                                    </DockPanel>
-                                                    <TextBlock Text="{Binding Detail}" FontSize="12" Foreground="{DynamicResource TextSecondary}" Margin="0,3,0,0" TextWrapping="Wrap" />
-                                                    <TextBlock Text="{Binding ValueText}" FontSize="12" Foreground="{DynamicResource TextMuted}" Margin="0,2,0,0" />
-                                                </StackPanel>
-                                            </Border>
-                                        </Grid>
+                                        <Border Padding="0,6" BorderBrush="{DynamicResource Border}" BorderThickness="0,0,0,1">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="80" /><ColumnDefinition Width="90" /></Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0" Text="{Binding Department}" VerticalAlignment="Center" />
+                                                <TextBlock Grid.Column="1" FontFamily="{StaticResource MonoFont}" TextAlignment="Center" Text="{Binding EmployeeCount}" />
+                                                <TextBlock Grid.Column="2" FontFamily="{StaticResource MonoFont}" TextAlignment="Right" FontWeight="SemiBold" Text="{Binding AverageScore}" />
+                                            </Grid>
+                                        </Border>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
-                        </ScrollViewer>
-                    </Border>
+
+                            <!-- ranking / top performers -->
+                            <TextBlock Margin="0,16,0,6" Style="{StaticResource Caption}" Text="{loc:Loc Perf_Ranking}"
+                                       Visibility="{Binding IsEmployee, Converter={StaticResource InverseBoolToVis}}" />
+                            <ItemsControl ItemsSource="{Binding TopRows}" Visibility="{Binding IsEmployee, Converter={StaticResource InverseBoolToVis}}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Padding="0,6" BorderBrush="{DynamicResource Border}" BorderThickness="0,0,0,1">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions><ColumnDefinition Width="40" /><ColumnDefinition Width="*" /><ColumnDefinition Width="150" /><ColumnDefinition Width="70" /><ColumnDefinition Width="110" /></Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0" FontFamily="{StaticResource MonoFont}" Text="{Binding Rank}" />
+                                                <TextBlock Grid.Column="1" Text="{Binding EmployeeName}" VerticalAlignment="Center" />
+                                                <TextBlock Grid.Column="2" Foreground="{DynamicResource TextSecondary}" Text="{Binding Department}" VerticalAlignment="Center" />
+                                                <TextBlock Grid.Column="3" FontFamily="{StaticResource MonoFont}" TextAlignment="Right" FlowDirection="LeftToRight" FontWeight="SemiBold" Text="{Binding ScoreText}" />
+                                                <Border Grid.Column="4" Style="{StaticResource BandPill}" HorizontalAlignment="Right"><TextBlock Style="{StaticResource PillText}" Text="{Binding BandLabel}" /></Border>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <!-- need support -->
+                            <TextBlock Margin="0,16,0,6" Style="{StaticResource Caption}" Foreground="{DynamicResource StatusDangerText}" Text="{loc:Loc Perf_NeedSupport}"
+                                       Visibility="{Binding IsEmployee, Converter={StaticResource InverseBoolToVis}}" />
+                            <ItemsControl ItemsSource="{Binding SupportRows}" Visibility="{Binding IsEmployee, Converter={StaticResource InverseBoolToVis}}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Padding="0,5" BorderBrush="{DynamicResource Border}" BorderThickness="0,0,0,1">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="90" /></Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0" Text="{Binding EmployeeName}" />
+                                                <TextBlock Grid.Column="1" FontFamily="{StaticResource MonoFont}" TextAlignment="Right" FlowDirection="LeftToRight" Text="{Binding ScoreText}" />
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <!-- strengths / weaknesses (employee) -->
+                            <Grid Margin="0,16,0,0" Visibility="{Binding IsEmployee, Converter={StaticResource BoolToVis}}">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="20" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Style="{StaticResource Caption}" Foreground="{DynamicResource StatusSuccessText}" Text="{loc:Loc Perf_Strengths}" Margin="0,0,0,6" />
+                                    <ItemsControl ItemsSource="{Binding StrengthRows}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Margin="0,3"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="60" /></Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="0" Text="{Binding Name}" /><TextBlock Grid.Column="1" FontFamily="{StaticResource MonoFont}" TextAlignment="Right" Text="{Binding Score}" /></Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Style="{StaticResource Caption}" Foreground="{DynamicResource StatusDangerText}" Text="{loc:Loc Perf_Weaknesses}" Margin="0,0,0,6" />
+                                    <ItemsControl ItemsSource="{Binding WeaknessRows}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Margin="0,3"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="60" /></Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="0" Text="{Binding Name}" /><TextBlock Grid.Column="1" FontFamily="{StaticResource MonoFont}" TextAlignment="Right" Text="{Binding Score}" /></Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- trend -->
+                            <TextBlock Margin="0,16,0,6" Style="{StaticResource Caption}" Text="{loc:Loc Perf_Trend}" />
+                            <ItemsControl ItemsSource="{Binding TrendRows}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Padding="0,5" BorderBrush="{DynamicResource Border}" BorderThickness="0,0,0,1">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="200" /><ColumnDefinition Width="70" /></Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0" Text="{Binding PeriodName}" VerticalAlignment="Center" />
+                                                <ProgressBar Grid.Column="1" Height="8" VerticalAlignment="Center" Minimum="0" Maximum="100" Value="{Binding Score, Mode=OneWay}"
+                                                             Background="{DynamicResource SurfaceMuted}" Foreground="{DynamicResource BrandText}" BorderThickness="0" />
+                                                <TextBlock Grid.Column="2" FontFamily="{StaticResource MonoFont}" TextAlignment="Right" FontWeight="SemiBold" Text="{Binding Score}" />
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <Rectangle Height="20" Fill="Transparent" />
+                        </StackPanel>
+                    </ScrollViewer>
                 </Grid>
             </TabItem>
+
         </TabControl>
     </Grid>
 </UserControl>

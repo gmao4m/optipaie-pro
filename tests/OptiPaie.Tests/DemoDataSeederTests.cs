@@ -67,7 +67,7 @@ namespace OptiPaie.Tests
             _assets = new AssetService(_uowf);
             _training = new TrainingService(_uowf);
             _certificates = new WorkCertificateService(_uowf);
-            _performance = new PerformanceService(_uowf, _attendance);
+            _performance = new PerformanceService(_uowf);
 
             _seeder = new DemoDataSeeder(_companies, _employees, _contracts, _attendance, _leave,
                 _loans, _assets, _training, _certificates, _performance);
@@ -163,30 +163,32 @@ namespace OptiPaie.Tests
         }
 
         [Test]
-        public void Seed_HasACompletedPerformanceCycleWithPromotionsAndRewards()
+        public void Seed_HasTemplatesFinalisedPeriodsAndBehaviourLog()
         {
             long companyId = SeedOk();
 
-            IReadOnlyList<CycleSummary> cycles = _performance.GetCycles(companyId);
-            Assert.That(cycles.Count, Is.GreaterThanOrEqualTo(1));
-            CycleSummary cycle = cycles.First();
-            Assert.That(cycle.CompletionPercent, Is.EqualTo(100m), "every review submitted");
-            Assert.That(cycle.Status, Is.EqualTo(PerformanceCycleStatus.Completed));
+            // department templates in both weighting modes
+            var templates = _performance.GetTemplates(companyId);
+            Assert.That(templates.Any(t => !t.IsBuiltIn), Is.True, "company department templates seeded");
+            Assert.That(templates.Any(t => t.WeightingMode == WeightingMode.Weighted), Is.True);
+            Assert.That(templates.Any(t => t.WeightingMode == WeightingMode.Simple), Is.True, "both weighting modes present");
 
-            PerformanceDashboard dashboard = _performance.GetDashboard(companyId);
-            Assert.That(dashboard.TopPerformers.Count, Is.GreaterThanOrEqualTo(1));
-            Assert.That(dashboard.ReviewCount, Is.EqualTo(20));
+            // finalised periods with every employee evaluated
+            var periods = _performance.GetPeriods(companyId);
+            Assert.That(periods.Count(p => p.Status == PeriodStatus.Closed), Is.GreaterThanOrEqualTo(2));
+            PeriodSummary closed = periods.First(p => p.Status == PeriodStatus.Closed);
+            Assert.That(closed.Done, Is.EqualTo(20), "every employee evaluated in a closed period");
 
-            // The department grids score on 1-5; the seeded reviews must land on real,
-            // non-zero scores (a regression guard: mismatched scale silently saved 0/5).
-            Assert.That(dashboard.CompanyAveragePercent, Is.GreaterThan(40m),
-                "seeded reviews carry realistic scores, not 0");
-            Assert.That(dashboard.TopPerformers.First().ScorePercent, Is.GreaterThan(0m));
+            // general report reflects real, non-zero scores (regression guard vs 0/5 bug)
+            GeneralReport report = _performance.GetGeneralReport(companyId);
+            Assert.That(report.HasData, Is.True);
+            Assert.That(report.EvaluatedCount, Is.EqualTo(20));
+            Assert.That(report.CompanyAverage, Is.GreaterThan(40m), "seeded evaluations carry realistic scores, not 0");
+            Assert.That(report.TopPerformers.Count, Is.GreaterThanOrEqualTo(1));
+            Assert.That(report.BestEmployee, Is.Not.Null);
 
-            Employee touati = _employees.GetByCompany(companyId).First(e => e.LastNameFr == "TOUATI");
-            CareerTimeline timeline = _performance.GetCareerTimeline(touati.Id);
-            Assert.That(timeline.Items.Any(i => i.Kind == "reward"), Is.True, "a bonus on the career timeline");
-            Assert.That(timeline.Items.Any(i => i.Kind == "review"), Is.True);
+            // continuous behaviour log
+            Assert.That(_performance.GetCompanyBehaviors(companyId).Count, Is.GreaterThan(5), "a populated behaviour log");
         }
 
         [Test]

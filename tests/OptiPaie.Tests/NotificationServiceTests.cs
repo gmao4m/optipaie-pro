@@ -52,7 +52,7 @@ namespace OptiPaie.Tests
             _leave = new LeaveService(_uow);
             _training = new TrainingService(_uow);
             _notifications = new NotificationService(_companies, _employees, _contracts, _leave, _training,
-                new PerformanceService(_uow, new AttendanceService(_uow)));
+                new PerformanceService(_uow));
 
             _companyId = _companies.Create(new Company { NameFr = "SARL Test", Nif = "000000000000000" }).Value;
             _employeeId = _employees.Create(new Employee

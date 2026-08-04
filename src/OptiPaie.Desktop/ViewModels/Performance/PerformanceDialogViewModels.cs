@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
+using System.Windows;
 using System.Windows.Input;
 using OptiPaie.Core.Dtos;
 using OptiPaie.Core.Entities;
@@ -10,515 +11,453 @@ using OptiPaie.Core.Enums;
 using OptiPaie.Core.Primitives;
 using OptiPaie.Desktop.Common;
 using OptiPaie.Desktop.Composition;
+using OptiPaie.Desktop.Localization;
 using OptiPaie.Desktop.Mvvm;
 
 namespace OptiPaie.Desktop.ViewModels.Performance
 {
-    /// <summary>A checkable label/value item (departments in the cycle launcher, etc.).</summary>
-    public sealed class CheckItemViewModel : ObservableObject
+    /// <summary>A dialog VM the shared show-helper can close with a result.</summary>
+    public interface IHasDialogResult { Action<bool> RequestClose { set; } }
+
+    internal static class PerfDialogs
     {
-        private bool _isChecked;
-        public CheckItemViewModel(string label, string value, bool isChecked = false) { Label = label; Value = value; _isChecked = isChecked; }
-        public string Label { get; }
-        public string Value { get; }
-        public bool IsChecked { get => _isChecked; set => Set(ref _isChecked, value); }
+        public static bool Show(Window window, IHasDialogResult vm)
+        {
+            window.Owner = Application.Current == null ? null : Application.Current.MainWindow;
+            OptiPaie.Desktop.App.ApplyFlowDirection(window);
+            vm.RequestClose = ok => { try { window.DialogResult = ok; } catch { window.Close(); } };
+            return window.ShowDialog() == true;
+        }
+
+        public static string Err(Result r) =>
+            string.IsNullOrEmpty(r.ErrorCode) ? r.Error : TranslationSource.Instance[r.ErrorCode];
     }
 
-    /// <summary>A template group option for the default-template picker.</summary>
-    public sealed class TemplateOption
-    {
-        public TemplateOption(string groupKey, string name) { GroupKey = groupKey; Name = name; }
-        public string GroupKey { get; }
-        public string Name { get; }
-        public override string ToString() => Name;
-    }
+    // Enum option carriers for the combo boxes (localised label + value).
+    public sealed class CadenceOption { public PeriodCadence Value { get; set; } public string Label => PerfLabels.CadenceLabel(Value); }
+    public sealed class CategoryOption { public CriterionCategory Value { get; set; } public string Label => PerfLabels.CategoryLabel(Value); }
+    public sealed class ScoreTypeOption { public ScoreType Value { get; set; } public string Label => PerfLabels.ScoreTypeLabel(Value); }
 
-    /// <summary>An enum option with a French label (for combo boxes).</summary>
-    public sealed class LabeledOption<T>
-    {
-        public LabeledOption(T value, string label) { Value = value; Label = label; }
-        public T Value { get; }
-        public string Label { get; }
-        public override string ToString() => Label;
-    }
-
-    // ============================================================ Cycle launcher
-
-    public sealed class CycleLaunchViewModel : ObservableObject
+    // ======================================================================
+    //  PERIOD editor
+    // ======================================================================
+    public sealed class PeriodEditViewModel : ObservableObject, IHasDialogResult
     {
         private readonly AppServices _services;
         private readonly long _companyId;
-
+        private readonly long _periodId;
         private string _name;
-        private LabeledOption<PerformanceCycleType> _cycleType;
-        private DateTime _startDate = DateTime.Today;
-        private DateTime _endDate = DateTime.Today.AddMonths(3);
-        private DateTime? _deadline = DateTime.Today.AddMonths(3).AddDays(-3);
-        private int _periodYear = DateTime.Today.Year;
-        private string _periodLabel = DateTime.Today.Year.ToString();
-        private bool _selfAssessment;
-        private TemplateOption _fallbackTemplate;
+        private PeriodCadence _cadence = PeriodCadence.Monthly;
+        private DateTime _start = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+        private DateTime _end = new DateTime(DateTime.Today.Year, DateTime.Today.Month, DateTime.DaysInMonth(DateTime.Today.Year, DateTime.Today.Month));
 
-        public CycleLaunchViewModel(AppServices services, long companyId)
+        public PeriodEditViewModel(AppServices services, long companyId, long periodId = 0)
         {
-            _services = services;
-            _companyId = companyId;
-            _name = "Campagne " + DateTime.Today.Year;
-
-            CycleTypes.Add(new LabeledOption<PerformanceCycleType>(PerformanceCycleType.Monthly, "Mensuelle"));
-            CycleTypes.Add(new LabeledOption<PerformanceCycleType>(PerformanceCycleType.Quarterly, "Trimestrielle"));
-            CycleTypes.Add(new LabeledOption<PerformanceCycleType>(PerformanceCycleType.SemiAnnual, "Semestrielle"));
-            CycleTypes.Add(new LabeledOption<PerformanceCycleType>(PerformanceCycleType.Annual, "Annuelle"));
-            CycleTypes.Add(new LabeledOption<PerformanceCycleType>(PerformanceCycleType.Probation, "Fin d'essai"));
-            CycleTypes.Add(new LabeledOption<PerformanceCycleType>(PerformanceCycleType.Custom, "Personnalisée"));
-            // Semi-annual is the recommended default cadence.
-            _cycleType = CycleTypes.First(t => t.Value == PerformanceCycleType.SemiAnnual);
-
-            // Period auto-defaults to the current semester (freely editable below).
-            _periodLabel = (DateTime.Today.Month <= 6 ? "S1 " : "S2 ") + DateTime.Today.Year;
-
-            foreach (string dept in _services.Employees.GetByCompany(companyId, false)
-                         .Select(e => string.IsNullOrWhiteSpace(e.Department) ? "Non affecté" : e.Department.Trim())
-                         .Distinct().OrderBy(d => d))
-            {
-                Departments.Add(new CheckItemViewModel(dept, dept, true));
-            }
-
-            foreach (TemplateSummary t in _services.Performance.GetTemplates(companyId)
-                         .GroupBy(t => t.GroupKey).Select(g => g.First()))
-            {
-                Templates.Add(new TemplateOption(t.GroupKey, t.Name));
-            }
-            _fallbackTemplate = Templates.FirstOrDefault(t => t.GroupKey == "builtin-general") ?? Templates.FirstOrDefault();
-
-            LaunchCommand = new RelayCommand(Launch);
+            _services = services; _companyId = companyId; _periodId = periodId;
+            SaveCommand = new RelayCommand(Save);
             CancelCommand = new RelayCommand(() => RequestClose?.Invoke(false));
+            _name = "Campagne " + DateTime.Today.Year;
+            if (periodId > 0)
+            {
+                EvalPeriod p = _services.Performance.GetPeriod(periodId);
+                if (p != null) { _name = p.Name; _cadence = p.Cadence; _start = p.StartDate; _end = p.EndDate; }
+            }
         }
 
-        public Action<bool> RequestClose { get; set; }
-
-        public ObservableCollection<LabeledOption<PerformanceCycleType>> CycleTypes { get; } = new ObservableCollection<LabeledOption<PerformanceCycleType>>();
-        public ObservableCollection<CheckItemViewModel> Departments { get; } = new ObservableCollection<CheckItemViewModel>();
-        public ObservableCollection<TemplateOption> Templates { get; } = new ObservableCollection<TemplateOption>();
+        public IReadOnlyList<CadenceOption> Cadences { get; } = new[]
+        {
+            new CadenceOption { Value = PeriodCadence.Weekly },
+            new CadenceOption { Value = PeriodCadence.Monthly },
+            new CadenceOption { Value = PeriodCadence.Yearly }
+        };
 
         public string Name { get => _name; set => Set(ref _name, value); }
-        public LabeledOption<PerformanceCycleType> CycleType { get => _cycleType; set => Set(ref _cycleType, value); }
-        public DateTime StartDate { get => _startDate; set => Set(ref _startDate, value); }
-        public DateTime EndDate { get => _endDate; set => Set(ref _endDate, value); }
-        public DateTime? Deadline { get => _deadline; set => Set(ref _deadline, value); }
-        public int PeriodYear { get => _periodYear; set => Set(ref _periodYear, value); }
-        public string PeriodLabel { get => _periodLabel; set => Set(ref _periodLabel, value); }
-        public bool SelfAssessment { get => _selfAssessment; set => Set(ref _selfAssessment, value); }
-        public TemplateOption FallbackTemplate { get => _fallbackTemplate; set => Set(ref _fallbackTemplate, value); }
+        public PeriodCadence Cadence { get => _cadence; set => Set(ref _cadence, value); }
+        public DateTime StartDate { get => _start; set => Set(ref _start, value); }
+        public DateTime EndDate { get => _end; set => Set(ref _end, value); }
 
-        public string Hint => "Chaque employé reçoit automatiquement le modèle et l'évaluateur par défaut de son département " +
-                              "(sinon le modèle choisi ci-dessous).";
-
-        public ICommand LaunchCommand { get; }
+        public ICommand SaveCommand { get; }
         public ICommand CancelCommand { get; }
+        public Action<bool> RequestClose { private get; set; }
 
-        private void Launch()
+        private void Save()
         {
-            List<string> depts = Departments.Where(d => d.IsChecked).Select(d => d.Value).ToList();
-            if (depts.Count == 0) { Dialogs.Info("Sélectionnez au moins un département."); return; }
-
-            var request = new CycleLaunchRequest
+            var period = new EvalPeriod
             {
-                CompanyId = _companyId,
-                Name = _name,
-                CycleType = _cycleType.Value,
-                StartDate = _startDate,
-                EndDate = _endDate,
-                Deadline = _deadline,
-                SelfAssessment = _selfAssessment,
-                PeriodYear = _periodYear,
-                PeriodLabel = _periodLabel,
-                Departments = depts,
-                DefaultTemplateGroupKey = _fallbackTemplate?.GroupKey
+                Id = _periodId, CompanyId = _companyId, Name = _name,
+                Cadence = _cadence, StartDate = _start, EndDate = _end,
+                Status = PeriodStatus.Open
             };
-
-            Result<long> r = _services.Performance.LaunchCycle(request);
-            if (r.IsFailure) { Dialogs.Error(r.Error); return; }
+            Result<long> r = _services.Performance.SavePeriod(period);
+            if (r.IsFailure) { Dialogs.Error(PerfDialogs.Err(r)); return; }
             RequestClose?.Invoke(true);
         }
     }
 
-    // ============================================================ Template editor
-
-    public sealed class TemplateCriterionRowViewModel : ObservableObject
+    // ======================================================================
+    //  EVALUATION form (the scoring screen)
+    // ======================================================================
+    public sealed class EvaluationFormViewModel : ObservableObject, IHasDialogResult
     {
-        private static readonly CultureInfo Fr = CultureInfo.GetCultureInfo("fr-FR");
-        private readonly Action _changed;
-        private string _label;
-        private decimal _weight;
-        private bool _isKpi;
-        private bool _higherIsBetter;
-        private string _targetText;
+        private readonly AppServices _services;
+        private readonly long _evaluationId;
+        private Evaluation _evaluation;
+        private List<EvaluationScore> _scores = new List<EvaluationScore>();
+        private long _companyId, _employeeId;
+        private DateTime _periodStart, _periodEnd;
+        private string _employeeName = "—", _employeeMeta = string.Empty, _periodName = string.Empty;
+        private string _totalText = "0 / 100", _bandLabel = string.Empty, _bandKind = "neutral", _note;
+        private int _positive, _negative;
 
-        public TemplateCriterionRowViewModel(Action changed, string label = "", decimal weight = 0m,
-            CriterionType type = CriterionType.Behavioral, bool higherIsBetter = true, decimal? defaultTarget = null)
+        public EvaluationFormViewModel(AppServices services, long evaluationId)
         {
-            _changed = changed;
-            _label = label;
-            _weight = weight;
-            _isKpi = type == CriterionType.Kpi;
-            _higherIsBetter = higherIsBetter;
-            _targetText = defaultTarget.HasValue ? defaultTarget.Value.ToString("0.##", Fr) : string.Empty;
+            _services = services; _evaluationId = evaluationId;
+            SaveCommand = new RelayCommand(() => Save(false));
+            CompleteCommand = new RelayCommand(() => Save(true));
+            CancelCommand = new RelayCommand(() => RequestClose?.Invoke(false));
+            AddPositiveCommand = new RelayCommand(() => AddBehavior(true));
+            AddNegativeCommand = new RelayCommand(() => AddBehavior(false));
+            Load();
         }
 
-        public string Label { get => _label; set => Set(ref _label, value); }
-        public decimal Weight { get => _weight; set { if (Set(ref _weight, value)) _changed?.Invoke(); } }
+        public ObservableCollection<CriterionCardViewModel> Criteria { get; } = new ObservableCollection<CriterionCardViewModel>();
+        public ObservableCollection<BehaviorItem> Behaviors { get; } = new ObservableCollection<BehaviorItem>();
 
-        /// <summary>KPI (numeric target/achieved) vs behavioral (rated 1-5).</summary>
-        public bool IsKpi { get => _isKpi; set { if (Set(ref _isKpi, value)) Raise(nameof(ShowKpiOptions)); } }
-        public bool ShowKpiOptions => _isKpi;
-        public bool HigherIsBetter { get => _higherIsBetter; set => Set(ref _higherIsBetter, value); }
+        public string EmployeeName { get => _employeeName; private set => Set(ref _employeeName, value); }
+        public string EmployeeMeta { get => _employeeMeta; private set => Set(ref _employeeMeta, value); }
+        public string PeriodName { get => _periodName; private set => Set(ref _periodName, value); }
+        public string TotalText { get => _totalText; private set => Set(ref _totalText, value); }
+        public string BandLabel { get => _bandLabel; private set => Set(ref _bandLabel, value); }
+        public string BandKind { get => _bandKind; private set => Set(ref _bandKind, value); }
+        public string Note { get => _note; set => Set(ref _note, value); }
+        public int PositiveCount { get => _positive; private set => Set(ref _positive, value); }
+        public int NegativeCount { get => _negative; private set => Set(ref _negative, value); }
+        public bool HasBehaviors => Behaviors.Count > 0;
 
-        /// <summary>Optional default target that pre-fills a review (KPI only).</summary>
-        public string TargetText { get => _targetText; set => Set(ref _targetText, value); }
+        public ICommand SaveCommand { get; }
+        public ICommand CompleteCommand { get; }
+        public ICommand CancelCommand { get; }
+        public ICommand AddPositiveCommand { get; }
+        public ICommand AddNegativeCommand { get; }
+        public Action<bool> RequestClose { private get; set; }
 
-        public CriterionType Type => _isKpi ? CriterionType.Kpi : CriterionType.Behavioral;
-
-        public decimal? DefaultTarget
+        private void Load()
         {
-            get
+            EvaluationDetail d = _services.Performance.GetEvaluationDetail(_evaluationId);
+            if (d == null) return;
+            _evaluation = d.Evaluation;
+            _scores = d.Scores.ToList();
+            _employeeId = _evaluation.EmployeeId;
+            EmployeeName = d.EmployeeName;
+            EmployeeMeta = d.EmployeeMeta;
+            PeriodName = d.PeriodName;
+            Note = _evaluation.Note;
+
+            EvalPeriod p = _services.Performance.GetPeriod(_evaluation.PeriodId);
+            if (p != null) { _companyId = p.CompanyId; _periodStart = p.StartDate; _periodEnd = p.EndDate; }
+
+            Criteria.Clear();
+            foreach (EvaluationScore s in _scores)
+                Criteria.Add(new CriterionCardViewModel(s, _services.Performance.ComputeLineScore, RecomputeTotal));
+
+            LoadBehaviors(d.Behaviors, d.PositiveCount, d.NegativeCount);
+            RecomputeTotal();
+        }
+
+        private void LoadBehaviors(IReadOnlyList<BehaviorEntry> entries, int pos, int neg)
+        {
+            Behaviors.Clear();
+            foreach (BehaviorEntry b in entries) Behaviors.Add(new BehaviorItem(b));
+            PositiveCount = pos; NegativeCount = neg;
+            Raise(nameof(HasBehaviors));
+        }
+
+        private void RecomputeTotal()
+        {
+            decimal total = _services.Performance.ComputeTotal(_scores, _evaluation.WeightingMode);
+            TotalText = total.ToString("0.#", L.Fr) + " / 100";
+            ClassificationBand band = _services.Performance.Classify(total);
+            BandLabel = PerfLabels.BandLabel(band);
+            BandKind = PerfLabels.BandKind(band);
+        }
+
+        private void AddBehavior(bool positive)
+        {
+            var vm = new BehaviorQuickViewModel(_services, _companyId, _employeeId) { InitialPositive = positive };
+            if (!PerfDialogs.Show(new Views.BehaviorQuickWindow { DataContext = vm }, vm)) return;
+            var fresh = _services.Performance.GetBehaviors(_employeeId)
+                .Where(b => b.OccurredAt >= _periodStart && b.OccurredAt <= _periodEnd).ToList();
+            LoadBehaviors(fresh, fresh.Count(b => b.IsPositive), fresh.Count(b => !b.IsPositive));
+        }
+
+        private void Save(bool complete)
+        {
+            if (_evaluation == null) { RequestClose?.Invoke(false); return; }
+            _evaluation.Note = Note;
+            Result r = _services.Performance.SaveEvaluation(_evaluation, _scores);
+            if (r.IsFailure) { Dialogs.Error(PerfDialogs.Err(r)); return; }
+            if (complete)
             {
-                if (!_isKpi || string.IsNullOrWhiteSpace(_targetText)) return null;
-                string cleaned = _targetText.Replace(" ", string.Empty).Replace(",", ".");
-                return decimal.TryParse(cleaned, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal v) ? v : (decimal?)null;
+                Result c = _services.Performance.CompleteEvaluation(_evaluationId);
+                if (c.IsFailure) { Dialogs.Error(PerfDialogs.Err(c)); return; }
             }
+            RequestClose?.Invoke(true);
         }
     }
 
-    public sealed class TemplateEditorViewModel : ObservableObject
+    /// <summary>One criterion card on the evaluation screen (a rating slider or a KPI target/achieved).</summary>
+    public sealed class CriterionCardViewModel : ObservableObject
     {
-        private static readonly CultureInfo Fr = CultureInfo.GetCultureInfo("fr-FR");
+        private readonly EvaluationScore _s;
+        private readonly Func<EvaluationScore, decimal> _score;
+        private readonly Action _changed;
+
+        public CriterionCardViewModel(EvaluationScore s, Func<EvaluationScore, decimal> score, Action changed)
+        {
+            _s = s; _score = score; _changed = changed;
+        }
+
+        public string Name => _s.CriterionName;
+        public string CategoryLabel => PerfLabels.CategoryLabel(_s.Category);
+        public bool IsKpi => _s.Category == CriterionCategory.Kpi;
+        public bool IsRating => !IsKpi;
+        public double Max => _s.ScoreType == ScoreType.Stars5 ? 5 : (_s.ScoreType == ScoreType.Score20 ? 20 : 100);
+        public double Tick => _s.ScoreType == ScoreType.Percent ? 5 : 1;
+        public string ScaleSuffix => _s.ScoreType == ScoreType.Stars5 ? "/ 5" : (_s.ScoreType == ScoreType.Score20 ? "/ 20" : "%");
+
+        public double RawValue
+        {
+            get => (double)(_s.RawValue ?? 0m);
+            set { _s.RawValue = (decimal)Math.Round(value, 1); Recompute(); Raise(nameof(RawValueText)); }
+        }
+        public string RawValueText => (_s.RawValue ?? 0m).ToString("0.#", L.Fr) + " " + ScaleSuffix;
+
+        public string TargetText => (_s.KpiTarget ?? 0m).ToString("0.###", L.Fr);
+        public string ActualText
+        {
+            get => _s.KpiActual.HasValue ? _s.KpiActual.Value.ToString("0.###", L.Fr) : string.Empty;
+            set { _s.KpiActual = Parse(value); Recompute(); }
+        }
+        public string AchievementText => IsKpi ? _s.NormalizedScore.ToString("0.#", L.Fr) + " %" : string.Empty;
+        public string NormalizedText => _s.NormalizedScore.ToString("0.#", L.Fr);
+        public string Note { get => _s.Note; set { _s.Note = value; Raise(nameof(Note)); } }
+
+        private void Recompute()
+        {
+            _s.NormalizedScore = _score(_s);
+            Raise(nameof(NormalizedText));
+            Raise(nameof(AchievementText));
+            _changed();
+        }
+
+        private static decimal? Parse(string s) =>
+            decimal.TryParse(s, NumberStyles.Any, L.Fr, out decimal v) ? v : (decimal?)null;
+    }
+
+    public sealed class BehaviorItem
+    {
+        public BehaviorItem(BehaviorEntry b) { B = b; }
+        public BehaviorEntry B { get; }
+        public string Glyph => B.IsPositive ? "👍" : "👎";
+        public string EmployeeName => B.EmployeeName;
+        public string Note => B.Note;
+        public string DateText => B.OccurredAt.ToString("dd/MM/yyyy", L.Fr);
+        public string Kind => B.IsPositive ? "success" : "danger";
+    }
+
+    // ======================================================================
+    //  TEMPLATE editor
+    // ======================================================================
+    public sealed class TemplateEditorViewModel : ObservableObject, IHasDialogResult
+    {
         private readonly AppServices _services;
         private readonly long _companyId;
-        private readonly bool _duplicate;
-        private long _templateId;
-        private string _groupKey;
+        private readonly long _templateId;
+        private string _name = string.Empty, _department = string.Empty;
+        private bool _weighted, _isDefault;
 
-        private string _name;
-        private string _description;
-        private string _departmentTag;
-        private decimal _scaleMax = 20m;
-        private string _weightTotalText = "0 %";
-        private bool _weightBalanced;
-        private bool _simpleMode;
-
-        public TemplateEditorViewModel(AppServices services, long companyId, long sourceTemplateId, bool duplicate)
+        public TemplateEditorViewModel(AppServices services, long companyId, long templateId)
         {
-            _services = services;
-            _companyId = companyId;
-            _duplicate = duplicate;
-            _templateId = duplicate ? 0 : sourceTemplateId;
-
-            TemplateDetail detail = _services.Performance.GetTemplateDetail(sourceTemplateId);
-            if (detail != null)
-            {
-                _name = duplicate ? detail.Template.Name + " (copie)" : detail.Template.Name;
-                _description = detail.Template.Description;
-                _departmentTag = detail.Template.DepartmentTag;
-                _scaleMax = detail.Template.ScaleMax;
-                _groupKey = duplicate ? null : detail.Template.GroupKey;
-                foreach (PerformanceTemplateCriterion c in detail.Criteria)
-                {
-                    Criteria.Add(new TemplateCriterionRowViewModel(Recompute, c.Label, c.WeightPercent,
-                        c.CriterionType, c.HigherIsBetter, c.DefaultTarget));
-                }
-            }
-
-            Title = duplicate ? "Dupliquer le modèle" : "Modifier le modèle";
+            _services = services; _companyId = companyId; _templateId = templateId;
             AddCriterionCommand = new RelayCommand(AddCriterion);
-            RemoveCriterionCommand = new RelayCommand(RemoveCriterion);
-            NormalizeCommand = new RelayCommand(Normalize);
-            EqualizeCommand = new RelayCommand(() => { EqualizeWeights(); Recompute(); });
+            RemoveCriterionCommand = new RelayCommand(o => Remove(o as TemplateCriterionRowViewModel));
             SaveCommand = new RelayCommand(Save);
             CancelCommand = new RelayCommand(() => RequestClose?.Invoke(false));
+
+            if (templateId > 0)
+            {
+                TemplateDetail d = _services.Performance.GetTemplateDetail(templateId);
+                if (d != null)
+                {
+                    _name = d.Template.Name; _department = d.Template.Department;
+                    _weighted = d.Template.WeightingMode == WeightingMode.Weighted;
+                    _isDefault = d.Template.IsDefault;
+                    foreach (EvalCriterion c in d.Criteria) Criteria.Add(new TemplateCriterionRowViewModel(c, Recompute));
+                }
+            }
+            if (Criteria.Count == 0) AddCriterion();
             Recompute();
         }
 
-        public Action<bool> RequestClose { get; set; }
-        public string Title { get; }
         public ObservableCollection<TemplateCriterionRowViewModel> Criteria { get; } = new ObservableCollection<TemplateCriterionRowViewModel>();
 
         public string Name { get => _name; set => Set(ref _name, value); }
-        public string Description { get => _description; set => Set(ref _description, value); }
-        public string DepartmentTag { get => _departmentTag; set => Set(ref _departmentTag, value); }
-        public decimal ScaleMax { get => _scaleMax; set => Set(ref _scaleMax, value); }
-        public string WeightTotalText { get => _weightTotalText; private set => Set(ref _weightTotalText, value); }
+        public string Department { get => _department; set => Set(ref _department, value); }
+        public bool IsWeighted { get => _weighted; set { if (Set(ref _weighted, value)) { Raise(nameof(ShowWeights)); Recompute(); } } }
+        public bool IsDefault { get => _isDefault; set => Set(ref _isDefault, value); }
+        public bool ShowWeights => _weighted;
 
-        /// <summary>True when the weights sum to 100 % (± 0.5); drives the colour feedback.</summary>
-        public bool WeightBalanced { get => _weightBalanced; private set => Set(ref _weightBalanced, value); }
-
-        /// <summary>Simple mode: all criteria share an equal weight (no manual weight editing).</summary>
-        public bool SimpleMode
-        {
-            get => _simpleMode;
-            set
-            {
-                if (Set(ref _simpleMode, value))
-                {
-                    if (value) EqualizeWeights();
-                    Recompute();
-                    Raise(nameof(WeightsEditable));
-                }
-            }
-        }
-
-        public bool WeightsEditable => !_simpleMode;
+        private string _weightSum = string.Empty;
+        public string WeightSumText { get => _weightSum; private set => Set(ref _weightSum, value); }
+        private bool _weightOk = true;
+        public bool WeightValid { get => _weightOk; private set => Set(ref _weightOk, value); }
 
         public ICommand AddCriterionCommand { get; }
         public ICommand RemoveCriterionCommand { get; }
-        public ICommand NormalizeCommand { get; }
-        public ICommand EqualizeCommand { get; }
         public ICommand SaveCommand { get; }
         public ICommand CancelCommand { get; }
+        public Action<bool> RequestClose { private get; set; }
 
         private void AddCriterion()
         {
-            Criteria.Add(new TemplateCriterionRowViewModel(Recompute, "Nouveau critère", 0m));
-            if (_simpleMode) EqualizeWeights();
+            Criteria.Add(new TemplateCriterionRowViewModel(
+                new EvalCriterion { Name = string.Empty, Category = CriterionCategory.Behavioral, ScoreType = ScoreType.Stars5, WeightPercent = 0m }, Recompute));
             Recompute();
         }
 
-        private void RemoveCriterion(object p)
+        private void Remove(TemplateCriterionRowViewModel row)
         {
-            if (p is TemplateCriterionRowViewModel r)
-            {
-                Criteria.Remove(r);
-                if (_simpleMode) EqualizeWeights();
-                Recompute();
-            }
-        }
-
-        /// <summary>Scales the current weights proportionally so they sum to exactly 100 %.</summary>
-        private void Normalize()
-        {
-            if (Criteria.Count == 0) return;
-            decimal total = Criteria.Sum(c => c.Weight);
-            if (total <= 0m) { EqualizeWeights(); Recompute(); return; }
-
-            decimal acc = 0m;
-            for (int k = 0; k < Criteria.Count; k++)
-            {
-                if (k == Criteria.Count - 1) Criteria[k].Weight = Math.Round(100m - acc, 2, MidpointRounding.AwayFromZero);
-                else { decimal w = Math.Round(Criteria[k].Weight / total * 100m, 2, MidpointRounding.AwayFromZero); Criteria[k].Weight = w; acc += w; }
-            }
+            if (row != null) Criteria.Remove(row);
             Recompute();
-        }
-
-        /// <summary>Gives every criterion the same weight (100 / n), with any rounding on the last.</summary>
-        private void EqualizeWeights()
-        {
-            int n = Criteria.Count;
-            if (n == 0) return;
-            decimal each = Math.Round(100m / n, 2, MidpointRounding.AwayFromZero);
-            decimal acc = 0m;
-            for (int k = 0; k < n; k++)
-            {
-                if (k == n - 1) Criteria[k].Weight = Math.Round(100m - acc, 2, MidpointRounding.AwayFromZero);
-                else { Criteria[k].Weight = each; acc += each; }
-            }
         }
 
         private void Recompute()
         {
-            decimal total = Criteria.Sum(c => c.Weight);
-            WeightBalanced = Math.Abs(total - 100m) <= 0.5m;
-            WeightTotalText = "Total des poids : " + total.ToString("0.##", Fr) + " % / 100 %";
+            decimal sum = Criteria.Sum(c => c.WeightValue);
+            WeightSumText = string.Format(L.T("Perf_WeightSum"), sum.ToString("0.#", L.Fr));
+            WeightValid = !_weighted || Math.Abs(sum - 100m) <= 0.5m;
         }
 
         private void Save()
         {
-            var template = new PerformanceTemplate
+            var template = new EvalTemplate
             {
-                Id = _templateId,
-                CompanyId = _companyId,
-                GroupKey = _groupKey,
-                Name = _name,
-                Description = _description,
-                DepartmentTag = _departmentTag,
-                Kind = TemplateKind.Custom,
-                ScaleMax = _scaleMax <= 0m ? 20m : _scaleMax
+                Id = _templateId, CompanyId = _companyId, Name = _name, Department = _department,
+                WeightingMode = _weighted ? WeightingMode.Weighted : WeightingMode.Simple, IsDefault = _isDefault
             };
-            var criteria = Criteria.Select(c => new PerformanceTemplateCriterion
-            {
-                Label = c.Label,
-                WeightPercent = c.Weight,
-                CriterionType = c.Type,
-                HigherIsBetter = c.HigherIsBetter,
-                DefaultTarget = c.DefaultTarget
-            }).ToList();
-
+            var criteria = Criteria.Select(c => c.ToEntity()).ToList();
             Result<long> r = _services.Performance.SaveTemplate(template, criteria);
-            if (r.IsFailure) { Dialogs.Error(r.Error); return; }
+            if (r.IsFailure) { Dialogs.Error(PerfDialogs.Err(r)); return; }
             RequestClose?.Invoke(true);
         }
     }
 
-    // ================================================================= Goal editor
-
-    public sealed class GoalEditViewModel : ObservableObject
+    public sealed class TemplateCriterionRowViewModel : ObservableObject
     {
-        private readonly AppServices _services;
-        private readonly long _goalId;
+        private readonly EvalCriterion _c;
+        private readonly Action _changed;
 
-        private Employee _employee;
-        private string _title;
-        private string _targetMetric;
-        private DateTime? _dueDate = DateTime.Today.AddMonths(3);
-        private decimal _progress;
-        private LabeledOption<PerformanceGoalStatus> _status;
-
-        public GoalEditViewModel(AppServices services, long companyId, GoalRow existing)
+        public TemplateCriterionRowViewModel(EvalCriterion c, Action changed)
         {
-            _services = services;
-
-            foreach (Employee e in _services.Employees.GetByCompany(companyId, false).OrderBy(e => e.LastNameFr))
-            {
-                Employees.Add(e);
-            }
-
-            Statuses.Add(new LabeledOption<PerformanceGoalStatus>(PerformanceGoalStatus.Active, "En cours"));
-            Statuses.Add(new LabeledOption<PerformanceGoalStatus>(PerformanceGoalStatus.Achieved, "Atteint"));
-            Statuses.Add(new LabeledOption<PerformanceGoalStatus>(PerformanceGoalStatus.Missed, "Manqué"));
-            Statuses.Add(new LabeledOption<PerformanceGoalStatus>(PerformanceGoalStatus.Cancelled, "Annulé"));
-
-            if (existing != null)
-            {
-                _goalId = existing.GoalId;
-                _employee = Employees.FirstOrDefault(e => e.Id == existing.EmployeeId);
-                _title = existing.Title;
-                _targetMetric = existing.TargetMetric;
-                _dueDate = existing.DueDate;
-                _progress = existing.ProgressPercent;
-                _status = Statuses.FirstOrDefault(s => s.Value == existing.Status) ?? Statuses[0];
-                Title = "Modifier l'objectif";
-            }
-            else
-            {
-                _employee = Employees.FirstOrDefault();
-                _status = Statuses[0];
-                Title = "Nouvel objectif";
-            }
-
-            SaveCommand = new RelayCommand(Save);
-            CancelCommand = new RelayCommand(() => RequestClose?.Invoke(false));
+            _c = c; _changed = changed;
+            SelectedCategory = c.Category;
+            SelectedScoreType = c.ScoreType;
         }
 
-        public Action<bool> RequestClose { get; set; }
-        public string Title { get; }
-        public bool CanChooseEmployee => _goalId == 0;
-        public ObservableCollection<Employee> Employees { get; } = new ObservableCollection<Employee>();
-        public ObservableCollection<LabeledOption<PerformanceGoalStatus>> Statuses { get; } = new ObservableCollection<LabeledOption<PerformanceGoalStatus>>();
-
-        public Employee Employee { get => _employee; set => Set(ref _employee, value); }
-        public string GoalTitle { get => _title; set => Set(ref _title, value); }
-        public string TargetMetric { get => _targetMetric; set => Set(ref _targetMetric, value); }
-        public DateTime? DueDate { get => _dueDate; set => Set(ref _dueDate, value); }
-        public decimal Progress { get => _progress; set => Set(ref _progress, value); }
-        public double ProgressValue { get => (double)_progress; set { Progress = (decimal)Math.Round(value); Raise(nameof(Progress)); } }
-        public LabeledOption<PerformanceGoalStatus> Status { get => _status; set => Set(ref _status, value); }
-
-        public ICommand SaveCommand { get; }
-        public ICommand CancelCommand { get; }
-
-        private void Save()
+        public static IReadOnlyList<CategoryOption> CategoryOptions { get; } = new[]
         {
-            if (_employee == null) { Dialogs.Error("Sélectionnez un employé."); return; }
+            new CategoryOption { Value = CriterionCategory.Behavioral },
+            new CategoryOption { Value = CriterionCategory.Technical },
+            new CategoryOption { Value = CriterionCategory.Administrative },
+            new CategoryOption { Value = CriterionCategory.Kpi }
+        };
+        public static IReadOnlyList<ScoreTypeOption> ScoreTypeOptions { get; } = new[]
+        {
+            new ScoreTypeOption { Value = ScoreType.Stars5 },
+            new ScoreTypeOption { Value = ScoreType.Score20 },
+            new ScoreTypeOption { Value = ScoreType.Percent }
+        };
 
-            var goal = new PerformanceGoal
-            {
-                Id = _goalId,
-                EmployeeId = _employee.Id,
-                Title = _title,
-                TargetMetric = _targetMetric,
-                DueDate = _dueDate,
-                ProgressPercent = _progress,
-                Status = _status.Value
-            };
+        public string Name { get => _c.Name; set { _c.Name = value; Raise(nameof(Name)); } }
 
-            Result r = _goalId == 0
-                ? ToResult(_services.Performance.CreateGoal(goal))
-                : _services.Performance.UpdateGoal(goal);
-            if (r.IsFailure) { Dialogs.Error(r.Error); return; }
-            RequestClose?.Invoke(true);
+        public CriterionCategory SelectedCategory
+        {
+            get => _c.Category;
+            set { _c.Category = value; Raise(nameof(SelectedCategory)); Raise(nameof(IsKpi)); Raise(nameof(IsRating)); }
+        }
+        public ScoreType SelectedScoreType
+        {
+            get => _c.ScoreType;
+            set { _c.ScoreType = value; Raise(nameof(SelectedScoreType)); }
         }
 
-        private static Result ToResult<T>(Result<T> r) => r.IsSuccess ? Result.Ok() : Result.Fail(r.Error, r.ErrorCode);
+        public bool IsKpi => _c.Category == CriterionCategory.Kpi;
+        public bool IsRating => !IsKpi;
+
+        public string WeightText
+        {
+            get => _c.WeightPercent.ToString("0.#", L.Fr);
+            set { _c.WeightPercent = decimal.TryParse(value, NumberStyles.Any, L.Fr, out decimal v) ? v : 0m; _changed(); }
+        }
+        public decimal WeightValue => _c.WeightPercent;
+
+        public string TargetText
+        {
+            get => _c.KpiTarget.HasValue ? _c.KpiTarget.Value.ToString("0.###", L.Fr) : string.Empty;
+            set { _c.KpiTarget = decimal.TryParse(value, NumberStyles.Any, L.Fr, out decimal v) ? v : (decimal?)null; }
+        }
+
+        public EvalCriterion ToEntity() => _c;
     }
 
-    // ============================================================ Career event
-
-    public sealed class CareerEventViewModel : ObservableObject
+    // ======================================================================
+    //  QUICK behaviour (👍 / 👎)
+    // ======================================================================
+    public sealed class BehaviorQuickViewModel : ObservableObject, IHasDialogResult
     {
         private readonly AppServices _services;
-        private readonly long _employeeId;
-
-        private string _oldPosition;
-        private string _newPosition;
-        private string _amountText;
-        private string _category;
+        private readonly long _companyId;
+        private EmployeePick _selectedEmployee;
+        private bool _positive = true;
+        private string _note = string.Empty;
         private DateTime _date = DateTime.Today;
-        private string _reason;
+        private readonly bool _lockedEmployee;
 
-        public CareerEventViewModel(AppServices services, long employeeId, string employeeName, bool isPromotion)
+        public BehaviorQuickViewModel(AppServices services, long companyId, long employeeId)
         {
-            _services = services;
-            _employeeId = employeeId;
-            IsPromotion = isPromotion;
-            EmployeeName = employeeName;
-            Title = isPromotion ? "Enregistrer une promotion" : "Enregistrer une récompense";
-
-            if (isPromotion)
-            {
-                Employee e = _services.Employees.Get(employeeId);
-                _oldPosition = e?.Poste;
-            }
-
+            _services = services; _companyId = companyId;
             SaveCommand = new RelayCommand(Save);
             CancelCommand = new RelayCommand(() => RequestClose?.Invoke(false));
+            foreach (var e in _services.Employees.GetByCompany(companyId, false).OrderBy(x => x.LastNameFr))
+                Employees.Add(new EmployeePick(e.Id, (e.LastNameFr + " " + e.FirstNameFr).Trim()));
+            if (employeeId > 0)
+            {
+                _selectedEmployee = Employees.FirstOrDefault(e => e.Id == employeeId);
+                _lockedEmployee = true;
+            }
+            else _selectedEmployee = Employees.FirstOrDefault();
         }
 
-        public Action<bool> RequestClose { get; set; }
-        public string Title { get; }
-        public string EmployeeName { get; }
-        public bool IsPromotion { get; }
-        public bool IsReward => !IsPromotion;
+        public ObservableCollection<EmployeePick> Employees { get; } = new ObservableCollection<EmployeePick>();
+        public EmployeePick SelectedEmployee { get => _selectedEmployee; set => Set(ref _selectedEmployee, value); }
+        public bool ShowEmployeePicker => !_lockedEmployee;
 
-        public string OldPosition { get => _oldPosition; set => Set(ref _oldPosition, value); }
-        public string NewPosition { get => _newPosition; set => Set(ref _newPosition, value); }
-        public string AmountText { get => _amountText; set => Set(ref _amountText, value); }
-        public string Category { get => _category; set => Set(ref _category, value); }
-        public DateTime EventDate { get => _date; set => Set(ref _date, value); }
-        public string Reason { get => _reason; set => Set(ref _reason, value); }
+        public bool InitialPositive { set => IsPositive = value; }
+        public bool IsPositive { get => _positive; set { if (Set(ref _positive, value)) Raise(nameof(IsNegative)); } }
+        public bool IsNegative { get => !_positive; set => IsPositive = !value; }
+        public string Note { get => _note; set => Set(ref _note, value); }
+        public DateTime OccurredAt { get => _date; set => Set(ref _date, value); }
 
         public ICommand SaveCommand { get; }
         public ICommand CancelCommand { get; }
+        public Action<bool> RequestClose { private get; set; }
 
         private void Save()
         {
-            Result result;
-            if (IsPromotion)
-            {
-                result = ToResult(_services.Performance.LogPromotion(_employeeId, _oldPosition, _newPosition, _date, _reason, null));
-            }
-            else
-            {
-                decimal amount = 0m;
-                if (!string.IsNullOrWhiteSpace(_amountText))
-                {
-                    decimal.TryParse(_amountText.Replace(',', '.'), NumberStyles.Any, CultureInfo.InvariantCulture, out amount);
-                }
-                result = ToResult(_services.Performance.LogReward(_employeeId, amount, _category, _date, _reason));
-            }
-
-            if (result.IsFailure) { Dialogs.Error(result.Error); return; }
+            if (_selectedEmployee == null) { Dialogs.Error(TranslationSource.Instance["Performance_EmployeeNotFound"]); return; }
+            Result<long> r = _services.Performance.LogBehavior(_companyId, _selectedEmployee.Id, _positive, _note, _date);
+            if (r.IsFailure) { Dialogs.Error(PerfDialogs.Err(r)); return; }
             RequestClose?.Invoke(true);
         }
-
-        private static Result ToResult<T>(Result<T> r) => r.IsSuccess ? Result.Ok() : Result.Fail(r.Error, r.ErrorCode);
     }
 }

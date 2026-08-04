@@ -49,7 +49,7 @@ namespace OptiPaie.Desktop.Composition
             var leaveService = new LeaveService(unitOfWorkFactory);
             var loanService = new LoanService(unitOfWorkFactory);
             var contractService = new ContractService(unitOfWorkFactory);
-            var performanceService = new PerformanceService(unitOfWorkFactory, attendanceService);
+            var performanceService = new PerformanceService(unitOfWorkFactory);
             var assetService = new AssetService(unitOfWorkFactory);
             var departmentService = new DepartmentService(unitOfWorkFactory);
             var trainingService = new TrainingService(unitOfWorkFactory);

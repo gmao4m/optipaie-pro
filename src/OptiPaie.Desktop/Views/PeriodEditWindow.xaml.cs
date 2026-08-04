@@ -2,9 +2,9 @@ using System.Windows;
 
 namespace OptiPaie.Desktop.Views
 {
-    public partial class TemplateEditorWindow : Window
+    public partial class PeriodEditWindow : Window
     {
-        public TemplateEditorWindow()
+        public PeriodEditWindow()
         {
             InitializeComponent();
         }

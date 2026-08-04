@@ -109,29 +109,27 @@ namespace OptiPaie.Desktop.ViewModels
             T.Result == TrainingResult.Failed ? "danger" : "neutral";
     }
 
-    public sealed class ProfileGoalRow
+    public sealed class ProfileEvalRow
     {
         private static readonly CultureInfo Fr = CultureInfo.GetCultureInfo("fr-FR");
-        public ProfileGoalRow(GoalRow g) { G = g; }
-        public GoalRow G { get; }
-        public string Title => G.Title;
-        public string ProgressText => G.ProgressPercent.ToString("0.#", Fr) + " %";
-        public double ProgressValue => (double)G.ProgressPercent;
-        public string StatusLabel => G.StatusLabel;
-        public string StatusKind =>
-            G.Status == PerformanceGoalStatus.Achieved ? "success" :
-            G.IsOverdue ? "danger" : "pending";
+        public ProfileEvalRow(EvaluationSummary e) { E = e; }
+        public EvaluationSummary E { get; }
+        public string Title => string.IsNullOrEmpty(E.PeriodName) ? "—" : E.PeriodName;
+        public double ProgressValue => (double)E.TotalScore;
+        public string ProgressText => E.TotalScore.ToString("0.#", Fr) + " / 100";
+        public string StatusLabel => Performance.PerfLabels.BandLabel(E.Band);
+        public string StatusKind => Performance.PerfLabels.BandKind(E.Band);
     }
 
-    public sealed class ProfileCareerRow
+    public sealed class ProfileBehaviorRow
     {
         private static readonly CultureInfo Fr = CultureInfo.GetCultureInfo("fr-FR");
-        public ProfileCareerRow(CareerTimelineItem i) { I = i; }
-        public CareerTimelineItem I { get; }
-        public string DateText => I.Date.ToString("dd/MM/yyyy", Fr);
-        public string Title => I.Title;
-        public string Detail => I.Detail;
-        public string ValueText => I.ValueText;
+        public ProfileBehaviorRow(BehaviorEntry b) { B = b; }
+        public BehaviorEntry B { get; }
+        public string DateText => B.OccurredAt.ToString("dd/MM/yyyy", Fr);
+        public string Title => B.IsPositive ? "👍" : "👎";
+        public string Detail => B.Note;
+        public string ValueText => string.Empty;
     }
 
     /// <summary>
@@ -178,8 +176,8 @@ namespace OptiPaie.Desktop.ViewModels
         public ObservableCollection<ProfileLoanRow> Loans { get; } = new ObservableCollection<ProfileLoanRow>();
         public ObservableCollection<ProfileAssetRow> Assets { get; } = new ObservableCollection<ProfileAssetRow>();
         public ObservableCollection<ProfileTrainingRow> Training { get; } = new ObservableCollection<ProfileTrainingRow>();
-        public ObservableCollection<ProfileGoalRow> Goals { get; } = new ObservableCollection<ProfileGoalRow>();
-        public ObservableCollection<ProfileCareerRow> Career { get; } = new ObservableCollection<ProfileCareerRow>();
+        public ObservableCollection<ProfileEvalRow> Evaluations { get; } = new ObservableCollection<ProfileEvalRow>();
+        public ObservableCollection<ProfileBehaviorRow> Behaviors { get; } = new ObservableCollection<ProfileBehaviorRow>();
 
         // -- header ----------------------------------------------------------
         public string FullName { get; private set; } = "—";
@@ -219,9 +217,9 @@ namespace OptiPaie.Desktop.ViewModels
         public bool HasLoans => Loans.Count > 0;
         public bool HasAssets => Assets.Count > 0;
         public bool HasTraining => Training.Count > 0;
-        public bool HasGoals => Goals.Count > 0;
-        public bool HasCareer => Career.Count > 0;
-        public bool HasPerformance => HasReview || HasGoals || HasCareer;
+        public bool HasEvaluations => Evaluations.Count > 0;
+        public bool HasBehaviors => Behaviors.Count > 0;
+        public bool HasPerformance => HasReview || HasEvaluations || HasBehaviors;
 
         public ICommand EditCommand { get; }
         public ICommand ExportCommand { get; }
@@ -365,27 +363,22 @@ namespace OptiPaie.Desktop.ViewModels
 
         private void LoadPerformance()
         {
-            PerformanceSummary latest = _services.Performance.GetByEmployee(_employeeId)
-                .OrderByDescending(r => r.ReviewDate).FirstOrDefault();
-            if (latest != null && latest.Status == PerformanceStatus.Completed)
+            // Completed evaluations, most recent first (the module returns them ordered).
+            var history = _services.Performance.GetByEmployee(_employeeId);
+            EvaluationSummary latest = history.FirstOrDefault();
+            if (latest != null)
             {
                 HasReview = true;
-                LatestScoreText = latest.OverallScore.ToString("0.##", Fr);
-                LatestRatingText = latest.Rating;
-                LatestReviewPeriod = latest.PeriodLabel;
+                LatestScoreText = latest.TotalScore.ToString("0.#", Fr) + " / 100";
+                LatestRatingText = Performance.PerfLabels.BandLabel(latest.Band);
+                LatestReviewPeriod = latest.PeriodName;
             }
 
-            foreach (GoalRow g in _services.Performance.GetGoals(_employeeId)
-                         .Where(x => x.Status != PerformanceGoalStatus.Achieved || x.ProgressPercent < 100m))
-            {
-                Goals.Add(new ProfileGoalRow(g));
-            }
+            foreach (EvaluationSummary e in history.Take(6))
+                Evaluations.Add(new ProfileEvalRow(e));
 
-            CareerTimeline timeline = _services.Performance.GetCareerTimeline(_employeeId);
-            if (timeline != null)
-            {
-                foreach (CareerTimelineItem i in timeline.Items) Career.Add(new ProfileCareerRow(i));
-            }
+            foreach (BehaviorEntry b in _services.Performance.GetBehaviors(_employeeId).Take(6))
+                Behaviors.Add(new ProfileBehaviorRow(b));
         }
 
         // ------------------------------------------------------------ actions
@@ -404,7 +397,7 @@ namespace OptiPaie.Desktop.ViewModels
         private void Reload()
         {
             Contracts.Clear(); Payslips.Clear(); LeaveRequests.Clear(); Loans.Clear();
-            Assets.Clear(); Training.Clear(); Goals.Clear(); Career.Clear();
+            Assets.Clear(); Training.Clear(); Evaluations.Clear(); Behaviors.Clear();
             Load();
             RaiseAll();
         }
@@ -479,8 +472,8 @@ namespace OptiPaie.Desktop.ViewModels
                 Loans = Loans.Select(l => new[] { l.PrincipalText, l.InstallmentText, l.OutstandingText, l.StatusLabel }).ToList(),
                 Assets = Assets.Select(a => new[] { a.AssetName, a.AssignedText, a.ReturnedText, a.StatusLabel }).ToList(),
                 Training = Training.Select(t => new[] { t.Title, t.Provider, t.DateText, t.ResultLabel, t.CertificateText }).ToList(),
-                Goals = Goals.Select(g => new[] { g.Title, g.ProgressText, g.StatusLabel }).ToList(),
-                Career = Career.Select(c => new[] { c.DateText, c.Title, c.Detail }).ToList()
+                Goals = Evaluations.Select(e => new[] { e.Title, e.ProgressText, e.StatusLabel }).ToList(),
+                Career = Behaviors.Select(b => new[] { b.DateText, b.Title, b.Detail }).ToList()
             };
         }
 
@@ -494,7 +487,7 @@ namespace OptiPaie.Desktop.ViewModels
                 nameof(LeaveEntitlementText), nameof(LeaveTakenText), nameof(LeaveRemainingText), nameof(LeavePendingText),
                 nameof(LatestScoreText), nameof(LatestRatingText), nameof(LatestReviewPeriod), nameof(HasReview),
                 nameof(HasContracts), nameof(HasPayslips), nameof(HasLeave), nameof(HasLoans),
-                nameof(HasAssets), nameof(HasTraining), nameof(HasGoals), nameof(HasCareer), nameof(HasPerformance)
+                nameof(HasAssets), nameof(HasTraining), nameof(HasEvaluations), nameof(HasBehaviors), nameof(HasPerformance)
             }) Raise(p);
         }
 

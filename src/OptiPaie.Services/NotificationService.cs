@@ -119,8 +119,8 @@ namespace OptiPaie.Services
                 });
             }
 
-            // Performance — reviews to finalise (from launched cycles), urgency by due date.
-            foreach (PerformanceReminder r in _performance.GetReminders(company.Id, today))
+            // Performance — pending evaluations whose period is closing or overdue.
+            foreach (EvaluationReminder r in _performance.GetReminders(company.Id, today))
             {
                 items.Add(new Notification
                 {
@@ -129,56 +129,12 @@ namespace OptiPaie.Services
                              : r.DaysLeft <= 3 ? NotificationSeverity.Warning
                              : NotificationSeverity.Info,
                     Title = "Évaluation à finaliser — " + (r.EmployeeName ?? "—"),
-                    Detail = "Échéance le " + r.DueDate.ToString("dd/MM/yyyy", Fr) + " · " + Countdown(r.DaysLeft),
+                    Detail = (string.IsNullOrEmpty(r.PeriodName) ? string.Empty : r.PeriodName + " · ") +
+                             "Échéance le " + r.DueDate.ToString("dd/MM/yyyy", Fr) + " · " + Countdown(r.DaysLeft),
                     ModuleKey = ModuleKeys.Performance,
                     Date = r.DueDate
                 });
             }
-
-            // Performance -> Contracts: a logged promotion prompts a contract amendment (never edits).
-            foreach (ContractAmendmentPrompt p in _performance.GetContractAmendmentPrompts(company.Id))
-            {
-                items.Add(new Notification
-                {
-                    Kind = "performance",
-                    Severity = NotificationSeverity.Warning,
-                    Title = "Avenant de contrat — " + (p.EmployeeName ?? "—"),
-                    Detail = "Promotion " + Arrow(p.OldPosition, p.NewPosition) + " : établir l'avenant de contrat.",
-                    ModuleKey = ModuleKeys.Contracts,
-                    Date = p.Date
-                });
-            }
-
-            // Contracts -> Performance: probation (période d'essai) ending -> fin d'essai evaluation.
-            foreach (ContractSummary c in _contracts.GetByCompany(company.Id))
-            {
-                if (c.Status != ContractStatus.Active) continue;
-
-                EmploymentContract full = _contracts.Get(c.ContractId);
-                if (full == null || full.TrialPeriodDays <= 0) continue;
-
-                DateTime probationEnd = full.StartDate.Date.AddDays(full.TrialPeriodDays);
-                int days = (int)(probationEnd - today).TotalDays;
-                if (days < -7 || days > window) continue;
-                if (_performance.HasProbationReview(c.EmployeeId)) continue;
-
-                names.TryGetValue(c.EmployeeId, out string pn);
-                items.Add(new Notification
-                {
-                    Kind = "performance",
-                    Severity = days <= 3 ? NotificationSeverity.Urgent : NotificationSeverity.Warning,
-                    Title = "Fin d'essai — " + (pn ?? c.EmployeeName ?? "—"),
-                    Detail = "Période d'essai jusqu'au " + probationEnd.ToString("dd/MM/yyyy", Fr) +
-                             " · réaliser l'évaluation de fin d'essai.",
-                    ModuleKey = ModuleKeys.Performance,
-                    Date = probationEnd
-                });
-            }
-        }
-
-        private static string Arrow(string oldPosition, string newPosition)
-        {
-            return (string.IsNullOrWhiteSpace(oldPosition) ? string.Empty : oldPosition + " → ") + (newPosition ?? string.Empty);
         }
 
         private static string Countdown(int days)

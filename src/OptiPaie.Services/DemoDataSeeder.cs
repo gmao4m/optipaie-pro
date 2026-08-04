@@ -168,7 +168,7 @@ namespace OptiPaie.Services
                 Nis = "000916025478931",
                 Rc = "09/00-1245789 B 16",
                 ArticleImposition = "16050124789",
-                CnasEmployerNumber = "09-1024578-90",
+                CnasEmployerNumber = "091-024-5789",   // 10 digits (CNAS employer-number rule)
                 Bank = "BEA - Agence Boufarik",
                 BankAccount = "002 00456 1120045789 12",
                 Currency = "DZD",
@@ -242,7 +242,7 @@ namespace OptiPaie.Services
                     PaymentMode = PaymentMode.BankTransfer,
                     HireDate = s.HireDate,
                     BirthDate = new DateTime(1985 + (n % 12), 1 + (n % 11), 1 + (n % 27)),
-                    Nss = "0" + (1985 + (n % 12)).ToString() + (100000 + n).ToString(),
+                    Nss = "0" + (1985 + (n % 12)).ToString() + (1000000 + n).ToString(),   // 12 digits (NSS rule)
                     NationalId = (109000000000000000L + n).ToString(),
                     Rib = "002004561120" + (100000 + n).ToString() + (10 + (n % 89)).ToString(),
                     IsActive = true
@@ -306,21 +306,66 @@ namespace OptiPaie.Services
             }
         }
 
-        // ===== department defaults (org structure: dept -> manager + template) ===
+        // ===== evaluation templates (one per department; weighted + simple modes) ===
 
         private void ConfigureDepartments(long companyId, Dictionary<string, EmpSpec> by)
         {
-            // Point each department at its new 1-5 evaluation grid (migration 0027).
-            SaveDept(companyId, "Production", "dept-production", by["benali"].Id);
-            SaveDept(companyId, "Commercial", "dept-commercial", by["hamadi"].Id);
-            SaveDept(companyId, "Administration", "dept-administration", by["zeroual"].Id);
-            SaveDept(companyId, "Informatique", "dept-informatique", by["meziane"].Id);
+            // Production — weighted, mixes behavioural + a productivity KPI.
+            SaveDeptTemplate(companyId, "Production", WeightingMode.Weighted, isDefault: true, new[]
+            {
+                Crit("Qualité du travail", CriterionCategory.Behavioral, ScoreType.Stars5, 35m),
+                Kpi("Productivité (pièces / objectif)", 25m, 100m),
+                Crit("Respect des consignes de sécurité", CriterionCategory.Behavioral, ScoreType.Stars5, 25m),
+                Crit("Assiduité", CriterionCategory.Behavioral, ScoreType.Stars5, 15m)
+            });
+
+            // Commercial — weighted, sales KPI carries the most weight.
+            SaveDeptTemplate(companyId, "Commercial", WeightingMode.Weighted, isDefault: false, new[]
+            {
+                Kpi("Objectifs de vente (réalisé / cible)", 50m, 100m),
+                Crit("Relation client", CriterionCategory.Behavioral, ScoreType.Stars5, 20m),
+                Crit("Assiduité", CriterionCategory.Behavioral, ScoreType.Stars5, 15m),
+                Crit("Esprit d'équipe", CriterionCategory.Behavioral, ScoreType.Stars5, 15m)
+            });
+
+            // Administration — simple mode (all criteria equal), showcases the other mode.
+            SaveDeptTemplate(companyId, "Administration", WeightingMode.Simple, isDefault: false, new[]
+            {
+                Crit("Exactitude des tâches", CriterionCategory.Administrative, ScoreType.Stars5, 25m),
+                Kpi("Respect des délais (%)", 25m, 100m),
+                Crit("Réactivité", CriterionCategory.Behavioral, ScoreType.Stars5, 25m),
+                Crit("Assiduité", CriterionCategory.Behavioral, ScoreType.Stars5, 25m)
+            });
+
+            // Informatique — weighted, technical craft + an incidents KPI.
+            SaveDeptTemplate(companyId, "Informatique", WeightingMode.Weighted, isDefault: false, new[]
+            {
+                Crit("Qualité du travail / du code", CriterionCategory.Technical, ScoreType.Stars5, 35m),
+                Kpi("Incidents résolus (réalisé / cible)", 25m, 100m),
+                Crit("Respect des délais de projet", CriterionCategory.Behavioral, ScoreType.Stars5, 20m),
+                Crit("Évolution des compétences", CriterionCategory.Technical, ScoreType.Stars5, 20m)
+            });
         }
 
-        private void SaveDept(long companyId, string dept, string templateGroupKey, long reviewerId)
+        private void SaveDeptTemplate(long companyId, string dept, WeightingMode mode, bool isDefault, EvalCriterion[] criteria)
         {
-            Must(_performance.SaveDeptSetting(companyId, dept, templateGroupKey, reviewerId), "paramètre du département " + dept);
+            var template = new EvalTemplate
+            {
+                CompanyId = companyId,
+                Department = dept,
+                Name = "Grille — " + dept,
+                Description = "Modèle d'évaluation du département " + dept + ".",
+                WeightingMode = mode,
+                IsDefault = isDefault
+            };
+            Must(_performance.SaveTemplate(template, criteria), "modèle du département " + dept);
         }
+
+        private static EvalCriterion Crit(string name, CriterionCategory category, ScoreType type, decimal weight) =>
+            new EvalCriterion { Name = name, Category = category, ScoreType = type, WeightPercent = weight };
+
+        private static EvalCriterion Kpi(string name, decimal weight, decimal target) =>
+            new EvalCriterion { Name = name, Category = CriterionCategory.Kpi, ScoreType = ScoreType.Percent, WeightPercent = weight, KpiTarget = target, HigherIsBetter = true };
 
         // ===== attendance (a full previous month) ===============================
 
@@ -426,90 +471,123 @@ namespace OptiPaie.Services
             }
         }
 
-        // ===== performance (a completed cycle + promotions + rewards + goals) ===
+        // ===== performance (templates seeded above; now behaviour + periods + evaluations) ==
 
         private void CreatePerformance(long companyId, Dictionary<string, EmpSpec> by, int year, DateTime today)
         {
-            var request = new CycleLaunchRequest
+            // 1. A continuous 👍/👎 behaviour log — facts that ground the evaluations.
+            CreateBehaviors(companyId, by, today);
+
+            // 2. A deterministic band per employee (spread), improving over the years — except
+            //    one employee who declines, so the "en baisse" alert has something to catch.
+            var ordered = by.Values.OrderBy(s => s.Id).ToList();
+            var employeeIds = ordered.Select(s => s.Id).ToList();
+            var baseBand = new Dictionary<long, decimal>();
+            for (int i = 0; i < ordered.Count; i++)
+                baseBand[ordered[i].Id] = 0.60m + (i % 8) * 0.045m;   // 0.60 .. 0.915
+            long declining = by["cherif"].Id;
+
+            decimal BandFor(long empId, int idx)  // idx: 0 oldest .. 2 most recent
+            {
+                decimal b = baseBand[empId];
+                if (empId == declining)
+                    return new[] { b + 0.06m, b, b - 0.10m }[idx];
+                return Math.Min(0.98m, b - 0.06m + idx * 0.03m);
+            }
+
+            // 3. Three finalised annual periods → history, trend and the reports.
+            SeedAnnualPeriod(companyId, "Évaluation " + (year - 2), year - 2, employeeIds, id => BandFor(id, 0));
+            SeedAnnualPeriod(companyId, "Évaluation " + (year - 1), year - 1, employeeIds, id => BandFor(id, 1));
+            SeedAnnualPeriod(companyId, "Évaluation " + year, year, employeeIds, id => BandFor(id, 2));
+
+            // 4. A current OPEN monthly period — a few done, the rest pending: the live flow.
+            var open = new EvalPeriod
             {
                 CompanyId = companyId,
-                Name = "Évaluation annuelle " + year,
-                CycleType = PerformanceCycleType.Annual,
-                StartDate = new DateTime(year, 12, 1),
-                EndDate = new DateTime(year, 12, 31),
-                Deadline = new DateTime(year, 12, 28),
-                PeriodYear = year,
-                PeriodLabel = year.ToString(),
-                DefaultTemplateGroupKey = "builtin-general"
+                Name = "Campagne " + today.Year + " — en cours",
+                Cadence = PeriodCadence.Monthly,
+                StartDate = new DateTime(today.Year, today.Month, 1),
+                EndDate = new DateTime(today.Year, today.Month, DateTime.DaysInMonth(today.Year, today.Month)),
+                Status = PeriodStatus.Open
             };
-
-            Result<long> launched = _performance.LaunchCycle(request);
-            if (launched.IsFailure)
-            {
-                return;
-            }
-
-            CycleDetail detail = _performance.GetCycleDetail(launched.Value);
-            int i = 0;
-            long topReviewId = 0;
-            foreach (CycleReviewRow row in detail.Reviews)
-            {
-                PerformanceReview review = _performance.Get(row.ReviewId);
-                decimal scaleMax = review.ScaleMax <= 0m ? 20m : review.ScaleMax;
-
-                // A realistic spread of performance levels as a fraction of the scale, so it
-                // works whatever the grid's scale is (the department grids are on 1-5).
-                decimal band = 0.62m + ((i * 7) % 8) * 0.045m; // 0.62 .. 0.935
-
-                var criteria = new List<PerformanceCriterion>();
-                foreach (PerformanceCriterion c in GetCriteria(row.ReviewId))
-                {
-                    if (c.CriterionType == CriterionType.Kpi)
-                    {
-                        // Target/achieved chosen so the derived score lands near the band.
-                        c.KpiTarget = 100m;
-                        c.KpiAchieved = Math.Round(100m * (band + 0.2m), MidpointRounding.AwayFromZero);
-                    }
-                    else
-                    {
-                        decimal s = Math.Round(band * scaleMax, MidpointRounding.AwayFromZero);
-                        c.Score = s < 1m ? 1m : (s > scaleMax ? scaleMax : s);
-                    }
-                    criteria.Add(c);
-                }
-
-                review.Reviewer = string.IsNullOrWhiteSpace(review.Reviewer) ? "Direction" : review.Reviewer;
-                Must(_performance.Save(review, criteria), "évaluation de l'employé #" + row.EmployeeId);
-                Must(_performance.Complete(row.ReviewId), "finalisation de l'évaluation #" + row.ReviewId);
-
-                if (row.EmployeeId == by["touati"].Id) topReviewId = row.ReviewId;
-                i++;
-            }
-
-            // Promotions (prompt a contract amendment; never edit the contract here).
-            _performance.LogPromotion(by["boudiaf"].Id, "Opérateur de production", "Chef d'équipe",
-                today.AddMonths(-2), "Excellente évaluation annuelle", null);
-            _performance.LogPromotion(by["saadi"].Id, "Technicien de maintenance", "Technicien senior",
-                today.AddMonths(-5), "Montée en compétences", null);
-            _performance.LogPromotion(by["bouzid"].Id, "Développeur", "Développeur senior",
-                today.AddMonths(-4), "Excellente performance technique", null);
-
-            // Rewards / bonuses.
-            _performance.LogReward(by["touati"].Id, 25000m, "Prime de rendement", today.AddMonths(-1), "Dépassement des objectifs de vente");
-            _performance.LogReward(by["bouzid"].Id, 30000m, "Prime de projet", today.AddMonths(-3), "Livraison du module RH");
-
-            // A couple of active goals for the goals screen / career timeline.
-            _performance.CreateGoal(new PerformanceGoal { EmployeeId = by["touati"].Id, Title = "Atteindre 120% des objectifs de vente", TargetMetric = "120%", ProgressPercent = 60m, DueDate = today.AddMonths(3) });
-            _performance.CreateGoal(new PerformanceGoal { EmployeeId = by["bouzid"].Id, Title = "Livrer le module de gestion des congés", TargetMetric = "v1.0 en production", ProgressPercent = 40m, DueDate = today.AddMonths(2) });
-
-            if (topReviewId != 0) { /* review kept for linkage/demo */ }
+            long openId = Must(_performance.SavePeriod(open), "période courante");
+            foreach (long id in employeeIds.Take(6))
+                SeedEvaluation(openId, id, BandFor(id, 2));
         }
 
-        private IEnumerable<PerformanceCriterion> GetCriteria(long reviewId)
+        private long SeedAnnualPeriod(long companyId, string name, int y, List<long> employeeIds, Func<long, decimal> bandFor)
         {
-            // The service exposes criteria through GetDetail.
-            PerformanceDetail detail = _performance.GetDetail(reviewId);
-            return detail != null ? detail.Criteria : new List<PerformanceCriterion>();
+            var period = new EvalPeriod
+            {
+                CompanyId = companyId,
+                Name = name,
+                Cadence = PeriodCadence.Yearly,
+                StartDate = new DateTime(y, 1, 1),
+                EndDate = new DateTime(y, 12, 31),
+                Status = PeriodStatus.Open
+            };
+            long pid = Must(_performance.SavePeriod(period), "période " + name);
+            foreach (long empId in employeeIds)
+                SeedEvaluation(pid, empId, bandFor(empId));
+            _performance.ClosePeriod(pid);
+            return pid;
+        }
+
+        private void SeedEvaluation(long periodId, long employeeId, decimal band)
+        {
+            Result<long> created = _performance.CreateEvaluation(periodId, employeeId, null);
+            if (created.IsFailure) return;
+            EvaluationDetail detail = _performance.GetEvaluationDetail(created.Value);
+            if (detail == null) return;
+
+            var scores = detail.Scores.ToList();
+            foreach (EvaluationScore line in scores) ScoreLine(line, band);
+            Evaluation ev = detail.Evaluation;
+            ev.Evaluator = "Direction";
+            _performance.SaveEvaluation(ev, scores);
+            _performance.CompleteEvaluation(created.Value);
+        }
+
+        private static void ScoreLine(EvaluationScore line, decimal band)
+        {
+            if (line.Category == CriterionCategory.Kpi)
+            {
+                decimal target = line.KpiTarget ?? 100m;
+                line.KpiActual = Math.Round(target * band, 2, MidpointRounding.AwayFromZero);
+                return;
+            }
+            switch (line.ScoreType)
+            {
+                case ScoreType.Stars5: line.RawValue = Bound(Math.Round(band * 5m, MidpointRounding.AwayFromZero), 1m, 5m); break;
+                case ScoreType.Score20: line.RawValue = Bound(Math.Round(band * 20m, MidpointRounding.AwayFromZero), 1m, 20m); break;
+                default: line.RawValue = Bound(Math.Round(band * 100m, MidpointRounding.AwayFromZero), 0m, 100m); break;
+            }
+        }
+
+        private static decimal Bound(decimal v, decimal lo, decimal hi) => v < lo ? lo : (v > hi ? hi : v);
+
+        private void CreateBehaviors(long companyId, Dictionary<string, EmpSpec> by, DateTime today)
+        {
+            void Log(string code, bool positive, int daysAgo, string note) =>
+                _performance.LogBehavior(companyId, by[code].Id, positive, note, today.AddDays(-daysAgo));
+
+            Log("bouzid", true, 3, "A livré le module avant l'échéance");
+            Log("touati", true, 5, "A dépassé son objectif mensuel de vente");
+            Log("benali", true, 8, "A formé deux nouveaux opérateurs");
+            Log("haddad", false, 6, "Retard répété en début de semaine");
+            Log("amrani", true, 10, "Clôture comptable sans aucune erreur");
+            Log("kaddour", false, 12, "Absence non justifiée");
+            Log("saadi", true, 9, "Maintenance préventive proactive");
+            Log("meziane", true, 4, "Résolution rapide d'un incident critique");
+            Log("cherif", false, 7, "Écart d'inventaire au magasin");
+            Log("ferhat", true, 11, "Excellent retour d'un client clé");
+            Log("gherbi", true, 6, "A digitalisé le suivi des congés");
+            Log("medjani", false, 14, "Livraison en retard sur un ticket");
+            Log("slimani", true, 2, "A fiabilisé les sauvegardes serveur");
+            Log("boudiaf", true, 15, "Zéro incident de sécurité ce mois");
+            Log("touati", false, 20, "A oublié de relancer un prospect");
+            Log("bouzid", true, 18, "Mentorat de l'équipe junior");
+            Log("cherif", false, 25, "Retards de pointage répétés");
         }
 
         // ===== loans (different repayment stages) ===============================
@@ -649,7 +727,7 @@ namespace OptiPaie.Services
                 CompanyId = companyId,
                 Title = "Développement .NET avancé",
                 Category = "Informatique",
-                Provider = "Institut national de la formation professionnelle",
+                Provider = "INFP Boufarik",
                 Status = TrainingStatus.Completed,
                 StartDate = today.AddMonths(-5),
                 EndDate = today.AddMonths(-5).AddDays(5),
@@ -677,7 +755,7 @@ namespace OptiPaie.Services
             long office = Must(_training.Save(new TrainingSession
             {
                 CompanyId = companyId,
-                Title = "Bureautique avancée (Excel)",
+                Title = "Bureautique avancée sur Excel",
                 Category = "Bureautique",
                 Provider = "Centre de formation Blida",
                 Status = TrainingStatus.Planned,

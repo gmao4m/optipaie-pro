@@ -1,133 +1,99 @@
+using System;
 using System.Collections.Generic;
 using OptiPaie.Core.Entities;
 
 namespace OptiPaie.Core.Interfaces.Repositories
 {
     /// <summary>
-    /// Persistence for the whole Performance &amp; Career module: reviews and their criteria,
-    /// versioned templates, review cycles, goals, career events and per-department defaults.
+    /// Persistence for the Performance (Évaluation) module: templates and their criteria,
+    /// evaluation periods, evaluations and their scored lines, and the behaviour log.
     /// Company-scoped queries join the shared Employees/Companies tables — no employee,
     /// company or payroll data is ever copied here.
     /// </summary>
     public interface IPerformanceRepository
     {
-        // -- reviews -----------------------------------------------------------
-
-        PerformanceReview GetById(long id);
-
-        /// <summary>Reviews of one employee, most recent first.</summary>
-        IEnumerable<PerformanceReview> GetByEmployee(long employeeId);
-
-        /// <summary>Reviews of a whole company for a year.</summary>
-        IEnumerable<PerformanceReview> GetByCompanyYear(long companyId, int year);
-
-        /// <summary>Every non-deleted review of a company across all years (dashboard/search).</summary>
-        IEnumerable<PerformanceReview> GetByCompany(long companyId);
-
-        /// <summary>Reviews assigned to a cycle.</summary>
-        IEnumerable<PerformanceReview> GetByCycle(long cycleId);
-
-        long Insert(PerformanceReview review);
-
-        void Update(PerformanceReview review);
-
-        void SoftDelete(long id);
-
-        // -- criteria ----------------------------------------------------------
-
-        /// <summary>Criteria of one review, in display order.</summary>
-        IEnumerable<PerformanceCriterion> GetCriteria(long reviewId);
-
-        long InsertCriterion(PerformanceCriterion criterion);
-
-        void UpdateCriterion(PerformanceCriterion criterion);
-
-        /// <summary>Hard-deletes a criterion (they are only ever child rows of a draft).</summary>
-        void DeleteCriterion(long id);
-
         // -- templates ---------------------------------------------------------
 
-        PerformanceTemplate GetTemplate(long id);
+        EvalTemplate GetTemplate(long id);
 
-        /// <summary>Current, non-archived templates visible to a company (built-ins + its own).</summary>
-        IEnumerable<PerformanceTemplate> GetTemplatesForCompany(long companyId);
+        /// <summary>Built-in templates (CompanyId null) plus a company's own, non-deleted.</summary>
+        IEnumerable<EvalTemplate> GetTemplatesForCompany(long companyId);
 
-        /// <summary>The current version of a template group (optionally company-scoped).</summary>
-        PerformanceTemplate GetCurrentTemplateByGroup(string groupKey, long? companyId);
+        long InsertTemplate(EvalTemplate template);
 
-        /// <summary>Every version of a group, newest first (version history).</summary>
-        IEnumerable<PerformanceTemplate> GetTemplateVersions(string groupKey);
-
-        long InsertTemplate(PerformanceTemplate template);
-
-        void UpdateTemplate(PerformanceTemplate template);
-
-        /// <summary>Clears IsCurrent for every current row of a group (before adding a new version).</summary>
-        void SupersedeTemplateGroup(string groupKey, long? companyId);
+        void UpdateTemplate(EvalTemplate template);
 
         void SoftDeleteTemplate(long id);
 
-        /// <summary>True if any review was created from a template in this group.</summary>
-        bool IsTemplateGroupUsed(string groupKey);
+        /// <summary>Clears IsDefault on all of a company's templates (before marking a new default).</summary>
+        void ClearDefaultTemplate(long companyId);
 
-        IEnumerable<PerformanceTemplateCriterion> GetTemplateCriteria(long templateId);
+        // -- criteria ----------------------------------------------------------
 
-        long InsertTemplateCriterion(PerformanceTemplateCriterion criterion);
+        IEnumerable<EvalCriterion> GetCriteria(long templateId);
 
-        /// <summary>Hard-deletes all criteria of a template (used to replace an unused template's set).</summary>
-        void DeleteTemplateCriteria(long templateId);
+        long InsertCriterion(EvalCriterion criterion);
 
-        // -- cycles ------------------------------------------------------------
+        /// <summary>Hard-deletes all criteria of a template (a save replaces the set wholesale).</summary>
+        void DeleteCriteria(long templateId);
 
-        PerformanceCycle GetCycle(long id);
+        // -- periods -----------------------------------------------------------
 
-        IEnumerable<PerformanceCycle> GetCyclesByCompany(long companyId);
+        EvalPeriod GetPeriod(long id);
 
-        long InsertCycle(PerformanceCycle cycle);
+        IEnumerable<EvalPeriod> GetPeriodsByCompany(long companyId);
 
-        void UpdateCycle(PerformanceCycle cycle);
+        long InsertPeriod(EvalPeriod period);
 
-        void SoftDeleteCycle(long id);
+        void UpdatePeriod(EvalPeriod period);
 
-        // -- goals -------------------------------------------------------------
+        void SoftDeletePeriod(long id);
 
-        PerformanceGoal GetGoal(long id);
+        // -- evaluations -------------------------------------------------------
 
-        IEnumerable<PerformanceGoal> GetGoalsByEmployee(long employeeId);
+        Evaluation GetEvaluation(long id);
 
-        IEnumerable<PerformanceGoal> GetGoalsByCompany(long companyId);
+        IEnumerable<Evaluation> GetEvaluationsByPeriod(long periodId);
 
-        long InsertGoal(PerformanceGoal goal);
+        /// <summary>An employee's evaluations across all periods, most recent period first.</summary>
+        IEnumerable<Evaluation> GetEvaluationsByEmployee(long employeeId);
 
-        void UpdateGoal(PerformanceGoal goal);
+        /// <summary>Every non-deleted evaluation of a company (joins EvalPeriods by company).</summary>
+        IEnumerable<Evaluation> GetEvaluationsByCompany(long companyId);
 
-        void SoftDeleteGoal(long id);
+        /// <summary>The evaluation of one employee in one period, if it exists.</summary>
+        Evaluation GetForEmployeeInPeriod(long periodId, long employeeId);
 
-        IEnumerable<PerformanceGoalTemplate> GetGoalTemplates(long companyId);
+        long InsertEvaluation(Evaluation evaluation);
 
-        long InsertGoalTemplate(PerformanceGoalTemplate template);
+        void UpdateEvaluation(Evaluation evaluation);
 
-        void SoftDeleteGoalTemplate(long id);
+        void SoftDeleteEvaluation(long id);
 
-        // -- career events -----------------------------------------------------
+        // -- scored lines ------------------------------------------------------
 
-        IEnumerable<PerformanceCareerEvent> GetCareerEventsByEmployee(long employeeId);
+        IEnumerable<EvaluationScore> GetScores(long evaluationId);
 
-        /// <summary>Career events of a whole company (joins the shared Employees table).</summary>
-        IEnumerable<PerformanceCareerEvent> GetCareerEventsByCompany(long companyId);
+        long InsertScore(EvaluationScore score);
 
-        long InsertCareerEvent(PerformanceCareerEvent careerEvent);
+        /// <summary>Hard-deletes all scored lines of an evaluation (replaced wholesale on save).</summary>
+        void DeleteScores(long evaluationId);
 
-        void SoftDeleteCareerEvent(long id);
+        // -- behaviour log -----------------------------------------------------
 
-        // -- department defaults ----------------------------------------------
+        BehaviorLog GetBehavior(long id);
 
-        IEnumerable<PerformanceDeptSetting> GetDeptSettings(long companyId);
+        /// <summary>An employee's behaviour entries, most recent first.</summary>
+        IEnumerable<BehaviorLog> GetBehaviorsByEmployee(long employeeId);
 
-        PerformanceDeptSetting GetDeptSetting(long companyId, string department);
+        /// <summary>A company's behaviour entries (joins Employees), most recent first.</summary>
+        IEnumerable<BehaviorLog> GetBehaviorsByCompany(long companyId);
 
-        long InsertDeptSetting(PerformanceDeptSetting setting);
+        /// <summary>An employee's behaviour entries whose OccurredAt falls in [from, to].</summary>
+        IEnumerable<BehaviorLog> GetBehaviorsInRange(long employeeId, DateTime from, DateTime to);
 
-        void UpdateDeptSetting(PerformanceDeptSetting setting);
+        long InsertBehavior(BehaviorLog behavior);
+
+        void SoftDeleteBehavior(long id);
     }
 }

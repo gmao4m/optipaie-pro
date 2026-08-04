@@ -1,0 +1,46 @@
+<Window x:Class="OptiPaie.Desktop.Views.BehaviorQuickWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="clr-namespace:OptiPaie.Desktop.Localization"
+        Title="{loc:Loc Perf_LogBehavior}" Height="430" Width="440" ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner" FontFamily="{StaticResource AppFont}" Background="{DynamicResource Canvas}">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Background="{DynamicResource Brand}" Padding="22,18">
+            <TextBlock Text="{loc:Loc Perf_LogBehavior}" Foreground="{DynamicResource TextOnBrand}" FontSize="17" FontWeight="SemiBold" />
+        </Border>
+
+        <StackPanel Grid.Row="1" Margin="22,18">
+            <StackPanel Visibility="{Binding ShowEmployeePicker, Converter={StaticResource BoolToVis}}">
+                <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Perf_Employee}" />
+                <ComboBox Style="{StaticResource AppComboBox}" Height="36" Margin="0,4,0,12"
+                          ItemsSource="{Binding Employees}" SelectedItem="{Binding SelectedEmployee}" DisplayMemberPath="Name" />
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal">
+                <RadioButton Content="{loc:Loc Perf_BehaviorPositive}" IsChecked="{Binding IsPositive}" Margin="0,0,20,0" VerticalContentAlignment="Center" />
+                <RadioButton Content="{loc:Loc Perf_BehaviorNegative}" IsChecked="{Binding IsNegative}" VerticalContentAlignment="Center" />
+            </StackPanel>
+
+            <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Perf_Note}" Margin="0,14,0,0" />
+            <TextBox Style="{StaticResource AppTextBox}" Height="90" Margin="0,4,0,0" TextWrapping="Wrap" AcceptsReturn="True"
+                     VerticalScrollBarVisibility="Auto" VerticalContentAlignment="Top"
+                     Text="{Binding Note, UpdateSourceTrigger=PropertyChanged}" />
+
+            <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Perf_Date}" Margin="0,14,0,0" />
+            <DatePicker Height="36" Margin="0,4,0,0" SelectedDate="{Binding OccurredAt}" />
+        </StackPanel>
+
+        <Border Grid.Row="2" Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="0,1,0,0" Padding="22,14">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="{loc:Loc Common_Cancel}" Style="{StaticResource SecondaryButton}" Height="38" Margin="0,0,10,0" Command="{Binding CancelCommand}" />
+                <Button Content="{loc:Loc Common_Save}" Style="{StaticResource PrimaryButton}" Height="38" MinWidth="120" Command="{Binding SaveCommand}" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

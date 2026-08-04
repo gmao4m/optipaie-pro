@@ -1,93 +1,64 @@
 # Module 5 — Évaluations (Performance)
 
-Premium module, module key `performance`. Fifth module of the HR ecosystem. It runs
-weighted performance reviews on a /20 scale and **pulls the employee's attendance context
-live from the Attendance module** — absences, retards and heures supplémentaires appear
-in every review without being copied or re-entered.
+Premium module, module key `performance`. Rebuilt from scratch (migration `0028`) around a
+single **fair-scoring engine**: absolute simplicity + an objective, evidence-based evaluation.
 
----
+## 1. Concept
 
-## 1. What it does
+- **Templates per department** — a reusable grid of **criteria**. Each criterion has a
+  **category** (comportemental / technique / administratif / **KPI**) and a **scoring type**
+  (étoiles /5 · note /20 · pourcentage %).
+- **Two weighting modes** (a toggle): *Critères égaux* (simple average) or *Pondéré* (each
+  criterion carries a weight %, summing to 100).
+- **KPI criterion** = a numeric objective (cible) vs the value realised → an achievement %.
+- **Behaviour log** — 👍 / 👎 facts logged as they happen, shown next to the evaluation screen
+  so scoring rests on reality, not memory.
+- **Periods** — weekly / monthly / yearly; the formal evaluation happens per period.
 
-| Capability | Where |
+## 2. Fair score (single source of truth: `OptiPaie.Services/PerformanceService.cs`)
+
+Every criterion is **normalised to 0-100** whatever its type (stars×20, /20×5, % as-is, KPI =
+achievement % capped 0-100). Then:
+
+- **Simple** : total = average of the criteria.
+- **Pondéré** : total = Σ(score × poids) / Σ(poids).
+
+The 0-100 total maps to a **band**: Excellent ≥ 90 · Très bien ≥ 75 · Bien ≥ 60 · Moyen ≥ 45 ·
+Faible. `ComputeLineScore` / `ComputeTotal` / `Classify` are pure/public — the editor shows the
+score live as you rate.
+
+## 3. Screens (`Views/PerformanceView.xaml`, 3 tabs)
+
+| Tab | What |
 |---|---|
-| Reviews of a company for a year | `Évaluations` screen |
-| Create / edit a review with weighted criteria | `Nouvelle évaluation` dialog |
-| Live overall score (/20) and rating band | editor |
-| Attendance context (absences, retards, h. supp.) | editor + PDF |
-| Finalise · Reopen · Delete | action bar |
-| Review PDF (A4, FR) | `PDF` action |
+| **Évaluations** | period selector · board (one row per employee: score, band, statut, *Évaluer/Ouvrir*) · *meilleur employé* banner · quick *Enregistrer un comportement* |
+| Evaluation screen | employee header + live total/band · behaviour log side panel (with 👍/👎 add) · one card per criterion (slider for ratings, cible/réalisé for KPI) · *Enregistrer* / *Finaliser* |
+| **Modèles** | per-department templates — new / edit / duplicate / *par défaut* / delete |
+| **Rapports** | Général (moyenne, classement, à accompagner, tendance, meilleur) · Département · Employé (score, forces/faiblesses, tendance, recommandation) — export **PDF / Excel** |
 
-## 2. Business rules (single source of truth)
+## 4. Smart touches
 
-All rules live in `OptiPaie.Services/PerformanceService.cs`.
+- *Meilleur employé* of the latest period.
+- Decline alert (`IsDeclining`) when a score drops over ≥ 3 consecutive periods.
+- A recommendation per employee (promotion / formation / suivi) — a *suggestion only*, never
+  edits contracts or payroll.
 
-- **Weighted /20 scoring**: overall = Σ(score × weight) / Σ(weight), rounded to 2, on a
-  0–20 scale. Scores must be within 0–20; weights non-negative.
-- **Rating bands**: ≥16 Excellent · ≥14 Très bien · ≥12 Bien · ≥10 Assez bien · <10
-  Insuffisant.
-- **Default criteria** seeded on a new review: qualité du travail, productivité,
-  assiduité/ponctualité, travail d'équipe, initiative — each weight 1.
-- **Lifecycle**: `Draft → Completed`, reopenable. A review may only be edited while a
-  draft; finalising requires a reviewer and at least one weighted criterion.
-- **Criteria are child rows of a draft** — a save replaces them wholesale.
+## 5. Data model — migration `src/OptiPaie.Data/Sql/Migrations/0028_PerformanceRebuild.sql`
 
-## 3. Cross-module synchronisation (live attendance pull)
+`EvalTemplates` · `EvalCriteria` · `EvalPeriods` · `Evaluations` · `EvaluationScores` ·
+`BehaviorLogs`. All reference the shared `Employees`/`Companies` tables by id; decimals/dates as
+invariant TEXT; soft-delete via `IsDeleted`. One built-in fallback template seeded.
 
-`GetDetail` aggregates the employee's attendance across the review year straight from the
-Attendance module (`IAttendanceService.GetMonthlySummary` over the 12 months) and returns
-an `AttendanceContext` (absences, retards, heures travaillées/supplémentaires). It is
-**read every time**, never stored on the review, so a review always reflects the latest
-pointage — even attendance recorded *after* the review was created. When there is no
-pointage (or the Attendance module is not in use) the section is simply omitted.
+## 6. Cross-module
 
-This is a pure read: the Attendance module, the payroll engine, the licensing system and
-the module-activation system are all untouched.
+- 360° profile shows the employee's recent **évaluations** + recent **comportement** (via
+  `GetByEmployee` / `GetBehaviors`).
+- Notifications surface pending evaluations whose period is closing (`GetReminders`).
+- Payroll, attendance, CNAS and contracts are untouched — a pure read of employee/department data.
 
-## 4. Data model
+## 7. Tests
 
-Migration `src/OptiPaie.Data/Sql/Migrations/0014_Performance.sql` — additive only.
-
-```
-PerformanceReviews
-  Id INTEGER PK   EmployeeId → FK Employees(Id)   -- the SHARED employee table
-  PeriodYear / PeriodLabel   Status (1 Draft, 2 Completed)
-  ReviewDate   Reviewer   OverallScore TEXT (/20, derived)   Comments
-  CreatedAtUtc / UpdatedAtUtc / IsDeleted
-
-PerformanceCriteria
-  Id INTEGER PK   ReviewId → FK PerformanceReviews(Id) ON DELETE CASCADE
-  Label   Weight TEXT   Score TEXT (/20)   Comment   SortOrder   IsDeleted
-```
-
-No company column: a company's reviews come from joining `Employees`. Dates bind through
-`SqliteDate.Day`.
-
-## 5. Files
-
-| Layer | File |
-|---|---|
-| Core | `Enums/PerformanceStatus.cs`, `Entities/PerformanceReview.cs`, `Entities/PerformanceCriterion.cs`, `Dtos/PerformanceSummary.cs` |
-| Core | `Interfaces/Repositories/IPerformanceRepository.cs`, `Interfaces/Services/IPerformanceService.cs` |
-| Data | `Sql/Migrations/0014_Performance.sql`, `Repositories/PerformanceRepository.cs` |
-| Services | `PerformanceService.cs` (takes `IAttendanceService` for the live pull) |
-| Desktop | `ViewModels/PerformanceViewModel.cs`, `PerformanceEditViewModel.cs` |
-| Desktop | `Views/PerformanceView.xaml`, `PerformanceEditWindow.xaml` |
-| Desktop | `Documents/PerformanceReviewDocument.cs` (QuestPDF A4) |
-| Tests | `tests/OptiPaie.Tests/PerformanceServiceTests.cs` |
-
-## 6. Tests
-
-`PerformanceServiceTests` — 17 integration tests against a **real SQLite file**:
-
-- draft creation seeds the five default criteria; unknown employee rejected
-- weighted /20 scoring (worked example 14/20), score-out-of-range rejected, criteria
-  replaced wholesale
-- rating bands (parameterised)
-- lifecycle: complete needs a reviewer, locks against editing; reopen re-enables; delete
-- **cross-module pull**: a review's detail reflects attendance recorded after creation
-  (1 absence, 1 retard, 2 h supp.); with no pointage the context is omitted
-- company listing carries the shared name and the rating
-
-Status: **17/17 passing**, full suite **1276/1276 passing**, `OptiPaie.Desktop` builds
-0 errors / 0 warnings.
+`tests/OptiPaie.Tests/PerformanceServiceTests.cs` — 23 integration cases against a real SQLite
+file (scoring per type, simple vs weighted, KPI achievement, the five bands, templates + weight
+validation, periods, evaluation lifecycle, behaviour log, the three reports, reminders). Full
+suite **1467/1467 passing**; `OptiPaie.Desktop` builds 0 errors.

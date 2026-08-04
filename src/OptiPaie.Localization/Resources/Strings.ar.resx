@@ -781,11 +781,11 @@
   <data name="Enum_CertType_Free" xml:space="preserve"><value>وثيقة حرة</value></data>
 
   <!-- Performance module (8-tab hub) -->
-  <data name="Perf_Title" xml:space="preserve"><value>الأداء والمسار المهني</value></data>
-  <data name="Perf_Subtitle" xml:space="preserve"><value>حملات التقييم والنماذج والأهداف والمعايرة ومسار الموظفين.</value></data>
+  <data name="Perf_Title" xml:space="preserve"><value>التقييمات</value></data>
+  <data name="Perf_Subtitle" xml:space="preserve"><value>قيّم موظفيك بعدل: قوالب، معايير موزونة، مؤشرات KPI وسجلّ سلوكيات.</value></data>
   <data name="Perf_Tab_Campaigns" xml:space="preserve"><value>الحملات</value></data>
   <data name="Perf_Tab_Reviews" xml:space="preserve"><value>التقييمات</value></data>
-  <data name="Perf_Tab_Templates" xml:space="preserve"><value>النماذج</value></data>
+  <data name="Perf_Tab_Templates" xml:space="preserve"><value>القوالب</value></data>
   <data name="Perf_Tab_Calibration" xml:space="preserve"><value>المعايرة</value></data>
   <data name="Perf_Tab_Goals" xml:space="preserve"><value>الأهداف</value></data>
   <data name="Perf_Tab_Comparison" xml:space="preserve"><value>المقارنة</value></data>
@@ -1108,4 +1108,385 @@
   <data name="Employees_EditRow" xml:space="preserve"><value>تعديل البطاقة</value></data>
   <data name="Employees_DeleteRow" xml:space="preserve"><value>حذف الموظف</value></data>
   <data name="Employees_ListEmpty" xml:space="preserve"><value>لا يوجد موظفون — انقر « موظف جديد » لإضافة الأول.</value></data>
+  <data name="Perf_Tab_Evaluations" xml:space="preserve">
+    <value>التقييمات</value>
+  </data>
+  <data name="Perf_Tab_Reports" xml:space="preserve">
+    <value>التقارير</value>
+  </data>
+  <data name="Perf_Period" xml:space="preserve">
+    <value>الفترة</value>
+  </data>
+  <data name="Perf_NewPeriod" xml:space="preserve">
+    <value>فترة جديدة</value>
+  </data>
+  <data name="Perf_Close" xml:space="preserve">
+    <value>إغلاق</value>
+  </data>
+  <data name="Perf_Reopen" xml:space="preserve">
+    <value>إعادة فتح</value>
+  </data>
+  <data name="Perf_LogBehavior" xml:space="preserve">
+    <value>تسجيل سلوك</value>
+  </data>
+  <data name="Perf_BestOfPeriod" xml:space="preserve">
+    <value>أفضل موظف:</value>
+  </data>
+  <data name="Perf_Board_Status" xml:space="preserve">
+    <value>{0}/{1} مُقيّم</value>
+  </data>
+  <data name="Perf_BestFormat" xml:space="preserve">
+    <value>{0} — {1}/100 ({2})</value>
+  </data>
+  <data name="Perf_NoPeriod" xml:space="preserve">
+    <value>لا توجد فترة. أنشئ واحدة للبدء.</value>
+  </data>
+  <data name="Perf_Col_Employee" xml:space="preserve">
+    <value>الموظف</value>
+  </data>
+  <data name="Perf_Col_Dept" xml:space="preserve">
+    <value>القسم</value>
+  </data>
+  <data name="Perf_Evaluate" xml:space="preserve">
+    <value>تقييم</value>
+  </data>
+  <data name="Perf_Templates_Hint" xml:space="preserve">
+    <value>قالب لكل قسم؛ القالب المدمج نقطة انطلاق.</value>
+  </data>
+  <data name="Perf_NewTemplate" xml:space="preserve">
+    <value>قالب جديد</value>
+  </data>
+  <data name="Perf_Col_Template" xml:space="preserve">
+    <value>القالب</value>
+  </data>
+  <data name="Perf_Col_Mode" xml:space="preserve">
+    <value>النمط</value>
+  </data>
+  <data name="Perf_Col_Criteria" xml:space="preserve">
+    <value>المعايير</value>
+  </data>
+  <data name="Perf_SetDefault" xml:space="preserve">
+    <value>تعيين كافتراضي</value>
+  </data>
+  <data name="Perf_AllDepartments" xml:space="preserve">
+    <value>كل الأقسام</value>
+  </data>
+  <data name="Perf_BuiltIn" xml:space="preserve">
+    <value>مدمج</value>
+  </data>
+  <data name="Perf_Default" xml:space="preserve">
+    <value>افتراضي</value>
+  </data>
+  <data name="Perf_ConfirmDeleteTemplate" xml:space="preserve">
+    <value>حذف القالب «{0}»؟</value>
+  </data>
+  <data name="Perf_Report_General" xml:space="preserve">
+    <value>نظرة عامة</value>
+  </data>
+  <data name="Perf_Report_Dept" xml:space="preserve">
+    <value>حسب القسم</value>
+  </data>
+  <data name="Perf_Report_Employee" xml:space="preserve">
+    <value>حسب الموظف</value>
+  </data>
+  <data name="Perf_ExportPdf" xml:space="preserve">
+    <value>تصدير PDF</value>
+  </data>
+  <data name="Perf_ExportCsv" xml:space="preserve">
+    <value>تصدير Excel</value>
+  </data>
+  <data name="Perf_Behavior" xml:space="preserve">
+    <value>السلوك</value>
+  </data>
+  <data name="Perf_Recommendation" xml:space="preserve">
+    <value>التوصية:</value>
+  </data>
+  <data name="Perf_DeptAverages" xml:space="preserve">
+    <value>المتوسط حسب القسم</value>
+  </data>
+  <data name="Perf_Ranking" xml:space="preserve">
+    <value>الترتيب</value>
+  </data>
+  <data name="Perf_NeedSupport" xml:space="preserve">
+    <value>يحتاج دعمًا</value>
+  </data>
+  <data name="Perf_Strengths" xml:space="preserve">
+    <value>نقاط القوة</value>
+  </data>
+  <data name="Perf_Weaknesses" xml:space="preserve">
+    <value>نقاط التحسين</value>
+  </data>
+  <data name="Perf_Trend" xml:space="preserve">
+    <value>التطوّر</value>
+  </data>
+  <data name="Perf_Report_GeneralSub" xml:space="preserve">
+    <value>{0} تقييمات من {1} موظفًا</value>
+  </data>
+  <data name="Perf_Report_DeptTitle" xml:space="preserve">
+    <value>القسم — {0}</value>
+  </data>
+  <data name="Perf_Report_DeptSub" xml:space="preserve">
+    <value>{0} مُقيّمون من {1}</value>
+  </data>
+  <data name="Perf_BehaviorCount" xml:space="preserve">
+    <value>👍 {0}  ·  👎 {1}</value>
+  </data>
+  <data name="Perf_Exported" xml:space="preserve">
+    <value>تم التصدير بنجاح.</value>
+  </data>
+  <data name="Perf_Reco_Promotion" xml:space="preserve">
+    <value>أداء ممتاز — فكّر في ترقية أو مكافأة.</value>
+  </data>
+  <data name="Perf_Reco_Training" xml:space="preserve">
+    <value>أداء يحتاج تعزيزًا — اقترح تكوينًا موجّهًا.</value>
+  </data>
+  <data name="Perf_Reco_Watch" xml:space="preserve">
+    <value>تراجع عبر عدة فترات — تابع عن قرب.</value>
+  </data>
+  <data name="Perf_Reco_Keep" xml:space="preserve">
+    <value>أداء مستقر — واصل المتابعة.</value>
+  </data>
+  <data name="Perf_Reco_NoData" xml:space="preserve">
+    <value>لا يوجد تقييم نهائي بعد.</value>
+  </data>
+  <data name="Perf_PeriodEditor" xml:space="preserve">
+    <value>فترة تقييم</value>
+  </data>
+  <data name="Perf_PeriodName" xml:space="preserve">
+    <value>اسم الفترة</value>
+  </data>
+  <data name="Perf_Cadence" xml:space="preserve">
+    <value>الدورية</value>
+  </data>
+  <data name="Perf_StartDate" xml:space="preserve">
+    <value>تاريخ البداية</value>
+  </data>
+  <data name="Perf_EndDate" xml:space="preserve">
+    <value>تاريخ النهاية</value>
+  </data>
+  <data name="Perf_ConfirmDeletePeriod" xml:space="preserve">
+    <value>حذف الفترة «{0}»؟</value>
+  </data>
+  <data name="Perf_TemplateEditor" xml:space="preserve">
+    <value>قالب التقييم</value>
+  </data>
+  <data name="Perf_TemplateName" xml:space="preserve">
+    <value>اسم القالب</value>
+  </data>
+  <data name="Perf_UseWeights" xml:space="preserve">
+    <value>أوزان مخصّصة (وإلا معايير متساوية)</value>
+  </data>
+  <data name="Perf_SetAsDefault" xml:space="preserve">
+    <value>القالب الافتراضي</value>
+  </data>
+  <data name="Perf_Criteria" xml:space="preserve">
+    <value>المعايير</value>
+  </data>
+  <data name="Perf_KpiTarget" xml:space="preserve">
+    <value>هدف المؤشّر</value>
+  </data>
+  <data name="Perf_WeightSum" xml:space="preserve">
+    <value>مجموع الأوزان: {0} %</value>
+  </data>
+  <data name="Perf_Evaluation" xml:space="preserve">
+    <value>التقييم</value>
+  </data>
+  <data name="Perf_LiveScore" xml:space="preserve">
+    <value>النتيجة الإجمالية</value>
+  </data>
+  <data name="Perf_Behaviors" xml:space="preserve">
+    <value>سجلّ السلوكيات</value>
+  </data>
+  <data name="Perf_Positive" xml:space="preserve">
+    <value>إيجابي</value>
+  </data>
+  <data name="Perf_Negative" xml:space="preserve">
+    <value>سلبي</value>
+  </data>
+  <data name="Perf_Observations" xml:space="preserve">
+    <value>ملاحظات عامة</value>
+  </data>
+  <data name="Perf_Complete" xml:space="preserve">
+    <value>إنهاء</value>
+  </data>
+  <data name="Perf_KpiTargetLabel" xml:space="preserve">
+    <value>الهدف</value>
+  </data>
+  <data name="Perf_KpiActual" xml:space="preserve">
+    <value>المُحقّق</value>
+  </data>
+  <data name="Perf_NoBehavior" xml:space="preserve">
+    <value>لا سلوكيات مسجّلة لهذه الفترة.</value>
+  </data>
+  <data name="Perf_Employee" xml:space="preserve">
+    <value>الموظف</value>
+  </data>
+  <data name="Perf_BehaviorPositive" xml:space="preserve">
+    <value>سلوك إيجابي</value>
+  </data>
+  <data name="Perf_BehaviorNegative" xml:space="preserve">
+    <value>سلوك سلبي</value>
+  </data>
+  <data name="Perf_Note" xml:space="preserve">
+    <value>ملاحظة</value>
+  </data>
+  <data name="Perf_Date" xml:space="preserve">
+    <value>التاريخ</value>
+  </data>
+  <data name="Profile_RecentEvals" xml:space="preserve">
+    <value>آخر التقييمات</value>
+  </data>
+  <data name="Profile_RecentBehavior" xml:space="preserve">
+    <value>السلوك الأخير</value>
+  </data>
+  <data name="Enum_Cadence_Weekly" xml:space="preserve">
+    <value>أسبوعي</value>
+  </data>
+  <data name="Enum_Cadence_Monthly" xml:space="preserve">
+    <value>شهري</value>
+  </data>
+  <data name="Enum_Cadence_Yearly" xml:space="preserve">
+    <value>سنوي</value>
+  </data>
+  <data name="Enum_Category_Behavioral" xml:space="preserve">
+    <value>سلوكي</value>
+  </data>
+  <data name="Enum_Category_Technical" xml:space="preserve">
+    <value>فني</value>
+  </data>
+  <data name="Enum_Category_Administrative" xml:space="preserve">
+    <value>إداري</value>
+  </data>
+  <data name="Enum_Category_Kpi" xml:space="preserve">
+    <value>مؤشّر (هدف رقمي)</value>
+  </data>
+  <data name="Enum_ScoreType_Stars5" xml:space="preserve">
+    <value>نجوم (/5)</value>
+  </data>
+  <data name="Enum_ScoreType_Score20" xml:space="preserve">
+    <value>علامة (/20)</value>
+  </data>
+  <data name="Enum_ScoreType_Percent" xml:space="preserve">
+    <value>نسبة (%)</value>
+  </data>
+  <data name="Enum_Weighting_Simple" xml:space="preserve">
+    <value>معايير متساوية</value>
+  </data>
+  <data name="Enum_Weighting_Weighted" xml:space="preserve">
+    <value>موزون</value>
+  </data>
+  <data name="Enum_PeriodStatus_Open" xml:space="preserve">
+    <value>مفتوحة</value>
+  </data>
+  <data name="Enum_PeriodStatus_Closed" xml:space="preserve">
+    <value>مغلقة</value>
+  </data>
+  <data name="Enum_EvalStatus_Pending" xml:space="preserve">
+    <value>قيد الانتظار</value>
+  </data>
+  <data name="Enum_EvalStatus_Done" xml:space="preserve">
+    <value>تمّ</value>
+  </data>
+  <data name="Enum_Band_Excellent" xml:space="preserve">
+    <value>ممتاز</value>
+  </data>
+  <data name="Enum_Band_VeryGood" xml:space="preserve">
+    <value>جيد جدًا</value>
+  </data>
+  <data name="Enum_Band_Good" xml:space="preserve">
+    <value>جيد</value>
+  </data>
+  <data name="Enum_Band_Average" xml:space="preserve">
+    <value>متوسط</value>
+  </data>
+  <data name="Enum_Band_Weak" xml:space="preserve">
+    <value>ضعيف</value>
+  </data>
+  <data name="Performance_EmployeeNotFound" xml:space="preserve">
+    <value>الموظف غير موجود.</value>
+  </data>
+  <data name="Performance_TemplateWeightSum" xml:space="preserve">
+    <value>يجب أن يساوي مجموع الأوزان 100٪.</value>
+  </data>
+  <data name="Performance_TemplateBuiltInReadOnly" xml:space="preserve">
+    <value>القالب المدمج للقراءة فقط — انسخه.</value>
+  </data>
+  <data name="Performance_NameRequired" xml:space="preserve">
+    <value>الاسم مطلوب.</value>
+  </data>
+  <data name="Performance_NoCriteria" xml:space="preserve">
+    <value>أضف معيارًا واحدًا على الأقل.</value>
+  </data>
+  <data name="Performance_PeriodDates" xml:space="preserve">
+    <value>تاريخ النهاية قبل تاريخ البداية.</value>
+  </data>
+  <data name="Performance_PeriodClosed" xml:space="preserve">
+    <value>الفترة مغلقة.</value>
+  </data>
+  <data name="Performance_PeriodNotFound" xml:space="preserve">
+    <value>الفترة غير موجودة.</value>
+  </data>
+  <data name="Performance_TemplateNotFound" xml:space="preserve">
+    <value>القالب غير موجود.</value>
+  </data>
+  <data name="Performance_EvaluationNotFound" xml:space="preserve">
+    <value>التقييم غير موجود.</value>
+  </data>
+  <data name="Performance_TemplateNotOwned" xml:space="preserve">
+    <value>هذا القالب لا يخصّ الشركة.</value>
+  </data>
+  <data name="Perf_Tab_Overview" xml:space="preserve">
+    <value>نظرة عامة</value>
+  </data>
+  <data name="Perf_LogBehavior_Tip" xml:space="preserve">
+    <value>سجّل 👍 أو 👎 في ثوانٍ</value>
+  </data>
+  <data name="Perf_StartEvaluation" xml:space="preserve">
+    <value>قيّم الآن</value>
+  </data>
+  <data name="Perf_StartEvaluation_Tip" xml:space="preserve">
+    <value>يفتح حملة التقييم الجارية</value>
+  </data>
+  <data name="Perf_Empty_NoEval" xml:space="preserve">
+    <value>لا يوجد تقييم بعد — أنشئ فترة وابدأ.</value>
+  </data>
+  <data name="Perf_CompanyAverage" xml:space="preserve">
+    <value>متوسط المؤسسة</value>
+  </data>
+  <data name="Perf_Best" xml:space="preserve">
+    <value>أفضل موظف</value>
+  </data>
+  <data name="Perf_Pending" xml:space="preserve">
+    <value>تقييمات معلّقة</value>
+  </data>
+  <data name="Perf_NotEvaluated" xml:space="preserve">
+    <value>لم يُقيّموا بعد</value>
+  </data>
+  <data name="Perf_AllClear" xml:space="preserve">
+    <value>كل شيء محدّث — لا إجراء مطلوب.</value>
+  </data>
+  <data name="Perf_ToHandle" xml:space="preserve">
+    <value>بحاجة لمعالجة</value>
+  </data>
+  <data name="Perf_Handle" xml:space="preserve">
+    <value>معالجة</value>
+  </data>
+  <data name="Perf_Improved" xml:space="preserve">
+    <value>في تحسّن</value>
+  </data>
+  <data name="Perf_Declined" xml:space="preserve">
+    <value>في تراجع</value>
+  </data>
+  <data name="Perf_RecentActivity" xml:space="preserve">
+    <value>آخر النشاطات</value>
+  </data>
+  <data name="Perf_Alert_Decline" xml:space="preserve">
+    <value>تراجع في الأداء — {0}</value>
+  </data>
+  <data name="Perf_Alert_Overdue" xml:space="preserve">
+    <value>تقييم متأخّر — {0}: {1} موظف بحاجة لتقييم</value>
+  </data>
+  <data name="Perf_Alert_Pending" xml:space="preserve">
+    <value>الموعد يقترب — {0}: {1} موظف بحاجة لتقييم</value>
+  </data>
 </root>

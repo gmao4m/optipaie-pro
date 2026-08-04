@@ -1,242 +1,57 @@
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Globalization;
-using System.Linq;
-using System.Windows;
-using System.Windows.Input;
-using OptiPaie.Core.Dtos;
-using OptiPaie.Core.Entities;
-using OptiPaie.Core.Enums;
-using OptiPaie.Core.Primitives;
-using OptiPaie.Desktop.Common;
 using OptiPaie.Desktop.Composition;
 using OptiPaie.Desktop.Mvvm;
 using OptiPaie.Desktop.ViewModels.Performance;
-using OptiPaie.Desktop.Views;
 
 namespace OptiPaie.Desktop.ViewModels
 {
-    /// <summary>One review as shown in the list.</summary>
-    public sealed class PerformanceRowViewModel
-    {
-        public PerformanceRowViewModel(PerformanceSummary summary)
-        {
-            Summary = summary;
-        }
-
-        public PerformanceSummary Summary { get; }
-        public long Id => Summary.ReviewId;
-        public string EmployeeName => Summary.EmployeeName;
-        public string PeriodLabel => Summary.PeriodLabel;
-        public string Reviewer => Summary.Reviewer;
-        public string DateText => Summary.ReviewDate.ToString("dd/MM/yyyy", CultureInfo.GetCultureInfo("fr-FR"));
-        public string ScoreText => Summary.OverallScore.ToString("0.##", CultureInfo.InvariantCulture) + " / 20";
-        public string Rating => Summary.Rating;
-        public string StatusLabel => Summary.Status == PerformanceStatus.Completed ? "Finalisée" : "Brouillon";
-        public bool IsDraft => Summary.Status == PerformanceStatus.Draft;
-        public bool IsCompleted => Summary.Status == PerformanceStatus.Completed;
-    }
-
     /// <summary>
-    /// Évaluations — performance reviews of a company for a year. A review pulls the
-    /// employee's attendance (absences, retards) live from the Attendance module, so it
-    /// always reflects the latest presence data.
+    /// Root of the Performance (Évaluation) module — a four-tab hub: an Overview control centre,
+    /// the evaluations board, the department templates, and the reports. The shell resolves this
+    /// VM (module key "performance") and shows it via the DataTemplate → PerformanceView.
     /// </summary>
     public sealed class PerformanceViewModel : ObservableObject, IActivable
     {
         private readonly AppServices _services;
-
-        private Company _selectedCompany;
-        private int _selectedYear = DateTime.Today.Year;
-        private PerformanceRowViewModel _selectedReview;
-        private string _statusMessage = string.Empty;
+        private int _tab;
 
         public PerformanceViewModel(AppServices services)
         {
-            Common.CrashLog.Breadcrumb("Performance VM: constructing");
             _services = services;
-
-            for (int y = DateTime.Today.Year - 5; y <= DateTime.Today.Year + 1; y++) Years.Add(y);
-
-            NewCommand = new RelayCommand(New);
-            OpenCommand = new RelayCommand(Open, () => _selectedReview != null);
-            CompleteCommand = new RelayCommand(CompleteReview, () => _selectedReview != null && _selectedReview.IsDraft);
-            ReopenCommand = new RelayCommand(Reopen, () => _selectedReview != null && _selectedReview.IsCompleted);
-            DeleteCommand = new RelayCommand(Delete, () => _selectedReview != null);
-
-            // Hub tabs (each reads the hub's active company / year).
-            Cycles = new CyclesTabViewModel(_services, CompanyId);
-            Modeles = new TemplatesTabViewModel(_services, CompanyId);
-            Dashboard = new DashboardTabViewModel(_services, CompanyId);
-            Calibration = new CalibrationTabViewModel(_services, CompanyId, () => _selectedYear);
-            Objectifs = new GoalsTabViewModel(_services, CompanyId);
-            Comparaison = new ComparisonTabViewModel(_services, CompanyId);
-            Parcours = new CareerTabViewModel(_services, CompanyId);
+            Evaluations = new EvaluationsTabViewModel(services);
+            Templates = new TemplatesTabViewModel(services);
+            Reports = new ReportsTabViewModel(services);
+            Overview = new OverviewTabViewModel(services, this);
         }
 
-        private long CompanyId() => _selectedCompany != null ? _selectedCompany.Id : 0L;
+        public OverviewTabViewModel Overview { get; }
+        public EvaluationsTabViewModel Evaluations { get; }
+        public TemplatesTabViewModel Templates { get; }
+        public ReportsTabViewModel Reports { get; }
 
-        // Performance &amp; Career hub tabs.
-        public CyclesTabViewModel Cycles { get; }
-        public TemplatesTabViewModel Modeles { get; }
-        public DashboardTabViewModel Dashboard { get; }
-        public CalibrationTabViewModel Calibration { get; }
-        public GoalsTabViewModel Objectifs { get; }
-        public ComparisonTabViewModel Comparaison { get; }
-        public CareerTabViewModel Parcours { get; }
-
-        private void RefreshTabs()
-        {
-            // Each tab loads independently and defensively: a data problem in one tab
-            // degrades that tab to empty rather than tearing down the whole module (and,
-            // via the shell's activation guard, never the app). The entry path is proven
-            // crash-free by PerformanceEntryPathTests, but real-world data is unpredictable.
-            SafeRefresh("Cycles", Cycles.Refresh);
-            SafeRefresh("Modeles", Modeles.Refresh);
-            SafeRefresh("Dashboard", Dashboard.Refresh);
-            SafeRefresh("Calibration", Calibration.Refresh);
-            SafeRefresh("Objectifs", Objectifs.Refresh);
-            SafeRefresh("Comparaison", Comparaison.Refresh);
-            SafeRefresh("Parcours", Parcours.Refresh);
-        }
-
-        private static void SafeRefresh(string tab, Action refresh)
-        {
-            // A breadcrumb per tab, flushed to disk BEFORE the load runs, so even an
-            // uncatchable failure (e.g. StackOverflow) names the exact tab that ran last.
-            Common.CrashLog.Breadcrumb("Performance tab refresh: " + tab);
-            try { refresh(); }
-            catch (Exception ex)
-            {
-                Common.CrashLog.Fatal("Performance tab '" + tab + "' refresh", ex);
-                System.Diagnostics.Debug.WriteLine("Performance tab refresh failed: " + ex);
-            }
-        }
-
-        public ObservableCollection<Company> Companies { get; } = new ObservableCollection<Company>();
-        public ObservableCollection<int> Years { get; } = new ObservableCollection<int>();
-        public ObservableCollection<PerformanceRowViewModel> Reviews { get; } = new ObservableCollection<PerformanceRowViewModel>();
-
-        public Company SelectedCompany
-        {
-            get => _selectedCompany;
-            set { if (Set(ref _selectedCompany, value)) Load(); }
-        }
-
-        public int SelectedYear
-        {
-            get => _selectedYear;
-            set { if (Set(ref _selectedYear, value)) { Load(); Calibration.Refresh(); Dashboard.Refresh(); } }
-        }
-
-        public PerformanceRowViewModel SelectedReview
-        {
-            get => _selectedReview;
-            set => Set(ref _selectedReview, value);
-        }
-
-        public string StatusMessage { get => _statusMessage; private set => Set(ref _statusMessage, value); }
-
-        public ICommand NewCommand { get; }
-        public ICommand OpenCommand { get; }
-        public ICommand CompleteCommand { get; }
-        public ICommand ReopenCommand { get; }
-        public ICommand DeleteCommand { get; }
+        /// <summary>Bound to the hub TabControl. 0 Overview · 1 Evaluations · 2 Templates · 3 Reports.</summary>
+        public int SelectedTabIndex { get => _tab; set => Set(ref _tab, value); }
 
         public void OnActivated()
         {
-            Common.CrashLog.Breadcrumb("Performance.OnActivated: start");
-            // The active company comes from the single global selector in the header.
-            _selectedCompany = _services.CompanyContext.Active;
-            Raise(nameof(SelectedCompany));
-            Load();
-            Common.CrashLog.Breadcrumb("Performance.OnActivated: reviews loaded, refreshing tabs");
-            RefreshTabs();
-            Common.CrashLog.Breadcrumb("Performance.OnActivated: done (view render follows)");
+            long companyId = _services.CompanyContext.Active == null ? 0 : _services.CompanyContext.Active.Id;
+            Evaluations.SetCompany(companyId);
+            Templates.SetCompany(companyId);
+            Reports.SetCompany(companyId);
+            Overview.SetCompany(companyId);
         }
 
-        private void Load()
+        /// <summary>Jump to the evaluations board with a period selected (from an Overview action).</summary>
+        public void GoToPeriod(long periodId)
         {
-            Reviews.Clear();
-            if (_selectedCompany == null) return;
-
-            foreach (PerformanceSummary summary in _services.Performance.GetByCompanyYear(_selectedCompany.Id, _selectedYear))
-            {
-                Reviews.Add(new PerformanceRowViewModel(summary));
-            }
-
-            SelectedReview = Reviews.FirstOrDefault();
-            int completed = Reviews.Count(r => r.IsCompleted);
-            StatusMessage = Reviews.Count + " évaluation(s) · " + completed + " finalisée(s)";
+            Evaluations.SelectPeriod(periodId);
+            SelectedTabIndex = 1;
         }
 
-        private void New()
+        /// <summary>Jump to the per-employee report (from a decline alert's "handle" action).</summary>
+        public void GoToReportEmployee(long employeeId)
         {
-            if (_selectedCompany == null)
-            {
-                Dialogs.Info("Sélectionnez d'abord une entreprise.");
-                return;
-            }
-
-            IReadOnlyList<Employee> employees = _services.Employees.GetByCompany(_selectedCompany.Id, false);
-            if (employees.Count == 0)
-            {
-                Dialogs.Info("Aucun employé actif dans cette entreprise.");
-                return;
-            }
-
-            var vm = new PerformanceEditViewModel(_services, employees, _selectedYear, 0);
-            if (ShowEditor(vm))
-            {
-                Load();
-            }
-        }
-
-        private void Open()
-        {
-            // The signature review form: one card per criterion, a live colour-coded overall.
-            var vm = new Performance.PerformanceReviewFormViewModel(_services, _selectedReview.Id);
-            var window = new PerformanceReviewWindow { DataContext = vm, Owner = Application.Current.MainWindow };
-            App.ApplyFlowDirection(window);
-            vm.RequestClose = ok => window.DialogResult = ok;
-            if (window.ShowDialog() == true)
-            {
-                Load();
-            }
-        }
-
-        private bool ShowEditor(PerformanceEditViewModel vm)
-        {
-            var window = new PerformanceEditWindow { DataContext = vm, Owner = Application.Current.MainWindow };
-            App.ApplyFlowDirection(window);
-            vm.RequestClose = ok => window.DialogResult = ok;
-            return window.ShowDialog() == true;
-        }
-
-        private void CompleteReview() => Run(_services.Performance.Complete(_selectedReview.Id), "Évaluation finalisée.");
-        private void Reopen() => Run(_services.Performance.Reopen(_selectedReview.Id), "Évaluation rouverte.");
-
-        private void Delete()
-        {
-            if (!Dialogs.Confirm("Supprimer définitivement cette évaluation ?"))
-            {
-                return;
-            }
-
-            Run(_services.Performance.Delete(_selectedReview.Id), "Évaluation supprimée.");
-        }
-
-        private void Run(Result result, string success)
-        {
-            if (result.IsFailure)
-            {
-                Dialogs.Error(result.Error);
-                return;
-            }
-
-            Load();
-            StatusMessage = success;
+            Reports.ShowEmployee(employeeId);
+            SelectedTabIndex = 3;
         }
     }
 }

@@ -2,157 +2,126 @@ using System;
 using System.Collections.Generic;
 using OptiPaie.Core.Dtos;
 using OptiPaie.Core.Entities;
+using OptiPaie.Core.Enums;
 using OptiPaie.Core.Primitives;
 
 namespace OptiPaie.Core.Interfaces.Services
 {
     /// <summary>
-    /// The Performance &amp; Career module service: reviews and scoring, the versioned
-    /// template library, review cycles, goals, calibration, the company dashboard,
-    /// promotions/rewards and employee comparison. Owns scoring (weighted average on each
-    /// review's configurable scale) and the rating bands; pulls attendance live from the
-    /// Attendance module. Reads employee/department data but never writes payroll.
+    /// The Performance (Évaluation) module service. Owns the fair-scoring rules: every
+    /// criterion is normalised to 0-100 whatever its type (stars / 20 / percent / KPI), then
+    /// combined equally (simple mode) or by weight (weighted mode) into one 0-100 total, mapped
+    /// to a five-band classification. Also owns the behaviour log, evaluation periods, per-report
+    /// aggregation and the "smart" hints. Reads employee/department data; never writes payroll.
     /// </summary>
     public interface IPerformanceService
     {
-        // -- reviews -----------------------------------------------------------
+        // ===================== TEMPLATES =====================================
 
-        /// <summary>Creates a draft review seeded with the default general criteria (/20).</summary>
-        Result<long> CreateDraft(long employeeId, int periodYear, string periodLabel, string reviewer);
-
-        /// <summary>Creates a draft review by snapshotting a template's criteria (versioned).</summary>
-        Result<long> CreateFromTemplate(long employeeId, long templateId, int periodYear, string periodLabel,
-            string reviewer, long? reviewerEmployeeId, long? cycleId, DateTime? dueDate, bool selfAssessment);
-
-        /// <summary>
-        /// Creates a draft review for an employee using their department's evaluation grid
-        /// (company default → department built-in grid → Générale). The primary entry point
-        /// for the "open the evaluation directly" flow.
-        /// </summary>
-        Result<long> CreateForEmployee(long employeeId, int periodYear, string periodLabel, string reviewer, long? cycleId, DateTime? dueDate);
-
-        /// <summary>Saves the review header and its criteria (only while it is a draft).</summary>
-        Result Save(PerformanceReview review, IEnumerable<PerformanceCriterion> criteria);
-
-        /// <summary>Finalises a review: all criteria must be scored and a reviewer set.</summary>
-        Result Complete(long id);
-
-        /// <summary>Reopens a completed review for correction.</summary>
-        Result Reopen(long id);
-
-        /// <summary>Soft-deletes a review and its criteria.</summary>
-        Result Delete(long id);
-
-        PerformanceReview Get(long id);
-
-        PerformanceDetail GetDetail(long id);
-
-        IReadOnlyList<PerformanceSummary> GetByEmployee(long employeeId);
-
-        IReadOnlyList<PerformanceSummary> GetByCompanyYear(long companyId, int year);
-
-        /// <summary>The rating band label for a score on the given scale (default /20).</summary>
-        string Rate(decimal score);
-
-        /// <summary>The rating band for a score normalised to its scale.</summary>
-        string RateScaled(decimal score, decimal scaleMax);
-
-        /// <summary>Converts a KPI criterion's target/achieved into a score on the given scale (see the 1-5 anchor mapping).</summary>
-        decimal ScoreKpi(decimal? target, decimal? achieved, bool higherIsBetter, decimal scaleMax);
-
-        // -- templates ---------------------------------------------------------
-
+        /// <summary>Templates visible to a company (its own + built-ins), with criteria counts.</summary>
         IReadOnlyList<TemplateSummary> GetTemplates(long companyId);
 
+        /// <summary>A template with its criteria, for the editor.</summary>
         TemplateDetail GetTemplateDetail(long templateId);
 
-        /// <summary>Copies a template into a new, editable company-owned template group.</summary>
-        Result<long> DuplicateTemplate(long sourceTemplateId, long companyId, string newName);
+        /// <summary>The template a company should use for a department: its department template →
+        /// its default → the built-in base. Never null when the built-in seed is present.</summary>
+        EvalTemplate ResolveTemplate(long companyId, string department);
 
-        /// <summary>
-        /// Saves a company template and its criteria. If the group has already been used by
-        /// a review, a NEW version is created (the old one is preserved for past reviews).
-        /// Weights must sum to 100.
-        /// </summary>
-        Result<long> SaveTemplate(PerformanceTemplate template, IEnumerable<PerformanceTemplateCriterion> criteria);
+        /// <summary>Creates or updates a company template and replaces its criteria wholesale.
+        /// In weighted mode the criteria weights must sum to 100 (±0.5).</summary>
+        Result<long> SaveTemplate(EvalTemplate template, IEnumerable<EvalCriterion> criteria);
 
-        Result ArchiveTemplate(long templateId);
+        /// <summary>Copies any visible template into a new editable company template.</summary>
+        Result<long> DuplicateTemplate(long sourceTemplateId, long companyId, string newName, string department);
 
+        /// <summary>Marks one company template as the default (clears the others).</summary>
+        Result SetDefaultTemplate(long companyId, long templateId);
+
+        /// <summary>Soft-deletes a company template (built-ins are read-only).</summary>
         Result DeleteTemplate(long templateId);
 
-        // -- department defaults ----------------------------------------------
+        // ===================== PERIODS =======================================
 
-        IReadOnlyList<PerformanceDeptSetting> GetDeptSettings(long companyId);
+        IReadOnlyList<PeriodSummary> GetPeriods(long companyId);
 
-        Result SaveDeptSetting(long companyId, string department, string templateGroupKey, long? reviewerEmployeeId);
+        EvalPeriod GetPeriod(long periodId);
 
-        // -- cycles ------------------------------------------------------------
+        Result<long> SavePeriod(EvalPeriod period);
 
-        /// <summary>
-        /// Launches a cycle and bulk-assigns one review per included employee, each seeded
-        /// from its department's default template (or the request fallback), with the
-        /// department's default reviewer and the cycle deadline as the due date.
-        /// </summary>
-        Result<long> LaunchCycle(CycleLaunchRequest request);
+        Result ClosePeriod(long periodId);
 
-        IReadOnlyList<CycleSummary> GetCycles(long companyId);
+        Result ReopenPeriod(long periodId);
 
-        CycleDetail GetCycleDetail(long cycleId);
+        Result DeletePeriod(long periodId);
 
-        /// <summary>Recomputes and persists the cycle status from its reviews' completion.</summary>
-        Result RefreshCycleStatus(long cycleId);
+        // ===================== EVALUATIONS ===================================
 
-        Result CancelCycle(long cycleId);
+        /// <summary>One row per active employee of the company for a period: their evaluation and
+        /// status if started, or a pending placeholder (EvaluationId = 0) if not.</summary>
+        IReadOnlyList<EvaluationSummary> GetEvaluationBoard(long periodId);
 
-        Result DeleteCycle(long cycleId);
+        /// <summary>Full data for the evaluation screen (scores + the employee's behaviour log
+        /// over the period window + derived band).</summary>
+        EvaluationDetail GetEvaluationDetail(long evaluationId);
 
-        /// <summary>Pending/overdue reviews for the Notifications engine.</summary>
-        IReadOnlyList<PerformanceReminder> GetReminders(long companyId, DateTime asOf);
+        /// <summary>Creates a pending evaluation for an employee in a period, snapshotting the
+        /// resolved template's criteria into unscored lines. Returns the existing one if any.</summary>
+        Result<long> CreateEvaluation(long periodId, long employeeId, long? templateId);
 
-        // -- goals -------------------------------------------------------------
+        /// <summary>Saves a draft evaluation: recomputes each line's normalised score and the
+        /// overall total, then persists (score lines replaced wholesale).</summary>
+        Result SaveEvaluation(Evaluation evaluation, IEnumerable<EvaluationScore> scores);
 
-        IReadOnlyList<GoalRow> GetGoals(long employeeId);
+        Result CompleteEvaluation(long evaluationId);
 
-        IReadOnlyList<GoalRow> GetCompanyGoals(long companyId);
+        Result ReopenEvaluation(long evaluationId);
 
-        Result<long> CreateGoal(PerformanceGoal goal);
+        Result DeleteEvaluation(long evaluationId);
 
-        Result UpdateGoal(PerformanceGoal goal);
+        // ----- scoring helpers (pure; power the live preview) ----------------
 
-        Result SetGoalProgress(long goalId, decimal progressPercent);
+        /// <summary>Normalises one scored line to 0-100 from its type/value (or KPI target/achieved).</summary>
+        decimal ComputeLineScore(EvaluationScore line);
 
-        Result SetGoalStatus(long goalId, Enums.PerformanceGoalStatus status);
+        /// <summary>Combines normalised line scores into a 0-100 total (equal or by weight).</summary>
+        decimal ComputeTotal(IReadOnlyList<EvaluationScore> scores, WeightingMode mode);
 
-        Result DeleteGoal(long goalId);
+        /// <summary>Maps a 0-100 total to its fairness band.</summary>
+        ClassificationBand Classify(decimal totalScore);
 
-        IReadOnlyList<PerformanceGoalTemplate> GetGoalTemplates(long companyId);
+        // ===================== BEHAVIOUR LOG =================================
 
-        Result<long> CreateGoalTemplate(PerformanceGoalTemplate template);
+        Result<long> LogBehavior(long companyId, long employeeId, bool isPositive, string note, DateTime occurredAt);
 
-        Result DeleteGoalTemplate(long templateId);
+        IReadOnlyList<BehaviorEntry> GetBehaviors(long employeeId);
 
-        // -- career events -----------------------------------------------------
+        IReadOnlyList<BehaviorEntry> GetCompanyBehaviors(long companyId);
 
-        Result<long> LogPromotion(long employeeId, string oldPosition, string newPosition, DateTime date, string reason, long? linkedReviewId);
+        Result DeleteBehavior(long behaviorId);
 
-        Result<long> LogReward(long employeeId, decimal amount, string category, DateTime date, string reason);
+        // ===================== REPORTS & SMART ===============================
 
-        Result DeleteCareerEvent(long id);
+        EmployeeReport GetEmployeeReport(long employeeId);
 
-        CareerTimeline GetCareerTimeline(long employeeId);
+        DeptReport GetDeptReport(long companyId, string department);
 
-        /// <summary>Promotions whose new position isn't yet reflected on the employee — contract-amendment prompts.</summary>
-        IReadOnlyList<ContractAmendmentPrompt> GetContractAmendmentPrompts(long companyId);
+        GeneralReport GetGeneralReport(long companyId);
 
-        /// <summary>True when the employee already has a probation-template review (any status).</summary>
-        bool HasProbationReview(long employeeId);
+        /// <summary>Best performer of the company's most recent evaluated period (may be null).</summary>
+        BestEmployeeInfo GetBestEmployee(long companyId);
 
-        // -- calibration / dashboard / comparison -----------------------------
+        /// <summary>Everything the Overview (control-center) tab needs in one pass: company average
+        /// + band, best, need-support, movers (improved/declined), pending/not-evaluated counts,
+        /// actionable alerts, and the recent behaviour activity.</summary>
+        OverviewData GetOverview(long companyId);
 
-        CalibrationView GetCalibration(long companyId, int year);
+        // ===================== CONSUMED BY OTHER MODULES =====================
 
-        PerformanceDashboard GetDashboard(long companyId);
+        /// <summary>An employee's completed evaluations, most recent first (the 360° profile).</summary>
+        IReadOnlyList<EvaluationSummary> GetByEmployee(long employeeId);
 
-        EmployeeComparison Compare(IReadOnlyList<long> employeeIds);
+        /// <summary>Pending evaluations in open periods that are closing or overdue (notifications).</summary>
+        IReadOnlyList<EvaluationReminder> GetReminders(long companyId, DateTime asOf);
     }
 }

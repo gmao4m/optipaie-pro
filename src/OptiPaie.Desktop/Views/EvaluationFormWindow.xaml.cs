@@ -2,9 +2,9 @@ using System.Windows;
 
 namespace OptiPaie.Desktop.Views
 {
-    public partial class TemplateEditorWindow : Window
+    public partial class EvaluationFormWindow : Window
     {
-        public TemplateEditorWindow()
+        public EvaluationFormWindow()
         {
             InitializeComponent();
         }
