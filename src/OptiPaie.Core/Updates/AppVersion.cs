@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using System.Reflection;
 
 namespace OptiPaie.Core.Updates
 {
@@ -96,6 +97,35 @@ namespace OptiPaie.Core.Updates
             }
 
             return c.IsNewerThan(cur);
+        }
+
+        /// <summary>
+        /// The running application's PRODUCT version (e.g. "1.14.0"), read from the entry
+        /// assembly's InformationalVersion — which mirrors &lt;Version&gt; in Directory.Build.props,
+        /// the single place to bump per release. AssemblyVersion/FileVersion are intentionally
+        /// frozen (binding stability) and must NOT be used for update comparison. Any
+        /// "+build"/"-pre" suffix (e.g. SourceLink commit hash) is stripped.
+        /// </summary>
+        public static string CurrentProduct()
+        {
+            try
+            {
+                Assembly asm = Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly();
+                string raw = null;
+                if (asm != null)
+                {
+                    AssemblyInformationalVersionAttribute info = asm.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+                    if (info != null) raw = info.InformationalVersion;
+                    if (string.IsNullOrWhiteSpace(raw) && asm.GetName().Version != null) raw = asm.GetName().Version.ToString();
+                }
+
+                if (TryParse(raw, out AppVersion v)) return v.ToString();
+                return string.IsNullOrWhiteSpace(raw) ? "1.0.0" : raw;
+            }
+            catch
+            {
+                return "1.0.0";
+            }
         }
 
         public override string ToString()

@@ -33,6 +33,7 @@ namespace OptiPaie.Desktop.Composition
             return new UpdateOptions
             {
                 AppName = "OptiPaie PRO",
+                VersionJsonUrl = AppSetting("Update.VersionJsonUrl") ?? string.Empty,
                 GitHubRepo = AppSetting("Update.GitHubRepo") ?? string.Empty,
                 FeedUrl = feedUrl ?? string.Empty,
                 MetadataUrl = metadataUrl,

@@ -968,12 +968,13 @@
   <data name="Act_Activate" xml:space="preserve"><value>تفعيل الرخصة</value></data>
   <data name="Act_Or" xml:space="preserve"><value>أو</value></data>
   <data name="Act_TrialEnded" xml:space="preserve"><value>انتهت التجربة</value></data>
-  <data name="Upd_Title" xml:space="preserve"><value>يتوفر تحديث جديد</value></data>
+  <data name="Upd_Title" xml:space="preserve"><value>🎉 تحديث جديد متوفّر!</value></data>
+  <data name="Upd_Headline" xml:space="preserve"><value>الإصدار الجديد {0} جاهز. يُنصح بالتحديث للحصول على آخر الميزات والتحسينات.</value></data>
   <data name="Upd_CurrentVersion" xml:space="preserve"><value>الإصدار الحالي</value></data>
   <data name="Upd_NewVersion" xml:space="preserve"><value>الإصدار الجديد</value></data>
   <data name="Upd_ReleaseNotes" xml:space="preserve"><value>ملاحظات الإصدار</value></data>
   <data name="Upd_Later" xml:space="preserve"><value>لاحقاً</value></data>
-  <data name="Upd_UpdateNow" xml:space="preserve"><value>التحديث الآن</value></data>
+  <data name="Upd_UpdateNow" xml:space="preserve"><value>تحميل التحديث الآن</value></data>
   <data name="AttSet_Title" xml:space="preserve"><value>إعدادات الحضور</value></data>
   <data name="AttSet_Hint" xml:space="preserve"><value>تحدد هذه القيم التأخيرات والساعات الإضافية المرسلة إلى كشف الأجور.</value></data>
   <data name="AttSet_StartTime" xml:space="preserve"><value>وقت البداية (HH:mm)</value></data>

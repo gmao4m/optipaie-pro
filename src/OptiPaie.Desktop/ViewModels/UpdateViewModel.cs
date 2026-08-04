@@ -44,6 +44,23 @@ namespace OptiPaie.Desktop.ViewModels
             ? "• Améliorations et corrections de bugs"
             : _info.ReleaseNotes;
 
+        /// <summary>Celebratory headline in the popup header ("La version X.X.X est prête…"), localized.</summary>
+        public string Headline
+        {
+            get
+            {
+                string template = OptiPaie.Desktop.Localization.TranslationSource.Instance["Upd_Headline"];
+                if (string.IsNullOrWhiteSpace(template) || template == "Upd_Headline" ||
+                    template.IndexOf("{0}", StringComparison.Ordinal) < 0)
+                {
+                    template = "La version {0} est prête.";
+                }
+
+                try { return string.Format(template, _info.LatestVersion); }
+                catch { return _info.AppName; }
+            }
+        }
+
         public string MandatoryText => _info.Mandatory
             ? "Cette mise à jour est obligatoire. Veuillez l'installer pour continuer à utiliser l'application."
             : string.Empty;

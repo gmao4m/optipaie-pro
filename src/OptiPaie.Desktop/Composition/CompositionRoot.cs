@@ -104,12 +104,28 @@ namespace OptiPaie.Desktop.Composition
             // service + metadata source are provider-agnostic and unit-tested. Disabled
             // gracefully (IsSupported=false) on non-installed/dev runs or when unconfigured.
             UpdateOptions updateOptions = UpdateConfig.Build(licensingOptions);
-            // GitHub Releases is the preferred update source; the Velopack feed is the
-            // fallback when only a feed URL is configured. Both are IReleaseChannel.
-            IReleaseChannel releaseChannel = !string.IsNullOrWhiteSpace(updateOptions.GitHubRepo)
-                ? (IReleaseChannel)new GitHubReleaseChannel(updateOptions, logger)
-                : new VelopackReleaseChannel(updateOptions, logger);
-            IUpdateMetadataSource updateMetadata = new SupabaseUpdateMetadataSource(updateOptions, logger);
+            // Update-source precedence — all IReleaseChannel, so the pop-up, orchestration and
+            // offline handling are identical: (1) a self-hosted version.json (simplest: one file
+            // carrying the version + installer URL + mandatory flag), (2) GitHub Releases,
+            // (3) a Velopack feed. Any dev/unconfigured run reports IsSupported=false (no-op).
+            IReleaseChannel releaseChannel;
+            IUpdateMetadataSource updateMetadata;
+            if (!string.IsNullOrWhiteSpace(updateOptions.VersionJsonUrl))
+            {
+                var versionJson = new VersionJsonReleaseChannel(updateOptions, logger);
+                releaseChannel = versionJson;
+                updateMetadata = versionJson; // mandatory flag + notes come from the same manifest
+            }
+            else if (!string.IsNullOrWhiteSpace(updateOptions.GitHubRepo))
+            {
+                releaseChannel = new GitHubReleaseChannel(updateOptions, logger);
+                updateMetadata = new SupabaseUpdateMetadataSource(updateOptions, logger);
+            }
+            else
+            {
+                releaseChannel = new VelopackReleaseChannel(updateOptions, logger);
+                updateMetadata = new SupabaseUpdateMetadataSource(updateOptions, logger);
+            }
             IUpdateService updateService = new UpdateService(releaseChannel, updateMetadata, updateOptions, logger);
 
             return new AppServices(

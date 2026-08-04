@@ -968,12 +968,13 @@
   <data name="Act_Activate" xml:space="preserve"><value>Activer la licence</value></data>
   <data name="Act_Or" xml:space="preserve"><value>OU</value></data>
   <data name="Act_TrialEnded" xml:space="preserve"><value>Essai terminé</value></data>
-  <data name="Upd_Title" xml:space="preserve"><value>Nouvelle mise à jour disponible</value></data>
+  <data name="Upd_Title" xml:space="preserve"><value>🎉 Nouvelle mise à jour disponible !</value></data>
+  <data name="Upd_Headline" xml:space="preserve"><value>La version {0} est prête. Il est recommandé de mettre à jour pour bénéficier des dernières fonctionnalités et améliorations.</value></data>
   <data name="Upd_CurrentVersion" xml:space="preserve"><value>Version actuelle</value></data>
   <data name="Upd_NewVersion" xml:space="preserve"><value>Nouvelle version</value></data>
   <data name="Upd_ReleaseNotes" xml:space="preserve"><value>Notes de version</value></data>
   <data name="Upd_Later" xml:space="preserve"><value>Plus tard</value></data>
-  <data name="Upd_UpdateNow" xml:space="preserve"><value>Mettre à jour maintenant</value></data>
+  <data name="Upd_UpdateNow" xml:space="preserve"><value>Télécharger la mise à jour</value></data>
   <data name="AttSet_Title" xml:space="preserve"><value>Paramètres de présence</value></data>
   <data name="AttSet_Hint" xml:space="preserve"><value>Ces valeurs déterminent les retards et les heures supplémentaires transmises à la paie.</value></data>
   <data name="AttSet_StartTime" xml:space="preserve"><value>Heure de début (HH:mm)</value></data>

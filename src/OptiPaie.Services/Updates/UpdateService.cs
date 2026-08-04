@@ -113,15 +113,8 @@ namespace OptiPaie.Services.Updates
 
         private static string CurrentVersionSafe()
         {
-            try
-            {
-                Version v = Assembly.GetEntryAssembly() != null ? Assembly.GetEntryAssembly().GetName().Version : null;
-                return v != null ? v.ToString(3) : "1.0.0";
-            }
-            catch
-            {
-                return "1.0.0";
-            }
+            // Product version (InformationalVersion), NOT AssemblyVersion (frozen at 1.8.0.0).
+            return AppVersion.CurrentProduct();
         }
     }
 }
