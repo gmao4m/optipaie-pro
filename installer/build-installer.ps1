@@ -24,6 +24,14 @@ $stage     = Join-Path $env:TEMP "optipaie_publish"
 $outDir    = Join-Path $PSScriptRoot "output"
 $wix       = Join-Path $env:USERPROFILE ".dotnet\tools\wix.exe"
 
+# Single source of truth for the version: Directory.Build.props <Version>.
+# WiX needs a 4-part version (X.Y.Z.0); Package.wxs + Bundle.wxs read $(var.AppVersion).
+[xml]$props = Get-Content (Join-Path $root "Directory.Build.props")
+$appVersion = ([string]($props.Project.PropertyGroup.Version)).Trim()
+if (-not $appVersion) { throw "No <Version> found in Directory.Build.props" }
+$wixVersion = "$appVersion.0"
+Write-Host "==> Product version = $appVersion (WiX $wixVersion)" -ForegroundColor Cyan
+
 Write-Host "==> Building Release payload..." -ForegroundColor Cyan
 if (Test-Path $stage) { Remove-Item -Recurse -Force $stage }
 dotnet build $desktopCsproj -c Release -o $stage -v minimal
@@ -36,14 +44,14 @@ New-Item -ItemType Directory -Force $outDir | Out-Null
 
 Write-Host "==> Building MSI..." -ForegroundColor Cyan
 & $wix build (Join-Path $PSScriptRoot "Package.wxs") `
-    -d "PublishDir=$stage" -b $PSScriptRoot `
+    -d "PublishDir=$stage" -d "AppVersion=$wixVersion" -b $PSScriptRoot `
     -ext WixToolset.UI.wixext `
     -o (Join-Path $outDir "OptiPaie PRO.msi")
 if ($LASTEXITCODE -ne 0) { throw "MSI build failed." }
 
 Write-Host "==> Building Setup.exe bootstrapper..." -ForegroundColor Cyan
 & $wix build (Join-Path $PSScriptRoot "Bundle.wxs") `
-    -b $PSScriptRoot `
+    -d "AppVersion=$wixVersion" -b $PSScriptRoot `
     -ext WixToolset.BootstrapperApplications.wixext `
     -ext WixToolset.Netfx.wixext `
     -o (Join-Path $outDir "OptiPaie PRO Setup.exe")

@@ -14,7 +14,7 @@
 
   <Package Name="OptiPaie PRO"
            Manufacturer="OptiPaie"
-           Version="1.14.0.0"
+           Version="$(var.AppVersion)"
            UpgradeCode="B4318537-7007-4E89-AFE5-148F2A869C99"
            Scope="perMachine"
            Compressed="yes">
