@@ -295,9 +295,11 @@ namespace OptiPaie.Desktop
                     ShowUpdateDialog(check);
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // A background check must never crash the app.
+                // A background check must never crash the app — but log it (not silently
+                // swallow), so a real failure is visible in the breadcrumbs, not hidden.
+                CrashLog.Breadcrumb("Update check skipped: " + ex.Message);
             }
         }
 
@@ -312,15 +314,24 @@ namespace OptiPaie.Desktop
             _updateDialogOpen = true;
             bool proceed = false;
 
-            var viewModel = new UpdateViewModel(Services, check);
-            var window = new UpdateWindow { DataContext = viewModel, Owner = MainWindow };
-            ApplyFlowDirection(window);
-            viewModel.CloseRequested = ok =>
+            // Defensive: a failure building/showing the dialog must never crash the app
+            // (this is where a read-only-binding bug used to throw and be swallowed silently).
+            try
             {
-                proceed = ok;
-                try { window.DialogResult = ok; } catch { window.Close(); }
-            };
-            window.ShowDialog();
+                var viewModel = new UpdateViewModel(Services, check);
+                var window = new UpdateWindow { DataContext = viewModel, Owner = MainWindow };
+                ApplyFlowDirection(window);
+                viewModel.CloseRequested = ok =>
+                {
+                    proceed = ok;
+                    try { window.DialogResult = ok; } catch { window.Close(); }
+                };
+                window.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                CrashLog.Breadcrumb("Update dialog failed: " + ex.Message);
+            }
 
             _updateDialogOpen = false;
 

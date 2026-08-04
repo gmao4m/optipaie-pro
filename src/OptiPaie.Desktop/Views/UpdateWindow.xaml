@@ -65,7 +65,7 @@
 
             <!-- Progress + status -->
             <StackPanel Grid.Row="3" Margin="0,14,0,0">
-                <ProgressBar Height="8" Minimum="0" Maximum="100" Value="{Binding Progress}"
+                <ProgressBar Height="8" Minimum="0" Maximum="100" Value="{Binding Progress, Mode=OneWay}"
                              Foreground="{DynamicResource BrandText}"
                              Visibility="{Binding IsBusy, Converter={StaticResource BoolToVis}}" />
                 <TextBlock Text="{Binding StatusMessage}" Margin="0,8,0,0" TextWrapping="Wrap"
