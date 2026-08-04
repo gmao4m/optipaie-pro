@@ -1,56 +1,150 @@
 name: Release
 
-# Publishes a GitHub Release with the OptiPaie PRO installer whenever a version
-# tag (e.g. v1.0.1) is pushed. The desktop client checks this repository's latest
-# release, compares versions, and offers the update. Uses the built-in GITHUB_TOKEN
-# — no extra secrets required for a public repository.
+# ============================================================================
+# Fully-automatic release + auto-update. No manual steps beyond a version bump.
+#
+# On every push to main it reads the PRODUCT version from Directory.Build.props
+# (<Version> — the single place to change). If that version has NOT been released
+# yet (no v<version> tag), it:
+#   1. builds the app + the WiX Setup.exe / MSI installer,
+#   2. creates a GitHub Release v<version> and uploads OptiPaie-PRO-Setup.exe,
+#   3. rewrites version.json (latest_version + notes) and pushes it back to main.
+# The desktop client reads version.json on launch and shows the update pop-up.
+#
+# So each release = bump <Version> by one line, then `git push`. Nothing else.
+# A push that does NOT change the version (or only touches docs / version.json)
+# runs a ~30 s no-op and releases nothing.
+#
+# Loop-safe: the version.json commit uses the built-in GITHUB_TOKEN (which never
+# re-triggers workflows), carries [skip ci], and version.json is in paths-ignore;
+# and a re-run would skip anyway because the tag now exists.
+# ============================================================================
 
 on:
   push:
-    tags: [ 'v*' ]
+    branches: [ main ]
+    paths-ignore:
+      - 'version.json'
+      - 'docs/**'
+      - '**/*.md'
   workflow_dispatch:
     inputs:
-      version:
-        description: 'Version (e.g. 1.0.1)'
-        required: true
+      force:
+        description: 'Force a release even if the tag already exists'
+        type: boolean
+        default: false
 
 permissions:
   contents: write
+
+concurrency:
+  group: release-main
+  cancel-in-progress: false
 
 jobs:
   release:
     runs-on: windows-latest
     steps:
-      - name: Checkout
+      - name: Checkout (full history for tags)
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: "Read product version (single source: Directory.Build.props)"
+        id: ver
+        shell: pwsh
+        run: |
+          [xml]$p = Get-Content "Directory.Build.props"
+          $v = ([string]($p.Project.PropertyGroup.Version)).Trim()
+          if (-not $v) { throw "No <Version> found in Directory.Build.props" }
+          "version=$v" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "tag=v$v"    | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          Write-Host "Product version = $v"
+
+      - name: Decide whether to release (skip if already tagged)
+        id: gate
+        shell: pwsh
+        run: |
+          $force = "${{ github.event.inputs.force }}" -eq "true"
+          $exists = [bool](git tag -l "${{ steps.ver.outputs.tag }}")
+          if ($force -or -not $exists) {
+            "go=true" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+            Write-Host "Releasing ${{ steps.ver.outputs.version }} (force=$force, tagExists=$exists)."
+          } else {
+            "go=false" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+            Write-Host "::notice::${{ steps.ver.outputs.tag }} is already released - nothing to do."
+          }
 
       - name: Setup .NET SDK
+        if: steps.gate.outputs.go == 'true'
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
 
-      - name: Install Velopack CLI (vpk)
-        run: dotnet tool install -g vpk --version 1.2.0
-
-      - name: Resolve version
-        id: ver
+      - name: Install WiX v5 CLI + extensions
+        if: steps.gate.outputs.go == 'true'
         shell: pwsh
         run: |
-          $v = if ($env:GITHUB_REF_NAME -like 'v*') { $env:GITHUB_REF_NAME.TrimStart('v') } else { '${{ github.event.inputs.version }}' }
-          echo "value=$v" >> $env:GITHUB_OUTPUT
+          dotnet tool install --global wix --version 5.0.2
+          wix extension add -g WixToolset.UI.wixext
+          wix extension add -g WixToolset.BootstrapperApplications.wixext
+          wix extension add -g WixToolset.Netfx.wixext
 
-      - name: Build + pack (Velopack)
+      - name: Build installer (Setup.exe + MSI)
+        if: steps.gate.outputs.go == 'true'
         shell: pwsh
-        run: powershell -ExecutionPolicy Bypass -File release/pack.ps1 -Version ${{ steps.ver.outputs.value }}
+        run: powershell -ExecutionPolicy Bypass -File installer/build-installer.ps1
+
+      - name: Stage release asset (URL-friendly name for the updater)
+        if: steps.gate.outputs.go == 'true'
+        shell: pwsh
+        run: |
+          Copy-Item "installer/output/OptiPaie PRO Setup.exe" "installer/output/OptiPaie-PRO-Setup.exe" -Force
+
+      - name: Build release notes (commits since the last tag)
+        if: steps.gate.outputs.go == 'true'
+        shell: pwsh
+        run: |
+          $last = (git describe --tags --abbrev=0 2>$null)
+          if ($last) { $lines = git log "$last..HEAD" --no-merges --pretty=format:"- %s" }
+          else       { $lines = git log -20 --no-merges --pretty=format:"- %s" }
+          if (-not $lines) { $lines = "- Ameliorations et corrections" }
+          $lines = ($lines -split "`n" | Select-Object -First 25) -join "`n"
+          Set-Content -Path notes.txt -Value $lines -Encoding utf8
+          Write-Host $lines
 
       - name: Create GitHub Release + upload installer
+        if: steps.gate.outputs.go == 'true'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name }}
-          name: OptiPaie PRO ${{ steps.ver.outputs.value }}
-          generate_release_notes: true
+          tag_name: ${{ steps.ver.outputs.tag }}
+          name: OptiPaie PRO ${{ steps.ver.outputs.version }}
+          body_path: notes.txt
+          make_latest: true
           files: |
-            release/output/*Setup.exe
-            release/output/*.nupkg
-            release/output/RELEASES
-            release/output/*.json
+            installer/output/OptiPaie-PRO-Setup.exe
+            installer/output/OptiPaie PRO.msi
+
+      - name: Update version.json and push it back
+        if: steps.gate.outputs.go == 'true'
+        shell: pwsh
+        run: |
+          $v = "${{ steps.ver.outputs.version }}"
+          $notes = (Get-Content notes.txt -Raw).Trim()
+          $manifest = [ordered]@{
+            latest_version = $v
+            download_url   = "https://github.com/${{ github.repository }}/releases/latest/download/OptiPaie-PRO-Setup.exe"
+            release_notes  = $notes
+            mandatory      = $false
+          }
+          ($manifest | ConvertTo-Json -Depth 5) | Set-Content -Path version.json -Encoding utf8
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add version.json
+          if (git diff --cached --quiet) {
+            Write-Host "version.json already up to date."
+          } else {
+            git commit -m "chore(release): version.json -> $v [skip ci]"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          }
