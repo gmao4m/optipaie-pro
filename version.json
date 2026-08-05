@@ -1,6 +1,6 @@
 {
-  "latest_version": "1.15.0",
+  "latest_version": "1.16.0",
   "download_url": "https://github.com/gmao4m/optipaie-pro/releases/latest/download/OptiPaie-PRO-Setup.exe",
-  "release_notes": "- chore(release): v1.15.0 - section CNAS DAC/DAS (declarations) verifiee et incluse\n- build(installer): version en source unique (Directory.Build.props -> MSI + bundle)\n- chore(release): version.json -> 1.14.0 [skip ci]",
+  "release_notes": "- chore(release): 1.16.0 — module Évaluation reconstruit + centre de pilotage\n- feat(performance): rebuild the Évaluation module from scratch + control centre\n- chore(release): version.json -> 1.15.0 [skip ci]",
   "mandatory": false
 }
