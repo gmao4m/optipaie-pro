@@ -47,5 +47,14 @@ namespace OptiPaie.Tests
         {
             Assert.That(LicenseKeyFormatter.RawLength, Is.EqualTo(15));
         }
+
+        [Test]
+        public void FormattedCompleteKey_Is18Chars()
+        {
+            // 15 alphanumerics + 3 dashes. The activation TextBox MaxLength MUST be >= 18,
+            // otherwise a complete key can never be typed and activation is impossible.
+            Assert.That(RealKey.Length, Is.EqualTo(18));
+            Assert.That(LicenseKeyFormatter.Format("PAYG9FPDMPZDJXS").Length, Is.EqualTo(18));
+        }
     }
 }

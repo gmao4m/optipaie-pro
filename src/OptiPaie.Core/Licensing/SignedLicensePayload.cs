@@ -39,6 +39,15 @@ namespace OptiPaie.Core.Licensing
         /// <summary>The enabled module keys.</summary>
         public string[] Modules { get; set; }
 
+        /// <summary>
+        /// Company scope: how many companies the desktop may create.
+        /// <c>1</c> = Mono-société; <c>0</c> = Multi-sociétés (unlimited).
+        /// A missing field or explicit <c>null</c> is read as Mono (the safe default,
+        /// matching the backend) — so Multi is only ever an explicit <c>0</c>.
+        /// Orthogonal to <see cref="Type"/>/<see cref="ExpiresAt"/> (the duration axis).
+        /// </summary>
+        public int? MaxCompanies { get; set; }
+
         public DateTime? IssuedAt { get; set; }
 
         /// <summary>Null = perpetual license.</summary>

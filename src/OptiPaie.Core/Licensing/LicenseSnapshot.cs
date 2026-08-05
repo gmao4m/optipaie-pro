@@ -53,7 +53,8 @@ namespace OptiPaie.Core.Licensing
             DateTime? expiresAtUtc,
             DateTime? graceUntilUtc,
             LicenseType type = LicenseType.Unknown,
-            string customerName = null)
+            string customerName = null,
+            int? maxCompanies = null)
         {
             State = state;
             ProductKey = productKey ?? string.Empty;
@@ -64,6 +65,7 @@ namespace OptiPaie.Core.Licensing
             DeviceId = deviceId ?? string.Empty;
             ServerStatus = serverStatus ?? string.Empty;
             Type = type;
+            MaxCompanies = maxCompanies;
             _modules = new HashSet<string>(modules ?? Array.Empty<string>(), StringComparer.OrdinalIgnoreCase);
             ActivatedAtUtc = activatedAtUtc;
             LastValidationUtc = lastValidationUtc;
@@ -84,6 +86,19 @@ namespace OptiPaie.Core.Licensing
 
         /// <summary>The commercial license type.</summary>
         public LicenseType Type { get; }
+
+        /// <summary>
+        /// Raw company scope carried by the token: <c>1</c> = Mono-société,
+        /// <c>0</c> = Multi-sociétés (unlimited), <c>null</c> = absent → read as Mono.
+        /// Only meaningful for a usable license; the gate treats trial/unactivated as Mono.
+        /// </summary>
+        public int? MaxCompanies { get; }
+
+        /// <summary>
+        /// True when this license grants an unlimited number of companies (Multi-sociétés).
+        /// Encoded as an explicit <c>0</c>; a missing/null value is Mono, never Multi.
+        /// </summary>
+        public bool IsMultiCompany => MaxCompanies.HasValue && MaxCompanies.Value == 0;
 
         /// <summary>Whole days until expiry (null for a perpetual license, 0 when expired).</summary>
         public int? DaysRemaining

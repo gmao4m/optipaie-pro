@@ -346,7 +346,8 @@ namespace OptiPaie.Services.Licensing
                 payload.ExpiresAt,
                 payload.GraceUntil,
                 LicenseTypes.Parse(payload.Type),
-                payload.CustomerName);
+                payload.CustomerName,
+                payload.MaxCompanies);
         }
 
         private static LicenseStateKind ComputeState(SignedLicensePayload payload, DateTime now)

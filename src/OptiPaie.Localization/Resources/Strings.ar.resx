@@ -360,6 +360,8 @@
   <data name="License_Active" xml:space="preserve"><value>مفعّلة</value></data>
   <data name="License_Inactive" xml:space="preserve"><value>غير مفعّلة</value></data>
   <data name="License_Trial" xml:space="preserve"><value>نسخة تجريبية</value></data>
+  <data name="License_CompanyLimitTitle" xml:space="preserve"><value>ترخيص شركة واحدة</value></data>
+  <data name="License_CompanyLimitReached" xml:space="preserve"><value>يسمح ترخيصك (شركة واحدة) بإنشاء شركة واحدة فقط. لإدارة عدة شركات، انتقل إلى ترخيص متعدّد الشركات.</value></data>
   <data name="License_Expired" xml:space="preserve"><value>منتهية</value></data>
   <data name="License_Activated" xml:space="preserve"><value>تم تفعيل الترخيص بنجاح.</value></data>
   <data name="License_InvalidSerial" xml:space="preserve"><value>الرقم التسلسلي غير صالح.</value></data>

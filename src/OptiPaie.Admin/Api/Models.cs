@@ -16,11 +16,19 @@ namespace OptiPaie.Admin.Api
         [JsonProperty("type")] public string Type { get; set; }
         [JsonProperty("status")] public string Status { get; set; }
         [JsonProperty("max_devices")] public int MaxDevices { get; set; }
+        // Company scope: 1 = Mono-société, 0 = Multi-sociétés (unlimited). null/absent = Mono.
+        [JsonProperty("max_companies")] public int? MaxCompanies { get; set; }
         [JsonProperty("expires_at")] public string ExpiresAt { get; set; }
+        [JsonProperty("activated_at")] public string ActivatedAt { get; set; }
+        [JsonProperty("app_version")] public string AppVersion { get; set; }
         [JsonProperty("created_at")] public string CreatedAt { get; set; }
         [JsonProperty("notes")] public string Notes { get; set; }
 
         [JsonIgnore] public string ExpiresDisplay => string.IsNullOrEmpty(ExpiresAt) ? "Permanente" : Dates.Short(ExpiresAt);
+        [JsonIgnore] public string ActivatedDisplay => string.IsNullOrEmpty(ActivatedAt) ? "—" : Dates.Short(ActivatedAt);
+        [JsonIgnore] public string VersionDisplay => string.IsNullOrEmpty(AppVersion) ? "—" : "v" + AppVersion;
+        [JsonIgnore] public string ScopeDisplay =>
+            MaxCompanies == 0 ? "Multi-sociétés" : (MaxCompanies.GetValueOrDefault(1) <= 1 ? "Mono-société" : MaxCompanies.Value + " sociétés");
         [JsonIgnore] public string CreatedDisplay => Dates.Short(CreatedAt);
     }
 

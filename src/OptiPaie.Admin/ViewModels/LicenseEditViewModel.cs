@@ -34,6 +34,14 @@ namespace OptiPaie.Admin.ViewModels
         }
     }
 
+    /// <summary>A selectable company-scope option (Mono/Multi) with a friendly label.</summary>
+    public sealed class ScopeOption
+    {
+        public ScopeOption(string value, string label) { Value = value; Label = label; }
+        public string Value { get; }
+        public string Label { get; }
+    }
+
     public sealed class LicenseEditViewModel : ObservableObject
     {
         private static string _payrollProductId;
@@ -41,7 +49,10 @@ namespace OptiPaie.Admin.ViewModels
         private readonly License _license;
         private readonly bool _isNew;
 
-        private string _company, _email, _type, _status, _newKeyInfo = string.Empty;
+        private string _company, _email, _type, _status, _scope, _newKeyInfo = string.Empty;
+        private string _generatedKey = string.Empty, _generatedScopeInfo = string.Empty;
+        private bool _created;
+        private bool _saving;
         private int _maxDevices = 1;
         private DateTime? _expires;
         private string _selectedModule = "ats";
@@ -53,10 +64,14 @@ namespace OptiPaie.Admin.ViewModels
             _isNew = license == null;
             _company = _license.CompanyName ?? string.Empty;
             _email = _license.Email ?? string.Empty;
-            _type = _license.Type ?? "lifetime";
+            // Only two durations remain (lifetime / annual); normalise any legacy type.
+            _type = _license.Type == "annual" ? "annual" : "lifetime";
             _status = _license.Status ?? "pending";
             _maxDevices = _license.MaxDevices <= 0 ? 1 : _license.MaxDevices;
             _expires = ParseDate(_license.ExpiresAt);
+            // Company scope. New licenses default to Mono (the safe choice); existing
+            // ones read the stored value (0 in DB = Multi-sociétés; 1/null = Mono).
+            _scope = _isNew ? "mono" : (_license.MaxCompanies == 0 ? "multi" : "mono");
 
             SaveCommand = new RelayCommand(async () => await SaveAsync());
             EnableCommand = new RelayCommand(async () => await SetStatusAsync("active"));
@@ -66,8 +81,9 @@ namespace OptiPaie.Admin.ViewModels
             DeleteCommand = new RelayCommand(async () => await DeleteAsync());
             GenerateKeyCommand = new RelayCommand(async () => await GenerateKeyAsync());
             RevokeKeyCommand = new RelayCommand(async o => await RevokeKeyAsync(o as ActivationKey));
-
-            if (!_isNew) LoadDetailsAsync();
+            CopyKeyCommand = new RelayCommand(CopyKey);
+            // Modules/upsell keys are no longer surfaced (every licence unlocks everything),
+            // so there is nothing to lazy-load here.
         }
 
         public Action RequestClose { get; set; }
@@ -80,15 +96,50 @@ namespace OptiPaie.Admin.ViewModels
         public List<string> Statuses { get; } = new List<string> { "pending", "active", "suspended", "revoked" };
         public List<Modules.Item> UpsellModules { get; } = Modules.All.FindAll(m => !m.Core);
 
+        /// <summary>
+        /// The only two license types: Mono-société (1 company) vs Multi-sociétés
+        /// (unlimited). BOTH unlock every feature — the sole difference is company count.
+        /// </summary>
+        public List<ScopeOption> ScopeOptions { get; } = new List<ScopeOption>
+        {
+            new ScopeOption("mono", "🏢 Mono-société — 1 entreprise (toutes les fonctionnalités)"),
+            new ScopeOption("multi", "🏢🏢 Multi-sociétés — illimité (toutes les fonctionnalités)")
+        };
+
+        /// <summary>Duration choices, mapped onto the stored `type` value.</summary>
+        public List<ScopeOption> Durations { get; } = new List<ScopeOption>
+        {
+            new ScopeOption("lifetime", "À vie (permanente)"),
+            new ScopeOption("annual", "Annuelle — 1 an")
+        };
+
         public string CompanyName { get => _company; set => Set(ref _company, value); }
         public string Email { get => _email; set => Set(ref _email, value); }
-        public string Type { get => _type; set => Set(ref _type, value); }
+
+        /// <summary>
+        /// The duration/type. Choosing "annual"/"monthly" pre-fills the expiry (+1 an /
+        /// +1 mois) if empty; "lifetime"/"demo"/"enterprise" clears it (permanent).
+        /// </summary>
+        public string Type
+        {
+            get => _type;
+            set { if (Set(ref _type, value)) ApplyDuration(); }
+        }
+
+        /// <summary>Company scope: "mono" or "multi".</summary>
+        public string Scope { get => _scope; set => Set(ref _scope, value); }
+
         public string Status { get => _status; set => Set(ref _status, value); }
         public int MaxDevices { get => _maxDevices; set => Set(ref _maxDevices, value); }
         public DateTime? Expires { get => _expires; set => Set(ref _expires, value); }
         public string SelectedModule { get => _selectedModule; set => Set(ref _selectedModule, value); }
         public DateTime? KeyExpiry { get => _keyExpiry; set => Set(ref _keyExpiry, value); }
         public string NewKeyInfo { get => _newKeyInfo; private set => Set(ref _newKeyInfo, value); }
+
+        /// <summary>The freshly generated key (shown with a Copy button after creation).</summary>
+        public string GeneratedKey { get => _generatedKey; private set { if (Set(ref _generatedKey, value)) Raise(nameof(HasGeneratedKey)); } }
+        public bool HasGeneratedKey => !string.IsNullOrEmpty(_generatedKey);
+        public string GeneratedScopeInfo { get => _generatedScopeInfo; private set => Set(ref _generatedScopeInfo, value); }
 
         public ObservableCollection<ModuleToggle> ModuleList { get; } = new ObservableCollection<ModuleToggle>();
         public ObservableCollection<ActivationKey> Keys { get; } = new ObservableCollection<ActivationKey>();
@@ -101,6 +152,7 @@ namespace OptiPaie.Admin.ViewModels
         public ICommand DeleteCommand { get; }
         public ICommand GenerateKeyCommand { get; }
         public ICommand RevokeKeyCommand { get; }
+        public ICommand CopyKeyCommand { get; }
 
         private async void LoadDetailsAsync()
         {
@@ -149,17 +201,19 @@ namespace OptiPaie.Admin.ViewModels
 
         private async System.Threading.Tasks.Task SaveAsync()
         {
+            // A new licence is created exactly once. Both guards are set SYNCHRONOUSLY
+            // before any await, so a fast double-click during the network round-trip cannot
+            // enter twice and mint two keys.
+            if (_created || _saving) return;
+            _saving = true;
+
             try
             {
-                var patch = new
-                {
-                    company_name = _company,
-                    email = _email,
-                    type = _type,
-                    status = _status,
-                    max_devices = _maxDevices,
-                    expires_at = _expires.HasValue ? _expires.Value.ToUniversalTime().ToString("o") : null
-                };
+                // Authoritative expiry from the duration, and the scope column.
+                // Multi = 0 (unlimited), Mono = 1. Always an explicit value (never null),
+                // so a missing token field can only ever mean Mono on the client.
+                string expiresIso = ComputeExpiryIso();
+                int maxCompanies = _scope == "multi" ? 0 : 1;
 
                 if (_isNew)
                 {
@@ -174,18 +228,77 @@ namespace OptiPaie.Admin.ViewModels
                         type = _type,
                         status = _status,
                         max_devices = _maxDevices,
-                        expires_at = patch.expires_at
+                        max_companies = maxCompanies,
+                        expires_at = expiresIso
                     });
-                    Dialogs.Info("Licence créée : " + key);
+
+                    // Show the key inline with a Copy button (keep the window open) instead
+                    // of a popup; block further saves so no duplicate key is minted.
+                    _created = true;
+                    GeneratedScopeInfo =
+                        (maxCompanies == 0 ? "Multi-sociétés (illimité)" : "Mono-société") + "  •  " +
+                        (_type == "annual" ? "Annuelle (1 an)" : "À vie") + "  •  toutes les fonctionnalités";
+                    GeneratedKey = key;
                 }
                 else
                 {
-                    await App.Api.UpdateAsync("licenses", "id=eq." + _license.Id, patch);
+                    await App.Api.UpdateAsync("licenses", "id=eq." + _license.Id, new
+                    {
+                        company_name = _company,
+                        email = _email,
+                        type = _type,
+                        status = _status,
+                        max_devices = _maxDevices,
+                        max_companies = maxCompanies,
+                        expires_at = expiresIso
+                    });
+                    RequestClose?.Invoke();
                 }
-
-                RequestClose?.Invoke();
             }
             catch (Exception ex) { Dialogs.Error(ex.Message); }
+            finally { _saving = false; }
+        }
+
+        /// <summary>Copies the freshly generated key to the clipboard.</summary>
+        private void CopyKey()
+        {
+            if (string.IsNullOrEmpty(_generatedKey)) return;
+            try { System.Windows.Clipboard.SetText(_generatedKey); }
+            catch (Exception ex) { Dialogs.Error("Copie impossible : " + ex.Message); }
+        }
+
+        /// <summary>
+        /// Pre-fills the expiry when the duration implies one, so the owner never has to
+        /// compute a date: annual → +1 an, monthly → +1 mois (only if empty);
+        /// lifetime/demo/enterprise → cleared (permanent).
+        /// </summary>
+        private void ApplyDuration()
+        {
+            switch ((_type ?? string.Empty).ToLowerInvariant())
+            {
+                case "annual": if (!_expires.HasValue) Expires = DateTime.Today.AddYears(1); break;
+                case "monthly": if (!_expires.HasValue) Expires = DateTime.Today.AddMonths(1); break;
+                case "lifetime":
+                case "demo":
+                case "enterprise": Expires = null; break;
+                // trial: left as-is (the 48-hour trial is handled offline on the client).
+            }
+        }
+
+        /// <summary>The expiry to persist, made authoritative by the duration at save time.</summary>
+        private string ComputeExpiryIso()
+        {
+            DateTime? expires = _expires;
+            switch ((_type ?? string.Empty).ToLowerInvariant())
+            {
+                case "lifetime":
+                case "demo":
+                case "enterprise": expires = null; break;
+                case "annual": if (!expires.HasValue) expires = DateTime.Today.AddYears(1); break;
+                case "monthly": if (!expires.HasValue) expires = DateTime.Today.AddMonths(1); break;
+            }
+
+            return expires.HasValue ? expires.Value.ToUniversalTime().ToString("o") : null;
         }
 
         private async System.Threading.Tasks.Task SetStatusAsync(string status)

@@ -13,10 +13,23 @@
             <Button Content="500" Style="{StaticResource SecondaryButton}" Width="70" Margin="0,0,8,8" Command="{Binding GenerateCommand}" CommandParameter="500" />
             <Button Content="1000" Style="{StaticResource SecondaryButton}" Width="70" Margin="0,0,8,8" Command="{Binding GenerateCommand}" CommandParameter="1000" />
         </WrapPanel>
-        <TextBlock Text="Note (lot)" Style="{StaticResource Caption}" Margin="0,8,0,6" />
+        <UniformGrid Columns="2" Margin="0,8,0,0">
+            <StackPanel Margin="0,0,8,0">
+                <TextBlock Text="Type (les deux = toutes les fonctionnalités)" Style="{StaticResource Caption}" Margin="0,0,0,6" />
+                <ComboBox Height="34" VerticalContentAlignment="Center" ItemsSource="{Binding ScopeOptions}" DisplayMemberPath="Label" SelectedValuePath="Value" SelectedValue="{Binding Scope}" />
+            </StackPanel>
+            <StackPanel Margin="8,0,0,0">
+                <TextBlock Text="Durée" Style="{StaticResource Caption}" Margin="0,0,0,6" />
+                <ComboBox Height="34" VerticalContentAlignment="Center" ItemsSource="{Binding Durations}" DisplayMemberPath="Label" SelectedValuePath="Value" SelectedValue="{Binding Duration}" />
+            </StackPanel>
+        </UniformGrid>
+        <TextBlock Text="Note (lot)" Style="{StaticResource Caption}" Margin="0,10,0,6" />
         <TextBox Style="{StaticResource AppTextBox}" Text="{Binding Note}" />
         <DockPanel Margin="0,14,0,6">
-            <Button DockPanel.Dock="Right" Content="Exporter en CSV" Style="{StaticResource PrimaryButton}" Command="{Binding ExportCommand}" />
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                <Button Content="Exporter en PDF" Style="{StaticResource PrimaryButton}" Command="{Binding ExportPdfCommand}" Margin="0,0,8,0" />
+                <Button Content="CSV" Style="{StaticResource SecondaryButton}" Command="{Binding ExportCommand}" />
+            </StackPanel>
             <TextBlock Text="Clés générées" Style="{StaticResource Caption}" VerticalAlignment="Center" />
         </DockPanel>
         <TextBox Text="{Binding Output, Mode=OneWay}" IsReadOnly="True" Height="180" FontFamily="Consolas" FontSize="12"

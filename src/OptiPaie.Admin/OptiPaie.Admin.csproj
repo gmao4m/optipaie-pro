@@ -17,6 +17,8 @@
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <!-- Printable license batch PDF (same version the desktop app uses). -->
+    <PackageReference Include="QuestPDF" Version="2022.12.1" />
   </ItemGroup>
 
   <ItemGroup>

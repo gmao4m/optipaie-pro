@@ -408,6 +408,13 @@ alter table licenses add column if not exists customer_id uuid references custom
 alter table licenses add column if not exists type        text not null default 'lifetime';
 alter table licenses add column if not exists max_devices int  not null default 1;
 
+-- Company scope (mono/multi-société): the number of companies the desktop may
+-- create. 1 = Mono-société; 0 = Multi-sociétés (unlimited). Defaults to 1 so a
+-- forgotten/absent value is the SAFE (Mono) choice on BOTH the server and the
+-- desktop client — the client also reads null/absent as Mono — and every
+-- pre-existing row becomes Mono. The admin writes 0 to grant Multi.
+alter table licenses add column if not exists max_companies int not null default 1;
+
 do $$ begin
   if not exists (select 1 from pg_constraint where conname = 'licenses_type_check') then
     alter table licenses add constraint licenses_type_check
@@ -476,24 +483,26 @@ create policy p_devices_admin on devices for all to authenticated using (true) w
 drop policy if exists p_activations_read on activations;
 create policy p_activations_read on activations for select to authenticated using (true);
 
--- ---- new key format: XXXXX-XXXXX-XXXXX-XXXXX (4 groups of 5) ----------------
---  Signature kept compatible with generate_licenses(int, text, ...); the prefix
---  argument is now ignored (the enterprise format has no product prefix).
-create or replace function gen_license_key(prefix text default null)
+-- ---- key format: PAY-XXXX-XXXX-XXXX (product prefix + 3 groups of 4) ---------
+--  MUST match the desktop client's LicenseKeyFormatter exactly (PrefixLength=3,
+--  GroupSize=4, GroupCount=3 → 15 alphanumerics), otherwise a generated key is
+--  mangled by the activation textbox and never validates. generate_licenses passes
+--  the product prefix ('PAY'); the admin UI calls it with the default.
+create or replace function gen_license_key(prefix text default 'PAY')
 returns text as $$
 declare
   charset text := 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  result  text := '';
+  result  text := upper(coalesce(nullif(trim(prefix), ''), 'PAY'));
   part    text;
   i int;
   j int;
 begin
-  for i in 1..4 loop
+  for i in 1..3 loop
     part := '';
-    for j in 1..5 loop
+    for j in 1..4 loop
       part := part || substr(charset, floor(random() * length(charset))::int + 1, 1);
     end loop;
-    result := case when i = 1 then part else result || '-' || part end;
+    result := result || '-' || part;
   end loop;
   return result;
 end;

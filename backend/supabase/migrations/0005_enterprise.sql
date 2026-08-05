@@ -87,24 +87,25 @@ create policy p_devices_admin on devices for all to authenticated using (true) w
 drop policy if exists p_activations_read on activations;
 create policy p_activations_read on activations for select to authenticated using (true);
 
--- ---- new key format: XXXXX-XXXXX-XXXXX-XXXXX (4 groups of 5) ----------------
---  Signature kept compatible with generate_licenses(int, text, ...); the prefix
---  argument is now ignored (the enterprise format has no product prefix).
-create or replace function gen_license_key(prefix text default null)
+-- ---- key format: PAY-XXXX-XXXX-XXXX (product prefix + 3 groups of 4) ---------
+--  MUST match the desktop client's LicenseKeyFormatter exactly (PrefixLength=3,
+--  GroupSize=4, GroupCount=3 → 15 alphanumerics), otherwise a generated key is
+--  mangled by the activation textbox and never validates.
+create or replace function gen_license_key(prefix text default 'PAY')
 returns text as $$
 declare
   charset text := 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  result  text := '';
+  result  text := upper(coalesce(nullif(trim(prefix), ''), 'PAY'));
   part    text;
   i int;
   j int;
 begin
-  for i in 1..4 loop
+  for i in 1..3 loop
     part := '';
-    for j in 1..5 loop
+    for j in 1..4 loop
       part := part || substr(charset, floor(random() * length(charset))::int + 1, 1);
     end loop;
-    result := case when i = 1 then part else result || '-' || part end;
+    result := result || '-' || part;
   end loop;
   return result;
 end;

@@ -90,6 +90,16 @@ namespace OptiPaie.Desktop.ViewModels
 
         private void New()
         {
+            // Mono-société licenses (and the trial) allow a single company; adding
+            // more needs a Multi-sociétés license. The first company is always allowed.
+            if (!_services.LicenseGate.CanAddCompany(_services.Companies.GetAll().Count))
+            {
+                Dialogs.Info(
+                    OptiPaie.Desktop.Localization.TranslationSource.Instance["License_CompanyLimitReached"],
+                    OptiPaie.Desktop.Localization.TranslationSource.Instance["License_CompanyLimitTitle"]);
+                return;
+            }
+
             var company = new Company { Currency = "DZD" };
             if (Dialogs.ShowCompanyEditor(new CompanyEditViewModel(_services, company, true)))
             {

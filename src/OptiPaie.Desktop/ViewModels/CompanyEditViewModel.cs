@@ -194,6 +194,16 @@ namespace OptiPaie.Desktop.ViewModels
 
             if (_isNew)
             {
+                // Safety net (the list also guards): a Mono-société license/trial caps
+                // the app at one company; adding more needs a Multi-sociétés license.
+                if (!_services.LicenseGate.CanAddCompany(_services.Companies.GetAll().Count))
+                {
+                    Dialogs.Info(
+                        OptiPaie.Desktop.Localization.TranslationSource.Instance["License_CompanyLimitReached"],
+                        OptiPaie.Desktop.Localization.TranslationSource.Instance["License_CompanyLimitTitle"]);
+                    return;
+                }
+
                 Result<long> result = _services.Companies.Create(Company);
                 if (!result.IsSuccess)
                 {

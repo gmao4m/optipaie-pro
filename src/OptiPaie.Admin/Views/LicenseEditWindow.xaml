@@ -21,12 +21,16 @@
                     <StackPanel Margin="8,0,0,10"><TextBlock Text="Email" Style="{StaticResource Caption}" /><TextBox Style="{StaticResource AppTextBox}" Text="{Binding Email}" /></StackPanel>
                 </UniformGrid>
                 <UniformGrid Columns="2">
-                    <StackPanel Margin="0,0,8,10"><TextBlock Text="Type" Style="{StaticResource Caption}" /><ComboBox Height="36" VerticalContentAlignment="Center" ItemsSource="{Binding Types}" SelectedItem="{Binding Type}" /></StackPanel>
-                    <StackPanel Margin="8,0,0,10"><TextBlock Text="Appareils max" Style="{StaticResource Caption}" /><TextBox Style="{StaticResource AppTextBox}" Text="{Binding MaxDevices}" /></StackPanel>
+                    <StackPanel Margin="0,0,8,10"><TextBlock Text="Durée" Style="{StaticResource Caption}" /><ComboBox Height="36" VerticalContentAlignment="Center" ItemsSource="{Binding Durations}" DisplayMemberPath="Label" SelectedValuePath="Value" SelectedValue="{Binding Type}" /></StackPanel>
+                    <StackPanel Margin="8,0,0,10"><TextBlock Text="Type (portée)" Style="{StaticResource Caption}" /><ComboBox Height="36" VerticalContentAlignment="Center" ItemsSource="{Binding ScopeOptions}" DisplayMemberPath="Label" SelectedValuePath="Value" SelectedValue="{Binding Scope}" /></StackPanel>
                 </UniformGrid>
                 <UniformGrid Columns="2">
                     <StackPanel Margin="0,0,8,10"><TextBlock Text="Statut" Style="{StaticResource Caption}" /><ComboBox Height="36" VerticalContentAlignment="Center" ItemsSource="{Binding Statuses}" SelectedItem="{Binding Status}" /></StackPanel>
-                    <StackPanel Margin="8,0,0,10"><TextBlock Text="Expiration (vide = permanente)" Style="{StaticResource Caption}" /><DatePicker Height="36" SelectedDate="{Binding Expires}" /></StackPanel>
+                    <StackPanel Margin="8,0,0,10"><TextBlock Text="Appareils max" Style="{StaticResource Caption}" /><TextBox Style="{StaticResource AppTextBox}" Text="{Binding MaxDevices}" /></StackPanel>
+                </UniformGrid>
+                <UniformGrid Columns="2">
+                    <StackPanel Margin="0,0,8,10"><TextBlock Text="Expiration (vide = permanente)" Style="{StaticResource Caption}" /><DatePicker Height="36" SelectedDate="{Binding Expires}" /></StackPanel>
+                    <StackPanel Margin="8,0,0,10" VerticalAlignment="Center"><TextBlock Text="Annuelle → +1 an auto • À vie → laisser vide" Style="{StaticResource Caption}" TextWrapping="Wrap" /></StackPanel>
                 </UniformGrid>
 
                 <WrapPanel Margin="0,6,0,0">
@@ -38,46 +42,24 @@
                     <Button Content="Supprimer" Style="{StaticResource SecondaryButton}" Command="{Binding DeleteCommand}" Foreground="{StaticResource Bad}" Margin="0,0,8,8" Visibility="{Binding IsExisting, Converter={StaticResource BoolToVis}}" />
                 </WrapPanel>
 
-                <StackPanel Visibility="{Binding IsExisting, Converter={StaticResource BoolToVis}}">
-                    <TextBlock Text="Modules" Style="{StaticResource H2}" Margin="0,16,0,8" />
-                    <ItemsControl ItemsSource="{Binding ModuleList}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <DockPanel Margin="0,5">
-                                    <TextBlock DockPanel.Dock="Right" Text="{Binding Info}" Style="{StaticResource Caption}" VerticalAlignment="Center" />
-                                    <CheckBox IsChecked="{Binding Enabled}" IsEnabled="{Binding CanToggle}" Content="{Binding Name}" VerticalContentAlignment="Center" />
-                                </DockPanel>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-
-                    <TextBlock Text="Clés d'activation de module" Style="{StaticResource H2}" Margin="0,18,0,8" />
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                        <ComboBox Width="200" Height="34" VerticalContentAlignment="Center" ItemsSource="{Binding UpsellModules}" DisplayMemberPath="Name" SelectedValuePath="Key" SelectedValue="{Binding SelectedModule}" />
-                        <DatePicker Width="150" Height="34" Margin="8,0,0,0" SelectedDate="{Binding KeyExpiry}" />
-                        <Button Content="Générer une clé" Style="{StaticResource PrimaryButton}" Command="{Binding GenerateKeyCommand}" Margin="8,0,0,0" />
+                <!-- Freshly generated key with a one-click Copy button (new licence). -->
+                <Border Style="{StaticResource Card}" Margin="0,14,0,0" Padding="16"
+                        Visibility="{Binding HasGeneratedKey, Converter={StaticResource BoolToVis}}">
+                    <StackPanel>
+                        <TextBlock Text="✅ Licence créée — clé à remettre au client" Style="{StaticResource Caption}" />
+                        <DockPanel Margin="0,8,0,0">
+                            <Button DockPanel.Dock="Right" Content="📋 Copier" Style="{StaticResource PrimaryButton}"
+                                    Command="{Binding CopyKeyCommand}" Margin="10,0,0,0" />
+                            <TextBox Text="{Binding GeneratedKey, Mode=OneWay}" IsReadOnly="True" FontFamily="Consolas"
+                                     FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource Brand}"
+                                     BorderThickness="0" Background="Transparent" VerticalContentAlignment="Center" />
+                        </DockPanel>
+                        <TextBlock Text="{Binding GeneratedScopeInfo}" Style="{StaticResource Caption}" Margin="0,6,0,0" />
                     </StackPanel>
-                    <TextBlock Text="{Binding NewKeyInfo}" FontFamily="Consolas" Foreground="{StaticResource Brand}" Margin="0,0,0,8" />
-                    <Border Style="{StaticResource Card}" Padding="0" Height="200">
-                        <DataGrid ItemsSource="{Binding Keys}">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="Module" Binding="{Binding ModuleKey}" Width="120" />
-                                <DataGridTextColumn Header="Clé" Binding="{Binding KeyCode}" Width="*" FontFamily="Consolas" />
-                                <DataGridTextColumn Header="Statut" Binding="{Binding Status}" Width="90" />
-                                <DataGridTextColumn Header="Créée" Binding="{Binding CreatedDisplay}" Width="100" />
-                                <DataGridTemplateColumn Header="" Width="90">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <Button Content="Révoquer" Style="{StaticResource SecondaryButton}" Height="26" Padding="8,0" Margin="4,0" Foreground="{StaticResource Bad}"
-                                                    Command="{Binding DataContext.RevokeKeyCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                    CommandParameter="{Binding}" />
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-                            </DataGrid.Columns>
-                        </DataGrid>
-                    </Border>
-                </StackPanel>
+                </Border>
+
+                <TextBlock Text="ℹ️ Les deux types (Mono / Multi) débloquent TOUTES les fonctionnalités — seule différence : le nombre de sociétés."
+                           Style="{StaticResource Caption}" Margin="2,14,0,0" TextWrapping="Wrap" />
             </StackPanel>
         </ScrollViewer>
     </DockPanel>

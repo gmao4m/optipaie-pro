@@ -32,12 +32,14 @@
         <Border Grid.Row="2" Style="{StaticResource Card}" Padding="0">
             <DataGrid ItemsSource="{Binding Items}">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Clé" Binding="{Binding LicenseKey}" Width="180" FontFamily="Consolas" />
-                    <DataGridTextColumn Header="Client" Binding="{Binding CompanyName}" Width="*" />
-                    <DataGridTextColumn Header="Type" Binding="{Binding Type}" Width="110" />
-                    <DataGridTextColumn Header="Statut" Binding="{Binding Status}" Width="110" />
-                    <DataGridTextColumn Header="Expiration" Binding="{Binding ExpiresDisplay}" Width="120" />
-                    <DataGridTextColumn Header="Créée" Binding="{Binding CreatedDisplay}" Width="110" />
+                    <DataGridTextColumn Header="Clé" Binding="{Binding LicenseKey}" Width="170" FontFamily="Consolas" />
+                    <DataGridTextColumn Header="Client / société" Binding="{Binding CompanyName}" Width="*" />
+                    <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="180" />
+                    <DataGridTextColumn Header="Portée" Binding="{Binding ScopeDisplay}" Width="115" />
+                    <DataGridTextColumn Header="Statut" Binding="{Binding Status}" Width="90" />
+                    <DataGridTextColumn Header="Activée le" Binding="{Binding ActivatedDisplay}" Width="100" />
+                    <DataGridTextColumn Header="Version" Binding="{Binding VersionDisplay}" Width="80" />
+                    <DataGridTextColumn Header="Expiration" Binding="{Binding ExpiresDisplay}" Width="110" />
                     <DataGridTemplateColumn Header="" Width="90">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>

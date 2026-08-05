@@ -29,6 +29,8 @@ export interface LicenseRow {
   status: string;
   type: string | null;
   max_devices: number | null;
+  // Company scope: 1 = Mono-société, 0 = Multi-sociétés (unlimited). Missing/null = Mono.
+  max_companies: number | null;
   activated_at: string | null;
   last_validation_at: string | null;
   expires_at: string | null;
@@ -59,35 +61,27 @@ function graceDays(product: ProductRow): number {
 }
 
 /**
- * Enabled module keys for a license: every core module of the product plus every
- * per-license module flagged enabled. Returns [] for a non-active license so a
- * suspension/revocation propagates (and sticks offline via the signed token).
+ * Enabled module keys for a license. Every license unlocks the WHOLE product —
+ * Mono-société and Multi-sociétés differ ONLY in the number of companies
+ * (max_companies), never in features. So an active license grants every module of
+ * the product; a non-active one grants none, so a suspension/revocation still locks
+ * the app (and sticks offline via the signed token). The per-license license_modules
+ * flags are retained in the schema but no longer gate features.
  */
 export async function resolveModules(
   db: SupabaseClient,
   productId: string,
-  licenseId: string,
+  _licenseId: string,
   status: string,
 ): Promise<string[]> {
   if (status !== "active") return [];
 
-  const enabled = new Set<string>();
-
-  const cores = await db
+  const all = await db
     .from("modules")
     .select("key")
-    .eq("product_id", productId)
-    .eq("is_core", true);
-  for (const m of cores.data ?? []) enabled.add(m.key as string);
+    .eq("product_id", productId);
 
-  const lm = await db
-    .from("license_modules")
-    .select("module_key")
-    .eq("license_id", licenseId)
-    .eq("enabled", true);
-  for (const m of lm.data ?? []) enabled.add(m.module_key as string);
-
-  return [...enabled];
+  return (all.data ?? []).map((m) => m.key as string);
 }
 
 /**
@@ -105,6 +99,13 @@ export function buildSignedToken(
   const now = new Date();
   const graceUntil = new Date(now.getTime() + graceDays(product) * 86_400_000);
 
+  // Company scope for the token: 1 = Mono, 0 = Multi (unlimited). A missing OR null
+  // value — a row predating the max_companies column (absent from select("*")) or a
+  // null cell — coerces to 1 (safe/Mono), which matches how the desktop client reads
+  // an absent/null token field. Multi is therefore ALWAYS an explicit 0, never null.
+  const rawScope = (license as { max_companies?: number | null }).max_companies;
+  const maxCompanies = (rawScope === undefined || rawScope === null) ? 1 : rawScope;
+
   const payload = {
     v: 1,
     product: product.key,
@@ -118,6 +119,8 @@ export function buildSignedToken(
     deviceId: deviceId,
     status: license.status,
     type: license.type ?? "lifetime",
+    // Company scope: 1 = Mono-société, 0 = Multi-sociétés (unlimited). Never null.
+    maxCompanies,
     modules,
     issuedAt: now.toISOString(),
     expiresAt: license.expires_at, // null = perpetual

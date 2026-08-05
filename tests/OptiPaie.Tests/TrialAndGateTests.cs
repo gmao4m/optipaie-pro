@@ -119,6 +119,101 @@ namespace OptiPaie.Tests
             Assert.That(gate.IsEnabled(ModuleKeys.Training), Is.False);
         }
 
+        // ---------------------------------------------------------------- company scope (mono/multi)
+
+        /// <summary>An Active, usable snapshot carrying a given company scope (null = Multi).</summary>
+        private static LicenseSnapshot ScopedSnapshot(int? maxCompanies, LicenseStateKind state = LicenseStateKind.Active)
+        {
+            DateTime now = DateTime.UtcNow;
+            return new LicenseSnapshot(
+                state, "payroll", "PAY-TEST-0001", "Atlas Industrie", "a@atlas.dz", "TEST-DEVICE", "active",
+                new[] { ModuleKeys.Attendance }, now, now, null, now.AddDays(30),
+                LicenseType.Lifetime, "Atlas Industrie", maxCompanies);
+        }
+
+        [Test]
+        public void Gate_MonoLicense_AllowsOnlyOneCompany()
+        {
+            var gate = new LicenseGate(new FakeLicensing(ScopedSnapshot(1)), NewTrial(new InMemoryTrialStore()));
+
+            Assert.That(gate.MaxCompanies, Is.EqualTo(1));
+            Assert.That(gate.CanAddCompany(0), Is.True, "the first company is always allowed");
+            Assert.That(gate.CanAddCompany(1), Is.False, "a second company needs a Multi licence");
+        }
+
+        [Test]
+        public void Gate_MultiLicense_AllowsUnlimitedCompanies()
+        {
+            // Multi is the explicit sentinel 0 (unlimited).
+            var gate = new LicenseGate(new FakeLicensing(ScopedSnapshot(0)), NewTrial(new InMemoryTrialStore()));
+
+            Assert.That(gate.MaxCompanies, Is.Null, "0 → unlimited (Multi)");
+            Assert.That(gate.CanAddCompany(0), Is.True);
+            Assert.That(gate.CanAddCompany(9), Is.True);
+        }
+
+        [Test]
+        public void Gate_UsableLicenseWithoutScopeField_IsTreatedAsMono()
+        {
+            // Revenue-hole guard: a signed token that carries NO maxCompanies field
+            // (payload.MaxCompanies == null) must be read as Mono for a USABLE license —
+            // never as Multi. Otherwise any field-less token would grant Multi for free.
+            var gate = new LicenseGate(new FakeLicensing(ScopedSnapshot(null)), NewTrial(new InMemoryTrialStore()));
+
+            Assert.That(gate.MaxCompanies, Is.EqualTo(1), "absent/null scope = Mono, matching the backend");
+            Assert.That(gate.CanAddCompany(0), Is.True, "the first company is allowed");
+            Assert.That(gate.CanAddCompany(1), Is.False, "but a second is not — no free Multi");
+        }
+
+        [Test]
+        public void Gate_Trial_IsTreatedAsMono()
+        {
+            var trial = NewTrial(new InMemoryTrialStore());
+            trial.StartTrial();
+            var gate = new LicenseGate(new FakeLicensing(LicenseSnapshot.NotActivated()), trial);
+
+            Assert.That(gate.MaxCompanies, Is.EqualTo(1), "the trial allows a single company");
+            Assert.That(gate.CanAddCompany(0), Is.True);
+            Assert.That(gate.CanAddCompany(1), Is.False);
+        }
+
+        [Test]
+        public void Gate_Unactivated_IsTreatedAsMono()
+        {
+            var gate = new LicenseGate(new FakeLicensing(LicenseSnapshot.NotActivated()), NewTrial(new InMemoryTrialStore()));
+
+            Assert.That(gate.MaxCompanies, Is.EqualTo(1));
+            Assert.That(gate.CanAddCompany(0), Is.True);
+            Assert.That(gate.CanAddCompany(1), Is.False);
+        }
+
+        [Test]
+        public void Gate_SuspendedMultiLicense_DoesNotGrantMulti()
+        {
+            // A real Multi (maxCompanies=0) license that is NOT usable (suspended) must not
+            // unlock multi-company: the gate falls back to Mono until it is usable again.
+            var gate = new LicenseGate(new FakeLicensing(ScopedSnapshot(0, LicenseStateKind.Suspended)),
+                NewTrial(new InMemoryTrialStore()));
+
+            Assert.That(gate.MaxCompanies, Is.EqualTo(1));
+            Assert.That(gate.CanAddCompany(1), Is.False);
+        }
+
+        [Test]
+        public void Snapshot_Duration_AnnualCountsDown_LifetimeIsPerpetual()
+        {
+            DateTime now = DateTime.UtcNow;
+            var annual = new LicenseSnapshot(LicenseStateKind.Active, "payroll", "PAY", "Co", "e", "DEV",
+                "active", new[] { "payroll" }, now, now, now.AddDays(30), now.AddDays(30),
+                LicenseType.Annual, "Co", 1);
+            var lifetime = new LicenseSnapshot(LicenseStateKind.Active, "payroll", "PAY", "Co", "e", "DEV",
+                "active", new[] { "payroll" }, now, now, null, now.AddDays(30),
+                LicenseType.Lifetime, "Co", null);
+
+            Assert.That(annual.DaysRemaining, Is.GreaterThan(0), "an annual/dated licence counts down to expiry");
+            Assert.That(lifetime.DaysRemaining, Is.Null, "a lifetime licence never expires");
+        }
+
         // ---------------------------------------------------------------- test doubles
 
         private sealed class InMemoryTrialStore : ITrialStore

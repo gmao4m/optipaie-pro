@@ -1,7 +1,9 @@
 using System;
 using System.Configuration;
+using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -20,7 +22,10 @@ namespace OptiPaie.Admin.Api
 
         private readonly string _url;
         private readonly string _key;
+        private readonly SemaphoreSlim _refreshLock = new SemaphoreSlim(1, 1);
         private string _token;
+        private string _refreshToken;
+        private DateTime _expiresAtUtc = DateTime.MinValue;
 
         public SupabaseAdminClient(string url, string publishableKey)
         {
@@ -54,7 +59,7 @@ namespace OptiPaie.Admin.Api
                     }
 
                     JObject o = JObject.Parse(body);
-                    _token = (string)o["access_token"];
+                    StoreSession(o);
                     UserEmail = (string)(o["user"] != null ? o["user"]["email"] : null) ?? email;
                     if (string.IsNullOrEmpty(_token))
                     {
@@ -64,7 +69,90 @@ namespace OptiPaie.Admin.Api
             }
         }
 
-        public void SignOut() { _token = null; UserEmail = null; }
+        public void SignOut() { _token = null; _refreshToken = null; _expiresAtUtc = DateTime.MinValue; UserEmail = null; }
+
+        /// <summary>Stores the access + refresh tokens and computes the local expiry (with a 60 s safety margin).</summary>
+        private void StoreSession(JObject o)
+        {
+            _token = (string)o["access_token"];
+            _refreshToken = (string)o["refresh_token"] ?? _refreshToken;
+            int expiresIn = (int?)o["expires_in"] ?? 3600;
+            _expiresAtUtc = DateTime.UtcNow.AddSeconds(Math.Max(30, expiresIn - 60));
+        }
+
+        /// <summary>
+        /// Proactively refreshes the access token when it is at/near expiry, so a long
+        /// admin session never surfaces a "jwt expired" error. A no-op without a session.
+        /// </summary>
+        private async Task EnsureFreshTokenAsync()
+        {
+            if (string.IsNullOrEmpty(_refreshToken) || DateTime.UtcNow < _expiresAtUtc)
+            {
+                return;
+            }
+
+            await TryRefreshAsync().ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Exchanges the refresh token for a new access token. Serialized so concurrent
+        /// callers refresh once. <paramref name="force"/> is set by the 401 backstop so it
+        /// refreshes even when the token still looks locally fresh (the server rejected it —
+        /// clock skew or early revocation); proactive callers leave it false.
+        /// </summary>
+        private async Task<bool> TryRefreshAsync(bool force = false)
+        {
+            if (string.IsNullOrEmpty(_refreshToken))
+            {
+                return false;
+            }
+
+            await _refreshLock.WaitAsync().ConfigureAwait(false);
+            try
+            {
+                // A proactive caller can skip if another request already refreshed while we
+                // waited on the lock; a forced (post-401) caller must always refresh.
+                if (!force && !string.IsNullOrEmpty(_token) && DateTime.UtcNow < _expiresAtUtc)
+                {
+                    return true;
+                }
+
+                using (var req = new HttpRequestMessage(HttpMethod.Post, _url + "/auth/v1/token?grant_type=refresh_token"))
+                {
+                    req.Headers.TryAddWithoutValidation("apikey", _key);
+                    req.Content = Json(new { refresh_token = _refreshToken });
+                    using (HttpResponseMessage resp = await Http.SendAsync(req).ConfigureAwait(false))
+                    {
+                        string body = await resp.Content.ReadAsStringAsync().ConfigureAwait(false);
+                        if (!resp.IsSuccessStatusCode)
+                        {
+                            // Only a definitive auth rejection (invalid/expired refresh token)
+                            // invalidates the session. Transient errors (429 rate-limit, 5xx)
+                            // keep the still-valid refresh token so the session survives.
+                            int code = (int)resp.StatusCode;
+                            if (code == 400 || code == 401 || code == 403)
+                            {
+                                _token = null;
+                                _refreshToken = null;
+                                _expiresAtUtc = DateTime.MinValue;
+                            }
+                            return false;
+                        }
+
+                        StoreSession(JObject.Parse(body));
+                        return !string.IsNullOrEmpty(_token);
+                    }
+                }
+            }
+            catch
+            {
+                return false;
+            }
+            finally
+            {
+                _refreshLock.Release();
+            }
+        }
 
         // ---- REST ----
         public Task<T[]> SelectAsync<T>(string table, string query)
@@ -81,6 +169,12 @@ namespace OptiPaie.Admin.Api
         /// <summary>Select with an exact total count (from the Content-Range header).</summary>
         public async Task<PagedResult<T>> SelectPagedAsync<T>(string table, string query, int from, int to)
         {
+            return await SelectPagedAsync<T>(table, query, from, to, false).ConfigureAwait(false);
+        }
+
+        private async Task<PagedResult<T>> SelectPagedAsync<T>(string table, string query, int from, int to, bool isRetry)
+        {
+            await EnsureFreshTokenAsync().ConfigureAwait(false);
             using (var req = new HttpRequestMessage(HttpMethod.Get, _url + "/rest/v1/" + table + "?" + query))
             {
                 AddAuth(req);
@@ -89,6 +183,11 @@ namespace OptiPaie.Admin.Api
                 req.Headers.TryAddWithoutValidation("Range", from + "-" + to);
                 using (HttpResponseMessage resp = await Http.SendAsync(req).ConfigureAwait(false))
                 {
+                    if (resp.StatusCode == HttpStatusCode.Unauthorized && !isRetry && await TryRefreshAsync(true).ConfigureAwait(false))
+                    {
+                        return await SelectPagedAsync<T>(table, query, from, to, true).ConfigureAwait(false);
+                    }
+
                     string body = await resp.Content.ReadAsStringAsync().ConfigureAwait(false);
                     if (!resp.IsSuccessStatusCode) throw new InvalidOperationException(ExtractError(body, "Erreur de lecture."));
 
@@ -136,8 +235,9 @@ namespace OptiPaie.Admin.Api
         }
 
         // ---- plumbing ----
-        private async Task<T> SendJsonAsync<T>(HttpMethod method, string path, object body, string prefer)
+        private async Task<T> SendJsonAsync<T>(HttpMethod method, string path, object body, string prefer, bool isRetry = false)
         {
+            await EnsureFreshTokenAsync().ConfigureAwait(false);
             using (var req = new HttpRequestMessage(method, _url + path))
             {
                 AddAuth(req);
@@ -145,6 +245,13 @@ namespace OptiPaie.Admin.Api
                 if (body != null) req.Content = Json(body);
                 using (HttpResponseMessage resp = await Http.SendAsync(req).ConfigureAwait(false))
                 {
+                    // Backstop: if the token expired between the proactive check and the call,
+                    // refresh once and replay the request transparently.
+                    if (resp.StatusCode == HttpStatusCode.Unauthorized && !isRetry && await TryRefreshAsync(true).ConfigureAwait(false))
+                    {
+                        return await SendJsonAsync<T>(method, path, body, prefer, true).ConfigureAwait(false);
+                    }
+
                     string s = await resp.Content.ReadAsStringAsync().ConfigureAwait(false);
                     if (!resp.IsSuccessStatusCode) throw new InvalidOperationException(ExtractError(s, "Erreur serveur (" + (int)resp.StatusCode + ")."));
                     if (typeof(T) == typeof(object) || string.IsNullOrWhiteSpace(s)) return default(T);

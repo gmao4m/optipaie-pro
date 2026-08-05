@@ -360,6 +360,8 @@
   <data name="License_Active" xml:space="preserve"><value>Activée</value></data>
   <data name="License_Inactive" xml:space="preserve"><value>Non activée</value></data>
   <data name="License_Trial" xml:space="preserve"><value>Version d'évaluation</value></data>
+  <data name="License_CompanyLimitTitle" xml:space="preserve"><value>Licence Mono-société</value></data>
+  <data name="License_CompanyLimitReached" xml:space="preserve"><value>Votre licence Mono-société autorise une seule entreprise. Pour gérer plusieurs entreprises, passez à une licence Multi-sociétés.</value></data>
   <data name="License_Expired" xml:space="preserve"><value>Expirée</value></data>
   <data name="License_Activated" xml:space="preserve"><value>Licence activée avec succès.</value></data>
   <data name="License_InvalidSerial" xml:space="preserve"><value>Numéro de série invalide.</value></data>
