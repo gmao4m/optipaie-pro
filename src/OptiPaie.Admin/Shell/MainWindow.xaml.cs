@@ -1,4 +1,6 @@
+using System.Configuration;
 using System.Windows;
+using OptiPaie.Admin.Api;
 
 namespace OptiPaie.Admin.Shell
 {
@@ -8,6 +10,10 @@ namespace OptiPaie.Admin.Shell
         {
             InitializeComponent();
             DataContext = new ShellViewModel();
+
+            // Best-effort update check once the console is shown (never blocks).
+            Loaded += async (s, e) =>
+                await AdminUpdater.CheckAsync(ConfigurationManager.AppSettings["Admin.UpdateUrl"]);
         }
     }
 }

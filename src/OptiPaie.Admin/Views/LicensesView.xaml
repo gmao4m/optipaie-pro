@@ -27,19 +27,23 @@
             <ComboBox Width="150" Height="36" Margin="8,0,0,0" ItemsSource="{Binding StatusFilters}" SelectedItem="{Binding StatusFilter}" VerticalContentAlignment="Center" />
             <ComboBox Width="150" Height="36" Margin="8,0,0,0" ItemsSource="{Binding TypeFilters}" SelectedItem="{Binding TypeFilter}" VerticalContentAlignment="Center" />
             <Button Content="Rechercher" Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Command="{Binding RefreshCommand}" />
+            <Button Content="↻ Actualiser" Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Command="{Binding RefreshCommand}"
+                    ToolTip="Recharger la liste (les nouvelles activations apparaissent ici)" />
+            <TextBlock Text="{Binding AutoRefreshHint}" VerticalAlignment="Center" Margin="12,0,0,0" Style="{StaticResource Caption}" />
         </StackPanel>
 
         <Border Grid.Row="2" Style="{StaticResource Card}" Padding="0">
             <DataGrid ItemsSource="{Binding Items}">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Clé" Binding="{Binding LicenseKey}" Width="170" FontFamily="Consolas" />
+                    <DataGridTextColumn Header="Clé" Binding="{Binding LicenseKey}" Width="160" FontFamily="Consolas" />
                     <DataGridTextColumn Header="Client / société" Binding="{Binding CompanyName}" Width="*" />
                     <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="180" />
-                    <DataGridTextColumn Header="Portée" Binding="{Binding ScopeDisplay}" Width="115" />
-                    <DataGridTextColumn Header="Statut" Binding="{Binding Status}" Width="90" />
+                    <DataGridTextColumn Header="Portée" Binding="{Binding ScopeDisplay}" Width="110" />
+                    <DataGridTextColumn Header="Durée" Binding="{Binding TypeDisplay}" Width="80" />
+                    <DataGridTextColumn Header="Statut" Binding="{Binding StatusDisplay}" Width="95" />
                     <DataGridTextColumn Header="Activée le" Binding="{Binding ActivatedDisplay}" Width="100" />
-                    <DataGridTextColumn Header="Version" Binding="{Binding VersionDisplay}" Width="80" />
-                    <DataGridTextColumn Header="Expiration" Binding="{Binding ExpiresDisplay}" Width="110" />
+                    <DataGridTextColumn Header="Expiration" Binding="{Binding ExpiresDisplay}" Width="105" />
+                    <DataGridTextColumn Header="Version" Binding="{Binding VersionDisplay}" Width="70" />
                     <DataGridTemplateColumn Header="" Width="90">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>

@@ -30,6 +30,45 @@ namespace OptiPaie.Admin.Api
         [JsonIgnore] public string ScopeDisplay =>
             MaxCompanies == 0 ? "Multi-sociétés" : (MaxCompanies.GetValueOrDefault(1) <= 1 ? "Mono-société" : MaxCompanies.Value + " sociétés");
         [JsonIgnore] public string CreatedDisplay => Dates.Short(CreatedAt);
+
+        /// <summary>Duration/type as a plain French label (À vie / Annuel / …).</summary>
+        [JsonIgnore]
+        public string TypeDisplay
+        {
+            get
+            {
+                switch ((Type ?? string.Empty).Trim().ToLowerInvariant())
+                {
+                    case "lifetime": return "À vie";
+                    case "annual": return "Annuel";
+                    case "monthly": return "Mensuel";
+                    case "trial": return "Essai";
+                    case "demo": return "Démo";
+                    case "enterprise": return "Entreprise";
+                    default: return string.IsNullOrEmpty(Type) ? "—" : Type;
+                }
+            }
+        }
+
+        /// <summary>Server status as a plain French label.</summary>
+        [JsonIgnore]
+        public string StatusDisplay
+        {
+            get
+            {
+                switch ((Status ?? string.Empty).Trim().ToLowerInvariant())
+                {
+                    case "active": return "Active";
+                    case "pending": return "En attente";
+                    case "suspended": return "Suspendue";
+                    case "revoked": return "Révoquée";
+                    default: return string.IsNullOrEmpty(Status) ? "—" : Status;
+                }
+            }
+        }
+
+        /// <summary>True once the license has been activated by a customer (for row emphasis).</summary>
+        [JsonIgnore] public bool IsActivated => !string.IsNullOrEmpty(ActivatedAt);
     }
 
     public sealed class ModulePermission

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OptiPaie PRO Admin - MSI installer (WiX v5).
+  Installs the licensing admin console with Desktop + Start Menu shortcuts, a
+  distinct gold/navy icon and an uninstaller. The owner's machine already runs
+  the client (which requires .NET Framework 4.8), so no bootstrapper is needed.
+
+  The admin session (DPAPI refresh token) lives under %LocalAppData%\OptiPaie PRO
+  Admin - OUTSIDE the install folder - so upgrade/uninstall never sign you out.
+-->
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+
+  <Package Name="OptiPaie PRO Admin"
+           Manufacturer="OptiPaie"
+           Version="$(var.AppVersion)"
+           UpgradeCode="59EE60DE-E038-427B-BD8E-8031E553E6BE"
+           Scope="perMachine"
+           Compressed="yes">
+
+    <SummaryInformation Description="OptiPaie PRO Admin - Console de licences" Manufacturer="OptiPaie" />
+
+    <MajorUpgrade AllowSameVersionUpgrades="yes"
+                  DowngradeErrorMessage="Une version plus récente d'OptiPaie PRO Admin est déjà installée." />
+
+    <MediaTemplate EmbedCab="yes" />
+
+    <Icon Id="AdminIcon.ico" SourceFile="OptiPaieAdmin.ico" />
+    <Property Id="ARPPRODUCTICON" Value="AdminIcon.ico" />
+    <Property Id="ARPHELPLINK" Value="https://optipaie.dz" />
+
+    <WixVariable Id="WixUILicenseRtf" Value="License.rtf" />
+
+    <StandardDirectory Id="ProgramFiles6432Folder">
+      <Directory Id="INSTALLFOLDER" Name="OptiPaie PRO Admin" />
+    </StandardDirectory>
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="AppProgramMenuDir" Name="OptiPaie PRO Admin" />
+    </StandardDirectory>
+    <StandardDirectory Id="DesktopFolder" />
+
+    <ComponentGroup Id="AppFiles" Directory="INSTALLFOLDER">
+      <Files Include="$(var.PublishDir)\**" />
+    </ComponentGroup>
+
+    <Component Id="AppShortcuts" Directory="AppProgramMenuDir"
+               Guid="8C2741D7-9F6F-4942-ACD5-1CC66BC08B09">
+      <Shortcut Id="StartMenuShortcut"
+                Name="OptiPaie PRO Admin"
+                Description="Console d'administration des licences OptiPaie PRO"
+                Target="[INSTALLFOLDER]OptiPaie PRO Admin.exe"
+                WorkingDirectory="INSTALLFOLDER"
+                Icon="AdminIcon.ico" />
+      <Shortcut Id="DesktopShortcut"
+                Directory="DesktopFolder"
+                Name="OptiPaie PRO Admin"
+                Description="Console d'administration des licences OptiPaie PRO"
+                Target="[INSTALLFOLDER]OptiPaie PRO Admin.exe"
+                WorkingDirectory="INSTALLFOLDER"
+                Icon="AdminIcon.ico" />
+      <RemoveFolder Id="RemoveProgramMenuDir" Directory="AppProgramMenuDir" On="uninstall" />
+      <RegistryValue Root="HKLM" Key="Software\OptiPaie\OptiPaie PRO Admin"
+                     Name="Installed" Type="integer" Value="1" KeyPath="yes" />
+    </Component>
+
+    <Feature Id="Main" Title="OptiPaie PRO Admin" Level="1">
+      <ComponentGroupRef Id="AppFiles" />
+      <ComponentRef Id="AppShortcuts" />
+    </Feature>
+
+    <ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLFOLDER" />
+
+  </Package>
+</Wix>

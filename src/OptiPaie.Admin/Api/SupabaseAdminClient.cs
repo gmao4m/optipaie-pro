@@ -59,8 +59,8 @@ namespace OptiPaie.Admin.Api
                     }
 
                     JObject o = JObject.Parse(body);
-                    StoreSession(o);
                     UserEmail = (string)(o["user"] != null ? o["user"]["email"] : null) ?? email;
+                    StoreSession(o);
                     if (string.IsNullOrEmpty(_token))
                     {
                         throw new InvalidOperationException("Réponse d'authentification invalide.");
@@ -69,7 +69,37 @@ namespace OptiPaie.Admin.Api
             }
         }
 
-        public void SignOut() { _token = null; _refreshToken = null; _expiresAtUtc = DateTime.MinValue; UserEmail = null; }
+        public void SignOut()
+        {
+            _token = null;
+            _refreshToken = null;
+            _expiresAtUtc = DateTime.MinValue;
+            UserEmail = null;
+            AdminSession.Clear();
+        }
+
+        /// <summary>
+        /// Resumes a previously saved session so the console opens straight to the dashboard
+        /// without a login. Returns true once a fresh access token is obtained; false (and
+        /// clears the stored session) if the saved refresh token is no longer valid.
+        /// </summary>
+        public async Task<bool> TryRestoreSessionAsync()
+        {
+            if (!AdminSession.TryLoad(out string email, out string refresh))
+            {
+                return false;
+            }
+
+            _refreshToken = refresh;
+            UserEmail = email;
+            bool ok = await TryRefreshAsync(true).ConfigureAwait(false);
+            if (!ok)
+            {
+                AdminSession.Clear();
+                UserEmail = null;
+            }
+            return ok && IsAuthenticated;
+        }
 
         /// <summary>Stores the access + refresh tokens and computes the local expiry (with a 60 s safety margin).</summary>
         private void StoreSession(JObject o)
@@ -78,6 +108,9 @@ namespace OptiPaie.Admin.Api
             _refreshToken = (string)o["refresh_token"] ?? _refreshToken;
             int expiresIn = (int?)o["expires_in"] ?? 3600;
             _expiresAtUtc = DateTime.UtcNow.AddSeconds(Math.Max(30, expiresIn - 60));
+
+            // Persist the refresh token (DPAPI) so the console stays signed in next launch.
+            AdminSession.Save(UserEmail, _refreshToken);
         }
 
         /// <summary>
@@ -135,6 +168,7 @@ namespace OptiPaie.Admin.Api
                                 _token = null;
                                 _refreshToken = null;
                                 _expiresAtUtc = DateTime.MinValue;
+                                AdminSession.Clear(); // saved refresh token is no longer valid
                             }
                             return false;
                         }

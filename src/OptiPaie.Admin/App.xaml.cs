@@ -9,7 +9,7 @@ namespace OptiPaie.Admin
         /// <summary>The shared Supabase client (authenticated after login).</summary>
         public static SupabaseAdminClient Api { get; private set; }
 
-        protected override void OnStartup(StartupEventArgs e)
+        protected override async void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
 
@@ -20,7 +20,25 @@ namespace OptiPaie.Admin
             try { System.Net.ServicePointManager.SecurityProtocol |= System.Net.SecurityProtocolType.Tls13; } catch { }
 
             Api = SupabaseAdminClient.FromConfig();
-            new LoginWindow().Show();
+
+            // Sign-in-once: keep the process alive while we try to resume a saved session,
+            // then open straight to the console (or the login screen if there is none / it expired).
+            ShutdownMode = ShutdownMode.OnExplicitShutdown;
+            bool restored = false;
+            try { restored = await Api.TryRestoreSessionAsync(); } catch { restored = false; }
+
+            if (restored)
+            {
+                var main = new Shell.MainWindow();
+                MainWindow = main;
+                main.Show();
+            }
+            else
+            {
+                new LoginWindow().Show();
+            }
+
+            ShutdownMode = ShutdownMode.OnLastWindowClose;
         }
     }
 }

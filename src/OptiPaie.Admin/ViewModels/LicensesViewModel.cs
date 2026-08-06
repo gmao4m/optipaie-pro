@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Threading;
 using OptiPaie.Admin.Api;
 using OptiPaie.Admin.Common;
 using OptiPaie.Admin.Mvvm;
@@ -20,6 +21,7 @@ namespace OptiPaie.Admin.ViewModels
         private string _pageInfo = string.Empty;
         private int _page;
         private int _total;
+        private DispatcherTimer _auto;
 
         public LicensesViewModel()
         {
@@ -40,6 +42,9 @@ namespace OptiPaie.Admin.ViewModels
         public string TypeFilter { get => _typeFilter; set { if (Set(ref _typeFilter, value)) { _page = 0; Reload(); } } }
         public string PageInfo { get => _pageInfo; private set => Set(ref _pageInfo, value); }
 
+        /// <summary>Shown next to the search bar so the owner knows the list self-updates.</summary>
+        public string AutoRefreshHint => "Actualisation auto · 30 s";
+
         public ICommand RefreshCommand { get; }
         public ICommand NewCommand { get; }
         public ICommand BulkCommand { get; }
@@ -47,7 +52,19 @@ namespace OptiPaie.Admin.ViewModels
         public ICommand PrevCommand { get; }
         public ICommand NextCommand { get; }
 
-        public override void Load() { _page = 0; Reload(); }
+        public override void Load()
+        {
+            _page = 0;
+            Reload();
+
+            // Light auto-refresh so a new customer activation surfaces without a manual reload.
+            if (_auto == null)
+            {
+                _auto = new DispatcherTimer { Interval = TimeSpan.FromSeconds(30) };
+                _auto.Tick += (s, e) => { if (!Busy) Reload(); };
+                _auto.Start();
+            }
+        }
 
         private async void Reload()
         {

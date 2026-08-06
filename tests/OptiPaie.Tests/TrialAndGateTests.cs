@@ -235,6 +235,54 @@ namespace OptiPaie.Tests
             Assert.That(lifetime.DaysRemaining, Is.Null, "a lifetime licence never expires");
         }
 
+        // ---------------------------------------------------------------- all four license types
+
+        [Test]
+        public void AllFourLicenseTypes_UsableWithCorrectScopeAndDuration()
+        {
+            DateTime now = DateTime.UtcNow;
+            var combos = new[]
+            {
+                new { Type = LicenseType.Annual,   Max = (int?)1, Dated = true  }, // Mono + Annuel
+                new { Type = LicenseType.Lifetime, Max = (int?)1, Dated = false }, // Mono + À vie
+                new { Type = LicenseType.Annual,   Max = (int?)0, Dated = true  }, // Multi + Annuel
+                new { Type = LicenseType.Lifetime, Max = (int?)0, Dated = false }, // Multi + À vie
+            };
+
+            foreach (var c in combos)
+            {
+                string label = c.Type + "/" + (c.Max == 0 ? "Multi" : "Mono");
+                DateTime? expires = c.Dated ? now.AddDays(365) : (DateTime?)null;
+                var snap = new LicenseSnapshot(LicenseStateKind.Active, "payroll", "PAY-TEST-0001",
+                    "Atlas Industrie", "a@atlas.dz", "TEST-DEVICE", "active", new[] { ModuleKeys.Attendance },
+                    now, now, expires, now.AddDays(30), c.Type, "Atlas Industrie", c.Max);
+                var gate = new LicenseGate(new FakeLicensing(snap), NewTrial(new InMemoryTrialStore()));
+
+                Assert.That(gate.IsUsable, Is.True, label + " must be usable");
+
+                if (c.Max == 1)
+                {
+                    Assert.That(gate.MaxCompanies, Is.EqualTo(1), label + " → Mono caps at one company");
+                    Assert.That(gate.CanAddCompany(0), Is.True);
+                    Assert.That(gate.CanAddCompany(1), Is.False, label + " → a second company needs Multi");
+                }
+                else
+                {
+                    Assert.That(gate.MaxCompanies, Is.Null, label + " → Multi is unlimited");
+                    Assert.That(gate.CanAddCompany(9), Is.True);
+                }
+
+                if (c.Dated)
+                {
+                    Assert.That(snap.DaysRemaining, Is.GreaterThan(0), label + " → annual counts down to expiry");
+                }
+                else
+                {
+                    Assert.That(snap.DaysRemaining, Is.Null, label + " → lifetime never expires");
+                }
+            }
+        }
+
         // ---------------------------------------------------------------- test doubles
 
         private sealed class InMemoryTrialStore : ITrialStore
