@@ -1,6 +1,8 @@
+using System.Windows;
 using System.Windows.Input;
 using OptiPaie.Admin.Mvvm;
 using OptiPaie.Admin.ViewModels;
+using OptiPaie.Admin.Views;
 
 namespace OptiPaie.Admin.Shell
 {
@@ -19,6 +21,7 @@ namespace OptiPaie.Admin.Shell
         public ShellViewModel()
         {
             NavigateCommand = new RelayCommand(p => Navigate(p as string));
+            SignOutCommand = new RelayCommand(_ => SignOut());
             Navigate("dashboard");
         }
 
@@ -26,6 +29,22 @@ namespace OptiPaie.Admin.Shell
         public string ActiveKey { get => _activeKey; private set => Set(ref _activeKey, value); }
         public string UserEmail => App.Api.UserEmail;
         public ICommand NavigateCommand { get; }
+
+        /// <summary>Ends the owner session and returns to the login screen.</summary>
+        public ICommand SignOutCommand { get; }
+
+        private void SignOut()
+        {
+            App.Api.SignOut();
+
+            // Open the login window first, then close the console — so the app never runs
+            // out of windows (which would shut it down) during the swap.
+            var login = new LoginWindow();
+            Window old = Application.Current.MainWindow;
+            Application.Current.MainWindow = login;
+            login.Show();
+            old?.Close();
+        }
 
         private void Navigate(string key)
         {
