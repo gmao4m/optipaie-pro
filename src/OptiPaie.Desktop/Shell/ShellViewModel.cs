@@ -14,10 +14,10 @@ namespace OptiPaie.Desktop.Shell
 {
     /// <summary>
     /// Drives the whole application: hosts the current module view model and the
-    /// navigation. The navigation is GENERATED from the module registry (core screens
-    /// plus every premium module), and each premium module is gated by the license:
-    /// locked modules stay visible with a 🔒 and open a premium (upsell) page; when a
-    /// module becomes enabled the shell swaps to its real screen automatically.
+    /// navigation. The navigation is GENERATED from the module registry (core screens plus
+    /// every HR section). Every license (and the trial) unlocks the WHOLE product — there
+    /// is no per-module licensing, no lock icon and no upsell page; every section is always
+    /// open while the app is usable.
     /// </summary>
     public sealed class ShellViewModel : ObservableObject
     {
@@ -250,7 +250,7 @@ namespace OptiPaie.Desktop.Shell
             foreach (ModuleDescriptor module in _registry.Upsells)
             {
                 NavItemViewModel item = NewItem(module.Key, module.DisplayName(rtl), IconKeyFor(module.Key), true);
-                item.IsLocked = !_gate.IsEnabled(module.Key);
+                item.IsLocked = false; // every section is always unlocked — no per-module licensing
                 ModuleNav.Add(item);
                 _allNav.Add(item);
             }
@@ -510,13 +510,11 @@ namespace OptiPaie.Desktop.Shell
                 return ready;
             }
 
-            if (!_premium.TryGetValue(key, out PremiumModuleViewModel premium))
-            {
-                premium = new PremiumModuleViewModel(PremiumModuleCatalog.For(key));
-                _premium[key] = premium;
-            }
-
-            return premium;
+            // Reachable only in a rare, transient degraded state (a background sync just
+            // flagged the license unusable and the access watchdog is about to block the
+            // app). There is no per-module licensing, so never show a "module not included"
+            // page — fall back to the dashboard.
+            return _dashboard ?? (_dashboard = new DashboardViewModel(_services, Navigate));
         }
 
         private void UpdateSelection(string key)

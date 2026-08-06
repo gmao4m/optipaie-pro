@@ -16,29 +16,19 @@ namespace OptiPaie.Admin.ViewModels
 
     public sealed class ReportsViewModel : SectionViewModel
     {
-        public ObservableCollection<ModuleStat> ModuleStats { get; } = new ObservableCollection<ModuleStat>();
         public ObservableCollection<Kv> TypeStats { get; } = new ObservableCollection<Kv>();
         public ObservableCollection<Kv> StatusStats { get; } = new ObservableCollection<Kv>();
-        public ObservableCollection<Kv> KeyStats { get; } = new ObservableCollection<Kv>();
 
         public override async void Load()
         {
             Busy = true;
             try
             {
-                ModuleStats.Clear();
-                foreach (ModuleStat m in await App.Api.SelectAsync<ModuleStat>(
-                    "v_module_activation_stats", "product_key=eq.payroll&select=*&order=sort_order"))
-                {
-                    ModuleStats.Add(m);
-                }
-
+                // Every licence unlocks all sections — the only breakdowns that matter now
+                // are by duration (type) and by status.
                 var licenses = await App.Api.SelectAsync<License>("licenses", "select=type,status");
                 Fill(TypeStats, Aggregate(licenses, l => l.Type));
                 Fill(StatusStats, Aggregate(licenses, l => l.Status));
-
-                var keys = await App.Api.SelectAsync<ActivationKey>("activation_keys", "select=status");
-                Fill(KeyStats, Aggregate(keys, k => k.Status));
             }
             catch (Exception ex) { Dialogs.Error(ex.Message); }
             finally { Busy = false; }

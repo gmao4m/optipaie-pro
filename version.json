@@ -1,6 +1,6 @@
 {
-  "latest_version": "1.22.0",
+  "latest_version": "1.23.0",
   "download_url": "https://github.com/gmao4m/optipaie-pro/releases/latest/download/OptiPaie-PRO-Setup.exe",
-  "release_notes": "- Activation fiable (TLS 1.2 forcé) : plus de faux « pas d'internet ».\n- Essai gratuit plafonné à 48 heures ; compte local + déconnexion.\n- Console Admin : session persistante, panneau licences enrichi, installateur dédié.",
+  "release_notes": "- Chaque licence débloque TOUTES les sections (paie, pointage, congés, prêts, évaluation, contrats, formation, biens, attestations, ATS/DRT, déclarations, rapports…). Plus aucun verrou ni module séparé.\n- Activation fiable (TLS 1.2) et essai 48 h inchangés.",
   "mandatory": false
 }

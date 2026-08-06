@@ -28,8 +28,7 @@ namespace OptiPaie.Admin.ViewModels
         public List<string> Actions { get; } = new List<string>
         {
             "", "license.generate", "license.activate", "license.validate",
-            "module.activate", "module_key.generate", "module_key.revoke",
-            "module.validation_failed", "activation.error", "validation.error"
+            "activation.error", "validation.error"
         };
 
         public string ActionFilter { get => _actionFilter; set { if (Set(ref _actionFilter, value)) { _page = 0; Reload(); } } }

@@ -71,27 +71,6 @@ namespace OptiPaie.Admin.Api
         [JsonIgnore] public bool IsActivated => !string.IsNullOrEmpty(ActivatedAt);
     }
 
-    public sealed class ModulePermission
-    {
-        [JsonProperty("module_key")] public string ModuleKey { get; set; }
-        [JsonProperty("enabled")] public bool Enabled { get; set; }
-        [JsonProperty("activated_at")] public string ActivatedAt { get; set; }
-        [JsonProperty("expires_at")] public string ExpiresAt { get; set; }
-    }
-
-    public sealed class ActivationKey
-    {
-        [JsonProperty("id")] public string Id { get; set; }
-        [JsonProperty("module_key")] public string ModuleKey { get; set; }
-        [JsonProperty("key_code")] public string KeyCode { get; set; }
-        [JsonProperty("status")] public string Status { get; set; }
-        [JsonProperty("created_at")] public string CreatedAt { get; set; }
-        [JsonProperty("expires_at")] public string ExpiresAt { get; set; }
-
-        [JsonIgnore] public string CreatedDisplay => Dates.Short(CreatedAt);
-        [JsonIgnore] public string ExpiresDisplay => string.IsNullOrEmpty(ExpiresAt) ? "—" : Dates.Short(ExpiresAt);
-    }
-
     public sealed class Device
     {
         [JsonProperty("id")] public string Id { get; set; }
@@ -147,11 +126,4 @@ namespace OptiPaie.Admin.Api
         [JsonProperty("new_this_month")] public int NewThisMonth { get; set; }
     }
 
-    public sealed class ModuleStat
-    {
-        [JsonProperty("module_key")] public string ModuleKey { get; set; }
-        [JsonProperty("name_fr")] public string NameFr { get; set; }
-        [JsonProperty("enabled_count")] public int EnabledCount { get; set; }
-        [JsonProperty("sort_order")] public int SortOrder { get; set; }
-    }
 }

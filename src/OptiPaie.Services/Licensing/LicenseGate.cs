@@ -4,13 +4,14 @@ using OptiPaie.Core.Licensing;
 namespace OptiPaie.Services.Licensing
 {
     /// <summary>
-    /// Thin, read-only gate over the current license snapshot. The UI uses this to
-    /// decide whether to open a module or show it locked (🔒). Kept separate from
+    /// Thin, read-only gate over the current license snapshot. Kept separate from
     /// <see cref="ILicensingService"/> so views depend only on the question they ask.
     /// <para>
-    /// While the free 48-hour trial is active, EVERY module is unlocked, so the demo
-    /// shows the whole product (all HR modules), not just Payroll. A real license then
-    /// unlocks exactly the modules it grants.
+    /// Every license — and the free 48-hour trial — unlocks the WHOLE product: all
+    /// sections (payroll, attendance, leave, loans, performance, contracts, training,
+    /// assets, certificates, ATS/DRT, declarations, reports, archive…) are always on.
+    /// There is no per-module licensing; the only axes a license varies on are company
+    /// scope (Mono/Multi) and duration (lifetime/annual).
     /// </para>
     /// </summary>
     public sealed class LicenseGate : ILicenseGate
@@ -31,13 +32,9 @@ namespace OptiPaie.Services.Licensing
 
         public bool IsEnabled(string moduleKey)
         {
-            // During the trial the whole product is unlocked; otherwise the license decides.
-            if (_trial.GetStatus().IsActive)
-            {
-                return !string.IsNullOrEmpty(moduleKey);
-            }
-
-            return _licensing.Current.IsModuleEnabled(moduleKey);
+            // Every usable license (and the trial) unlocks the entire product — there is no
+            // per-module gating any more. A section is available whenever the app is usable.
+            return IsUsable && !string.IsNullOrEmpty(moduleKey);
         }
 
         /// <summary>

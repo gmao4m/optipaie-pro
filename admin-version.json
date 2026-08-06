@@ -1,6 +1,6 @@
 {
-  "latest_version": "1.22.0",
+  "latest_version": "1.23.0",
   "download_url": "https://github.com/gmao4m/optipaie-pro/releases/latest/download/OptiPaie-PRO-Admin-Setup.msi",
-  "release_notes": "- Session persistante : connexion une seule fois, la console reste connectée.\n- Panneau licences enrichi : colonne Durée (À vie / Annuel), statut clair, actualisation auto.\n- Installateur avec raccourci Bureau + icône dédiée (or/bleu).",
+  "release_notes": "- Chaque licence débloque toutes les sections : plus aucune option de modules dans la console (ni sélection, ni clés de module, ni panneaux « activation des modules »).\n- Générateur simplifié : Type (Mono/Multi) + Durée (annuel/à vie) uniquement.\n- Icône corrigée (toutes tailles).",
   "mandatory": false
 }

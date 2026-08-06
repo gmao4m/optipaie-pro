@@ -117,6 +117,25 @@ namespace OptiPaie.Tests
         }
 
         [Test]
+        public void Gate_AnyUsableLicense_UnlocksEveryModule()
+        {
+            // A usable license unlocks the WHOLE product regardless of what its token lists:
+            // ScopedSnapshot only grants [Attendance], yet every section must be enabled.
+            var gate = new LicenseGate(new FakeLicensing(ScopedSnapshot(1)), NewTrial(new InMemoryTrialStore()));
+
+            Assert.That(gate.IsUsable, Is.True);
+            foreach (string module in new[]
+            {
+                ModuleKeys.Attendance, ModuleKeys.Leave, ModuleKeys.Loans, ModuleKeys.Contracts,
+                ModuleKeys.Performance, ModuleKeys.Assets, ModuleKeys.Training, ModuleKeys.Ats,
+                ModuleKeys.WorkCertificate
+            })
+            {
+                Assert.That(gate.IsEnabled(module), Is.True, module + " must be unlocked by any usable license");
+            }
+        }
+
+        [Test]
         public void Gate_WithoutTrialOrLicense_LocksEveryModule()
         {
             var trial = NewTrial(new InMemoryTrialStore()); // never started

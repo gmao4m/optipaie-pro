@@ -490,7 +490,7 @@
   <data name="Cnas_Das_EncodeError" xml:space="preserve"><value>Un montant ou une durée dépasse la capacité d'un champ du format. Aucun fichier n'a été écrit — contactez-nous avec ce cas.</value></data>
   <data name="Cnas_Das_PartialYear" xml:space="preserve"><value>Année en cours : les trimestres non encore payés resteront vides. Générez la DAS une fois l'année complète, ou vérifiez que c'est bien ce que vous voulez déposer.</value></data>
   <data name="Shell_Nav_Settings" xml:space="preserve"><value>Paramètres</value></data>
-  <data name="Shell_Nav_PremiumHeader" xml:space="preserve"><value>MODULES PREMIUM</value></data>
+  <data name="Shell_Nav_PremiumHeader" xml:space="preserve"><value>RESSOURCES HUMAINES</value></data>
 
   <!-- Top bar (shell) -->
   <data name="Shell_ActiveCompany" xml:space="preserve"><value>Entreprise active</value></data>

@@ -10,30 +10,6 @@ using OptiPaie.Admin.Mvvm;
 
 namespace OptiPaie.Admin.ViewModels
 {
-    public sealed class ModuleToggle : ObservableObject
-    {
-        private readonly Action<ModuleToggle, bool> _onChange;
-        private bool _enabled;
-        private readonly bool _live;
-
-        public ModuleToggle(string key, string name, bool core, bool enabled, string info, Action<ModuleToggle, bool> onChange)
-        {
-            Key = key; Name = name; IsCore = core; _enabled = enabled; Info = info; _onChange = onChange; _live = true;
-        }
-
-        public string Key { get; }
-        public string Name { get; }
-        public bool IsCore { get; }
-        public bool CanToggle => !IsCore;
-        public string Info { get; }
-
-        public bool Enabled
-        {
-            get => _enabled;
-            set { if (Set(ref _enabled, value) && _live && !IsCore) _onChange(this, value); }
-        }
-    }
-
     /// <summary>A selectable company-scope option (Mono/Multi) with a friendly label.</summary>
     public sealed class ScopeOption
     {
@@ -49,14 +25,12 @@ namespace OptiPaie.Admin.ViewModels
         private readonly License _license;
         private readonly bool _isNew;
 
-        private string _company, _email, _type, _status, _scope, _newKeyInfo = string.Empty;
+        private string _company, _email, _type, _status, _scope;
         private string _generatedKey = string.Empty, _generatedScopeInfo = string.Empty;
         private bool _created;
         private bool _saving;
         private int _maxDevices = 1;
         private DateTime? _expires;
-        private string _selectedModule = "ats";
-        private DateTime? _keyExpiry;
 
         public LicenseEditViewModel(License license)
         {
@@ -79,11 +53,9 @@ namespace OptiPaie.Admin.ViewModels
             ExtendCommand = new RelayCommand(async () => await ExtendAsync());
             ResetDevicesCommand = new RelayCommand(async () => await ResetDevicesAsync());
             DeleteCommand = new RelayCommand(async () => await DeleteAsync());
-            GenerateKeyCommand = new RelayCommand(async () => await GenerateKeyAsync());
-            RevokeKeyCommand = new RelayCommand(async o => await RevokeKeyAsync(o as ActivationKey));
             CopyKeyCommand = new RelayCommand(CopyKey);
-            // Modules/upsell keys are no longer surfaced (every licence unlocks everything),
-            // so there is nothing to lazy-load here.
+            // Every licence unlocks every section — there is no per-module selection,
+            // no module-activation keys, and nothing module-related to load here.
         }
 
         public Action RequestClose { get; set; }
@@ -94,7 +66,6 @@ namespace OptiPaie.Admin.ViewModels
 
         public List<string> Types { get; } = new List<string> { "trial", "lifetime", "annual", "monthly", "demo", "enterprise" };
         public List<string> Statuses { get; } = new List<string> { "pending", "active", "suspended", "revoked" };
-        public List<Modules.Item> UpsellModules { get; } = Modules.All.FindAll(m => !m.Core);
 
         /// <summary>
         /// The only two license types: Mono-société (1 company) vs Multi-sociétés
@@ -132,17 +103,11 @@ namespace OptiPaie.Admin.ViewModels
         public string Status { get => _status; set => Set(ref _status, value); }
         public int MaxDevices { get => _maxDevices; set => Set(ref _maxDevices, value); }
         public DateTime? Expires { get => _expires; set => Set(ref _expires, value); }
-        public string SelectedModule { get => _selectedModule; set => Set(ref _selectedModule, value); }
-        public DateTime? KeyExpiry { get => _keyExpiry; set => Set(ref _keyExpiry, value); }
-        public string NewKeyInfo { get => _newKeyInfo; private set => Set(ref _newKeyInfo, value); }
 
         /// <summary>The freshly generated key (shown with a Copy button after creation).</summary>
         public string GeneratedKey { get => _generatedKey; private set { if (Set(ref _generatedKey, value)) Raise(nameof(HasGeneratedKey)); } }
         public bool HasGeneratedKey => !string.IsNullOrEmpty(_generatedKey);
         public string GeneratedScopeInfo { get => _generatedScopeInfo; private set => Set(ref _generatedScopeInfo, value); }
-
-        public ObservableCollection<ModuleToggle> ModuleList { get; } = new ObservableCollection<ModuleToggle>();
-        public ObservableCollection<ActivationKey> Keys { get; } = new ObservableCollection<ActivationKey>();
 
         public ICommand SaveCommand { get; }
         public ICommand EnableCommand { get; }
@@ -150,54 +115,7 @@ namespace OptiPaie.Admin.ViewModels
         public ICommand ExtendCommand { get; }
         public ICommand ResetDevicesCommand { get; }
         public ICommand DeleteCommand { get; }
-        public ICommand GenerateKeyCommand { get; }
-        public ICommand RevokeKeyCommand { get; }
         public ICommand CopyKeyCommand { get; }
-
-        private async void LoadDetailsAsync()
-        {
-            try
-            {
-                var perms = await App.Api.SelectAsync<ModulePermission>(
-                    "license_modules", "license_id=eq." + _license.Id + "&select=module_key,enabled,activated_at,expires_at");
-                ModuleList.Clear();
-                foreach (Modules.Item m in Modules.All)
-                {
-                    ModulePermission p = Array.Find(perms, x => x.ModuleKey == m.Key);
-                    bool on = m.Core || (p != null && p.Enabled);
-                    string info = p != null && !string.IsNullOrEmpty(p.ActivatedAt) ? "activé le " + Dates.Short(p.ActivatedAt) : string.Empty;
-                    ModuleList.Add(new ModuleToggle(m.Key, m.Name, m.Core, on, info, OnModuleChanged));
-                }
-                await LoadKeysAsync();
-            }
-            catch (Exception ex) { Dialogs.Error(ex.Message); }
-        }
-
-        private async System.Threading.Tasks.Task LoadKeysAsync()
-        {
-            Keys.Clear();
-            foreach (ActivationKey k in await App.Api.SelectAsync<ActivationKey>(
-                "activation_keys", "license_id=eq." + _license.Id + "&select=*&order=created_at.desc"))
-            {
-                Keys.Add(k);
-            }
-        }
-
-        private async void OnModuleChanged(ModuleToggle toggle, bool enabled)
-        {
-            try
-            {
-                await App.Api.UpsertAsync("license_modules", new
-                {
-                    license_id = _license.Id,
-                    product_id = _license.ProductId,
-                    module_key = toggle.Key,
-                    enabled,
-                    activated_at = enabled ? DateTime.UtcNow.ToString("o") : null
-                }, "license_id,module_key");
-            }
-            catch (Exception ex) { Dialogs.Error(ex.Message); }
-        }
 
         private async System.Threading.Tasks.Task SaveAsync()
         {
@@ -333,33 +251,6 @@ namespace OptiPaie.Admin.ViewModels
             catch (Exception ex) { Dialogs.Error(ex.Message); }
         }
 
-        private async System.Threading.Tasks.Task GenerateKeyAsync()
-        {
-            if (_isNew) { Dialogs.Info("Enregistrez d'abord la licence."); return; }
-            try
-            {
-                var rows = await App.Api.RpcAsync<GenRow[]>("generate_module_keys", new
-                {
-                    p_license_key = _license.LicenseKey,
-                    p_module_key = _selectedModule,
-                    p_count = 1,
-                    p_expires = _keyExpiry.HasValue ? _keyExpiry.Value.ToUniversalTime().ToString("o") : null
-                });
-                string code = rows != null && rows.Length > 0 ? rows[0].key_code : "";
-                NewKeyInfo = "Clé générée : " + code;
-                await LoadKeysAsync();
-            }
-            catch (Exception ex) { Dialogs.Error(ex.Message); }
-        }
-
-        private async System.Threading.Tasks.Task RevokeKeyAsync(ActivationKey key)
-        {
-            if (key == null) return;
-            if (!Dialogs.Confirm("Révoquer cette clé d'activation ?")) return;
-            try { await App.Api.RpcAsync<object>("revoke_activation_key", new { p_key_id = key.Id }); await LoadKeysAsync(); }
-            catch (Exception ex) { Dialogs.Error(ex.Message); }
-        }
-
         private static async System.Threading.Tasks.Task<string> EnsureProductAsync()
         {
             if (string.IsNullOrEmpty(_payrollProductId))
@@ -376,7 +267,6 @@ namespace OptiPaie.Admin.ViewModels
                 ? (DateTime?)d.ToLocalTime() : null;
         }
 
-        private sealed class GenRow { public string key_code { get; set; } }
         private sealed class ProductRow { public string id { get; set; } }
     }
 }
