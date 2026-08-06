@@ -34,5 +34,14 @@ namespace OptiPaie.Desktop.Views
                 await vm.SubmitAsync(PasswordBox.Password);
             }
         }
+
+        // Clear the inline password error as the user types (the box can't be data-bound).
+        private void Password_Changed(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is ActivationViewModel vm)
+            {
+                vm.OnPasswordChanged();
+            }
+        }
     }
 }

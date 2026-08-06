@@ -104,11 +104,20 @@
 
                         <WrapPanel Margin="0,20,0,0">
                             <Button Style="{StaticResource PrimaryButton}" Content="{loc:Loc Settings_Renew}" Command="{Binding RenewCommand}" Margin="0,0,10,10" />
-                            <Button Style="{StaticResource SecondaryButton}" Content="{loc:Loc Settings_ActivateModule}" Command="{Binding ActivateModuleCommand}" Margin="0,0,10,10" />
-                            <Button Style="{StaticResource SecondaryButton}" Content="{loc:Loc Settings_Deactivate}" Command="{Binding DeactivateCommand}" Margin="0,0,10,10" />
                             <Button Style="{StaticResource SecondaryButton}" Content="{loc:Loc Settings_CheckUpdates}" Command="{Binding CheckUpdatesCommand}" Margin="0,0,10,10" />
                         </WrapPanel>
                         <TextBlock Style="{StaticResource Caption}" Margin="0,2,0,0" Text="{Binding LastUpdateCheckText}" />
+
+                        <!-- Discreet: transfer the license to another computer (deactivates it here). -->
+                        <Button Command="{Binding DeactivateCommand}" Cursor="Hand" HorizontalAlignment="Left" Margin="0,14,0,0"
+                                ToolTip="À utiliser uniquement pour déplacer votre licence vers un autre ordinateur.">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <TextBlock Text="{loc:Loc Settings_Deactivate}" Foreground="{DynamicResource TextSecondary}"
+                                               FontSize="12" TextDecorations="Underline" Background="Transparent" />
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
                     </StackPanel>
                 </Border>
 

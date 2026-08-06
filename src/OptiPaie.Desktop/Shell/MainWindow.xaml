@@ -134,7 +134,8 @@
                     <ItemsControl ItemsSource="{Binding SettingsNav}" ItemTemplate="{StaticResource NavItemTemplate}" />
                     <Border Height="1" Background="{DynamicResource Border}" Margin="6,6" />
                     <Button Command="{Binding SignOutCommand}" Cursor="Hand" Height="42" Margin="0,1" HorizontalContentAlignment="Stretch"
-                            ToolTip="Se déconnecter et revenir à l'écran de démarrage">
+                            Visibility="{Binding CanSignOut, Converter={StaticResource BoolToVis}}"
+                            ToolTip="Se déconnecter et revenir à l'écran de connexion">
                         <Button.Template>
                             <ControlTemplate TargetType="Button">
                                 <Border x:Name="b" Background="Transparent" CornerRadius="8" Padding="12,0">

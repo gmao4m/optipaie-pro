@@ -53,7 +53,6 @@ namespace OptiPaie.Desktop.ViewModels
             RenewCommand = new RelayCommand(RenewLicense);
             DeactivateCommand = new RelayCommand(DeactivateDevice);
             CheckUpdatesCommand = new RelayCommand(CheckUpdates);
-            ActivateModuleCommand = new RelayCommand(ActivateModule);
         }
 
         public List<EnumOption> Languages { get; }
@@ -81,7 +80,6 @@ namespace OptiPaie.Desktop.ViewModels
         public ICommand RenewCommand { get; }
         public ICommand DeactivateCommand { get; }
         public ICommand CheckUpdatesCommand { get; }
-        public ICommand ActivateModuleCommand { get; }
 
         // -- License page bindings --------------------------------------------
         public string AccessStateText { get => _accessStateText; private set => Set(ref _accessStateText, value); }
@@ -188,9 +186,15 @@ namespace OptiPaie.Desktop.ViewModels
             return head + "-•••••-•••••-•••••";
         }
 
+        /// <summary>
+        /// Opens the account / activation page (Task 2). The activation window creates the
+        /// account and activates a key on first use, or renews with a new key when the annual
+        /// license has expired; an already-active, signed-in customer can still enter a
+        /// renewal key here. The email is pre-filled from the local account for convenience.
+        /// </summary>
         private void RenewLicense()
         {
-            var viewModel = new ActivationViewModel(_services);
+            var viewModel = new ActivationViewModel(_services, ActivationMode.Activate, _services.CustomerAccount.Email);
             var window = new ActivationWindow
             {
                 DataContext = viewModel,
@@ -214,20 +218,6 @@ namespace OptiPaie.Desktop.ViewModels
             _services.Licensing.Deactivate();
             RefreshLicense();
             Dialogs.Info("Licence désactivée sur cet appareil. Veuillez redémarrer l'application.");
-        }
-
-        private void ActivateModule()
-        {
-            var viewModel = new ModuleActivationViewModel(_services);
-            var window = new ModuleActivationWindow
-            {
-                DataContext = viewModel,
-                Owner = Application.Current.MainWindow
-            };
-            App.ApplyFlowDirection(window);
-            viewModel.CloseRequested = ok => window.DialogResult = ok;
-            window.ShowDialog();
-            RefreshLicense();
         }
 
         private async void CheckUpdates()

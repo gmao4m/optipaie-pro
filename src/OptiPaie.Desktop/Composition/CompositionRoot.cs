@@ -103,6 +103,11 @@ namespace OptiPaie.Desktop.Composition
             ILicenseGate licenseGate = new LicenseGate(licensingService, trialService);
             IAccessController accessController = new AccessGate(licensingService, trialService);
 
+            // The single local customer account (login/logout after first activation).
+            // Stored in the settings key/value table and DPAPI-wrapped — no migration,
+            // no network: sign-in after a logout is fully offline and never re-asks for a key.
+            ICustomerAccountService customerAccount = new CustomerAccountService(settingsService, cipher, logger);
+
             // Auto-update (Velopack). The channel is the only Velopack-aware piece; the
             // service + metadata source are provider-agnostic and unit-tested. Disabled
             // gracefully (IsSupported=false) on non-installed/dev runs or when unconfigured.
@@ -165,7 +170,8 @@ namespace OptiPaie.Desktop.Composition
                 auditService,
                 userService,
                 cnasDeclarationService,
-                atsDrtDocumentService);
+                atsDrtDocumentService,
+                customerAccount);
         }
     }
 }

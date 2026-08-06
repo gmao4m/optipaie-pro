@@ -10,20 +10,38 @@ using OptiPaie.Services.Licensing;
 
 namespace OptiPaie.Desktop.ViewModels
 {
+    /// <summary>How the welcome window behaves.</summary>
+    public enum ActivationMode
+    {
+        /// <summary>First use (or a new machine): create the account and activate a license key — or start the trial.</summary>
+        Activate,
+
+        /// <summary>Returning after a manual logout: email + password only. No license, no Internet.</summary>
+        SignIn
+    }
+
     /// <summary>
-    /// The welcome / access window: create a customer account or sign in, then activate a
-    /// license key (all modules unlocked) — or start the free 48-hour trial. The account
-    /// step (Supabase Auth) runs ONCE, at first activation; afterwards the app opens
-    /// offline from its cached, encrypted license. The email + company entered here are
-    /// stamped on the license so they appear in the owner's Admin panel.
+    /// The welcome / access window. Two modes:
+    /// <list type="bullet">
+    /// <item><b>Activate</b> — first use: enter email + password + company + license key.
+    /// The <i>license</i> is the only thing that can block the app; the online account step
+    /// is best-effort (for the owner's Admin panel) and never prevents a valid license from
+    /// activating. On success the account is saved locally so the app auto-opens next time.</item>
+    /// <item><b>SignIn</b> — after a manual logout: email + password only, verified against
+    /// the local account. Fully offline; the license is never requested again.</item>
+    /// </list>
+    /// Validation errors are shown inline, under the field they concern; flow/server messages
+    /// use the status banner.
     /// </summary>
     public sealed class ActivationViewModel : ObservableObject
     {
+        private enum AccountStep { Proceed, Blocked }
+
         private readonly AppServices _services;
         private readonly SupabaseAuthClient _auth;
         private readonly TrialInfo _trial;
 
-        private bool _isSignUp = true;
+        private ActivationMode _mode;
         private string _email = string.Empty;
         private string _company = string.Empty;
         private string _licenseKey = string.Empty;
@@ -31,17 +49,23 @@ namespace OptiPaie.Desktop.ViewModels
         private bool _isError;
         private bool _isBusy;
 
-        public ActivationViewModel(AppServices services)
+        private string _emailError = string.Empty;
+        private string _passwordError = string.Empty;
+        private string _companyError = string.Empty;
+        private string _keyError = string.Empty;
+
+        public ActivationViewModel(AppServices services, ActivationMode mode = ActivationMode.Activate, string prefillEmail = null)
         {
             _services = services;
+            _mode = mode;
             _trial = services.Trial.GetStatus();
+            _email = prefillEmail ?? string.Empty;
 
             string baseUrl = Setting("Licensing.BaseUrl");
             _auth = new SupabaseAuthClient(SupabaseAuthClient.DeriveProjectUrl(baseUrl), Setting("Licensing.AnonKey"));
 
-            SelectSignUpCommand = new RelayCommand(() => IsSignUp = true, () => !_isBusy);
-            SelectSignInCommand = new RelayCommand(() => IsSignUp = false, () => !_isBusy);
             TrialCommand = new RelayCommand(StartTrial, () => !_isBusy && CanStartTrial);
+            UseLicenseCommand = new RelayCommand(() => Mode = ActivationMode.Activate, () => !_isBusy);
         }
 
         /// <summary>Raised to close the window; true = the user may now use the app.</summary>
@@ -50,32 +74,55 @@ namespace OptiPaie.Desktop.ViewModels
         public string ProductName => "OptiPaie PRO";
         public string Subtitle => "Gestion de la paie & des RH";
 
-        // ---- account mode ----
-        public bool IsSignUp
+        // ---- mode -----------------------------------------------------------
+        public ActivationMode Mode
         {
-            get => _isSignUp;
+            get => _mode;
             set
             {
-                if (Set(ref _isSignUp, value))
+                if (Set(ref _mode, value))
                 {
-                    Raise(nameof(IsSignIn));
+                    Raise(nameof(IsActivateMode));
+                    Raise(nameof(IsSignInMode));
+                    Raise(nameof(ShowLicenseSection));
                     Raise(nameof(ShowCompanyField));
+                    Raise(nameof(ShowSwitchToLicense));
                     Raise(nameof(PrimaryButtonText));
                     Raise(nameof(ModeHint));
+                    ClearErrors();
                     SetStatus(string.Empty, false);
                 }
             }
         }
 
-        public bool IsSignIn => !_isSignUp;
-        public bool ShowCompanyField => _isSignUp;
-        public string PrimaryButtonText => _isSignUp ? "Créer mon compte et activer" : "Se connecter et activer";
-        public string ModeHint => _isSignUp
-            ? "Nouveau client ? Créez votre compte, puis activez votre clé."
-            : "Déjà client ? Connectez-vous, puis activez votre clé.";
+        public bool IsActivateMode => _mode == ActivationMode.Activate;
+        public bool IsSignInMode => _mode == ActivationMode.SignIn;
 
-        public string Email { get => _email; set { if (Set(ref _email, value)) CommandManager.InvalidateRequerySuggested(); } }
-        public string Company { get => _company; set => Set(ref _company, value); }
+        /// <summary>License key + company + trial are shown only when activating.</summary>
+        public bool ShowLicenseSection => IsActivateMode;
+        public bool ShowCompanyField => IsActivateMode;
+
+        /// <summary>The "use my license key" escape shown in sign-in mode (e.g. forgotten local password).</summary>
+        public bool ShowSwitchToLicense => IsSignInMode;
+
+        public string PrimaryButtonText => IsActivateMode ? "Créer mon compte et activer" : "Se connecter";
+
+        public string ModeHint => IsActivateMode
+            ? "Première utilisation : créez votre compte et activez votre clé de licence. Ce sera demandé une seule fois."
+            : "Bon retour ! Connectez-vous avec votre email et votre mot de passe.";
+
+        // ---- fields ---------------------------------------------------------
+        public string Email
+        {
+            get => _email;
+            set { if (Set(ref _email, value)) { EmailError = string.Empty; CommandManager.InvalidateRequerySuggested(); } }
+        }
+
+        public string Company
+        {
+            get => _company;
+            set { if (Set(ref _company, value)) CompanyError = string.Empty; }
+        }
 
         public string LicenseKey
         {
@@ -85,6 +132,7 @@ namespace OptiPaie.Desktop.ViewModels
                 string formatted = LicenseKeyFormatter.Format(value);
                 if (Set(ref _licenseKey, formatted))
                 {
+                    KeyError = string.Empty;
                     CommandManager.InvalidateRequerySuggested();
                 }
             }
@@ -92,6 +140,16 @@ namespace OptiPaie.Desktop.ViewModels
 
         public string KeyHint => "Format : PAY-XXXX-XXXX-XXXX";
 
+        // ---- inline (per-field) errors --------------------------------------
+        public string EmailError { get => _emailError; private set => Set(ref _emailError, value); }
+        public string PasswordError { get => _passwordError; private set => Set(ref _passwordError, value); }
+        public string CompanyError { get => _companyError; private set => Set(ref _companyError, value); }
+        public string KeyError { get => _keyError; private set => Set(ref _keyError, value); }
+
+        /// <summary>Called from the code-behind when the password box changes, to clear its error.</summary>
+        public void OnPasswordChanged() => PasswordError = string.Empty;
+
+        // ---- status banner (flow + server messages) -------------------------
         public string StatusMessage { get => _statusMessage; private set => Set(ref _statusMessage, value); }
         public bool IsError { get => _isError; private set => Set(ref _isError, value); }
         public bool HasStatus => !string.IsNullOrEmpty(_statusMessage);
@@ -111,8 +169,8 @@ namespace OptiPaie.Desktop.ViewModels
 
         public bool IsNotBusy => !_isBusy;
 
-        // ---- trial ----
-        public bool CanStartTrial => !_trial.IsExpired;
+        // ---- trial (activate mode only) -------------------------------------
+        public bool CanStartTrial => IsActivateMode && !_trial.IsExpired;
         public bool IsTrialExpired => _trial.IsExpired;
 
         public string TrialButtonText =>
@@ -141,54 +199,114 @@ namespace OptiPaie.Desktop.ViewModels
             }
         }
 
-        public ICommand SelectSignUpCommand { get; }
-        public ICommand SelectSignInCommand { get; }
         public ICommand TrialCommand { get; }
 
+        /// <summary>Switches sign-in mode back to full activation (recovery via the license key).</summary>
+        public ICommand UseLicenseCommand { get; }
+
         /// <summary>
-        /// Account (sign-up or sign-in) then license activation. Called from the window
-        /// code-behind with the PasswordBox value (passwords are never bound or stored).
+        /// Runs the mode's action. Called from the window code-behind with the PasswordBox
+        /// value (passwords are never bound or stored).
         /// </summary>
         public async Task SubmitAsync(string password)
         {
             if (_isBusy) return;
 
-            if (!LicenseKeyFormatter.IsComplete(_licenseKey)) { SetStatus("Saisissez une clé de licence complète (PAY-XXXX-XXXX-XXXX).", true); return; }
-            if (string.IsNullOrWhiteSpace(_email)) { SetStatus("Saisissez votre adresse email.", true); return; }
-            if (string.IsNullOrEmpty(password)) { SetStatus("Saisissez votre mot de passe.", true); return; }
-            if (_isSignUp && string.IsNullOrWhiteSpace(_company)) { SetStatus("Saisissez le nom de votre société.", true); return; }
+            ClearErrors();
+            SetStatus(string.Empty, false);
+
+            if (IsSignInMode)
+            {
+                SignInLocally(password);
+                return;
+            }
+
+            await ActivateAsync(password).ConfigureAwait(true);
+        }
+
+        // -- sign-in mode: offline, against the local account -----------------
+        private void SignInLocally(string password)
+        {
+            bool ok = true;
+            if (string.IsNullOrWhiteSpace(_email)) { EmailError = "Saisissez votre adresse email."; ok = false; }
+            if (string.IsNullOrEmpty(password)) { PasswordError = "Saisissez votre mot de passe."; ok = false; }
+            if (!ok) return;
 
             IsBusy = true;
             try
             {
-                // 1) Account step (once, online). Skipped only if Auth isn't configured.
-                if (_auth.IsConfigured)
+                string stored = _services.CustomerAccount.Email;
+                if (!string.IsNullOrEmpty(stored) &&
+                    !string.Equals(_email.Trim(), stored, StringComparison.OrdinalIgnoreCase))
                 {
-                    SetStatus(_isSignUp ? "Création de votre compte…" : "Connexion…", false);
-                    AuthResult ar = _isSignUp
-                        ? await _auth.SignUpAsync(_email.Trim(), password, _company.Trim(), CancellationToken.None).ConfigureAwait(true)
-                        : await _auth.SignInAsync(_email.Trim(), password, CancellationToken.None).ConfigureAwait(true);
-
-                    if (ar.IsOffline) { SetStatus("Aucune connexion Internet. La première activation nécessite une connexion.", true); return; }
-
-                    // An existing account in sign-up mode is fine — carry on to activation.
-                    if (!ar.Success && !(_isSignUp && ar.AlreadyExists)) { SetStatus(ar.Message, true); return; }
+                    EmailError = "Aucun compte trouvé pour cet email.";
+                    return;
                 }
 
-                // 2) Activate the licence, stamping email + company for the Admin panel.
+                if (_services.CustomerAccount.SignIn(_email.Trim(), password))
+                {
+                    CloseRequested?.Invoke(true);
+                    return;
+                }
+
+                PasswordError = "Email ou mot de passe incorrect.";
+            }
+            catch (Exception ex)
+            {
+                _services.Logger.Error("Local sign-in failed unexpectedly.", ex);
+                SetStatus("Une erreur inattendue est survenue.", true);
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+        // -- activate mode: license is the gate, account is best-effort -------
+        private async Task ActivateAsync(string password)
+        {
+            if (!ValidateActivateInputs(password))
+            {
+                return;
+            }
+
+            IsBusy = true;
+            try
+            {
+                // 1) Online account (for the owner's Admin panel). Blocks ONLY on issues the
+                //    customer must fix here (offline, weak password, bad email, wrong password
+                //    for an existing account). A pending email confirmation or a mail
+                //    rate-limit NEVER blocks the license — that was the original activation bug.
+                if (await EnsureOnlineAccountAsync(password).ConfigureAwait(true) == AccountStep.Blocked)
+                {
+                    return;
+                }
+
+                // 2) Activate the license — the real gate.
                 SetStatus("Activation de la licence…", false);
                 LicenseResult result = await _services.Licensing
-                    .ActivateAsync(LicenseKeyFormatter.Canonical(_licenseKey), (_company ?? string.Empty).Trim(), (_email ?? string.Empty).Trim(), CancellationToken.None)
+                    .ActivateAsync(LicenseKeyFormatter.Canonical(_licenseKey), _company.Trim(), _email.Trim(), CancellationToken.None)
                     .ConfigureAwait(true);
 
                 if (result.IsSuccess)
                 {
+                    // 3) Save the local account + open the session so the app auto-opens next
+                    //    launch and never re-asks for the license key.
+                    try
+                    {
+                        _services.CustomerAccount.Register(_email.Trim(), _company.Trim(), password);
+                    }
+                    catch (Exception ex)
+                    {
+                        _services.Logger.Warn("Local account save failed (license is still active): " + ex.Message);
+                    }
+
                     SetStatus("Licence activée avec succès. Bienvenue !", false);
                     CloseRequested?.Invoke(true);
                     return;
                 }
 
-                SetStatus(result.Message, true);
+                ShowActivationError(result);
             }
             catch (Exception ex)
             {
@@ -201,6 +319,106 @@ namespace OptiPaie.Desktop.ViewModels
             }
         }
 
+        private bool ValidateActivateInputs(string password)
+        {
+            bool ok = true;
+
+            if (string.IsNullOrWhiteSpace(_email)) { EmailError = "Saisissez votre adresse email."; ok = false; }
+            else if (!LooksLikeEmail(_email)) { EmailError = "Adresse email invalide."; ok = false; }
+
+            if (string.IsNullOrEmpty(password)) { PasswordError = "Saisissez votre mot de passe."; ok = false; }
+            else if (password.Length < 6) { PasswordError = "Mot de passe trop court (au moins 6 caractères)."; ok = false; }
+
+            if (string.IsNullOrWhiteSpace(_company)) { CompanyError = "Saisissez le nom de votre société."; ok = false; }
+
+            if (!LicenseKeyFormatter.IsComplete(_licenseKey)) { KeyError = "Clé de licence incomplète (PAY-XXXX-XXXX-XXXX)."; ok = false; }
+
+            return ok;
+        }
+
+        private async Task<AccountStep> EnsureOnlineAccountAsync(string password)
+        {
+            if (!_auth.IsConfigured)
+            {
+                return AccountStep.Proceed; // no backend configured — local-only account is enough
+            }
+
+            SetStatus("Création de votre compte…", false);
+            AuthResult ar = await _auth.SignUpAsync(_email.Trim(), password, _company.Trim(), CancellationToken.None).ConfigureAwait(true);
+
+            switch (ar.Kind)
+            {
+                case AuthErrorKind.None:
+                    return AccountStep.Proceed;
+
+                case AuthErrorKind.Offline:
+                    SetStatus("Aucune connexion Internet. La première activation nécessite une connexion.", true);
+                    return AccountStep.Blocked;
+
+                case AuthErrorKind.WeakPassword:
+                    PasswordError = "Mot de passe trop court (au moins 6 caractères).";
+                    return AccountStep.Blocked;
+
+                case AuthErrorKind.InvalidEmail:
+                    EmailError = "Adresse email invalide.";
+                    return AccountStep.Blocked;
+
+                case AuthErrorKind.AlreadyExists:
+                    // Same customer re-activating (new machine / reinstall) is normal —
+                    // verify ownership by signing in with the password they just typed.
+                    AuthResult si = await _auth.SignInAsync(_email.Trim(), password, CancellationToken.None).ConfigureAwait(true);
+                    if (si.Success || si.Kind == AuthErrorKind.EmailNotConfirmed || si.Kind == AuthErrorKind.RateLimited)
+                    {
+                        return AccountStep.Proceed;
+                    }
+                    if (si.Kind == AuthErrorKind.InvalidCredentials)
+                    {
+                        PasswordError = "Cet email a déjà un compte. Mot de passe incorrect.";
+                        return AccountStep.Blocked;
+                    }
+                    if (si.Kind == AuthErrorKind.Offline)
+                    {
+                        SetStatus("Aucune connexion Internet. Réessayez une fois connecté.", true);
+                        return AccountStep.Blocked;
+                    }
+                    return AccountStep.Proceed; // ambiguous — never block a valid license
+
+                default:
+                    // Email-confirmation pending, rate-limited, or any other soft issue must
+                    // NOT block the license. Log and carry on to activation.
+                    _services.Logger.Info("Online account step non-blocking (" + ar.Kind + "): " + ar.Message);
+                    return AccountStep.Proceed;
+            }
+        }
+
+        private void ShowActivationError(LicenseResult result)
+        {
+            switch (result.Kind)
+            {
+                case LicenseResultKind.InvalidKey:
+                case LicenseResultKind.KeyInvalid:
+                case LicenseResultKind.KeyUsed:
+                case LicenseResultKind.KeyExpired:
+                case LicenseResultKind.KeyRevoked:
+                case LicenseResultKind.KeyWrongLicense:
+                case LicenseResultKind.DeviceInUse:
+                case LicenseResultKind.DeviceMismatch:
+                case LicenseResultKind.WrongProduct:
+                case LicenseResultKind.UnknownProduct:
+                    // Key/device problems belong under the license-key field.
+                    KeyError = string.IsNullOrWhiteSpace(result.Message) ? "Clé de licence invalide." : result.Message;
+                    break;
+
+                case LicenseResultKind.Offline:
+                    SetStatus("Aucune connexion Internet. L'activation d'une licence nécessite une connexion.", true);
+                    break;
+
+                default:
+                    SetStatus(result.Message, true);
+                    break;
+            }
+        }
+
         private void StartTrial()
         {
             TrialInfo info = _services.Trial.StartTrial();
@@ -208,11 +426,28 @@ namespace OptiPaie.Desktop.ViewModels
             SetStatus("La période d'essai est expirée. Veuillez activer une licence.", true);
         }
 
+        private void ClearErrors()
+        {
+            EmailError = string.Empty;
+            PasswordError = string.Empty;
+            CompanyError = string.Empty;
+            KeyError = string.Empty;
+        }
+
         private void SetStatus(string message, bool isError)
         {
             IsError = isError;
             StatusMessage = message;
             Raise(nameof(HasStatus));
+        }
+
+        private static bool LooksLikeEmail(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value)) return false;
+            value = value.Trim();
+            int at = value.IndexOf('@');
+            int dot = value.LastIndexOf('.');
+            return at > 0 && dot > at + 1 && dot < value.Length - 1;
         }
 
         private static string Setting(string key)

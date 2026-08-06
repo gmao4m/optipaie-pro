@@ -48,7 +48,8 @@ namespace OptiPaie.Desktop.Composition
             IAuditService audit,
             IUserService users,
             ICnasDeclarationService cnasDeclarations,
-            IAtsDrtDocumentService atsDrtDocuments)
+            IAtsDrtDocumentService atsDrtDocuments,
+            ICustomerAccountService customerAccount)
         {
             Configuration = configuration;
             Logger = logger;
@@ -84,10 +85,17 @@ namespace OptiPaie.Desktop.Composition
             Users = users;
             CnasDeclarations = cnasDeclarations;
             AtsDrtDocuments = atsDrtDocuments;
+            CustomerAccount = customerAccount;
         }
 
         /// <summary>Local user accounts &amp; the optional login gate.</summary>
         public IUserService Users { get; }
+
+        /// <summary>
+        /// The single local customer account (email + password) that drives the app's
+        /// login / logout after the first activation — offline, independent of the license.
+        /// </summary>
+        public ICustomerAccountService CustomerAccount { get; }
 
         /// <summary>The current login session (who is signed in and their role).</summary>
         public UserSession Session { get; } = new UserSession();

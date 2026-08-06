@@ -8,31 +8,47 @@ using Newtonsoft.Json.Linq;
 
 namespace OptiPaie.Services.Licensing
 {
+    /// <summary>Classified reason an auth call did not fully succeed (drives precise, well-placed UI messages).</summary>
+    public enum AuthErrorKind
+    {
+        None = 0,
+        Offline,
+        AlreadyExists,
+        InvalidCredentials,
+        EmailNotConfirmed,
+        WeakPassword,
+        InvalidEmail,
+        RateLimited,
+        Other
+    }
+
     /// <summary>Outcome of a customer sign-up / sign-in against Supabase Auth.</summary>
     public sealed class AuthResult
     {
-        private AuthResult(bool success, bool isOffline, bool alreadyExists, string message)
+        private AuthResult(bool success, AuthErrorKind kind, string message)
         {
-            Success = success; IsOffline = isOffline; AlreadyExists = alreadyExists; Message = message ?? string.Empty;
+            Success = success; Kind = kind; Message = message ?? string.Empty;
         }
 
         public bool Success { get; }
-        public bool IsOffline { get; }
-        public bool AlreadyExists { get; }
+        public AuthErrorKind Kind { get; }
         public string Message { get; }
 
-        public static AuthResult Ok() => new AuthResult(true, false, false, string.Empty);
-        public static AuthResult Exists() => new AuthResult(false, false, true, "Un compte existe déjà pour cet email.");
-        public static AuthResult Offline() => new AuthResult(false, true, false, "Aucune connexion Internet.");
-        public static AuthResult Fail(string message) => new AuthResult(false, false, false, message);
+        public bool IsOffline => Kind == AuthErrorKind.Offline;
+        public bool AlreadyExists => Kind == AuthErrorKind.AlreadyExists;
+
+        public static AuthResult Ok() => new AuthResult(true, AuthErrorKind.None, string.Empty);
+        public static AuthResult Offline() => new AuthResult(false, AuthErrorKind.Offline, "Aucune connexion Internet.");
+        public static AuthResult Fail(AuthErrorKind kind, string message) => new AuthResult(false, kind, message);
     }
 
     /// <summary>
     /// Minimal customer-facing Supabase Auth client for the desktop app: create an
     /// account (email + password + company name) or sign in. Uses only the PUBLIC
-    /// project URL + publishable/anon key. It is used ONCE, at first activation — after
-    /// that the app runs offline from its cached, DPAPI-encrypted license. No password
-    /// is ever stored locally.
+    /// project URL + publishable/anon key. It is used at first activation to register the
+    /// customer with the owner's backend; the app itself runs offline from its cached,
+    /// DPAPI-encrypted license and a local account. No password is ever stored locally in
+    /// clear.
     /// </summary>
     public sealed class SupabaseAuthClient
     {
@@ -74,7 +90,7 @@ namespace OptiPaie.Services.Licensing
 
         private async Task<AuthResult> PostAsync(string path, object body, CancellationToken ct)
         {
-            if (!IsConfigured) return AuthResult.Fail("Service de compte non configuré.");
+            if (!IsConfigured) return AuthResult.Fail(AuthErrorKind.Other, "Service de compte non configuré.");
 
             try
             {
@@ -88,8 +104,8 @@ namespace OptiPaie.Services.Licensing
                         if (resp.IsSuccessStatusCode) return AuthResult.Ok();
 
                         string raw = ExtractError(s);
-                        if (LooksAlreadyRegistered(raw)) return AuthResult.Exists();
-                        return AuthResult.Fail(Localize(raw));
+                        AuthErrorKind kind = Classify((int)resp.StatusCode, raw);
+                        return AuthResult.Fail(kind, Localize(kind, raw));
                     }
                 }
             }
@@ -99,22 +115,31 @@ namespace OptiPaie.Services.Licensing
             }
         }
 
-        private static bool LooksAlreadyRegistered(string raw)
+        private static AuthErrorKind Classify(int status, string raw)
         {
-            if (string.IsNullOrEmpty(raw)) return false;
-            string r = raw.ToLowerInvariant();
-            return r.Contains("already registered") || r.Contains("already been registered") || r.Contains("user already");
+            string r = (raw ?? string.Empty).ToLowerInvariant();
+
+            if (status == 429 || r.Contains("rate limit") || r.Contains("over_email_send_rate_limit")) return AuthErrorKind.RateLimited;
+            if (r.Contains("already registered") || r.Contains("already been registered") || r.Contains("user already")) return AuthErrorKind.AlreadyExists;
+            if (r.Contains("invalid login credentials")) return AuthErrorKind.InvalidCredentials;
+            if (r.Contains("email not confirmed")) return AuthErrorKind.EmailNotConfirmed;
+            if (r.Contains("password should be at least") || r.Contains("weak")) return AuthErrorKind.WeakPassword;
+            if (r.Contains("unable to validate email") || r.Contains("invalid email") || r.Contains("invalid format")) return AuthErrorKind.InvalidEmail;
+            return AuthErrorKind.Other;
         }
 
-        private static string Localize(string raw)
+        private static string Localize(AuthErrorKind kind, string raw)
         {
-            if (string.IsNullOrWhiteSpace(raw)) return "Échec de l'authentification.";
-            string r = raw.ToLowerInvariant();
-            if (r.Contains("invalid login credentials")) return "Email ou mot de passe incorrect.";
-            if (r.Contains("password should be at least") || r.Contains("weak")) return "Mot de passe trop court (au moins 6 caractères).";
-            if (r.Contains("unable to validate email") || r.Contains("invalid email")) return "Adresse email invalide.";
-            if (r.Contains("email not confirmed")) return "Email non confirmé. Vérifiez votre boîte de réception.";
-            return raw;
+            switch (kind)
+            {
+                case AuthErrorKind.RateLimited: return "Trop de tentatives. Réessayez dans quelques minutes.";
+                case AuthErrorKind.AlreadyExists: return "Un compte existe déjà pour cet email.";
+                case AuthErrorKind.InvalidCredentials: return "Email ou mot de passe incorrect.";
+                case AuthErrorKind.EmailNotConfirmed: return "Email non confirmé. Vérifiez votre boîte de réception.";
+                case AuthErrorKind.WeakPassword: return "Mot de passe trop court (au moins 6 caractères).";
+                case AuthErrorKind.InvalidEmail: return "Adresse email invalide.";
+                default: return string.IsNullOrWhiteSpace(raw) ? "Échec de l'authentification." : raw;
+            }
         }
 
         private static string ExtractError(string body)

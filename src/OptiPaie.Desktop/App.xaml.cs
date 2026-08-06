@@ -102,6 +102,15 @@ namespace OptiPaie.Desktop
                 return;
             }
 
+            // Customer-session gate: after the first activation the customer stays signed in
+            // automatically (no account, no license re-entry). Only a manual logout brings up
+            // the sign-in screen, and then it asks for email + password ONLY.
+            if (!EnsureCustomerSession())
+            {
+                Shutdown();
+                return;
+            }
+
             // Demo experience: on a trial with an empty database, fill it with a realistic
             // Algerian sample dataset so every screen demonstrates the product immediately.
             // Never runs for a licensed install or a database that already has data.
@@ -154,9 +163,10 @@ namespace OptiPaie.Desktop
         }
 
         /// <summary>
-        /// Signs out of the current session: hides the main window and returns to the
-        /// activation / trial-start screen. If access is still valid when that screen closes
-        /// (e.g. the user continues the trial), the main window reopens; otherwise the app exits.
+        /// Signs out of the current session and returns to the sign-in screen. The license
+        /// AND the local account are kept, so the next sign-in needs only email + password —
+        /// never the license key again. If no customer account exists (trial / legacy install)
+        /// it falls back to the optional login gate or the activation screen.
         /// </summary>
         public void SignOut()
         {
@@ -165,8 +175,9 @@ namespace OptiPaie.Desktop
                 return;
             }
 
-            // Clear the login session.
-            Services.Session.Current = null;
+            // End sessions but keep the license and the local account intact.
+            Services.Session.Current = null;              // dormant multi-user session (if any)
+            Services.CustomerAccount.SignOut();
 
             Window main = MainWindow;
             if (main != null)
@@ -175,23 +186,32 @@ namespace OptiPaie.Desktop
             }
 
             bool proceed;
-            if (Services.Users.IsLoginRequired())
+            if (Services.CustomerAccount.HasAccount)
             {
-                // Login is enforced — require re-authentication.
+                // The normal path: email + password only (no license).
+                proceed = PromptCustomerSignIn();
+
+                // Mirror startup: if the optional multi-user login is also enabled, re-authenticate
+                // the operator so their per-user session (and role) is re-established — never leave
+                // Session.Current null, which would read as unrestricted admin.
+                if (proceed && Services.Users.IsLoginRequired())
+                {
+                    proceed = EnsureLogin();
+                }
+            }
+            else if (Services.Users.IsLoginRequired())
+            {
                 proceed = EnsureLogin();
             }
             else
             {
-                // No login enforced — show the activation / trial-start screen.
-                var viewModel = new ActivationViewModel(Services);
-                var window = new ActivationWindow { DataContext = viewModel };
-                ApplyFlowDirection(window);
-                viewModel.CloseRequested = ok => { try { window.DialogResult = ok; } catch { window.Close(); } };
-                window.ShowDialog();
-                proceed = Services.Access.Evaluate().CanUseApp;
+                // No customer account (trial / legacy) — show the activation / trial screen.
+                proceed = EnsureAccess();
             }
 
-            if (proceed && Services.Access.Evaluate().CanUseApp)
+            // After a successful sign-in the license normally still applies; if it lapsed
+            // while signed out, offer activation before giving up.
+            if (proceed && (Services.Access.Evaluate().CanUseApp || EnsureAccess()))
             {
                 if (main != null)
                 {
@@ -202,6 +222,33 @@ namespace OptiPaie.Desktop
             {
                 Shutdown();
             }
+        }
+
+        /// <summary>
+        /// Customer-session gate: auto-opens when the account is signed in (or when there is
+        /// no account yet — a trial or a legacy licensed install); after a manual logout it
+        /// asks for email + password ONLY (never the license again). Returns true to proceed.
+        /// </summary>
+        private bool EnsureCustomerSession()
+        {
+            OptiPaie.Core.Licensing.ICustomerAccountService account = Services.CustomerAccount;
+            if (account == null || !account.HasAccount || account.IsSignedIn)
+            {
+                return true;
+            }
+
+            return PromptCustomerSignIn();
+        }
+
+        /// <summary>Shows the sign-in screen (email + password only) for the local account.</summary>
+        private bool PromptCustomerSignIn()
+        {
+            var viewModel = new ActivationViewModel(Services, ActivationMode.SignIn, Services.CustomerAccount.Email);
+            var window = new ActivationWindow { DataContext = viewModel };
+            ApplyFlowDirection(window);
+            viewModel.CloseRequested = ok => { try { window.DialogResult = ok; } catch { window.Close(); } };
+            window.ShowDialog();
+            return Services.CustomerAccount.IsSignedIn;
         }
 
         /// <summary>
@@ -356,7 +403,12 @@ namespace OptiPaie.Desktop
                 return true;
             }
 
-            var viewModel = new ActivationViewModel(Services);
+            // Pre-fill the email from the local account when re-activating a lapsed license,
+            // so a returning customer never retypes what we already know.
+            string knownEmail = Services.CustomerAccount != null && Services.CustomerAccount.HasAccount
+                ? Services.CustomerAccount.Email
+                : null;
+            var viewModel = new ActivationViewModel(Services, ActivationMode.Activate, knownEmail);
             var activationWindow = new ActivationWindow { DataContext = viewModel };
             ApplyFlowDirection(activationWindow);
             viewModel.CloseRequested = ok => activationWindow.DialogResult = ok;

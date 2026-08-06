@@ -127,6 +127,13 @@ namespace OptiPaie.Desktop.Shell
         /// <summary>True when a user is actually signed in (login enforced).</summary>
         public bool IsSignedIn => _services.Session.IsAuthenticated;
 
+        /// <summary>
+        /// The logout button is meaningful only when there is a session to end: a local
+        /// customer account, or the optional multi-user login. For a trial or a legacy
+        /// licensed install with neither, it is hidden (clicking it would be a no-op).
+        /// </summary>
+        public bool CanSignOut => _services.CustomerAccount.HasAccount || _services.Users.IsLoginRequired();
+
         /// <summary>Header label for the signed-in user, e.g. "Nadia B. · Responsable".</summary>
         public string SessionUserText
         {
