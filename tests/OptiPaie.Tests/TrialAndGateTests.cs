@@ -47,6 +47,27 @@ namespace OptiPaie.Tests
         }
 
         [Test]
+        public void GetStatus_ClampsStaleLongerTrial_To48Hours()
+        {
+            var store = new InMemoryTrialStore();
+            // Simulate trial state written by an OLDER build with a longer duration:
+            // started ~2 hours ago, but persisted a ~14-day expiry.
+            DateTime started = DateTime.UtcNow.AddHours(-2);
+            store.Save(
+                "{\"StartedUtc\":\"" + started.ToString("o") + "\"," +
+                "\"ExpiresUtc\":\"" + started.AddDays(14).ToString("o") + "\"," +
+                "\"LastSeenUtc\":\"" + started.ToString("o") + "\"}");
+
+            TrialInfo info = NewTrial(store).GetStatus();
+
+            Assert.That(info.IsActive, Is.True);
+            Assert.That(info.HoursRemaining, Is.LessThanOrEqualTo(48),
+                "a stale 14-day trial must be clamped to at most 48h from its start");
+            Assert.That(info.HoursRemaining, Is.GreaterThanOrEqualTo(44),
+                "started ~2h ago → about 46h should remain, never 14 days");
+        }
+
+        [Test]
         public void Trial_CannotBeRestartedOnceUsed()
         {
             var store = new InMemoryTrialStore();

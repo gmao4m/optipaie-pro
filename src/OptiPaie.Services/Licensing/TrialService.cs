@@ -46,12 +46,18 @@ namespace OptiPaie.Services.Licensing
             DateTime now = DateTime.UtcNow;
             DateTime effectiveNow = record.LastSeenUtc > now ? record.LastSeenUtc : now;
 
-            if (effectiveNow > record.LastSeenUtc)
+            // Enforce the 48-hour policy even for state persisted by an earlier build that
+            // may have used a longer trial: the trial never lasts more than 48h from its
+            // start (fixes a stale "14 j 7 h restant" carried over from an older version).
+            DateTime cappedExpiry = record.StartedUtc.ToUniversalTime().AddHours(TrialHours);
+            DateTime expiresUtc = record.ExpiresUtc < cappedExpiry ? record.ExpiresUtc : cappedExpiry;
+
+            if (effectiveNow > record.LastSeenUtc || expiresUtc != record.ExpiresUtc)
             {
-                Save(record.StartedUtc, record.ExpiresUtc, effectiveNow);
+                Save(record.StartedUtc, expiresUtc, effectiveNow);
             }
 
-            return new TrialInfo(true, record.StartedUtc, record.ExpiresUtc, effectiveNow);
+            return new TrialInfo(true, record.StartedUtc, expiresUtc, effectiveNow);
         }
 
         public TrialInfo StartTrial()

@@ -37,6 +37,13 @@ namespace OptiPaie.Desktop
             CrashLog.Install(this);
             CrashLog.Breadcrumb("OnStartup");
 
+            // Force modern TLS for every outbound HTTPS call (Supabase activation, GitHub
+            // updates). .NET Framework can otherwise negotiate only TLS 1.0/1.1, which
+            // Supabase/Cloudflare reject — the handshake then throws and was being reported
+            // to the user as a bogus "Aucune connexion Internet" during activation.
+            try { System.Net.ServicePointManager.SecurityProtocol |= System.Net.SecurityProtocolType.Tls12; } catch { }
+            try { System.Net.ServicePointManager.SecurityProtocol |= System.Net.SecurityProtocolType.Tls13; } catch { }
+
             // Velopack install/update hooks must run before anything else. In a normal
             // launch this returns immediately; during install/update Velopack handles
             // its hook arguments and exits. Never touches business data.

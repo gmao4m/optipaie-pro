@@ -352,8 +352,11 @@ namespace OptiPaie.Desktop.ViewModels
                     return AccountStep.Proceed;
 
                 case AuthErrorKind.Offline:
-                    SetStatus("Aucune connexion Internet. La première activation nécessite une connexion.", true);
-                    return AccountStep.Blocked;
+                    // Do NOT block on the account step. The license activation below is the
+                    // real connectivity test: if there is genuinely no network, ActivateAsync
+                    // reports it; if the account call merely hiccuped, activation still works.
+                    _services.Logger.Info("Online account step skipped (offline/transport); proceeding to license activation.");
+                    return AccountStep.Proceed;
 
                 case AuthErrorKind.WeakPassword:
                     PasswordError = "Mot de passe trop court (au moins 6 caractères).";
@@ -376,12 +379,9 @@ namespace OptiPaie.Desktop.ViewModels
                         PasswordError = "Cet email a déjà un compte. Mot de passe incorrect.";
                         return AccountStep.Blocked;
                     }
-                    if (si.Kind == AuthErrorKind.Offline)
-                    {
-                        SetStatus("Aucune connexion Internet. Réessayez une fois connecté.", true);
-                        return AccountStep.Blocked;
-                    }
-                    return AccountStep.Proceed; // ambiguous — never block a valid license
+                    // Offline (or any other transport issue) here must NOT block: fall through
+                    // to license activation, which is the authoritative connectivity check.
+                    return AccountStep.Proceed;
 
                 default:
                     // Email-confirmation pending, rate-limited, or any other soft issue must
