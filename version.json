@@ -1,6 +1,6 @@
 {
-  "latest_version": "1.20.0",
+  "latest_version": "1.21.0",
   "download_url": "https://github.com/gmao4m/optipaie-pro/releases/latest/download/OptiPaie-PRO-Setup.exe",
-  "release_notes": "- Correctif majeur : l'activation des licences fonctionne toujours (le compte n'est plus un préalable bloquant).\n- Compte client local hors-ligne : connexion automatique au redémarrage ; clé demandée une seule fois.\n- Déconnexion : reconnexion par email + mot de passe uniquement.\n- Messages d'erreur clairs sous chaque champ ; essai gratuit 48 h.\n- Réglages > Licence simplifiés.",
+  "release_notes": "- Correctif CRITIQUE : l'activation affichait « Aucune connexion Internet » alors que le réseau fonctionne (TLS 1.2 désormais forcé).\n- L'étape compte ne bloque plus l'activation ; « pas de connexion » n'apparaît que si l'activation échoue réellement.\n- Essai gratuit plafonné à 48 heures exactement.",
   "mandatory": false
 }
