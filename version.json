@@ -1,6 +1,6 @@
 {
-  "latest_version": "1.19.0",
+  "latest_version": "1.20.0",
   "download_url": "https://github.com/gmao4m/optipaie-pro/releases/latest/download/OptiPaie-PRO-Setup.exe",
-  "release_notes": "- fix(attestations): align DRT (FR + AR) fields to the official CNAS form\n- chore(release): version.json -> 1.18.0 [skip ci]",
+  "release_notes": "- Correctif majeur : l'activation des licences fonctionne toujours (le compte n'est plus un préalable bloquant).\n- Compte client local hors-ligne : connexion automatique au redémarrage ; clé demandée une seule fois.\n- Déconnexion : reconnexion par email + mot de passe uniquement.\n- Messages d'erreur clairs sous chaque champ ; essai gratuit 48 h.\n- Réglages > Licence simplifiés.",
   "mandatory": false
 }
