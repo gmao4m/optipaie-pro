@@ -1,6 +1,6 @@
 {
-  "latest_version": "1.17.0",
+  "latest_version": "1.18.0",
   "download_url": "https://github.com/gmao4m/optipaie-pro/releases/latest/download/OptiPaie-PRO-Setup.exe",
-  "release_notes": "- feat(licensing): Mono/Multi-société, client login/signup, admin generator overhaul\n- chore(release): version.json -> 1.16.0 [skip ci]",
+  "release_notes": "- chore(release): 1.18.0 — Attestations ATS/DRT\n- feat(attestations): ATS/DRT CNAS certificates ported + wired to employees\n- chore(release): version.json -> 1.17.0 [skip ci]",
   "mandatory": false
 }
