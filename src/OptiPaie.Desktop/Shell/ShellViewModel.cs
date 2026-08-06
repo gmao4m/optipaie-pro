@@ -43,6 +43,7 @@ namespace OptiPaie.Desktop.Shell
         private AtsViewModel _ats;
         private CertificateViewModel _certificates;
         private CnasHubViewModel _cnas;
+        private AttestationsViewModel _attestations;
 
         private readonly Dictionary<string, PremiumModuleViewModel> _premium =
             new Dictionary<string, PremiumModuleViewModel>();
@@ -54,6 +55,7 @@ namespace OptiPaie.Desktop.Shell
         private object _current;
         private string _activeKey;
         private NavItemViewModel _cnasNav;
+        private NavItemViewModel _attestationsNav;
 
         public ShellViewModel(AppServices services)
         {
@@ -233,6 +235,11 @@ namespace OptiPaie.Desktop.Shell
             _cnasNav = CoreNav[CoreNav.Count - 1];
             _cnasNav.IsLocked = !_gate.IsUsable;
 
+            // ATS/DRT official attestations — same license-follows-usability rule as CNAS.
+            AddCore("attestations", L("Shell_Nav_Attestations"), "IconFileCheck");
+            _attestationsNav = CoreNav[CoreNav.Count - 1];
+            _attestationsNav.IsLocked = !_gate.IsUsable;
+
             foreach (ModuleDescriptor module in _registry.Upsells)
             {
                 NavItemViewModel item = NewItem(module.Key, module.DisplayName(rtl), IconKeyFor(module.Key), true);
@@ -365,6 +372,19 @@ namespace OptiPaie.Desktop.Shell
                     else
                     {
                         target = _cnas ?? (_cnas = new CnasHubViewModel(_services));
+                    }
+                    break;
+                case "attestations":
+                    // ATS/DRT attestations follow the license exactly like CNAS: available only
+                    // while the app is usable, otherwise redirect to the dashboard.
+                    if (!_gate.IsUsable)
+                    {
+                        key = "dashboard";
+                        target = _dashboard ?? (_dashboard = new DashboardViewModel(_services, Navigate));
+                    }
+                    else
+                    {
+                        target = _attestations ?? (_attestations = new AttestationsViewModel(_services));
                     }
                     break;
                 case "home":
@@ -512,12 +532,16 @@ namespace OptiPaie.Desktop.Shell
                 {
                     _cnasNav.IsLocked = !_gate.IsUsable;
                 }
+                if (_attestationsNav != null)
+                {
+                    _attestationsNav.IsLocked = !_gate.IsUsable;
+                }
 
                 // If a module page is currently shown, re-resolve it so a freshly
                 // enabled module swaps from the premium page to its real screen
                 // (and vice-versa on suspension) without any restart. CNAS follows the
                 // same rule (a mid-session lapse swaps it away to the dashboard at once).
-                if (_activeKey != null && (_registry.Exists(_activeKey) || _activeKey == "cnas"))
+                if (_activeKey != null && (_registry.Exists(_activeKey) || _activeKey == "cnas" || _activeKey == "attestations"))
                 {
                     Navigate(_activeKey);
                 }

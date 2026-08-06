@@ -34,12 +34,12 @@ namespace OptiPaie.Data.Repositories
 
             const string sql =
                 "INSERT INTO Companies " +
-                "(NameFr, NameAr, LegalForm, AddressFr, AddressAr, Nif, Nis, Rc, ArticleImposition, " +
-                " CnasEmployerNumber, Cacobatph, BtphSector, CacobatphEnabled, Bank, BankAccount, Currency, Phone, Email, Logo, " +
+                "(NameFr, NameAr, LegalForm, AddressFr, AddressAr, City, Nif, Nis, Rc, ArticleImposition, " +
+                " CnasEmployerNumber, Cacobatph, BtphSector, CacobatphEnabled, Bank, BankAccount, Currency, ManagerName, Phone, Email, Logo, " +
                 " CreatedAtUtc, UpdatedAtUtc, IsDeleted) " +
                 "VALUES " +
-                "(@NameFr, @NameAr, @LegalForm, @AddressFr, @AddressAr, @Nif, @Nis, @Rc, @ArticleImposition, " +
-                " @CnasEmployerNumber, @Cacobatph, @BtphSector, @CacobatphEnabled, @Bank, @BankAccount, @Currency, @Phone, @Email, @Logo, " +
+                "(@NameFr, @NameAr, @LegalForm, @AddressFr, @AddressAr, @City, @Nif, @Nis, @Rc, @ArticleImposition, " +
+                " @CnasEmployerNumber, @Cacobatph, @BtphSector, @CacobatphEnabled, @Bank, @BankAccount, @Currency, @ManagerName, @Phone, @Email, @Logo, " +
                 " @CreatedAtUtc, @UpdatedAtUtc, @IsDeleted); " +
                 "SELECT last_insert_rowid();";
 
@@ -55,10 +55,10 @@ namespace OptiPaie.Data.Repositories
             const string sql =
                 "UPDATE Companies SET " +
                 "NameFr = @NameFr, NameAr = @NameAr, LegalForm = @LegalForm, AddressFr = @AddressFr, " +
-                "AddressAr = @AddressAr, Nif = @Nif, Nis = @Nis, Rc = @Rc, ArticleImposition = @ArticleImposition, " +
+                "AddressAr = @AddressAr, City = @City, Nif = @Nif, Nis = @Nis, Rc = @Rc, ArticleImposition = @ArticleImposition, " +
                 "CnasEmployerNumber = @CnasEmployerNumber, Cacobatph = @Cacobatph, " +
                 "BtphSector = @BtphSector, CacobatphEnabled = @CacobatphEnabled, Bank = @Bank, " +
-                "BankAccount = @BankAccount, Currency = @Currency, Phone = @Phone, Email = @Email, Logo = @Logo, " +
+                "BankAccount = @BankAccount, Currency = @Currency, ManagerName = @ManagerName, Phone = @Phone, Email = @Email, Logo = @Logo, " +
                 "UpdatedAtUtc = @UpdatedAtUtc, IsDeleted = @IsDeleted " +
                 "WHERE Id = @Id;";
 

@@ -68,6 +68,9 @@ namespace OptiPaie.Desktop.Composition
             var cnasDeclarationService = new CnasDeclarationService(
                 companyService, employeeService, archiveService, configurationService);
 
+            // ATS/DRT official attestations — auto-fill the CNAS .docx templates from employee files.
+            var atsDrtDocumentService = new AtsDrtDocumentService(companyService, employeeService);
+
             // Audit trail. Wired into the lifecycle events of the modules through the
             // optional sink, so history is recorded without changing any service ctor.
             var auditService = new AuditService(unitOfWorkFactory, logger);
@@ -161,7 +164,8 @@ namespace OptiPaie.Desktop.Composition
                 notificationService,
                 auditService,
                 userService,
-                cnasDeclarationService);
+                cnasDeclarationService,
+                atsDrtDocumentService);
         }
     }
 }

@@ -63,6 +63,16 @@
                             <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Loc Company_AddressAr}" />
                             <TextBox Style="{StaticResource AppTextBox}" Text="{Binding Company.AddressAr}" />
                         </StackPanel>
+                        <UniformGrid Columns="2" Margin="0,0,0,14">
+                            <StackPanel Margin="0,0,8,0">
+                                <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Loc Company_ManagerName}" />
+                                <TextBox Style="{StaticResource AppTextBox}" Text="{Binding Company.ManagerName}" />
+                            </StackPanel>
+                            <StackPanel Margin="8,0,0,0">
+                                <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Loc Company_City}" />
+                                <TextBox Style="{StaticResource AppTextBox}" Text="{Binding Company.City}" />
+                            </StackPanel>
+                        </UniformGrid>
                         <UniformGrid Columns="2">
                             <StackPanel Margin="0,0,8,0">
                                 <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Loc Company_Phone}" />

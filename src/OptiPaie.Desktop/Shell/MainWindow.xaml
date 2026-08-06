@@ -22,6 +22,9 @@
         <DataTemplate DataType="{x:Type vm:CnasHubViewModel}">
             <views:CnasHubView />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:AttestationsViewModel}">
+            <views:AttestationsView />
+        </DataTemplate>
         <DataTemplate DataType="{x:Type vm:HomeViewModel}">
             <views:HomeView />
         </DataTemplate>

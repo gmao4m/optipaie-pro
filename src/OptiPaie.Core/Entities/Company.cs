@@ -38,6 +38,12 @@ namespace OptiPaie.Core.Entities
         /// <summary>Employer CNAS affiliation number.</summary>
         public string CnasEmployerNumber { get; set; }
 
+        /// <summary>Manager / legal representative name (responsable) — printed on ATS attestations. May be null.</summary>
+        public string ManagerName { get; set; }
+
+        /// <summary>City / commune (lieu) — printed on the ATS/DRT signature line. May be null.</summary>
+        public string City { get; set; }
+
         /// <summary>CACOBATPH affiliation number (construction/public works sector).</summary>
         public string Cacobatph { get; set; }
 

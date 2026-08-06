@@ -41,6 +41,14 @@
     <Reference Include="System.Configuration" />
   </ItemGroup>
 
+  <!-- Official CNAS attestation templates (ATS + DRT AR/FR). Shipped loose next to the
+       exe (like the source tool) so the OpenXML filler + Word converter open them by path. -->
+  <ItemGroup>
+    <Content Include="Assets\AtsDrtTemplates\*.docx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
   <!-- Bundled IBM Plex fonts (SIL OFL). Embedded as WPF resources so the exact type
        identity ships inside the installer and renders on any machine with no separate
        font installation. Referenced via pack URIs in Theme/Typography.xaml. -->

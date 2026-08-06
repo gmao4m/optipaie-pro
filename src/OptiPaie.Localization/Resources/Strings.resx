@@ -121,12 +121,16 @@
   <data name="Company_Rc" xml:space="preserve"><value>RC</value></data>
   <data name="Company_ArticleImposition" xml:space="preserve"><value>Article d'imposition</value></data>
   <data name="Company_CnasEmployerNumber" xml:space="preserve"><value>N° CNAS employeur</value></data>
+  <data name="Company_ManagerName" xml:space="preserve"><value>Responsable (gérant)</value></data>
+  <data name="Company_City" xml:space="preserve"><value>Ville (lieu)</value></data>
   <data name="Company_Logo" xml:space="preserve"><value>Logo</value></data>
 
   <data name="Employee_FirstName" xml:space="preserve"><value>Prénom</value></data>
   <data name="Employee_LastName" xml:space="preserve"><value>Nom</value></data>
   <data name="Employee_Gender" xml:space="preserve"><value>Sexe</value></data>
   <data name="Employee_BirthDate" xml:space="preserve"><value>Date de naissance</value></data>
+  <data name="Employee_BirthPlace" xml:space="preserve"><value>Lieu de naissance</value></data>
+  <data name="Employee_Address" xml:space="preserve"><value>Adresse</value></data>
   <data name="Employee_HireDate" xml:space="preserve"><value>Date de recrutement</value></data>
   <data name="Employee_ExitDate" xml:space="preserve"><value>Date de sortie</value></data>
   <data name="Employee_ContractType" xml:space="preserve"><value>Type de contrat</value></data>
@@ -400,6 +404,9 @@
   <data name="Shell_Nav_Archive" xml:space="preserve"><value>Archive</value></data>
   <data name="Shell_Nav_Reports" xml:space="preserve"><value>Rapports</value></data>
   <data name="Shell_Nav_Cnas" xml:space="preserve"><value>Déclarations CNAS</value></data>
+  <data name="Shell_Nav_Attestations" xml:space="preserve"><value>Attestations ATS / DRT</value></data>
+  <data name="AtsDrt_Title" xml:space="preserve"><value>Attestations CNAS — ATS · DRT</value></data>
+  <data name="AtsDrt_Subtitle" xml:space="preserve"><value>Générez l'attestation de travail et de salaire (ATS) et la déclaration de reprise (DRT) — remplies automatiquement depuis le dossier de l'employé.</value></data>
   <data name="Cnas_Title" xml:space="preserve"><value>Contrôle de préparation CNAS</value></data>
   <data name="Cnas_Subtitle" xml:space="preserve"><value>Vérifiez que les données sont complètes avant de produire la DAC/DAS.</value></data>
   <data name="Cnas_NoCompany" xml:space="preserve"><value>Sélectionnez une entreprise pour lancer le contrôle.</value></data>

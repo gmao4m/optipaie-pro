@@ -36,6 +36,12 @@ namespace OptiPaie.Core.Entities
         /// <summary>Date of birth. Null if unknown.</summary>
         public DateTime? BirthDate { get; set; }
 
+        /// <summary>Place of birth (lieu de naissance) — used on the ATS/DRT attestations. May be null.</summary>
+        public string BirthPlace { get; set; }
+
+        /// <summary>Home address — used on the ATS attestation (SADRESSE). May be null.</summary>
+        public string Address { get; set; }
+
         /// <summary>Hire date (date de recrutement).</summary>
         public DateTime HireDate { get; set; }
 

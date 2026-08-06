@@ -1,0 +1,198 @@
+<UserControl x:Class="OptiPaie.Desktop.Views.AttestationsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:OptiPaie.Desktop.Localization">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <Style x:Key="FieldLabel" TargetType="TextBlock" BasedOn="{StaticResource Caption}">
+            <Setter Property="Margin" Value="0,0,0,4" />
+        </Style>
+        <Style x:Key="StatusText" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource Brand}" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsError}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource StatusDanger}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="24,20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header: emerald title + gold underline -->
+        <StackPanel Grid.Row="0">
+            <TextBlock Style="{StaticResource H1}" Text="{loc:Loc AtsDrt_Title}" />
+            <Border Height="3" Width="120" HorizontalAlignment="Left" CornerRadius="2" Margin="2,8,0,0"
+                    Background="{DynamicResource Accent}" />
+            <TextBlock Style="{StaticResource Caption}" Margin="0,8,0,0" Text="{loc:Loc AtsDrt_Subtitle}" />
+            <TextBlock Style="{StaticResource Caption}" Margin="0,2,0,0">
+                <Run Text="Entreprise : " /><Run Text="{Binding CompanyDisplay, Mode=OneWay}" FontWeight="SemiBold" />
+            </TextBlock>
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,16,0,0">
+            <StackPanel>
+
+                <!-- 1) Document type + employee -->
+                <Border Style="{StaticResource Card}" Padding="18" Margin="0,0,0,14">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource H2}" Text="1 · Document et employé" />
+                        <Grid Margin="0,12,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="16" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Style="{StaticResource FieldLabel}" Text="Employé" />
+                                <ComboBox Height="34" VerticalContentAlignment="Center"
+                                          ItemsSource="{Binding Employees}" SelectedItem="{Binding SelectedEmployee}">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding LastNameFr}" FontWeight="SemiBold" />
+                                                <TextBlock Text=" " />
+                                                <TextBlock Text="{Binding FirstNameFr}" />
+                                                <TextBlock Text="  —  " Foreground="{DynamicResource TextMuted}" />
+                                                <TextBlock Text="{Binding Poste}" Foreground="{DynamicResource TextMuted}" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Style="{StaticResource FieldLabel}" Text="Type de document" />
+                                <StackPanel Orientation="Horizontal">
+                                    <RadioButton GroupName="CertType" Content="ATS (Attestation de travail et salaire)"
+                                                 IsChecked="{Binding IsAts}" VerticalContentAlignment="Center" Margin="0,0,16,0" />
+                                    <RadioButton GroupName="CertType" Content="DRT (Déclaration de reprise)"
+                                                 IsChecked="{Binding IsDrt}" VerticalContentAlignment="Center" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,8,0,0"
+                                            Visibility="{Binding IsDrt, Converter={StaticResource BoolToVis}}">
+                                    <TextBlock Text="Langue : " VerticalAlignment="Center" Foreground="{DynamicResource TextSecondary}" />
+                                    <RadioButton GroupName="DrtLang" Content="العربية" IsChecked="{Binding DrtArabic}" Margin="0,0,16,0" VerticalContentAlignment="Center" />
+                                    <RadioButton GroupName="DrtLang" Content="Français" VerticalContentAlignment="Center" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- 2) Work stoppage -->
+                <Border Style="{StaticResource Card}" Padding="18" Margin="0,0,0,14">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource H2}" Text="2 · Arrêt de travail" />
+                        <Grid Margin="0,12,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="16" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="16" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Style="{StaticResource FieldLabel}" Text="Date d'arrêt de travail" />
+                                <DatePicker Height="34" SelectedDate="{Binding StoppageDate}" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Style="{StaticResource FieldLabel}" Text="Nombre de jours" />
+                                <TextBox Style="{StaticResource AppTextBox}" Text="{Binding NumberOfDays, UpdateSourceTrigger=PropertyChanged}" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="4" VerticalAlignment="Bottom">
+                                <CheckBox Content="L'employé a repris le travail" IsChecked="{Binding HasResumedWork}"
+                                          VerticalContentAlignment="Center" Margin="0,0,0,8" />
+                            </StackPanel>
+                        </Grid>
+                        <Border Background="{DynamicResource BrandSoft}" CornerRadius="6" Padding="12,8" Margin="0,12,0,0">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Foreground="{DynamicResource BrandText}">
+                                    <Run Text="Dernier jour travaillé : " FontWeight="SemiBold" /><Run Text="{Binding LastWorkedDatePreview, Mode=OneWay}" />
+                                </TextBlock>
+                                <TextBlock Margin="24,0,0,0" Foreground="{DynamicResource BrandText}">
+                                    <Run Text="Date de reprise : " FontWeight="SemiBold" /><Run Text="{Binding ResumeDatePreview, Mode=OneWay}" />
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <!-- 3) ATS 12-month contribution grid -->
+                <Border Style="{StaticResource Card}" Padding="18" Margin="0,0,0,14"
+                        Visibility="{Binding IsAts, Converter={StaticResource BoolToVis}}">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource H2}" Text="3 · Tableau des cotisations (12 mois)" />
+                        <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                            <TextBlock Text="Mois de début :" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondary}" />
+                            <DatePicker Width="130" Height="32" Margin="8,0,0,0" SelectedDate="{Binding GridStartDate}" />
+                            <TextBlock Text="Nombre de mois :" VerticalAlignment="Center" Margin="16,0,0,0" Foreground="{DynamicResource TextSecondary}" />
+                            <TextBox Style="{StaticResource AppTextBox}" Width="60" Margin="8,0,0,0" Text="{Binding MonthCount, UpdateSourceTrigger=PropertyChanged}" />
+                            <Button Style="{StaticResource SecondaryButton}" Height="32" Margin="12,0,0,0"
+                                    Content="Construire le tableau" Command="{Binding BuildGridCommand}" />
+                        </StackPanel>
+                        <DataGrid Margin="0,12,0,0" ItemsSource="{Binding Contributions}" AutoGenerateColumns="False"
+                                  HeadersVisibility="Column" CanUserAddRows="False" CanUserResizeRows="False"
+                                  GridLinesVisibility="All" RowHeight="30" FontFamily="{StaticResource AppFont}" FontSize="12.5"
+                                  Background="{DynamicResource Surface}" RowBackground="{DynamicResource Surface}"
+                                  AlternatingRowBackground="{DynamicResource SurfaceMuted}" BorderBrush="{DynamicResource Border}"
+                                  BorderThickness="1" HorizontalGridLinesBrush="{DynamicResource Border}"
+                                  VerticalGridLinesBrush="{DynamicResource Border}" MaxHeight="360">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Mois" Binding="{Binding MonthLabel}" IsReadOnly="True" Width="1.4*" />
+                                <DataGridTextColumn Header="Heures" Binding="{Binding Hours}" Width="*" />
+                                <DataGridTextColumn Header="Jours absence" Binding="{Binding Absence}" Width="*" />
+                                <DataGridTextColumn Header="Base cotisable (DA)" Binding="{Binding ContributionBase}" Width="1.3*" />
+                                <DataGridTextColumn Header="Part salarié 9% (DA)" Binding="{Binding EmployeeShare}" IsReadOnly="True" Width="1.3*" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
+                </Border>
+
+                <!-- 4) Identity (auto-filled from the employee file, editable) -->
+                <Border Style="{StaticResource Card}" Padding="18" Margin="0,0,0,14">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource H2}" Text="4 · Identité (remplie automatiquement)" />
+                        <TextBlock Style="{StaticResource Caption}" Margin="0,4,0,0"
+                                   Text="Tirée du dossier de l'employé et de l'entreprise. Complétez les champs manquants au besoin." />
+
+                        <TextBlock Text="Entreprise" FontWeight="SemiBold" Margin="0,14,0,6" Foreground="{DynamicResource TextSecondary}" />
+                        <UniformGrid Columns="2">
+                            <StackPanel Margin="0,0,8,10"><TextBlock Style="{StaticResource FieldLabel}" Text="Responsable (gérant)" /><TextBox Style="{StaticResource AppTextBox}" Text="{Binding ManagerName}" /></StackPanel>
+                            <StackPanel Margin="8,0,0,10"><TextBlock Style="{StaticResource FieldLabel}" Text="N° adhérent CNAS (10 chiffres)" /><TextBox Style="{StaticResource AppTextBox}" Text="{Binding EmployerNumber}" /></StackPanel>
+                            <StackPanel Margin="0,0,8,10"><TextBlock Style="{StaticResource FieldLabel}" Text="Raison sociale" /><TextBox Style="{StaticResource AppTextBox}" Text="{Binding CompanyName}" /></StackPanel>
+                            <StackPanel Margin="8,0,0,10"><TextBlock Style="{StaticResource FieldLabel}" Text="Lieu (ville)" /><TextBox Style="{StaticResource AppTextBox}" Text="{Binding Location}" /></StackPanel>
+                            <StackPanel Margin="0,0,8,10"><TextBlock Style="{StaticResource FieldLabel}" Text="Adresse entreprise" /><TextBox Style="{StaticResource AppTextBox}" Text="{Binding CompanyAddress}" /></StackPanel>
+                        </UniformGrid>
+
+                        <TextBlock Text="Employé" FontWeight="SemiBold" Margin="0,10,0,6" Foreground="{DynamicResource TextSecondary}" />
+                        <UniformGrid Columns="2">
+                            <StackPanel Margin="0,0,8,10"><TextBlock Style="{StaticResource FieldLabel}" Text="Nom" /><TextBox Style="{StaticResource AppTextBox}" Text="{Binding EmpLastName}" /></StackPanel>
+                            <StackPanel Margin="8,0,0,10"><TextBlock Style="{StaticResource FieldLabel}" Text="Prénom" /><TextBox Style="{StaticResource AppTextBox}" Text="{Binding EmpFirstName}" /></StackPanel>
+                            <StackPanel Margin="0,0,8,10"><TextBlock Style="{StaticResource FieldLabel}" Text="N° sécurité sociale (12 chiffres)" /><TextBox Style="{StaticResource AppTextBox}" Text="{Binding Nss}" /></StackPanel>
+                            <StackPanel Margin="8,0,0,10"><TextBlock Style="{StaticResource FieldLabel}" Text="Poste" /><TextBox Style="{StaticResource AppTextBox}" Text="{Binding Position}" /></StackPanel>
+                            <StackPanel Margin="0,0,8,10"><TextBlock Style="{StaticResource FieldLabel}" Text="Date de naissance" /><DatePicker Height="34" SelectedDate="{Binding BirthDate}" /></StackPanel>
+                            <StackPanel Margin="8,0,0,10"><TextBlock Style="{StaticResource FieldLabel}" Text="Lieu de naissance" /><TextBox Style="{StaticResource AppTextBox}" Text="{Binding BirthPlace}" /></StackPanel>
+                            <StackPanel Margin="0,0,8,10"><TextBlock Style="{StaticResource FieldLabel}" Text="Date de recrutement" /><DatePicker Height="34" SelectedDate="{Binding HireDate}" /></StackPanel>
+                            <StackPanel Margin="8,0,0,10"><TextBlock Style="{StaticResource FieldLabel}" Text="Adresse employé" /><TextBox Style="{StaticResource AppTextBox}" Text="{Binding EmpAddress}" /></StackPanel>
+                        </UniformGrid>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Actions -->
+        <Border Grid.Row="2" BorderBrush="{DynamicResource Border}" BorderThickness="0,1,0,0" Padding="0,14,0,0" Margin="0,4,0,0">
+            <DockPanel>
+                <Button DockPanel.Dock="Right" Style="{StaticResource PrimaryButton}" Height="40" Padding="22,0"
+                        Content="Générer l'attestation" Command="{Binding GenerateCommand}" />
+                <TextBlock Style="{StaticResource StatusText}" VerticalAlignment="Center" Text="{Binding Status}" />
+            </DockPanel>
+        </Border>
+    </Grid>
+</UserControl>
