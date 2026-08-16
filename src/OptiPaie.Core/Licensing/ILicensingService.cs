@@ -18,6 +18,14 @@ namespace OptiPaie.Core.Licensing
         /// <summary>This machine's stable device id.</summary>
         string DeviceId { get; }
 
+        /// <summary>
+        /// True when a license has been stored on this machine (i.e. it was activated at least
+        /// once), REGARDLESS of whether that cache currently verifies. Used to recognise an
+        /// already-activated poste even when the live snapshot is momentarily unusable
+        /// (device-id drift, an unreadable cache), so it is never re-asked for its license.
+        /// </summary>
+        bool HasStoredLicense { get; }
+
         /// <summary>Raised whenever <see cref="Current"/> changes (e.g. after a sync).</summary>
         event EventHandler Changed;
 

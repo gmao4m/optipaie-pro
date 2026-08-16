@@ -337,6 +337,7 @@ namespace OptiPaie.Tests
             public FakeLicensing(LicenseSnapshot snapshot) { Current = snapshot; }
             public LicenseSnapshot Current { get; }
             public string DeviceId => "TEST-DEVICE";
+            public bool HasStoredLicense => Current != null && Current.IsActivated;
             public event EventHandler Changed { add { } remove { } }
             public LicenseSnapshot Refresh() => Current;
             public Task<LicenseResult> ActivateAsync(string k, string c, string e, CancellationToken t) => throw new NotSupportedException();

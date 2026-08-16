@@ -108,6 +108,10 @@ namespace OptiPaie.Desktop.Composition
             // no network: sign-in after a logout is fully offline and never re-asks for a key.
             ICustomerAccountService customerAccount = new CustomerAccountService(settingsService, cipher, logger);
 
+            // "Activated once" marker (plain settings flag). Lets the startup / reconnection
+            // gate trust a prior activation and never re-ask a paying customer for the license.
+            IActivationState activationState = new ActivationState(settingsService);
+
             // Auto-update (Velopack). The channel is the only Velopack-aware piece; the
             // service + metadata source are provider-agnostic and unit-tested. Disabled
             // gracefully (IsSupported=false) on non-installed/dev runs or when unconfigured.
@@ -171,7 +175,8 @@ namespace OptiPaie.Desktop.Composition
                 userService,
                 cnasDeclarationService,
                 atsDrtDocumentService,
-                customerAccount);
+                customerAccount,
+                activationState);
         }
     }
 }

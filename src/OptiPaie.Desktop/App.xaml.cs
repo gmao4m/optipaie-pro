@@ -102,7 +102,16 @@ namespace OptiPaie.Desktop
                 return;
             }
 
-            // Activation gate: the app requires a valid license or an active trial.
+            // Migration / backfill: a machine already activated under an OLDER version has a
+            // stored license but no "activated" marker yet. Recognise it as activated so this
+            // update never asks such a paying customer to re-enter their license.
+            if (Services.Licensing.HasStoredLicense)
+            {
+                Services.ActivationState.MarkActivated();
+            }
+
+            // Activation gate: license checked only until the poste is activated; afterwards it
+            // opens on the trusted marker and never re-asks for the license.
             if (!EnsureAccess())
             {
                 Shutdown();
@@ -298,7 +307,10 @@ namespace OptiPaie.Desktop
                 return;
             }
 
-            if (Services.Access.Evaluate().CanUseApp)
+            // An already-activated poste is never hard-blocked mid-session by a local
+            // re-verification issue; server-confirmed expiry / revocation are surfaced by the
+            // background sync, not by tearing the app down at runtime.
+            if (AccessDecision.MayOpen(Services.Access.Evaluate().CanUseApp, Services.ActivationState.IsActivated))
             {
                 return;
             }
@@ -405,13 +417,25 @@ namespace OptiPaie.Desktop
         /// </summary>
         private bool EnsureAccess()
         {
-            if (Services.Access.Evaluate().CanUseApp)
+            bool canUse = Services.Access.Evaluate().CanUseApp;
+            bool activated = Services.ActivationState.IsActivated;
+
+            // Open WITHOUT prompting when usable now OR already activated (the trusted marker):
+            // a transient LOCAL license-verification issue (device-id drift, unreadable cache)
+            // must never re-ask an already-activated poste for its license. Server-confirmed
+            // expiry / revocation are surfaced by the background sync, not blocked here.
+            if (AccessDecision.MayOpen(canUse, activated))
             {
+                if (canUse)
+                {
+                    Services.ActivationState.MarkActivated(); // confirm the marker while usable
+                }
+
                 return true;
             }
 
-            // Pre-fill the email from the local account when re-activating a lapsed license,
-            // so a returning customer never retypes what we already know.
+            // Genuinely never activated (and no active trial) → activation is required.
+            // Pre-fill the email from the local account so a returning customer never retypes it.
             string knownEmail = Services.CustomerAccount != null && Services.CustomerAccount.HasAccount
                 ? Services.CustomerAccount.Email
                 : null;
@@ -421,7 +445,8 @@ namespace OptiPaie.Desktop
             viewModel.CloseRequested = ok => activationWindow.DialogResult = ok;
             activationWindow.ShowDialog();
 
-            return Services.Access.Evaluate().CanUseApp;
+            // Activation may now have made the app usable and/or set the marker.
+            return AccessDecision.MayOpen(Services.Access.Evaluate().CanUseApp, Services.ActivationState.IsActivated);
         }
 
         /// <summary>

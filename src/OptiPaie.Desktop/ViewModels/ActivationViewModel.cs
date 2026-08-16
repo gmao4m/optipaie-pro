@@ -290,19 +290,18 @@ namespace OptiPaie.Desktop.ViewModels
 
                 if (result.IsSuccess)
                 {
-                    // 3) Save the local account + open the session so the app auto-opens next
-                    //    launch and never re-asks for the license key.
-                    try
-                    {
-                        _services.CustomerAccount.Register(_email.Trim(), _company.Trim(), password);
-                    }
-                    catch (Exception ex)
-                    {
-                        _services.Logger.Warn("Local account save failed (license is still active): " + ex.Message);
-                    }
+                    CompleteActivation(password);
+                    return;
+                }
 
-                    SetStatus("Licence activée avec succès. Bienvenue !", false);
-                    CloseRequested?.Invoke(true);
+                // Re-activating the SAME poste that is already activated: a device_in_use /
+                // device_mismatch from the server just means the license is already bound to
+                // THIS machine — the legitimate poste must never be blocked by it.
+                if ((result.Kind == LicenseResultKind.DeviceInUse || result.Kind == LicenseResultKind.DeviceMismatch)
+                    && (_services.ActivationState.IsActivated || _services.Licensing.HasStoredLicense))
+                {
+                    _services.Logger.Info("Re-activation on the same already-activated device — accepted (" + result.Kind + ").");
+                    CompleteActivation(password);
                     return;
                 }
 
@@ -317,6 +316,27 @@ namespace OptiPaie.Desktop.ViewModels
             {
                 IsBusy = false;
             }
+        }
+
+        /// <summary>
+        /// Finalises a successful (or same-device) activation: records the "activated" marker
+        /// so the poste is never re-asked for its license, saves the local account, and opens.
+        /// </summary>
+        private void CompleteActivation(string password)
+        {
+            _services.ActivationState.MarkActivated();
+
+            try
+            {
+                _services.CustomerAccount.Register(_email.Trim(), _company.Trim(), password);
+            }
+            catch (Exception ex)
+            {
+                _services.Logger.Warn("Local account save failed (license is still active): " + ex.Message);
+            }
+
+            SetStatus("Licence activée avec succès. Bienvenue !", false);
+            CloseRequested?.Invoke(true);
         }
 
         private bool ValidateActivateInputs(string password)

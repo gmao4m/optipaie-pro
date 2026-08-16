@@ -78,6 +78,22 @@ namespace OptiPaie.Services.Licensing
 
         public string DeviceId => _deviceId;
 
+        public bool HasStoredLicense
+        {
+            get
+            {
+                try
+                {
+                    StoredLicense stored = _store.Load();
+                    return stored != null && !string.IsNullOrWhiteSpace(stored.LicenseKey);
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+        }
+
         public LicenseSnapshot Refresh()
         {
             LicenseSnapshot snapshot = BuildFromStore();

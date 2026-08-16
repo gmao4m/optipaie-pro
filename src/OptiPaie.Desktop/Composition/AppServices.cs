@@ -49,7 +49,8 @@ namespace OptiPaie.Desktop.Composition
             IUserService users,
             ICnasDeclarationService cnasDeclarations,
             IAtsDrtDocumentService atsDrtDocuments,
-            ICustomerAccountService customerAccount)
+            ICustomerAccountService customerAccount,
+            IActivationState activationState)
         {
             Configuration = configuration;
             Logger = logger;
@@ -86,7 +87,14 @@ namespace OptiPaie.Desktop.Composition
             CnasDeclarations = cnasDeclarations;
             AtsDrtDocuments = atsDrtDocuments;
             CustomerAccount = customerAccount;
+            ActivationState = activationState;
         }
+
+        /// <summary>
+        /// Whether THIS machine has ever completed a license activation. Once true, the
+        /// startup / reconnection gate never re-asks for the license.
+        /// </summary>
+        public IActivationState ActivationState { get; }
 
         /// <summary>Local user accounts &amp; the optional login gate.</summary>
         public IUserService Users { get; }
