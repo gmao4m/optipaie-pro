@@ -56,11 +56,13 @@ namespace OptiPaie.Services.Licensing
 
         private readonly string _authUrl;
         private readonly string _anonKey;
+        private readonly OptiPaie.Common.Logging.ILogger _logger;
 
-        public SupabaseAuthClient(string projectUrl, string anonKey)
+        public SupabaseAuthClient(string projectUrl, string anonKey, OptiPaie.Common.Logging.ILogger logger = null)
         {
             _authUrl = string.IsNullOrWhiteSpace(projectUrl) ? string.Empty : projectUrl.TrimEnd('/') + "/auth/v1";
             _anonKey = anonKey ?? string.Empty;
+            _logger = logger;
         }
 
         /// <summary>True once the project URL + key are present (so the UI can fall back gracefully).</summary>
@@ -109,8 +111,11 @@ namespace OptiPaie.Services.Licensing
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                // Not silent any more: record WHY the auth call failed (TLS, DNS, timeout, …)
+                // in the persistent log, so a customer's connection problem is diagnosable.
+                _logger?.Warn("Supabase auth call failed (treated as offline): " + ex.GetType().Name + " — " + ex.Message);
                 return AuthResult.Offline();
             }
         }

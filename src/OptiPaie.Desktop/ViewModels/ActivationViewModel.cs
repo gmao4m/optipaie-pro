@@ -62,7 +62,7 @@ namespace OptiPaie.Desktop.ViewModels
             _email = prefillEmail ?? string.Empty;
 
             string baseUrl = Setting("Licensing.BaseUrl");
-            _auth = new SupabaseAuthClient(SupabaseAuthClient.DeriveProjectUrl(baseUrl), Setting("Licensing.AnonKey"));
+            _auth = new SupabaseAuthClient(SupabaseAuthClient.DeriveProjectUrl(baseUrl), Setting("Licensing.AnonKey"), services.Logger);
 
             TrialCommand = new RelayCommand(StartTrial, () => !_isBusy && CanStartTrial);
             UseLicenseCommand = new RelayCommand(() => Mode = ActivationMode.Activate, () => !_isBusy);
@@ -228,9 +228,13 @@ namespace OptiPaie.Desktop.ViewModels
         private void SignInLocally(string password)
         {
             bool ok = true;
-            if (string.IsNullOrWhiteSpace(_email)) { EmailError = "Saisissez votre adresse email."; ok = false; }
-            if (string.IsNullOrEmpty(password)) { PasswordError = "Saisissez votre mot de passe."; ok = false; }
-            if (!ok) return;
+            if (string.IsNullOrWhiteSpace(_email)) { EmailError = "أدخل بريدك الإلكتروني. / Saisissez votre adresse email."; ok = false; }
+            if (string.IsNullOrEmpty(password)) { PasswordError = "أدخل كلمة المرور. / Saisissez votre mot de passe."; ok = false; }
+            if (!ok)
+            {
+                _services.Logger.Warn("Login blocked: required field empty (email='" + _email + "').");
+                return;
+            }
 
             IsBusy = true;
             try
@@ -239,22 +243,25 @@ namespace OptiPaie.Desktop.ViewModels
                 if (!string.IsNullOrEmpty(stored) &&
                     !string.Equals(_email.Trim(), stored, StringComparison.OrdinalIgnoreCase))
                 {
-                    EmailError = "Aucun compte trouvé pour cet email.";
+                    EmailError = "لا يوجد حساب بهذا البريد على هذا الجهاز. / Aucun compte trouvé pour cet email.";
+                    _services.Logger.Warn("Login failed: unknown email '" + _email.Trim() + "' on this machine.");
                     return;
                 }
 
                 if (_services.CustomerAccount.SignIn(_email.Trim(), password))
                 {
+                    _services.Logger.Info("Login succeeded for '" + _email.Trim() + "'.");
                     CloseRequested?.Invoke(true);
                     return;
                 }
 
-                PasswordError = "Email ou mot de passe incorrect.";
+                PasswordError = "بريد إلكتروني أو كلمة مرور خاطئة. / Email ou mot de passe incorrect.";
+                _services.Logger.Warn("Login failed: wrong password for '" + _email.Trim() + "'.");
             }
             catch (Exception ex)
             {
-                _services.Logger.Error("Local sign-in failed unexpectedly.", ex);
-                SetStatus("Une erreur inattendue est survenue.", true);
+                _services.Logger.Error("Login failed unexpectedly for '" + _email + "'.", ex);
+                SetStatus("حدث خطأ تقني غير متوقّع. / Une erreur technique inattendue est survenue.", true);
             }
             finally
             {
@@ -413,6 +420,9 @@ namespace OptiPaie.Desktop.ViewModels
 
         private void ShowActivationError(LicenseResult result)
         {
+            // Every activation refusal is written to the persistent log (not only shown).
+            _services.Logger.Warn("Activation refused: " + result.Kind + " — " + result.Message);
+
             switch (result.Kind)
             {
                 case LicenseResultKind.InvalidKey:
@@ -426,15 +436,17 @@ namespace OptiPaie.Desktop.ViewModels
                 case LicenseResultKind.WrongProduct:
                 case LicenseResultKind.UnknownProduct:
                     // Key/device problems belong under the license-key field.
-                    KeyError = string.IsNullOrWhiteSpace(result.Message) ? "Clé de licence invalide." : result.Message;
+                    KeyError = "مفتاح الترخيص غير صالح أو غير مقبول. / " +
+                        (string.IsNullOrWhiteSpace(result.Message) ? "Clé de licence invalide." : result.Message);
                     break;
 
                 case LicenseResultKind.Offline:
-                    SetStatus("Aucune connexion Internet. L'activation d'une licence nécessite une connexion.", true);
+                    SetStatus("لا يوجد اتصال بالإنترنت. التفعيل الأول يتطلّب اتصالاً. / Aucune connexion Internet — l'activation nécessite une connexion.", true);
                     break;
 
                 default:
-                    SetStatus(result.Message, true);
+                    SetStatus("تعذّر تفعيل الترخيص. / " +
+                        (string.IsNullOrWhiteSpace(result.Message) ? "L'activation a échoué." : result.Message), true);
                     break;
             }
         }
