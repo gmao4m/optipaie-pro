@@ -66,6 +66,7 @@ namespace OptiPaie.Desktop.ViewModels
 
             TrialCommand = new RelayCommand(StartTrial, () => !_isBusy && CanStartTrial);
             UseLicenseCommand = new RelayCommand(() => Mode = ActivationMode.Activate, () => !_isBusy);
+            CheckUpdatesCommand = new RelayCommand(CheckUpdates, () => !_isBusy);
         }
 
         /// <summary>Raised to close the window; true = the user may now use the app.</summary>
@@ -203,6 +204,63 @@ namespace OptiPaie.Desktop.ViewModels
 
         /// <summary>Switches sign-in mode back to full activation (recovery via the license key).</summary>
         public ICommand UseLicenseCommand { get; }
+
+        /// <summary>« التحقق من التحديثات » — compares the running build to the published version.json.</summary>
+        public ICommand CheckUpdatesCommand { get; }
+
+        private string _updateMessage = string.Empty;
+
+        /// <summary>Result of the update check, shown at the bottom of the login screen.</summary>
+        public string UpdateMessage
+        {
+            get => _updateMessage;
+            private set { if (Set(ref _updateMessage, value)) Raise(nameof(HasUpdateMessage)); }
+        }
+
+        public bool HasUpdateMessage => !string.IsNullOrEmpty(_updateMessage);
+
+        /// <summary>
+        /// Checks for a new version via the existing update service (version.json). Fully
+        /// offline-safe: any failure shows a clear message and never crashes; the app stays
+        /// usable offline.
+        /// </summary>
+        private async void CheckUpdates()
+        {
+            UpdateMessage = "جارٍ التحقق من التحديثات…";
+            try
+            {
+                if (_services.Update == null || !_services.Update.IsSupported)
+                {
+                    UpdateMessage = "التحديث التلقائي يعمل بعد التثبيت عبر المُثبِّت الرسمي.";
+                    return;
+                }
+
+                OptiPaie.Core.Updates.AppUpdateCheck check =
+                    await _services.Update.CheckForUpdatesAsync(CancellationToken.None).ConfigureAwait(true);
+
+                if (check.UpdateAvailable)
+                {
+                    string url = ReleasesUrl();
+                    UpdateMessage = "يتوفر تحديث جديد: " + check.LatestVersion +
+                        (string.IsNullOrEmpty(url) ? string.Empty : "  —  " + url);
+                }
+                else
+                {
+                    UpdateMessage = "نسختك محدّثة (" + check.CurrentVersion + ").";
+                }
+            }
+            catch (Exception ex)
+            {
+                _services.Logger.Warn("Update check (login screen) failed: " + ex.Message);
+                UpdateMessage = "تعذّر التحقق من التحديثات — تحقّق من اتصالك بالإنترنت.";
+            }
+        }
+
+        private static string ReleasesUrl()
+        {
+            string repo = Setting("Update.GitHubRepo");
+            return string.IsNullOrWhiteSpace(repo) ? string.Empty : "https://github.com/" + repo + "/releases/latest";
+        }
 
         /// <summary>
         /// Runs the mode's action. Called from the window code-behind with the PasswordBox

@@ -158,6 +158,14 @@
                         </StackPanel>
                     </Border>
                 </StackPanel>
+
+                <!-- Check for updates — always available, including on the sign-in screen. -->
+                <Border Height="1" Background="{DynamicResource Border}" Margin="0,20,0,12" />
+                <Button Content="التحقق من التحديثات" Command="{Binding CheckUpdatesCommand}" IsEnabled="{Binding IsNotBusy}"
+                        Style="{StaticResource SecondaryButton}" Height="38" HorizontalAlignment="Center" Padding="20,0" />
+                <TextBlock Text="{Binding UpdateMessage}" TextWrapping="Wrap" TextAlignment="Center" Margin="0,8,0,0"
+                           FontSize="12.5" Foreground="{DynamicResource TextSecondary}"
+                           Visibility="{Binding UpdateMessage, Converter={StaticResource NonEmptyToVis}}" />
             </StackPanel>
         </ScrollViewer>
 
