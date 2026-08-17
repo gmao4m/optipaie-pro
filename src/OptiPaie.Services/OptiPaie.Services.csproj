@@ -28,6 +28,7 @@
        (OpenXML) and convert to PDF via Word automation (same stack as the source tool). -->
   <ItemGroup>
     <PackageReference Include="DocumentFormat.OpenXml" Version="3.3.0" />
+    <PackageReference Include="QuestPDF" Version="2022.12.1" />
     <PackageReference Include="Microsoft.Office.Interop.Word" Version="15.0.4797.1004" />
   </ItemGroup>
 

@@ -15,6 +15,8 @@ using OptiPaie.Desktop.Composition;
 using OptiPaie.Desktop.Localization;
 using OptiPaie.Desktop.Mvvm;
 using OptiPaie.Desktop.Views;
+using OptiPaie.Services.Documents;
+using QuestPDF.Fluent;
 
 namespace OptiPaie.Desktop.ViewModels
 {
@@ -198,6 +200,9 @@ namespace OptiPaie.Desktop.ViewModels
             SettingsCommand = new RelayCommand(OpenSettings);
             TypesCommand = new RelayCommand(OpenTypes);
             HolidaysCommand = new RelayCommand(OpenHolidays);
+            PrintDecisionCommand = new RelayCommand(PrintDecision, () => _selectedRequest != null && _selectedRequest.IsApproved);
+            PrintBalanceCertCommand = new RelayCommand(PrintBalanceCert, () => _selectedRequest != null);
+            PrintSettlementCommand = new RelayCommand(PrintSettlement, () => _selectedRequest != null);
         }
 
         public ObservableCollection<int> Years { get; } = new ObservableCollection<int>();
@@ -274,6 +279,9 @@ namespace OptiPaie.Desktop.ViewModels
         public ICommand SettingsCommand { get; }
         public ICommand TypesCommand { get; }
         public ICommand HolidaysCommand { get; }
+        public ICommand PrintDecisionCommand { get; }
+        public ICommand PrintBalanceCertCommand { get; }
+        public ICommand PrintSettlementCommand { get; }
 
         public void OnActivated()
         {
@@ -533,6 +541,69 @@ namespace OptiPaie.Desktop.ViewModels
             App.ApplyFlowDirection(window);
             vm.RequestClose = () => window.Close();
             window.ShowDialog();
+        }
+
+        private void PrintDecision()
+        {
+            if (_selectedRequest == null || !_selectedRequest.IsApproved) return;
+            LeaveRequest r = _selectedRequest.Request;
+            var model = new LeaveDecisionModel
+            {
+                CompanyName = _selectedCompany != null ? _selectedCompany.NameFr : string.Empty,
+                EmployeeName = _selectedRequest.EmployeeName,
+                TypeLabel = _selectedRequest.TypeLabel,
+                PaymentLabel = _selectedRequest.PaymentLabel,
+                StartDate = r.StartDate,
+                EndDate = r.EndDate,
+                Days = r.Days,
+                DecisionDate = r.DecidedAtUtc ?? DateTime.Now
+            };
+            SavePdf(p => Document.Create(new LeaveDecisionDocument(model).Compose).GeneratePdf(p), "Decision_conge");
+        }
+
+        private void PrintBalanceCert()
+        {
+            if (_selectedRequest == null) return;
+            LeaveBalance b = _services.Leave.GetBalance(_selectedRequest.Request.EmployeeId, _selectedYear);
+            var model = new LeaveBalanceCertificateModel
+            {
+                CompanyName = _selectedCompany != null ? _selectedCompany.NameFr : string.Empty,
+                EmployeeName = _selectedRequest.EmployeeName,
+                Year = _selectedYear,
+                Entitlement = b.Entitlement,
+                Taken = b.Taken,
+                Pending = b.Pending,
+                Available = b.Available
+            };
+            SavePdf(p => Document.Create(new LeaveBalanceCertificateDocument(model).Compose).GeneratePdf(p), "Attestation_solde");
+        }
+
+        private void PrintSettlement()
+        {
+            if (_selectedRequest == null) return;
+            Employee emp = _services.Employees.Get(_selectedRequest.Request.EmployeeId);
+            DateTime exit = emp != null && emp.ExitDate.HasValue ? emp.ExitDate.Value : DateTime.Today;
+            FinalSettlement s = _services.Leave.ComputeFinalSettlement(_selectedRequest.Request.EmployeeId, exit);
+            string company = _selectedCompany != null ? _selectedCompany.NameFr : string.Empty;
+            SavePdf(p => Document.Create(new LeaveSettlementDocument(s, company).Compose).GeneratePdf(p), "Reliquat_conge");
+        }
+
+        private void SavePdf(Action<string> generate, string defaultName)
+        {
+            var dialog = new Microsoft.Win32.SaveFileDialog { Filter = "Document PDF (*.pdf)|*.pdf", FileName = defaultName + ".pdf" };
+            if (dialog.ShowDialog() != true) return;
+
+            try
+            {
+                generate(dialog.FileName);
+                try { System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(dialog.FileName) { UseShellExecute = true }); }
+                catch { Dialogs.Info("Fichier enregistré :" + Environment.NewLine + dialog.FileName); }
+            }
+            catch (Exception ex)
+            {
+                _services.Logger?.Error("Impression congé", ex);
+                Dialogs.Error("Impossible de générer le PDF : " + ex.Message);
+            }
         }
 
         private void BuildStatusFilters()

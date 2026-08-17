@@ -1654,4 +1654,13 @@
   <data name="Holidays_Date" xml:space="preserve">
     <value>Date</value>
   </data>
+  <data name="Leave_PrintDecision" xml:space="preserve">
+    <value>Imprimer la décision</value>
+  </data>
+  <data name="Leave_PrintBalanceCert" xml:space="preserve">
+    <value>Attestation de solde</value>
+  </data>
+  <data name="Leave_PrintSettlement" xml:space="preserve">
+    <value>Reliquat (solde de tout compte)</value>
+  </data>
 </root>

@@ -201,6 +201,10 @@
                                             <MenuItem Header="{loc:Loc Leave_ActCancel}" Command="{Binding CancelCommand}"
                                                       Visibility="{Binding CanCancel, Converter={StaticResource BoolToVis}}" />
                                             <Separator />
+                                            <MenuItem Header="{loc:Loc Leave_PrintDecision}" Command="{Binding PrintDecisionCommand}" />
+                                            <MenuItem Header="{loc:Loc Leave_PrintBalanceCert}" Command="{Binding PrintBalanceCertCommand}" />
+                                            <MenuItem Header="{loc:Loc Leave_PrintSettlement}" Command="{Binding PrintSettlementCommand}" />
+                                            <Separator />
                                             <MenuItem Header="{loc:Loc Common_Delete}" Command="{Binding DeleteCommand}" />
                                         </ContextMenu>
                                     </Button.ContextMenu>
