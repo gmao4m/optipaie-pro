@@ -94,9 +94,10 @@ namespace OptiPaie.Tests
             leave.Approve(leaveId, null);
 
             var history = _audit.GetForEntity("Leave", leaveId);
-            Assert.That(history.Count, Is.EqualTo(1));
-            Assert.That(history[0].Action, Is.EqualTo(AuditAction.Approved));
-            Assert.That(history[0].NewValue, Is.EqualTo("Approuvé"));
+            Assert.That(history.Any(e => e.Action == AuditAction.Approved && e.NewValue == "Approuvé"), Is.True,
+                "the approval is recorded in the audit trail");
+            Assert.That(history.Any(e => e.Action == AuditAction.Created), Is.True,
+                "creating the request is audited too (journal à chaque transition)");
         }
 
         [Test]

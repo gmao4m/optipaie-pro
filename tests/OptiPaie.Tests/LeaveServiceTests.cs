@@ -288,7 +288,7 @@ namespace OptiPaie.Tests
 
             Result<long> saved = _service.Save(Request(_employeeId, _weekStart.AddDays(1), _weekStart.AddDays(2), LeaveType.Annual));
             _service.Approve(saved.Value, null);
-            _service.Cancel(saved.Value, null);
+            _service.Cancel(saved.Value, "Annulé");
 
             AttendanceRecord manual = _attendance.Get(_employeeId, _weekStart);
             Assert.That(manual, Is.Not.Null, "a manually recorded day is never removed by the leave module");
@@ -312,7 +312,7 @@ namespace OptiPaie.Tests
         {
             Result<long> first = _service.Save(Request(_employeeId, _weekStart, _weekStart.AddDays(2), LeaveType.Annual));
             _service.Approve(first.Value, null);
-            _service.Cancel(first.Value, null);
+            _service.Cancel(first.Value, "Reporté");
 
             Result<long> second = _service.Save(Request(_employeeId, _weekStart, _weekStart.AddDays(2), LeaveType.Annual));
             Assert.That(second.IsSuccess, Is.True, second.Error);
