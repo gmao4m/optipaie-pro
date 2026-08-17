@@ -23,20 +23,38 @@ reads. There is no import, no export, and no second copy of a day.
 
 All rules live in `OptiPaie.Services/LeaveService.cs`.
 
-- **Day counting** excludes the Algerian weekly rest — **Friday and Saturday** — unless
-  the parameter is turned off. A period made only of rest days is refused.
-- **No overlap**: two *live* requests (pending or approved) of one employee may never
-  cover the same day. Rejected and cancelled ones do not block.
+- **Day counting** excludes the company weekly rest days — **Friday and Saturday by
+  default, configurable** in the Paramètres dialog — unless exclusion is turned off. A
+  period made only of rest days is refused. There is **no public-holidays calendar** in
+  the application, so holidays are *not* auto-excluded (only the weekly rest is); a day can
+  still be marked by hand in the Attendance screen.
+- **No overlap**: two *live* requests (En attente or Approuvée) of one employee may never
+  cover the same day. Refused, cancelled and **Brouillon (draft)** requests do not block —
+  a draft is not "live". The rule is re-checked when a draft is submitted.
 - **Annual entitlement** = 2,5 days per month worked in the year, capped at 30
   (loi 90-11 art. 41). Pro-rated from the hire date and, when applicable, the exit
   date — both read from the shared employee record.
-- **Balance** = entitlement − approved annual days. Pending days are shown separately
-  and never silently deducted. Sick / maternity / special leave never touch the annual
-  balance; unpaid days are tracked on their own line.
-- **Lifecycle**: a request may only be edited while `Pending`; only a `Pending` request
-  can be approved or refused; only an `Approved` one can be cancelled; a rejected one
-  cannot be cancelled.
-- **Cross-year requests** count, for a given year, only the days that fall inside it.
+- **Balance** carries four figures: **acquis** (entitlement), **consommé** (approved annual
+  days), **réservé** (submitted-but-undecided annual days) and **disponible**
+  (acquis − consommé − réservé). A *submitted* request reserves the balance; a **draft
+  reserves nothing**. A refusal or a cancellation releases the reservation. Only Congé annuel
+  consumes the balance; sick / maternity / special never touch it; unpaid days are tracked on
+  their own line. Each type carries two policy flags — `DecrementsAnnualBalance` and `IsPaid`
+  — centralised in `Enums/LeaveTypePolicy`. **The balance is always derived, never a stored
+  counter**, so no value is ever decremented before its write commits.
+- **Employee eligibility**: the employee must be employed on the leave's start date (hired
+  on or before it, not exited before it).
+- **State machine** — enforced in the SERVICE, not only the UI; every forbidden transition
+  is rejected with a `Result` error: **Brouillon → En attente → (Approuvée | Refusée) →
+  Annulée**. `Submit` turns a draft live; `ReturnToDraft` sends an En attente back. Only an
+  En attente can be approved/refused; only an Approuvée can be cancelled. A **motive is
+  mandatory** for a refusal and a cancellation. Brouillon is stored additively as `IsDraft=1`
+  (migration 0030), so the `Status` CHECK (1..4) is never touched.
+- **Approval is atomic**: the status change and the attendance rows are written in one
+  transaction — a mid-approval failure rolls both back and records no audit, leaving no
+  partial row.
+- **Cross-year requests** count, for a given year, only the days that fall inside it, and
+  the balance is checked per year.
 
 ### Parameters
 
@@ -65,6 +83,18 @@ created for a Friday or a Saturday.
 Because payroll already consumes the attendance summary (see
 [Attendance](Attendance.md) §4), unpaid leave reaches the payslip with **zero**
 additional code in the payroll engine, which remains untouched.
+
+### How the payroll engine consumes leave *today* (unchanged)
+
+The payroll engine has **no knowledge of leave**. The only path is the attendance summary:
+`BatchPayrollService` computes `workedDays = monthDays − AttendanceSummary.AbsentDays`, and
+`PayrollService`/`PayrollCalculationEngine` receive that `WorkedDays` figure. An approved
+**unpaid** leave day is written as `Absent`, so it raises `AbsentDays` and lowers
+`WorkedDays` → the salary is reduced exactly as a hand-entered absence would reduce it. A
+**paid** leave day is written as `Congé` (`AttendanceStatus.Leave`), which is *not* an
+absence, so `WorkedDays` — and therefore the amount — is unchanged. Proven by
+`LeaveWorkflowTests.Payroll_PaidLeaveKeepsTheAmount_UnpaidDeductsOnlyViaAttendance`. **No
+file under `OptiPaie.PayrollEngine` was modified.**
 
 ## 4. Data model
 
@@ -101,14 +131,15 @@ representation, both repositories bind through it, and migration
 
 | Layer | File |
 |---|---|
-| Core | `Enums/LeaveType.cs`, `Enums/LeaveStatus.cs`, `Entities/LeaveRequest.cs`, `Dtos/LeaveBalance.cs` |
-| Core | `Interfaces/Repositories/ILeaveRepository.cs`, `Interfaces/Services/ILeaveService.cs` |
-| Data | `Sql/Migrations/0010_Leave.sql`, `0011_NormaliseAttendanceDates.sql`, `Repositories/LeaveRepository.cs`, `Context/SqliteDate.cs` |
+| Core | `Enums/LeaveType.cs`, `Enums/LeaveStatus.cs`, `Enums/LeaveTypePolicy.cs`, `Entities/LeaveRequest.cs` (`IsDraft`), `Dtos/LeaveBalance.cs` (`Available`, `WeekendDays`) |
+| Core | `Interfaces/Repositories/ILeaveRepository.cs`, `Interfaces/Services/ILeaveService.cs` (`Submit`, `ReturnToDraft`) |
+| Data | `Sql/Migrations/0010_Leave.sql`, `0011_NormaliseAttendanceDates.sql`, `0030_LeaveDraft.sql`, `Repositories/LeaveRepository.cs`, `Context/SqliteDate.cs` |
 | Services | `LeaveService.cs` |
 | Desktop | `ViewModels/LeaveViewModel.cs`, `LeaveEditViewModel.cs`, `LeaveBalancesViewModel.cs`, `LeaveSettingsViewModel.cs` |
 | Desktop | `Views/LeaveView.xaml`, `LeaveEditWindow.xaml`, `LeaveBalancesWindow.xaml`, `LeaveSettingsWindow.xaml` |
 | Desktop | `Documents/LeaveBalanceReportDocument.cs` (QuestPDF A4 report) |
-| Tests | `tests/OptiPaie.Tests/LeaveServiceTests.cs` |
+| Desktop | `Views/TextPromptWindow.xaml` (themed motive prompt), `Common/Dialogs.Prompt` |
+| Tests | `tests/OptiPaie.Tests/LeaveServiceTests.cs`, `LeaveWorkflowTests.cs` (mandatory proofs) |
 
 ## 6. Tests
 
@@ -127,5 +158,14 @@ representation, both repositories bind through it, and migration
 - settings round-trip and immediately change both the count and the entitlement
 - one stored representation per calendar day across modules
 
-Status: **26/26 passing**, full suite **1219/1219 passing**, `OptiPaie.Desktop` builds
-0 errors / 0 warnings.
+`LeaveWorkflowTests` — the mandatory Congés proofs (11 tests): the full **state machine**
+(every allowed transition passes, every forbidden one is rejected), the **reserved/available
+balance** (reservation, release on refusal, release on cancellation, a draft reserving
+nothing, insufficient-balance refusal), **overlap** (including a draft that is not live),
+**atomicity** (a mid-approval attendance failure — injected through a failing UnitOfWork —
+leaves no partial status/attendance/audit row), **payroll non-regression** (paid leave keeps
+the amount; unpaid deducts only via the attendance summary, the engine untouched), and a full
+create → submit → approve **smoke**.
+
+Status: **Leave 26 + 11 proofs passing**, full suite **1526/1526 passing** (1 skipped
+manual doc-inspection test), client + tests build 0 errors.
