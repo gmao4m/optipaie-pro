@@ -10,6 +10,7 @@ using OptiPaie.Core.Enums;
 using OptiPaie.Core.Interfaces.Repositories;
 using OptiPaie.Core.Interfaces.Services;
 using OptiPaie.Core.Primitives;
+using WeekendConfig = OptiPaie.Core.Certificates.WeekendConfig;
 
 namespace OptiPaie.Services
 {
@@ -28,6 +29,7 @@ namespace OptiPaie.Services
         private const string KeyDaysPerMonth = "Leave.DaysPerMonth";
         private const string KeyAnnualCap = "Leave.AnnualCap";
         private const string KeyExcludeRest = "Leave.ExcludeRestDays";
+        private const string KeyWeekendDays = "Leave.WeekendDays";
 
         /// <summary>Marks the attendance rows this module owns, so it only removes its own.</summary>
         private const string AttendanceMarker = "[Congé]";
@@ -61,19 +63,20 @@ namespace OptiPaie.Services
                         return Result.Fail<long>("Demande introuvable.", "Leave_NotFound");
                     }
 
+                    // Editable only while a draft or a pending request (both stored at
+                    // Status=Pending); an approved/refused/cancelled request is frozen.
                     if (existing.Status != LeaveStatus.Pending)
                     {
                         return Result.Fail<long>(
-                            "Seule une demande en attente peut être modifiée.", "Leave_NotEditable");
+                            "Seule une demande en attente ou un brouillon peut être modifié.", "Leave_NotEditable");
                     }
 
                     request.CreatedAtUtc = existing.CreatedAtUtc;
-                    request.Status = LeaveStatus.Pending;
                 }
-                else
-                {
-                    request.Status = LeaveStatus.Pending;
-                }
+
+                // A live request stays at Status=Pending; the draft/submitted distinction is
+                // carried by IsDraft (respected from the caller — the editor sets it).
+                request.Status = LeaveStatus.Pending;
 
                 Result validation = Validate(uow, request);
                 if (validation.IsFailure)
@@ -92,13 +95,98 @@ namespace OptiPaie.Services
                         "Leave_NoWorkingDay");
                 }
 
+                // Submitting straight away (not a draft) reserves the annual balance, so the
+                // days that consume it must still be available. A draft reserves nothing.
+                if (!request.IsDraft)
+                {
+                    Result balance = ValidateAnnualBalance(uow, request, settings);
+                    if (balance.IsFailure)
+                    {
+                        return Result.Fail<long>(balance.Error, balance.ErrorCode);
+                    }
+                }
+
                 if (request.Id > 0)
                 {
                     uow.Leave.Update(request);
+                    Audit.Record("Leave", request.Id, AuditAction.Updated, "Demande de congé modifiée");
                     return Result.Ok(request.Id);
                 }
 
-                return Result.Ok(uow.Leave.Insert(request));
+                long newId = uow.Leave.Insert(request);
+                Audit.Record("Leave", newId, AuditAction.Created,
+                    request.IsDraft ? "Brouillon de congé créé" : "Demande de congé créée",
+                    null, request.IsDraft ? "Brouillon" : "En attente");
+                return Result.Ok(newId);
+            }
+        }
+
+        public Result Submit(long id)
+        {
+            using (IUnitOfWork uow = _unitOfWorkFactory.Create())
+            {
+                LeaveRequest request = uow.Leave.GetById(id);
+                if (request == null)
+                {
+                    return Result.Fail("Demande introuvable.", "Leave_NotFound");
+                }
+
+                if (request.Status != LeaveStatus.Pending)
+                {
+                    return Result.Fail("Seul un brouillon peut être soumis.", "Leave_NotDraft");
+                }
+
+                if (!request.IsDraft)
+                {
+                    return Result.Ok(); // already submitted — idempotent
+                }
+
+                LeaveSettings settings = ReadSettings(uow);
+
+                // Becomes a LIVE request: re-validate with the overlap rule and reserve the balance.
+                request.IsDraft = false;
+
+                Result validation = Validate(uow, request);
+                if (validation.IsFailure)
+                {
+                    return Result.Fail(validation.Error, validation.ErrorCode);
+                }
+
+                Result balance = ValidateAnnualBalance(uow, request, settings);
+                if (balance.IsFailure)
+                {
+                    return Result.Fail(balance.Error, balance.ErrorCode);
+                }
+
+                request.UpdatedAtUtc = DateTime.UtcNow;
+                uow.Leave.Update(request);
+                Audit.Record("Leave", id, AuditAction.StatusChanged, "Congé soumis", "Brouillon", "En attente");
+                return Result.Ok();
+            }
+        }
+
+        public Result ReturnToDraft(long id, string note)
+        {
+            using (IUnitOfWork uow = _unitOfWorkFactory.Create())
+            {
+                LeaveRequest request = uow.Leave.GetById(id);
+                if (request == null)
+                {
+                    return Result.Fail("Demande introuvable.", "Leave_NotFound");
+                }
+
+                if (request.Status != LeaveStatus.Pending || request.IsDraft)
+                {
+                    return Result.Fail(
+                        "Seule une demande en attente peut être renvoyée en brouillon.", "Leave_NotPending");
+                }
+
+                request.IsDraft = true;                 // releases the reservation (a draft reserves nothing)
+                request.DecisionNote = note;
+                request.UpdatedAtUtc = DateTime.UtcNow;
+                uow.Leave.Update(request);
+                Audit.Record("Leave", id, AuditAction.Returned, "Congé renvoyé pour correction", "En attente", "Brouillon");
+                return Result.Ok();
             }
         }
 
@@ -117,12 +205,23 @@ namespace OptiPaie.Services
                     return Result.Ok();
                 }
 
-                if (request.Status != LeaveStatus.Pending)
+                if (request.Status != LeaveStatus.Pending || request.IsDraft)
                 {
-                    return Result.Fail("Seule une demande en attente peut être approuvée.", "Leave_NotPending");
+                    return Result.Fail(
+                        request.IsDraft
+                            ? "Ce brouillon doit d'abord être soumis."
+                            : "Seule une demande en attente peut être approuvée.",
+                        "Leave_NotPending");
                 }
 
                 LeaveSettings settings = ReadSettings(uow);
+
+                // Defensive: the annual balance must still fit at decision time.
+                Result approvalBalance = ValidateAnnualBalance(uow, request, settings);
+                if (approvalBalance.IsFailure)
+                {
+                    return Result.Fail(approvalBalance.Error, approvalBalance.ErrorCode);
+                }
 
                 uow.BeginTransaction();
                 try
@@ -156,9 +255,14 @@ namespace OptiPaie.Services
                     return Result.Fail("Demande introuvable.", "Leave_NotFound");
                 }
 
-                if (request.Status != LeaveStatus.Pending)
+                if (request.Status != LeaveStatus.Pending || request.IsDraft)
                 {
                     return Result.Fail("Seule une demande en attente peut être refusée.", "Leave_NotPending");
+                }
+
+                if (string.IsNullOrWhiteSpace(note))
+                {
+                    return Result.Fail("Un motif de refus est obligatoire.", "Leave_ReasonRequired");
                 }
 
                 request.Status = LeaveStatus.Rejected;
@@ -185,28 +289,33 @@ namespace OptiPaie.Services
                     return Result.Ok();
                 }
 
-                if (request.Status == LeaveStatus.Rejected)
+                // Spec: only an approved leave can be cancelled (Approuvée → Annulée). A pending
+                // request is refused or returned to draft; a draft is deleted.
+                if (request.Status != LeaveStatus.Approved)
                 {
-                    return Result.Fail("Une demande refusée ne peut pas être annulée.", "Leave_NotCancellable");
+                    return Result.Fail(
+                        "Seul un congé approuvé peut être annulé (utilisez Refuser ou Renvoyer pour une demande en attente).",
+                        "Leave_NotCancellable");
+                }
+
+                if (string.IsNullOrWhiteSpace(note))
+                {
+                    return Result.Fail("Un motif d'annulation est obligatoire.", "Leave_ReasonRequired");
                 }
 
                 uow.BeginTransaction();
                 try
                 {
-                    bool wasApproved = request.Status == LeaveStatus.Approved;
-
                     request.Status = LeaveStatus.Cancelled;
                     request.DecisionNote = note;
                     request.DecidedAtUtc = DateTime.UtcNow;
                     uow.Leave.Update(request);
 
-                    if (wasApproved)
-                    {
-                        RemoveAttendance(uow, request);
-                    }
+                    // It was approved, so it had written its days into attendance — take them back.
+                    RemoveAttendance(uow, request);
 
                     uow.Commit();
-                    Audit.Record("Leave", id, AuditAction.StatusChanged, "Congé annulé", null, "Annulé");
+                    Audit.Record("Leave", id, AuditAction.StatusChanged, "Congé annulé", "Approuvé", "Annulé");
                     return Result.Ok();
                 }
                 catch
@@ -227,6 +336,7 @@ namespace OptiPaie.Services
                     return Result.Ok();
                 }
 
+                LeaveStatus previous = request.Status;
                 uow.BeginTransaction();
                 try
                 {
@@ -237,6 +347,8 @@ namespace OptiPaie.Services
 
                     uow.Leave.SoftDelete(id);
                     uow.Commit();
+                    Audit.Record("Leave", id, AuditAction.Deleted, "Demande de congé supprimée",
+                        previous.ToString(), "Supprimé");
                     return Result.Ok();
                 }
                 catch
@@ -350,6 +462,12 @@ namespace OptiPaie.Services
                 uow.AppSettings.Upsert(KeyDaysPerMonth, settings.DaysPerMonth.ToString(CultureInfo.InvariantCulture));
                 uow.AppSettings.Upsert(KeyAnnualCap, settings.AnnualCap.ToString(CultureInfo.InvariantCulture));
                 uow.AppSettings.Upsert(KeyExcludeRest, settings.ExcludeRestDays ? "1" : "0");
+
+                ISet<DayOfWeek> weekendDays = settings.WeekendDays != null && settings.WeekendDays.Count > 0
+                    ? settings.WeekendDays
+                    : new HashSet<DayOfWeek> { DayOfWeek.Friday, DayOfWeek.Saturday };
+                uow.AppSettings.Upsert(KeyWeekendDays, new WeekendConfig(weekendDays).ToStorageString());
+
                 return Result.Ok();
             }
         }
@@ -364,9 +482,9 @@ namespace OptiPaie.Services
         /// </summary>
         private static void WriteAttendance(IUnitOfWork uow, LeaveRequest request, LeaveSettings settings)
         {
-            AttendanceStatus status = request.Type == LeaveType.Unpaid
-                ? AttendanceStatus.Absent
-                : AttendanceStatus.Leave;
+            AttendanceStatus status = LeaveTypePolicy.IsPaid(request.Type)
+                ? AttendanceStatus.Leave
+                : AttendanceStatus.Absent;
 
             string note = AttendanceMarker + " " + TypeLabel(request.Type);
 
@@ -420,7 +538,13 @@ namespace OptiPaie.Services
 
         private static Result Validate(IUnitOfWork uow, LeaveRequest request)
         {
-            if (request.EmployeeId <= 0 || !uow.Employees.ExistsById(request.EmployeeId))
+            if (request.EmployeeId <= 0)
+            {
+                return Result.Fail("Employé introuvable.", "Leave_EmployeeNotFound");
+            }
+
+            Employee employee = uow.Employees.GetById(request.EmployeeId);
+            if (employee == null)
             {
                 return Result.Fail("Employé introuvable.", "Leave_EmployeeNotFound");
             }
@@ -440,20 +564,82 @@ namespace OptiPaie.Services
                 return Result.Fail("La période ne peut pas dépasser une année.", "Leave_RangeTooLong");
             }
 
-            // No two live requests of the same employee may cover the same day.
-            IEnumerable<LeaveRequest> overlapping =
-                uow.Leave.GetByEmployeeRange(request.EmployeeId, request.StartDate.Date, request.EndDate.Date);
-
-            foreach (LeaveRequest other in overlapping)
+            // The employee must be employed on the leave's start date (actif à la date de début).
+            if (employee.HireDate.Date > request.StartDate.Date)
             {
-                if (other.Id == request.Id) continue;
-                if (other.Status == LeaveStatus.Rejected || other.Status == LeaveStatus.Cancelled) continue;
-
                 return Result.Fail(
-                    "Une autre demande couvre déjà cette période (" +
-                    other.StartDate.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) + " – " +
-                    other.EndDate.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) + ").",
-                    "Leave_Overlap");
+                    "L'employé n'est pas encore recruté à la date de début du congé.", "Leave_EmployeeInactive");
+            }
+
+            if (employee.ExitDate.HasValue && employee.ExitDate.Value.Date < request.StartDate.Date)
+            {
+                return Result.Fail(
+                    "L'employé a quitté l'entreprise avant la date de début du congé.", "Leave_EmployeeInactive");
+            }
+
+            // The overlap rule applies to LIVE requests only. A Brouillon (draft) reserves nothing
+            // and is not "live": it neither blocks others nor is blocked here. The rule is enforced
+            // when it is submitted (Submit sets IsDraft=false, which re-runs this check).
+            if (!request.IsDraft)
+            {
+                IEnumerable<LeaveRequest> overlapping =
+                    uow.Leave.GetByEmployeeRange(request.EmployeeId, request.StartDate.Date, request.EndDate.Date);
+
+                foreach (LeaveRequest other in overlapping)
+                {
+                    if (other.Id == request.Id) continue;
+                    if (other.Status == LeaveStatus.Rejected || other.Status == LeaveStatus.Cancelled) continue;
+                    if (other.IsDraft) continue; // a draft is not live for the overlap rule
+
+                    return Result.Fail(
+                        "Une autre demande couvre déjà cette période (" +
+                        other.StartDate.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) + " – " +
+                        other.EndDate.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) + ").",
+                        "Leave_Overlap");
+                }
+            }
+
+            return Result.Ok();
+        }
+
+        /// <summary>
+        /// For a type that consumes the annual entitlement (Congé annuel), the requested days must
+        /// fit the AVAILABLE balance (acquis − consommé − réservé) of every year the request touches.
+        /// The balance is computed from all OTHER requests (the request never counts against itself),
+        /// so re-validating at submit or approval is idempotent. Non-consuming types always pass.
+        /// </summary>
+        private static Result ValidateAnnualBalance(IUnitOfWork uow, LeaveRequest request, LeaveSettings settings)
+        {
+            if (!LeaveTypePolicy.DecrementsAnnualBalance(request.Type))
+            {
+                return Result.Ok();
+            }
+
+            Employee employee = uow.Employees.GetById(request.EmployeeId);
+
+            for (int year = request.StartDate.Year; year <= request.EndDate.Year; year++)
+            {
+                decimal requestedInYear = Count(
+                    Max(request.StartDate.Date, FirstOfYear(year)),
+                    Min(request.EndDate.Date, LastOfYear(year)),
+                    settings);
+
+                if (requestedInYear <= 0m) continue;
+
+                List<LeaveRequest> others = uow.Leave
+                    .GetByEmployeeRange(request.EmployeeId, FirstOfYear(year), LastOfYear(year))
+                    .Where(r => r.Id != request.Id)
+                    .ToList();
+
+                LeaveBalance balance = BuildBalance(employee, others, year, settings);
+
+                if (requestedInYear > balance.Available)
+                {
+                    return Result.Fail(
+                        "Solde de congé annuel insuffisant pour " + year.ToString(CultureInfo.InvariantCulture) +
+                        " : demandé " + Fmt(requestedInYear) + " j, disponible " + Fmt(balance.Available) + " j.",
+                        "Leave_InsufficientBalance");
+                }
             }
 
             return Result.Ok();
@@ -471,15 +657,23 @@ namespace OptiPaie.Services
         {
             for (DateTime day = start.Date; day <= end.Date; day = day.AddDays(1))
             {
-                if (settings.ExcludeRestDays && IsRestDay(day)) continue;
+                if (settings.ExcludeRestDays && IsRestDay(day, settings)) continue;
                 yield return day;
             }
         }
 
-        /// <summary>The Algerian weekly rest: Friday and Saturday.</summary>
-        private static bool IsRestDay(DateTime day)
+        /// <summary>A weekly rest day per the company parameter (default: Friday + Saturday).</summary>
+        private static bool IsRestDay(DateTime day, LeaveSettings settings)
         {
-            return day.DayOfWeek == DayOfWeek.Friday || day.DayOfWeek == DayOfWeek.Saturday;
+            ISet<DayOfWeek> weekend = settings.WeekendDays;
+            if (weekend == null || weekend.Count == 0)
+            {
+                // Empty/undefined set → fall back to the Algerian default rather than counting
+                // every day as worked (turning exclusion off is done via ExcludeRestDays).
+                return day.DayOfWeek == DayOfWeek.Friday || day.DayOfWeek == DayOfWeek.Saturday;
+            }
+
+            return weekend.Contains(day.DayOfWeek);
         }
 
         private static LeaveBalance BuildBalance(
@@ -504,24 +698,31 @@ namespace OptiPaie.Services
 
                 if (request.Status == LeaveStatus.Pending)
                 {
-                    if (request.Type == LeaveType.Annual) balance.Pending += days;
+                    // A SUBMITTED (non-draft) pending request RESERVES the annual balance;
+                    // a Brouillon (draft) reserves nothing.
+                    if (!request.IsDraft && LeaveTypePolicy.DecrementsAnnualBalance(request.Type))
+                    {
+                        balance.Pending += days;
+                    }
+
                     continue;
                 }
 
                 if (request.Status != LeaveStatus.Approved) continue;
 
-                if (request.Type == LeaveType.Annual)
+                if (LeaveTypePolicy.DecrementsAnnualBalance(request.Type))
                 {
                     balance.Taken += days;
                 }
                 else
                 {
                     balance.OtherLeaveDays += days;
-                    if (request.Type == LeaveType.Unpaid) balance.UnpaidDays += days;
+                    if (!LeaveTypePolicy.IsPaid(request.Type)) balance.UnpaidDays += days;
                 }
             }
 
             balance.Remaining = balance.Entitlement - balance.Taken;
+            balance.Available = balance.Entitlement - balance.Taken - balance.Pending;
             return balance;
         }
 
@@ -570,6 +771,20 @@ namespace OptiPaie.Services
                 settings.ExcludeRestDays = exclude.SettingValue != "0";
             }
 
+            AppSetting weekend = uow.AppSettings.Get(KeyWeekendDays);
+            if (weekend != null && !string.IsNullOrWhiteSpace(weekend.SettingValue))
+            {
+                try
+                {
+                    settings.WeekendDays = new HashSet<DayOfWeek>(
+                        WeekendConfig.FromStorageString(weekend.SettingValue).WeekendDays);
+                }
+                catch
+                {
+                    // Malformed value — keep the Friday/Saturday default.
+                }
+            }
+
             return settings;
         }
 
@@ -585,6 +800,8 @@ namespace OptiPaie.Services
                 default: return "Congé";
             }
         }
+
+        private static string Fmt(decimal value) => value.ToString("0.##", CultureInfo.InvariantCulture);
 
         private static DateTime FirstOfYear(int year) => new DateTime(year, 1, 1);
         private static DateTime LastOfYear(int year) => new DateTime(year, 12, 31);
