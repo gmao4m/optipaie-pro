@@ -49,7 +49,8 @@
                 <ComboBox Style="{StaticResource AppComboBox}" Width="90" Height="32" Margin="10,0,0,0" VerticalAlignment="Center"
                           ItemsSource="{Binding Years}" SelectedItem="{Binding SelectedYear}" />
                 <Button Style="{StaticResource PrimaryButton}" Height="32" Margin="10,0,0,0"
-                        Content="{loc:Loc Leave_NewRequest}" Command="{Binding NewCommand}" />
+                        Content="{loc:Loc Leave_NewRequest}" Command="{Binding NewCommand}"
+                        ToolTip="{Binding CreateHint}" />
                 <Menu Background="Transparent" VerticalAlignment="Center" Margin="6,0,0,0">
                     <MenuItem Header="{loc:Loc Common_More}" Height="32" Padding="8,0" VerticalContentAlignment="Center">
                         <MenuItem Header="{loc:Loc Leave_TeamBalances}" Command="{Binding BalancesCommand}" />
@@ -79,6 +80,11 @@
                           ItemsSource="{Binding MonthFilters}" SelectedItem="{Binding SelectedMonthFilter}"
                           DisplayMemberPath="Label" />
             </StackPanel>
+
+            <!-- Persistent reason shown when a request cannot be created (never a fleeting pop-up). -->
+            <TextBlock VerticalAlignment="Bottom" Margin="18,0,0,6" MaxWidth="360" TextWrapping="Wrap"
+                       Foreground="{DynamicResource StatusDangerText}" FontSize="12" Text="{Binding CreateHint}"
+                       Visibility="{Binding CreateHint, Converter={StaticResource NonEmptyToVis}}" />
         </StackPanel>
 
         <!-- Employee fiche: balance of the selected employee (acquis / consommé / réservé / disponible) -->

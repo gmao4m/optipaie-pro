@@ -1561,4 +1561,10 @@
   <data name="LeaveSet_WeekendDays" xml:space="preserve">
     <value>Jours de repos hebdomadaires (société)</value>
   </data>
+  <data name="Leave_NeedCompany" xml:space="preserve">
+    <value>Sélectionnez d'abord une entreprise pour créer une demande.</value>
+  </data>
+  <data name="Leave_NeedEmployee" xml:space="preserve">
+    <value>Aucun employé actif dans cette entreprise — ajoutez un employé avant de créer une demande.</value>
+  </data>
 </root>

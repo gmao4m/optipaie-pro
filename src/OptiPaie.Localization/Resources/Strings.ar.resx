@@ -1561,4 +1561,10 @@
   <data name="LeaveSet_WeekendDays" xml:space="preserve">
     <value>أيام الراحة الأسبوعية (المؤسسة)</value>
   </data>
+  <data name="Leave_NeedCompany" xml:space="preserve">
+    <value>اختر مؤسسة أولاً لإنشاء طلب.</value>
+  </data>
+  <data name="Leave_NeedEmployee" xml:space="preserve">
+    <value>لا يوجد موظف نشط في هذه المؤسسة — أضف موظفًا قبل إنشاء طلب.</value>
+  </data>
 </root>

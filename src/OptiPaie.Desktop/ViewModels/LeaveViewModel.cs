@@ -8,6 +8,7 @@ using System.Windows.Input;
 using OptiPaie.Core.Dtos;
 using OptiPaie.Core.Entities;
 using OptiPaie.Core.Enums;
+using OptiPaie.Core.Leave;
 using OptiPaie.Core.Primitives;
 using OptiPaie.Desktop.Common;
 using OptiPaie.Desktop.Composition;
@@ -154,6 +155,8 @@ namespace OptiPaie.Desktop.ViewModels
         private string _pendingText = "0", _takenText = "0", _availableText = "0", _unpaidText = "0";
         private string _balanceCaption = string.Empty;
         private string _statusMessage = string.Empty;
+        private bool _canCreate;
+        private string _createHint = string.Empty;
 
         public LeaveViewModel(AppServices services)
         {
@@ -166,7 +169,7 @@ namespace OptiPaie.Desktop.ViewModels
             _selectedStatusFilter = StatusFilters[0];
             _selectedMonthFilter = MonthFilters[0];
 
-            NewCommand = new RelayCommand(New);
+            NewCommand = new RelayCommand(New, () => _canCreate);
             EditCommand = new RelayCommand(Edit, () => _selectedRequest != null && _selectedRequest.CanEdit);
             SubmitCommand = new RelayCommand(Submit, () => _selectedRequest != null && _selectedRequest.CanSubmit);
             ApproveCommand = new RelayCommand(Approve, () => _selectedRequest != null && _selectedRequest.CanApprove);
@@ -226,6 +229,12 @@ namespace OptiPaie.Desktop.ViewModels
         public string BalanceCaption { get => _balanceCaption; private set => Set(ref _balanceCaption, value); }
         public string StatusMessage { get => _statusMessage; private set => Set(ref _statusMessage, value); }
 
+        /// <summary>Whether "طلب جديد" can open the form (drives the button's enabled state).</summary>
+        public bool CanCreate { get => _canCreate; private set => Set(ref _canCreate, value); }
+
+        /// <summary>Persistent explanation shown when the request cannot be created (never a fleeting pop-up).</summary>
+        public string CreateHint { get => _createHint; private set => Set(ref _createHint, value); }
+
         // Contextual availability of each action, for the current selection (drive button visibility).
         public bool CanSubmit => _selectedRequest != null && _selectedRequest.CanSubmit;
         public bool CanApprove => _selectedRequest != null && _selectedRequest.CanApprove;
@@ -255,6 +264,7 @@ namespace OptiPaie.Desktop.ViewModels
         {
             _allRows.Clear();
             _employeeNames.Clear();
+            UpdateCanCreate();
 
             if (_selectedCompany == null)
             {
@@ -345,21 +355,22 @@ namespace OptiPaie.Desktop.ViewModels
             CommandManager.InvalidateRequerySuggested();
         }
 
+        private void UpdateCanCreate()
+        {
+            bool hasCompany = _selectedCompany != null;
+            int active = hasCompany ? _services.Employees.GetByCompany(_selectedCompany.Id, false).Count : 0;
+            CanCreate = LeaveCreateGate.CanCreate(hasCompany, active);
+            string code = LeaveCreateGate.ReasonCode(hasCompany, active);
+            CreateHint = string.IsNullOrEmpty(code) ? string.Empty : L(code);
+            CommandManager.InvalidateRequerySuggested();
+        }
+
         private void New()
         {
-            if (_selectedCompany == null)
-            {
-                Dialogs.Info("Sélectionnez d'abord une entreprise.");
-                return;
-            }
+            // The button is disabled with a persistent reason when it cannot act; this stays as a guard.
+            if (!CanCreate) { StatusMessage = CreateHint; return; }
 
             IReadOnlyList<Employee> employees = _services.Employees.GetByCompany(_selectedCompany.Id, false);
-            if (employees.Count == 0)
-            {
-                Dialogs.Info("Aucun employé actif dans cette entreprise.");
-                return;
-            }
-
             ShowEditor(new LeaveEditViewModel(_services, employees, null));
         }
 
