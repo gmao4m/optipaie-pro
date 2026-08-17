@@ -3,6 +3,11 @@ using OptiPaie.Common.Logging;
 using OptiPaie.Core.Interfaces.Services;
 using OptiPaie.Localization;
 using OptiPaie.Reporting.Engine;
+// Both OptiPaie.Reporting.Engine and OptiPaie.Core.Interfaces.Services declare an
+// IReportService. This legacy shell uses the payslip PDF engine one (Preview/ExportPdf),
+// which is what CompositionRoot wires (new ReportService(localizationService)). Pin it
+// explicitly so the name is unambiguous — no behaviour change.
+using IReportService = OptiPaie.Reporting.Engine.IReportService;
 
 namespace OptiPaie.App
 {

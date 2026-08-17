@@ -50,7 +50,9 @@ namespace OptiPaie.App
             IPayrollEngine engine = new PayrollCalculationEngine();
             var payrollService = new PayrollService(unitOfWorkFactory, configurationService, engine);
 
-            var reportService = new ReportService(localizationService);
+            // Reporting.Engine.ReportService (payslip preview/PDF), not Services.ReportService
+            // (the Reports Center) — disambiguated because both namespaces are imported.
+            var reportService = new OptiPaie.Reporting.Engine.ReportService(localizationService);
             var licenseService = new LicenseService(configuration, logger);
 
             return new AppServices(
