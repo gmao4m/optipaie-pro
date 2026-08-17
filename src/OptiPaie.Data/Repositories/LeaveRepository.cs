@@ -63,10 +63,10 @@ namespace OptiPaie.Data.Repositories
 
             const string sql =
                 "INSERT INTO LeaveRequests " +
-                "(EmployeeId, Type, Status, IsDraft, StartDate, EndDate, Days, Reason, DecisionNote, " +
+                "(EmployeeId, Type, LeaveTypeId, Status, IsDraft, StartDate, EndDate, Days, Reason, DecisionNote, " +
                 " DecidedAtUtc, CreatedAtUtc, UpdatedAtUtc, IsDeleted) " +
                 "VALUES " +
-                "(@EmployeeId, @Type, @Status, @IsDraft, @StartDate, @EndDate, @Days, @Reason, @DecisionNote, " +
+                "(@EmployeeId, @Type, @LeaveTypeId, @Status, @IsDraft, @StartDate, @EndDate, @Days, @Reason, @DecisionNote, " +
                 " @DecidedAtUtc, @CreatedAtUtc, @UpdatedAtUtc, @IsDeleted); " +
                 "SELECT last_insert_rowid();";
 
@@ -83,7 +83,7 @@ namespace OptiPaie.Data.Repositories
 
             const string sql =
                 "UPDATE LeaveRequests SET " +
-                "EmployeeId = @EmployeeId, Type = @Type, Status = @Status, IsDraft = @IsDraft, " +
+                "EmployeeId = @EmployeeId, Type = @Type, LeaveTypeId = @LeaveTypeId, Status = @Status, IsDraft = @IsDraft, " +
                 "StartDate = @StartDate, EndDate = @EndDate, Days = @Days, Reason = @Reason, " +
                 "DecisionNote = @DecisionNote, DecidedAtUtc = @DecidedAtUtc, " +
                 "UpdatedAtUtc = @UpdatedAtUtc, IsDeleted = @IsDeleted " +

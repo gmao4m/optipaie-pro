@@ -16,6 +16,14 @@ namespace OptiPaie.Core.Entities
 
         public LeaveType Type { get; set; }
 
+        /// <summary>
+        /// Optional reference to a configurable <see cref="LeaveTypeDefinition"/>. Null on every
+        /// pre-existing request (and whenever no configurable types are used), in which case the
+        /// service reads the legacy <see cref="Type"/> exactly as before. Stored additively
+        /// (migration 0031) so old databases keep their meaning untouched.
+        /// </summary>
+        public long? LeaveTypeId { get; set; }
+
         public LeaveStatus Status { get; set; }
 
         /// <summary>

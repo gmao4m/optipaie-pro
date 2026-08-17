@@ -51,6 +51,12 @@ namespace OptiPaie.Core.Interfaces.Repositories
         /// <summary>Leave repository (premium module, shares Employees).</summary>
         ILeaveRepository Leave { get; }
 
+        /// <summary>Configurable leave-type catalogue (global + per-company).</summary>
+        ILeaveTypeRepository LeaveTypes { get; }
+
+        /// <summary>Public-holidays calendar (national + per-company).</summary>
+        IHolidayRepository Holidays { get; }
+
         /// <summary>Loan repository (premium module, shares Employees).</summary>
         ILoanRepository Loans { get; }
 

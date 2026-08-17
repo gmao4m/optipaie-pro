@@ -409,6 +409,8 @@ namespace OptiPaie.Tests
             public ILanguageRepository Languages => _inner.Languages;
             public IBackupRecordRepository BackupRecords => _inner.BackupRecords;
             public ILeaveRepository Leave => _inner.Leave;
+            public ILeaveTypeRepository LeaveTypes => _inner.LeaveTypes;
+            public IHolidayRepository Holidays => _inner.Holidays;
             public ILoanRepository Loans => _inner.Loans;
             public IContractRepository Contracts => _inner.Contracts;
             public IPerformanceRepository Performance => _inner.Performance;
