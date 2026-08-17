@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using OptiPaie.Core.Enums;
 
 namespace OptiPaie.Core.Dtos
 {
@@ -62,5 +63,62 @@ namespace OptiPaie.Core.Dtos
         /// </summary>
         public ISet<DayOfWeek> WeekendDays { get; set; } =
             new HashSet<DayOfWeek> { DayOfWeek.Friday, DayOfWeek.Saturday };
+
+        // --- Regulatory options. Each DEFAULTS to the historical behaviour so an existing
+        //     database behaves EXACTLY as before; a company opts in to the legal rule. ---
+
+        /// <summary>Count public holidays out of a leave period. Default OFF (holidays counted, as before).</summary>
+        public bool ExcludeHolidays { get; set; }
+
+        /// <summary>Count in calendar days (weekend included) instead of working days. Default OFF (working days).</summary>
+        public bool CalendarDayCount { get; set; }
+
+        /// <summary>Accrue on the 1 July → 30 June reference period instead of the civil year. Default OFF (civil year).</summary>
+        public bool ReferenceJulyToJune { get; set; }
+
+        /// <summary>Unpaid-leave months do not accrue annual entitlement. Default OFF (accrue as before).</summary>
+        public bool AccrualExcludesUnpaid { get; set; }
+
+        /// <summary>Apply the strict legal treatment to CNAS-paid leave (employer suspends the salary). Default OFF (salary maintained, as today).</summary>
+        public bool StrictCnasTreatment { get; set; }
+
+        /// <summary>Maternity duration in days (loi 25-08/2025 = 150 ; à vérifier au Journal Officiel). Informative parameter.</summary>
+        public decimal MaternityDays { get; set; } = 150m;
+    }
+
+    /// <summary>Live preview of a leave request BEFORE it is saved (days, payment, balance impact, blocking reason).</summary>
+    public sealed class LeavePreview
+    {
+        public decimal Days { get; set; }
+        public PaymentCategory Category { get; set; }
+        public bool DecrementsBalance { get; set; }
+        public decimal AvailableBefore { get; set; }
+        public decimal AvailableAfter { get; set; }
+        public bool Ok { get; set; }
+        public string Reason { get; set; }
+        public string ReasonCode { get; set; }
+    }
+
+    /// <summary>One month of the year in the annual-leave accrual detail.</summary>
+    public sealed class AccrualMonth
+    {
+        public int Month { get; set; }
+        public bool Present { get; set; }
+        public decimal UnpaidDays { get; set; }
+        public decimal Accrued { get; set; }
+    }
+
+    /// <summary>Reliquat de congé (solde de tout compte) for an employee leaving the company.</summary>
+    public sealed class FinalSettlement
+    {
+        public long EmployeeId { get; set; }
+        public string EmployeeName { get; set; }
+        public DateTime ExitDate { get; set; }
+        public decimal Acquired { get; set; }
+        public decimal Taken { get; set; }
+        public decimal RemainingDays { get; set; }
+        public decimal MonthlySalary { get; set; }
+        public decimal DailyRate { get; set; }
+        public decimal Amount { get; set; }
     }
 }

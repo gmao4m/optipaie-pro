@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using OptiPaie.Common.Logging;
 using OptiPaie.Common.Validation;
 using OptiPaie.Core.Auditing;
 using OptiPaie.Core.Dtos;
@@ -15,14 +16,10 @@ using WeekendConfig = OptiPaie.Core.Certificates.WeekendConfig;
 namespace OptiPaie.Services
 {
     /// <summary>
-    /// Leave module orchestration. Owns ALL leave rules so every screen and the
-    /// payroll chain agree:
-    ///   • leave days exclude the Algerian rest days (Friday/Saturday);
-    ///   • two live requests of one employee may never overlap;
-    ///   • annual entitlement = 2,5 days per month worked, capped at 30 (loi 90-11);
-    ///   • approving writes the days into Attendance, cancelling removes them.
-    /// The last rule is the cross-module synchronisation: no import, no export, no
-    /// duplicated day — payroll reads the same attendance rows as everything else.
+    /// Leave module orchestration. Owns ALL leave rules so every screen and the payroll chain agree.
+    /// Every regulatory option is a company setting that DEFAULTS to the historical behaviour, so an
+    /// existing database opens and computes exactly as before; a company opts in to the legal rule.
+    /// Approving writes the days into Attendance (the payroll engine is never touched).
     /// </summary>
     public sealed class LeaveService : ILeaveService
     {
@@ -30,9 +27,18 @@ namespace OptiPaie.Services
         private const string KeyAnnualCap = "Leave.AnnualCap";
         private const string KeyExcludeRest = "Leave.ExcludeRestDays";
         private const string KeyWeekendDays = "Leave.WeekendDays";
+        private const string KeyMaternityDays = "Leave.MaternityDays";
+        // Per-company regulatory flags (suffixed with the company id); absent = historical default.
+        private const string KeyExcludeHolidays = "Leave.ExcludeHolidays";
+        private const string KeyCalendarCount = "Leave.CalendarDayCount";
+        private const string KeyRefJulyJune = "Leave.ReferenceJulyToJune";
+        private const string KeyAccrualExclUnpaid = "Leave.AccrualExcludesUnpaid";
+        private const string KeyStrictCnas = "Leave.StrictCnasTreatment";
 
         /// <summary>Marks the attendance rows this module owns, so it only removes its own.</summary>
         private const string AttendanceMarker = "[Congé]";
+
+        private static readonly ISet<DateTime> NoHolidays = new HashSet<DateTime>();
 
         private readonly IUnitOfWorkFactory _unitOfWorkFactory;
 
@@ -44,65 +50,68 @@ namespace OptiPaie.Services
         /// <summary>Optional audit sink (no-op unless wired by composition). Records lifecycle changes.</summary>
         public IAuditSink Audit { get; set; } = NullAuditSink.Instance;
 
+        /// <summary>Optional logger — every refusal is written here (never a silent failure).</summary>
+        public ILogger Logger { get; set; }
+
+        // ---- resolved-per-operation context (settings + holidays + configurable types) ----
+        private sealed class Ctx
+        {
+            public LeaveSettings Settings;
+            public ISet<DateTime> Holidays;
+            public Dictionary<long, LeaveTypeDefinition> Types;
+        }
+
         public Result<long> Save(LeaveRequest request)
         {
             if (request == null)
             {
-                return Result.Fail<long>("Aucune demande de congé.", "Leave_Required");
+                return Fail<long>("Aucune demande de congé.", "Leave_Required");
             }
 
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
-                LeaveSettings settings = ReadSettings(uow);
+                long companyId = CompanyOf(uow, request.EmployeeId);
+                Ctx ctx = BuildCtx(uow, companyId, request.StartDate, request.EndDate);
 
                 if (request.Id > 0)
                 {
                     LeaveRequest existing = uow.Leave.GetById(request.Id);
                     if (existing == null)
                     {
-                        return Result.Fail<long>("Demande introuvable.", "Leave_NotFound");
+                        return Fail<long>("Demande introuvable.", "Leave_NotFound");
                     }
 
-                    // Editable only while a draft or a pending request (both stored at
-                    // Status=Pending); an approved/refused/cancelled request is frozen.
                     if (existing.Status != LeaveStatus.Pending)
                     {
-                        return Result.Fail<long>(
-                            "Seule une demande en attente ou un brouillon peut être modifié.", "Leave_NotEditable");
+                        return Fail<long>("Seule une demande en attente ou un brouillon peut être modifié.", "Leave_NotEditable");
                     }
 
                     request.CreatedAtUtc = existing.CreatedAtUtc;
                 }
 
-                // A live request stays at Status=Pending; the draft/submitted distinction is
-                // carried by IsDraft (respected from the caller — the editor sets it).
                 request.Status = LeaveStatus.Pending;
 
                 Result validation = Validate(uow, request);
                 if (validation.IsFailure)
                 {
-                    return Result.Fail<long>(validation.Error, validation.ErrorCode);
+                    return Fail<long>(validation.Error, validation.ErrorCode);
                 }
 
                 request.StartDate = request.StartDate.Date;
                 request.EndDate = request.EndDate.Date;
-                request.Days = Count(request.StartDate, request.EndDate, settings);
+                request.Days = Count(request.StartDate, request.EndDate, ctx);
 
                 if (request.Days <= 0m)
                 {
-                    return Result.Fail<long>(
-                        "La période ne contient aucun jour de congé (jours de repos uniquement).",
-                        "Leave_NoWorkingDay");
+                    return Fail<long>("La période ne contient aucun jour décompté (repos/fériés uniquement).", "Leave_NoWorkingDay");
                 }
 
-                // Submitting straight away (not a draft) reserves the annual balance, so the
-                // days that consume it must still be available. A draft reserves nothing.
                 if (!request.IsDraft)
                 {
-                    Result balance = ValidateAnnualBalance(uow, request, settings);
+                    Result balance = ValidateAnnualBalance(uow, request, ctx);
                     if (balance.IsFailure)
                     {
-                        return Result.Fail<long>(balance.Error, balance.ErrorCode);
+                        return Fail<long>(balance.Error, balance.ErrorCode);
                     }
                 }
 
@@ -126,37 +135,18 @@ namespace OptiPaie.Services
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 LeaveRequest request = uow.Leave.GetById(id);
-                if (request == null)
-                {
-                    return Result.Fail("Demande introuvable.", "Leave_NotFound");
-                }
+                if (request == null) return Fail("Demande introuvable.", "Leave_NotFound");
+                if (request.Status != LeaveStatus.Pending) return Fail("Seul un brouillon peut être soumis.", "Leave_NotDraft");
+                if (!request.IsDraft) return Result.Ok(); // already submitted — idempotent
 
-                if (request.Status != LeaveStatus.Pending)
-                {
-                    return Result.Fail("Seul un brouillon peut être soumis.", "Leave_NotDraft");
-                }
-
-                if (!request.IsDraft)
-                {
-                    return Result.Ok(); // already submitted — idempotent
-                }
-
-                LeaveSettings settings = ReadSettings(uow);
-
-                // Becomes a LIVE request: re-validate with the overlap rule and reserve the balance.
+                Ctx ctx = BuildCtx(uow, CompanyOf(uow, request.EmployeeId), request.StartDate, request.EndDate);
                 request.IsDraft = false;
 
                 Result validation = Validate(uow, request);
-                if (validation.IsFailure)
-                {
-                    return Result.Fail(validation.Error, validation.ErrorCode);
-                }
+                if (validation.IsFailure) return Fail(validation.Error, validation.ErrorCode);
 
-                Result balance = ValidateAnnualBalance(uow, request, settings);
-                if (balance.IsFailure)
-                {
-                    return Result.Fail(balance.Error, balance.ErrorCode);
-                }
+                Result balance = ValidateAnnualBalance(uow, request, ctx);
+                if (balance.IsFailure) return Fail(balance.Error, balance.ErrorCode);
 
                 request.UpdatedAtUtc = DateTime.UtcNow;
                 uow.Leave.Update(request);
@@ -170,18 +160,11 @@ namespace OptiPaie.Services
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 LeaveRequest request = uow.Leave.GetById(id);
-                if (request == null)
-                {
-                    return Result.Fail("Demande introuvable.", "Leave_NotFound");
-                }
-
+                if (request == null) return Fail("Demande introuvable.", "Leave_NotFound");
                 if (request.Status != LeaveStatus.Pending || request.IsDraft)
-                {
-                    return Result.Fail(
-                        "Seule une demande en attente peut être renvoyée en brouillon.", "Leave_NotPending");
-                }
+                    return Fail("Seule une demande en attente peut être renvoyée en brouillon.", "Leave_NotPending");
 
-                request.IsDraft = true;                 // releases the reservation (a draft reserves nothing)
+                request.IsDraft = true;
                 request.DecisionNote = note;
                 request.UpdatedAtUtc = DateTime.UtcNow;
                 uow.Leave.Update(request);
@@ -195,33 +178,15 @@ namespace OptiPaie.Services
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 LeaveRequest request = uow.Leave.GetById(id);
-                if (request == null)
-                {
-                    return Result.Fail("Demande introuvable.", "Leave_NotFound");
-                }
-
-                if (request.Status == LeaveStatus.Approved)
-                {
-                    return Result.Ok();
-                }
-
+                if (request == null) return Fail("Demande introuvable.", "Leave_NotFound");
+                if (request.Status == LeaveStatus.Approved) return Result.Ok();
                 if (request.Status != LeaveStatus.Pending || request.IsDraft)
-                {
-                    return Result.Fail(
-                        request.IsDraft
-                            ? "Ce brouillon doit d'abord être soumis."
-                            : "Seule une demande en attente peut être approuvée.",
-                        "Leave_NotPending");
-                }
+                    return Fail(request.IsDraft ? "Ce brouillon doit d'abord être soumis." : "Seule une demande en attente peut être approuvée.", "Leave_NotPending");
 
-                LeaveSettings settings = ReadSettings(uow);
+                Ctx ctx = BuildCtx(uow, CompanyOf(uow, request.EmployeeId), request.StartDate, request.EndDate);
 
-                // Defensive: the annual balance must still fit at decision time.
-                Result approvalBalance = ValidateAnnualBalance(uow, request, settings);
-                if (approvalBalance.IsFailure)
-                {
-                    return Result.Fail(approvalBalance.Error, approvalBalance.ErrorCode);
-                }
+                Result approvalBalance = ValidateAnnualBalance(uow, request, ctx);
+                if (approvalBalance.IsFailure) return Fail(approvalBalance.Error, approvalBalance.ErrorCode);
 
                 uow.BeginTransaction();
                 try
@@ -231,7 +196,7 @@ namespace OptiPaie.Services
                     request.DecidedAtUtc = DateTime.UtcNow;
                     uow.Leave.Update(request);
 
-                    WriteAttendance(uow, request, settings);
+                    WriteAttendance(uow, request, ctx);
 
                     uow.Commit();
                     Audit.Record("Leave", id, AuditAction.Approved, "Congé approuvé", "En attente", "Approuvé");
@@ -250,20 +215,11 @@ namespace OptiPaie.Services
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 LeaveRequest request = uow.Leave.GetById(id);
-                if (request == null)
-                {
-                    return Result.Fail("Demande introuvable.", "Leave_NotFound");
-                }
-
+                if (request == null) return Fail("Demande introuvable.", "Leave_NotFound");
                 if (request.Status != LeaveStatus.Pending || request.IsDraft)
-                {
-                    return Result.Fail("Seule une demande en attente peut être refusée.", "Leave_NotPending");
-                }
-
+                    return Fail("Seule une demande en attente peut être refusée.", "Leave_NotPending");
                 if (string.IsNullOrWhiteSpace(note))
-                {
-                    return Result.Fail("Un motif de refus est obligatoire.", "Leave_ReasonRequired");
-                }
+                    return Fail("Un motif de refus est obligatoire.", "Leave_ReasonRequired");
 
                 request.Status = LeaveStatus.Rejected;
                 request.DecisionNote = note;
@@ -279,29 +235,12 @@ namespace OptiPaie.Services
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 LeaveRequest request = uow.Leave.GetById(id);
-                if (request == null)
-                {
-                    return Result.Fail("Demande introuvable.", "Leave_NotFound");
-                }
-
-                if (request.Status == LeaveStatus.Cancelled)
-                {
-                    return Result.Ok();
-                }
-
-                // Spec: only an approved leave can be cancelled (Approuvée → Annulée). A pending
-                // request is refused or returned to draft; a draft is deleted.
+                if (request == null) return Fail("Demande introuvable.", "Leave_NotFound");
+                if (request.Status == LeaveStatus.Cancelled) return Result.Ok();
                 if (request.Status != LeaveStatus.Approved)
-                {
-                    return Result.Fail(
-                        "Seul un congé approuvé peut être annulé (utilisez Refuser ou Renvoyer pour une demande en attente).",
-                        "Leave_NotCancellable");
-                }
-
+                    return Fail("Seul un congé approuvé peut être annulé (utilisez Refuser ou Renvoyer pour une demande en attente).", "Leave_NotCancellable");
                 if (string.IsNullOrWhiteSpace(note))
-                {
-                    return Result.Fail("Un motif d'annulation est obligatoire.", "Leave_ReasonRequired");
-                }
+                    return Fail("Un motif d'annulation est obligatoire.", "Leave_ReasonRequired");
 
                 uow.BeginTransaction();
                 try
@@ -310,10 +249,7 @@ namespace OptiPaie.Services
                     request.DecisionNote = note;
                     request.DecidedAtUtc = DateTime.UtcNow;
                     uow.Leave.Update(request);
-
-                    // It was approved, so it had written its days into attendance — take them back.
                     RemoveAttendance(uow, request);
-
                     uow.Commit();
                     Audit.Record("Leave", id, AuditAction.StatusChanged, "Congé annulé", "Approuvé", "Annulé");
                     return Result.Ok();
@@ -331,24 +267,16 @@ namespace OptiPaie.Services
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 LeaveRequest request = uow.Leave.GetById(id);
-                if (request == null)
-                {
-                    return Result.Ok();
-                }
+                if (request == null) return Result.Ok();
 
                 LeaveStatus previous = request.Status;
                 uow.BeginTransaction();
                 try
                 {
-                    if (request.Status == LeaveStatus.Approved)
-                    {
-                        RemoveAttendance(uow, request);
-                    }
-
+                    if (request.Status == LeaveStatus.Approved) RemoveAttendance(uow, request);
                     uow.Leave.SoftDelete(id);
                     uow.Commit();
-                    Audit.Record("Leave", id, AuditAction.Deleted, "Demande de congé supprimée",
-                        previous.ToString(), "Supprimé");
+                    Audit.Record("Leave", id, AuditAction.Deleted, "Demande de congé supprimée", previous.ToString(), "Supprimé");
                     return Result.Ok();
                 }
                 catch
@@ -361,38 +289,30 @@ namespace OptiPaie.Services
 
         public LeaveRequest Get(long id)
         {
-            using (IUnitOfWork uow = _unitOfWorkFactory.Create())
-            {
-                return uow.Leave.GetById(id);
-            }
+            using (IUnitOfWork uow = _unitOfWorkFactory.Create()) return uow.Leave.GetById(id);
         }
 
         public IReadOnlyList<LeaveRequest> GetByEmployee(long employeeId)
         {
-            using (IUnitOfWork uow = _unitOfWorkFactory.Create())
-            {
-                return uow.Leave.GetByEmployee(employeeId).ToList();
-            }
+            using (IUnitOfWork uow = _unitOfWorkFactory.Create()) return uow.Leave.GetByEmployee(employeeId).ToList();
         }
 
         public IReadOnlyList<LeaveRequest> GetByCompanyYear(long companyId, int year)
         {
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
-            {
                 return uow.Leave.GetByCompanyRange(companyId, FirstOfYear(year), LastOfYear(year)).ToList();
-            }
         }
 
         public LeaveBalance GetBalance(long employeeId, int year)
         {
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
-                LeaveSettings settings = ReadSettings(uow);
                 Employee employee = uow.Employees.GetById(employeeId);
-                List<LeaveRequest> requests =
-                    uow.Leave.GetByEmployeeRange(employeeId, FirstOfYear(year), LastOfYear(year)).ToList();
+                long companyId = employee != null ? employee.CompanyId : 0L;
+                Ctx ctx = BuildCtx(uow, companyId, FirstOfYear(year), LastOfYear(year));
+                List<LeaveRequest> requests = uow.Leave.GetByEmployeeRange(employeeId, FirstOfYear(year), LastOfYear(year)).ToList();
 
-                LeaveBalance balance = BuildBalance(employee, requests, year, settings);
+                LeaveBalance balance = BuildBalance(employee, requests, year, ctx);
                 balance.EmployeeId = employeeId;
                 return balance;
             }
@@ -402,19 +322,15 @@ namespace OptiPaie.Services
         {
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
-                LeaveSettings settings = ReadSettings(uow);
-                List<LeaveRequest> all =
-                    uow.Leave.GetByCompanyRange(companyId, FirstOfYear(year), LastOfYear(year)).ToList();
+                Ctx ctx = BuildCtx(uow, companyId, FirstOfYear(year), LastOfYear(year));
+                List<LeaveRequest> all = uow.Leave.GetByCompanyRange(companyId, FirstOfYear(year), LastOfYear(year)).ToList();
                 var byEmployee = all.GroupBy(r => r.EmployeeId).ToDictionary(g => g.Key, g => g.ToList());
 
                 var result = new List<LeaveBalance>();
                 foreach (Employee employee in uow.Employees.GetByCompany(companyId))
                 {
-                    List<LeaveRequest> forEmployee = byEmployee.TryGetValue(employee.Id, out var rows)
-                        ? rows
-                        : new List<LeaveRequest>();
-
-                    LeaveBalance balance = BuildBalance(employee, forEmployee, year, settings);
+                    List<LeaveRequest> forEmployee = byEmployee.TryGetValue(employee.Id, out var rows) ? rows : new List<LeaveRequest>();
+                    LeaveBalance balance = BuildBalance(employee, forEmployee, year, ctx);
                     balance.EmployeeId = employee.Id;
                     balance.EmployeeName = (employee.LastNameFr + " " + employee.FirstNameFr).Trim();
                     result.Add(balance);
@@ -426,69 +342,164 @@ namespace OptiPaie.Services
 
         public decimal CountDays(DateTime start, DateTime end)
         {
+            // Company-agnostic quick count (week-end per global settings, no holidays). Preview() is the
+            // employee-accurate one (it applies holidays and the company's options).
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
-                return Count(start, end, ReadSettings(uow));
+                var ctx = new Ctx { Settings = ReadSettings(uow, 0), Holidays = NoHolidays, Types = new Dictionary<long, LeaveTypeDefinition>() };
+                return Count(start, end, ctx);
             }
+        }
+
+        public LeavePreview Preview(LeaveRequest request)
+        {
+            var preview = new LeavePreview();
+            if (request == null) { preview.Reason = "Aucune demande."; preview.ReasonCode = "Leave_Required"; return preview; }
+
+            using (IUnitOfWork uow = _unitOfWorkFactory.Create())
+            {
+                long companyId = CompanyOf(uow, request.EmployeeId);
+                Ctx ctx = BuildCtx(uow, companyId, request.StartDate, request.EndDate);
+
+                preview.Category = ResolveCategory(request, ctx);
+                preview.DecrementsBalance = ResolveDecrements(request, ctx);
+                preview.Days = Count(request.StartDate.Date, request.EndDate.Date, ctx);
+
+                LeaveBalance before = GetBalanceInternal(uow, request.EmployeeId, request.StartDate.Year, ctx);
+                preview.AvailableBefore = before.Available;
+                preview.AvailableAfter = preview.DecrementsBalance ? before.Available - preview.Days : before.Available;
+
+                // Blocking checks, most specific first, each with its precise reason.
+                Result validation = Validate(uow, request);
+                if (validation.IsFailure) { preview.Ok = false; preview.Reason = validation.Error; preview.ReasonCode = validation.ErrorCode; return preview; }
+                if (preview.Days <= 0m) { preview.Ok = false; preview.Reason = "La période ne contient aucun jour décompté."; preview.ReasonCode = "Leave_NoWorkingDay"; return preview; }
+                Result balance = ValidateAnnualBalance(uow, request, ctx);
+                if (balance.IsFailure) { preview.Ok = false; preview.Reason = balance.Error; preview.ReasonCode = balance.ErrorCode; return preview; }
+
+                preview.Ok = true;
+                return preview;
+            }
+        }
+
+        public IReadOnlyList<AccrualMonth> GetAccrualDetail(long employeeId, int year)
+        {
+            using (IUnitOfWork uow = _unitOfWorkFactory.Create())
+            {
+                Employee employee = uow.Employees.GetById(employeeId);
+                long companyId = employee != null ? employee.CompanyId : 0L;
+                Ctx ctx = BuildCtx(uow, companyId, FirstOfYear(year), LastOfYear(year));
+                List<LeaveRequest> requests = uow.Leave.GetByEmployeeRange(employeeId, FirstOfYear(year), LastOfYear(year)).ToList();
+                return AccrualMonths(employee, year, ctx, requests);
+            }
+        }
+
+        public FinalSettlement ComputeFinalSettlement(long employeeId, DateTime exitDate)
+        {
+            using (IUnitOfWork uow = _unitOfWorkFactory.Create())
+            {
+                Employee employee = uow.Employees.GetById(employeeId);
+                long companyId = employee != null ? employee.CompanyId : 0L;
+                int year = exitDate.Year;
+                Ctx ctx = BuildCtx(uow, companyId, FirstOfYear(year), LastOfYear(year));
+                List<LeaveRequest> requests = uow.Leave.GetByEmployeeRange(employeeId, FirstOfYear(year), LastOfYear(year)).ToList();
+
+                // Acquired up to the exit date (prorata), minus annual days already taken this year.
+                Employee toExit = employee;
+                if (toExit != null && (!toExit.ExitDate.HasValue || toExit.ExitDate.Value.Date > exitDate.Date))
+                {
+                    // evaluate accrual as if the contract ends on exitDate
+                    toExit = CloneWithExit(employee, exitDate);
+                }
+
+                decimal acquired = Entitlement(toExit, year, ctx, requests);
+                decimal taken = 0m;
+                foreach (LeaveRequest r in requests)
+                {
+                    if (r.Status != LeaveStatus.Approved || !ResolveDecrements(r, ctx)) continue;
+                    taken += Count(Max(r.StartDate, FirstOfYear(year)), Min(r.EndDate, LastOfYear(year)), ctx);
+                }
+
+                decimal remaining = acquired - taken;
+                if (remaining < 0m) remaining = 0m;
+
+                decimal monthly = employee != null ? employee.BaseSalary : 0m;
+                decimal daily = monthly / 30m; // usage courant : salaire mensuel / 30
+                return new FinalSettlement
+                {
+                    EmployeeId = employeeId,
+                    EmployeeName = employee != null ? (employee.LastNameFr + " " + employee.FirstNameFr).Trim() : string.Empty,
+                    ExitDate = exitDate.Date,
+                    Acquired = acquired,
+                    Taken = taken,
+                    RemainingDays = remaining,
+                    MonthlySalary = monthly,
+                    DailyRate = daily,
+                    Amount = decimal.Round(remaining * daily, 2, MidpointRounding.AwayFromZero)
+                };
+            }
+        }
+
+        public IReadOnlyList<LeaveTypeDefinition> GetTypes(long companyId)
+        {
+            using (IUnitOfWork uow = _unitOfWorkFactory.Create())
+                return uow.LeaveTypes.GetForCompany(companyId).Where(t => t.IsActive).ToList();
         }
 
         public LeaveSettings GetSettings()
         {
-            using (IUnitOfWork uow = _unitOfWorkFactory.Create())
-            {
-                return ReadSettings(uow);
-            }
+            using (IUnitOfWork uow = _unitOfWorkFactory.Create()) return ReadSettings(uow, 0);
         }
 
-        public Result SaveSettings(LeaveSettings settings)
+        public LeaveSettings GetSettings(long companyId)
         {
-            if (settings == null)
-            {
-                return Result.Fail("Paramètres manquants.", "Leave_SettingsRequired");
-            }
+            using (IUnitOfWork uow = _unitOfWorkFactory.Create()) return ReadSettings(uow, companyId);
+        }
 
-            if (settings.DaysPerMonth <= 0m || settings.DaysPerMonth > 10m)
-            {
-                return Result.Fail("Jours acquis par mois invalide.", "Leave_DaysPerMonthInvalid");
-            }
+        public Result SaveSettings(LeaveSettings settings) => SaveSettings(0, settings);
 
-            if (settings.AnnualCap <= 0m || settings.AnnualCap > 365m)
-            {
-                return Result.Fail("Plafond annuel invalide.", "Leave_CapInvalid");
-            }
+        public Result SaveSettings(long companyId, LeaveSettings settings)
+        {
+            if (settings == null) return Fail("Paramètres manquants.", "Leave_SettingsRequired");
+            if (settings.DaysPerMonth <= 0m || settings.DaysPerMonth > 10m) return Fail("Jours acquis par mois invalide.", "Leave_DaysPerMonthInvalid");
+            if (settings.AnnualCap <= 0m || settings.AnnualCap > 365m) return Fail("Plafond annuel invalide.", "Leave_CapInvalid");
 
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
+                // Historical, global parameters (unchanged).
                 uow.AppSettings.Upsert(KeyDaysPerMonth, settings.DaysPerMonth.ToString(CultureInfo.InvariantCulture));
                 uow.AppSettings.Upsert(KeyAnnualCap, settings.AnnualCap.ToString(CultureInfo.InvariantCulture));
                 uow.AppSettings.Upsert(KeyExcludeRest, settings.ExcludeRestDays ? "1" : "0");
+                uow.AppSettings.Upsert(KeyMaternityDays, settings.MaternityDays.ToString(CultureInfo.InvariantCulture));
 
                 ISet<DayOfWeek> weekendDays = settings.WeekendDays != null && settings.WeekendDays.Count > 0
-                    ? settings.WeekendDays
-                    : new HashSet<DayOfWeek> { DayOfWeek.Friday, DayOfWeek.Saturday };
+                    ? settings.WeekendDays : new HashSet<DayOfWeek> { DayOfWeek.Friday, DayOfWeek.Saturday };
                 uow.AppSettings.Upsert(KeyWeekendDays, new WeekendConfig(weekendDays).ToStorageString());
+
+                // Per-company regulatory flags.
+                uow.AppSettings.Upsert(Scoped(KeyExcludeHolidays, companyId), settings.ExcludeHolidays ? "1" : "0");
+                uow.AppSettings.Upsert(Scoped(KeyCalendarCount, companyId), settings.CalendarDayCount ? "1" : "0");
+                uow.AppSettings.Upsert(Scoped(KeyRefJulyJune, companyId), settings.ReferenceJulyToJune ? "1" : "0");
+                uow.AppSettings.Upsert(Scoped(KeyAccrualExclUnpaid, companyId), settings.AccrualExcludesUnpaid ? "1" : "0");
+                uow.AppSettings.Upsert(Scoped(KeyStrictCnas, companyId), settings.StrictCnasTreatment ? "1" : "0");
 
                 return Result.Ok();
             }
         }
 
-        // -- cross-module synchronisation --------------------------------------
+        // ================================================================ cross-module synchronisation
 
-        /// <summary>
-        /// Mirrors an approved request into the Attendance module: one row per leave
-        /// day, marked so the module can recognise its own rows later. Unpaid leave is
-        /// written as "Absent" so payroll deducts it; every other type as "Congé".
-        /// An existing attendance day is never silently overwritten.
-        /// </summary>
-        private static void WriteAttendance(IUnitOfWork uow, LeaveRequest request, LeaveSettings settings)
+        private void WriteAttendance(IUnitOfWork uow, LeaveRequest request, Ctx ctx)
         {
-            AttendanceStatus status = LeaveTypePolicy.IsPaid(request.Type)
-                ? AttendanceStatus.Leave
-                : AttendanceStatus.Absent;
+            PaymentCategory category = ResolveCategory(request, ctx);
+            // A day is "suspended" (Absent → payroll deducts) for unpaid leave, and — ONLY if the company
+            // opted in — for CNAS-paid leave. Default: CNAS behaves like employer-paid (salary maintained).
+            bool suspend = category == PaymentCategory.Unpaid
+                           || (category == PaymentCategory.SocialSecurity && ctx.Settings.StrictCnasTreatment);
+            AttendanceStatus status = suspend ? AttendanceStatus.Absent : AttendanceStatus.Leave;
 
-            string note = AttendanceMarker + " " + TypeLabel(request.Type);
+            string note = AttendanceMarker + " " + TypeLabelOf(request, ctx);
 
-            foreach (DateTime day in EachLeaveDay(request.StartDate, request.EndDate, settings))
+            foreach (DateTime day in EachLeaveDay(request.StartDate, request.EndDate, ctx))
             {
                 AttendanceRecord existing = uow.Attendance.GetByEmployeeAndDate(request.EmployeeId, day);
                 if (existing != null)
@@ -517,16 +528,13 @@ namespace OptiPaie.Services
             }
         }
 
-        /// <summary>Removes the attendance days this module created for the request.</summary>
         private static void RemoveAttendance(IUnitOfWork uow, LeaveRequest request)
         {
             List<AttendanceRecord> days = uow.Attendance
-                .GetByEmployeeRange(request.EmployeeId, request.StartDate, request.EndDate)
-                .ToList();
+                .GetByEmployeeRange(request.EmployeeId, request.StartDate, request.EndDate).ToList();
 
             foreach (AttendanceRecord day in days)
             {
-                // Only rows written by this module — a manually recorded day stays.
                 if (day.Notes != null && day.Notes.StartsWith(AttendanceMarker, StringComparison.Ordinal))
                 {
                     uow.Attendance.SoftDelete(day.Id);
@@ -534,52 +542,27 @@ namespace OptiPaie.Services
             }
         }
 
-        // -- internals ---------------------------------------------------------
+        // ================================================================ internals
 
         private static Result Validate(IUnitOfWork uow, LeaveRequest request)
         {
-            if (request.EmployeeId <= 0)
-            {
-                return Result.Fail("Employé introuvable.", "Leave_EmployeeNotFound");
-            }
+            if (request.EmployeeId <= 0) return Result.Fail("Employé introuvable.", "Leave_EmployeeNotFound");
 
             Employee employee = uow.Employees.GetById(request.EmployeeId);
-            if (employee == null)
-            {
-                return Result.Fail("Employé introuvable.", "Leave_EmployeeNotFound");
-            }
+            if (employee == null) return Result.Fail("Employé introuvable.", "Leave_EmployeeNotFound");
 
             if (request.StartDate == default(DateTime) || request.EndDate == default(DateTime))
-            {
                 return Result.Fail("Les dates de début et de fin sont obligatoires.", "Leave_DatesRequired");
-            }
-
             if (request.EndDate.Date < request.StartDate.Date)
-            {
                 return Result.Fail("La date de fin doit suivre la date de début.", "Leave_EndBeforeStart");
-            }
-
             if ((request.EndDate.Date - request.StartDate.Date).TotalDays > 365)
-            {
                 return Result.Fail("La période ne peut pas dépasser une année.", "Leave_RangeTooLong");
-            }
 
-            // The employee must be employed on the leave's start date (actif à la date de début).
             if (employee.HireDate.Date > request.StartDate.Date)
-            {
-                return Result.Fail(
-                    "L'employé n'est pas encore recruté à la date de début du congé.", "Leave_EmployeeInactive");
-            }
-
+                return Result.Fail("L'employé n'est pas encore recruté à la date de début du congé.", "Leave_EmployeeInactive");
             if (employee.ExitDate.HasValue && employee.ExitDate.Value.Date < request.StartDate.Date)
-            {
-                return Result.Fail(
-                    "L'employé a quitté l'entreprise avant la date de début du congé.", "Leave_EmployeeInactive");
-            }
+                return Result.Fail("L'employé a quitté l'entreprise avant la date de début du congé.", "Leave_EmployeeInactive");
 
-            // The overlap rule applies to LIVE requests only. A Brouillon (draft) reserves nothing
-            // and is not "live": it neither blocks others nor is blocked here. The rule is enforced
-            // when it is submitted (Submit sets IsDraft=false, which re-runs this check).
             if (!request.IsDraft)
             {
                 IEnumerable<LeaveRequest> overlapping =
@@ -589,7 +572,7 @@ namespace OptiPaie.Services
                 {
                     if (other.Id == request.Id) continue;
                     if (other.Status == LeaveStatus.Rejected || other.Status == LeaveStatus.Cancelled) continue;
-                    if (other.IsDraft) continue; // a draft is not live for the overlap rule
+                    if (other.IsDraft) continue;
 
                     return Result.Fail(
                         "Une autre demande couvre déjà cette période (" +
@@ -602,36 +585,22 @@ namespace OptiPaie.Services
             return Result.Ok();
         }
 
-        /// <summary>
-        /// For a type that consumes the annual entitlement (Congé annuel), the requested days must
-        /// fit the AVAILABLE balance (acquis − consommé − réservé) of every year the request touches.
-        /// The balance is computed from all OTHER requests (the request never counts against itself),
-        /// so re-validating at submit or approval is idempotent. Non-consuming types always pass.
-        /// </summary>
-        private static Result ValidateAnnualBalance(IUnitOfWork uow, LeaveRequest request, LeaveSettings settings)
+        private static Result ValidateAnnualBalance(IUnitOfWork uow, LeaveRequest request, Ctx ctx)
         {
-            if (!LeaveTypePolicy.DecrementsAnnualBalance(request.Type))
-            {
-                return Result.Ok();
-            }
+            if (!ResolveDecrements(request, ctx)) return Result.Ok();
 
             Employee employee = uow.Employees.GetById(request.EmployeeId);
 
             for (int year = request.StartDate.Year; year <= request.EndDate.Year; year++)
             {
-                decimal requestedInYear = Count(
-                    Max(request.StartDate.Date, FirstOfYear(year)),
-                    Min(request.EndDate.Date, LastOfYear(year)),
-                    settings);
-
+                decimal requestedInYear = Count(Max(request.StartDate.Date, FirstOfYear(year)), Min(request.EndDate.Date, LastOfYear(year)), ctx);
                 if (requestedInYear <= 0m) continue;
 
                 List<LeaveRequest> others = uow.Leave
                     .GetByEmployeeRange(request.EmployeeId, FirstOfYear(year), LastOfYear(year))
-                    .Where(r => r.Id != request.Id)
-                    .ToList();
+                    .Where(r => r.Id != request.Id).ToList();
 
-                LeaveBalance balance = BuildBalance(employee, others, year, settings);
+                LeaveBalance balance = BuildBalance(employee, others, year, ctx);
 
                 if (requestedInYear > balance.Available)
                 {
@@ -645,79 +614,61 @@ namespace OptiPaie.Services
             return Result.Ok();
         }
 
-        /// <summary>Leave days in a range: rest days (Friday/Saturday) excluded when configured.</summary>
-        private static decimal Count(DateTime start, DateTime end, LeaveSettings settings)
+        private static decimal Count(DateTime start, DateTime end, Ctx ctx)
         {
             int days = 0;
-            foreach (DateTime unused in EachLeaveDay(start, end, settings)) days++;
+            foreach (DateTime unused in EachLeaveDay(start, end, ctx)) days++;
             return days;
         }
 
-        private static IEnumerable<DateTime> EachLeaveDay(DateTime start, DateTime end, LeaveSettings settings)
+        private static IEnumerable<DateTime> EachLeaveDay(DateTime start, DateTime end, Ctx ctx)
         {
+            LeaveSettings s = ctx.Settings;
+            bool excludeWeekend = s.ExcludeRestDays && !s.CalendarDayCount;
+
             for (DateTime day = start.Date; day <= end.Date; day = day.AddDays(1))
             {
-                if (settings.ExcludeRestDays && IsRestDay(day, settings)) continue;
+                if (excludeWeekend && IsRestDay(day, s)) continue;
+                if (s.ExcludeHolidays && ctx.Holidays != null && ctx.Holidays.Contains(day.Date)) continue;
                 yield return day;
             }
         }
 
-        /// <summary>A weekly rest day per the company parameter (default: Friday + Saturday).</summary>
         private static bool IsRestDay(DateTime day, LeaveSettings settings)
         {
             ISet<DayOfWeek> weekend = settings.WeekendDays;
             if (weekend == null || weekend.Count == 0)
-            {
-                // Empty/undefined set → fall back to the Algerian default rather than counting
-                // every day as worked (turning exclusion off is done via ExcludeRestDays).
                 return day.DayOfWeek == DayOfWeek.Friday || day.DayOfWeek == DayOfWeek.Saturday;
-            }
-
             return weekend.Contains(day.DayOfWeek);
         }
 
-        private static LeaveBalance BuildBalance(
-            Employee employee, IEnumerable<LeaveRequest> requests, int year, LeaveSettings settings)
+        private static LeaveBalance BuildBalance(Employee employee, IEnumerable<LeaveRequest> requests, int year, Ctx ctx)
         {
+            List<LeaveRequest> reqList = requests as List<LeaveRequest> ?? requests.ToList();
             var balance = new LeaveBalance { Year = year, Entitlement = 0m };
+            if (employee != null) balance.Entitlement = Entitlement(employee, year, ctx, reqList);
 
-            if (employee != null)
+            foreach (LeaveRequest request in reqList)
             {
-                balance.Entitlement = Entitlement(employee, year, settings);
-            }
-
-            foreach (LeaveRequest request in requests)
-            {
-                // Only the part of the request falling inside the year counts.
-                decimal days = Count(
-                    Max(request.StartDate, FirstOfYear(year)),
-                    Min(request.EndDate, LastOfYear(year)),
-                    settings);
-
+                decimal days = Count(Max(request.StartDate, FirstOfYear(year)), Min(request.EndDate, LastOfYear(year)), ctx);
                 if (days <= 0m) continue;
 
                 if (request.Status == LeaveStatus.Pending)
                 {
-                    // A SUBMITTED (non-draft) pending request RESERVES the annual balance;
-                    // a Brouillon (draft) reserves nothing.
-                    if (!request.IsDraft && LeaveTypePolicy.DecrementsAnnualBalance(request.Type))
-                    {
-                        balance.Pending += days;
-                    }
-
+                    if (!request.IsDraft && ResolveDecrements(request, ctx)) balance.Pending += days;
                     continue;
                 }
 
                 if (request.Status != LeaveStatus.Approved) continue;
 
-                if (LeaveTypePolicy.DecrementsAnnualBalance(request.Type))
+                if (ResolveDecrements(request, ctx))
                 {
                     balance.Taken += days;
                 }
                 else
                 {
                     balance.OtherLeaveDays += days;
-                    if (!LeaveTypePolicy.IsPaid(request.Type)) balance.UnpaidDays += days;
+                    if (ResolveCategory(request, ctx) == PaymentCategory.Unpaid) balance.UnpaidDays += days;
                 }
             }
 
@@ -726,66 +677,188 @@ namespace OptiPaie.Services
             return balance;
         }
 
-        /// <summary>2,5 days per month worked in the year, capped at 30 (loi 90-11 art. 41).</summary>
-        private static decimal Entitlement(Employee employee, int year, LeaveSettings settings)
+        /// <summary>
+        /// 2,5 days per month worked, capped at 30 (loi 90-11 art. 41). When the company opts in,
+        /// months dominated by unpaid leave do not accrue (art. 46). Default OFF → the historical
+        /// formula, byte-identical to before.
+        /// </summary>
+        private static decimal Entitlement(Employee employee, int year, Ctx ctx, IEnumerable<LeaveRequest> requests)
         {
-            DateTime yearStart = FirstOfYear(year);
-            DateTime yearEnd = LastOfYear(year);
+            LeaveSettings s = ctx.Settings;
 
-            DateTime from = Max(employee.HireDate.Date, yearStart);
-            DateTime to = employee.ExitDate.HasValue ? Min(employee.ExitDate.Value.Date, yearEnd) : yearEnd;
+            if (s.AccrualExcludesUnpaid)
+            {
+                decimal sum = AccrualMonths(employee, year, ctx, requests as List<LeaveRequest> ?? requests.ToList())
+                    .Sum(a => a.Accrued);
+                return sum > s.AnnualCap ? s.AnnualCap : sum;
+            }
 
+            // Historical formula (unchanged): months of presence in the reference window × 2,5, capped.
+            DateTime windowStart = s.ReferenceJulyToJune ? new DateTime(year - 1, 7, 1) : FirstOfYear(year);
+            DateTime windowEnd = s.ReferenceJulyToJune ? new DateTime(year, 6, 30) : LastOfYear(year);
+
+            DateTime from = Max(employee.HireDate.Date, windowStart);
+            DateTime to = employee.ExitDate.HasValue ? Min(employee.ExitDate.Value.Date, windowEnd) : windowEnd;
             if (to < from) return 0m;
 
-            // Complete months of presence inside the year.
             int months = ((to.Year - from.Year) * 12) + to.Month - from.Month;
             if (to.Day >= from.Day) months++;
             if (months < 0) months = 0;
             if (months > 12) months = 12;
 
-            decimal earned = months * settings.DaysPerMonth;
-            return earned > settings.AnnualCap ? settings.AnnualCap : earned;
+            decimal earned = months * s.DaysPerMonth;
+            return earned > s.AnnualCap ? s.AnnualCap : earned;
         }
 
-        private static LeaveSettings ReadSettings(IUnitOfWork uow)
+        /// <summary>Month-by-month accrual view (informative). Unpaid-dominated months show 0 when the option is on.</summary>
+        private static IReadOnlyList<AccrualMonth> AccrualMonths(Employee employee, int year, Ctx ctx, List<LeaveRequest> requests)
+        {
+            var list = new List<AccrualMonth>();
+            if (employee == null) return list;
+
+            LeaveSettings s = ctx.Settings;
+            for (int m = 1; m <= 12; m++)
+            {
+                DateTime mStart = new DateTime(year, m, 1);
+                DateTime mEnd = mStart.AddMonths(1).AddDays(-1);
+
+                bool present = employee.HireDate.Date <= mEnd && (!employee.ExitDate.HasValue || employee.ExitDate.Value.Date >= mStart);
+
+                decimal unpaidDays = 0m;
+                foreach (LeaveRequest r in requests)
+                {
+                    if (r.Status != LeaveStatus.Approved) continue;
+                    if (ResolveCategory(r, ctx) != PaymentCategory.Unpaid) continue;
+                    unpaidDays += Count(Max(r.StartDate, mStart), Min(r.EndDate, mEnd), ctx);
+                }
+
+                decimal monthWorking = Count(mStart, mEnd, ctx);
+                bool unpaidDominated = s.AccrualExcludesUnpaid && monthWorking > 0m && unpaidDays >= monthWorking / 2m;
+                decimal accrued = present && !unpaidDominated ? s.DaysPerMonth : 0m;
+
+                list.Add(new AccrualMonth { Month = m, Present = present, UnpaidDays = unpaidDays, Accrued = accrued });
+            }
+
+            return list;
+        }
+
+        // ---- policy resolution (configurable type, else legacy) ----
+
+        private static bool ResolveDecrements(LeaveRequest r, Ctx ctx)
+        {
+            if (r.LeaveTypeId.HasValue && ctx.Types != null && ctx.Types.TryGetValue(r.LeaveTypeId.Value, out var def))
+                return def.DecrementsAnnualBalance;
+            return LeaveTypePolicy.DecrementsAnnualBalance(r.Type);
+        }
+
+        private static PaymentCategory ResolveCategory(LeaveRequest r, Ctx ctx)
+        {
+            if (r.LeaveTypeId.HasValue && ctx.Types != null && ctx.Types.TryGetValue(r.LeaveTypeId.Value, out var def))
+                return def.PaymentCategory;
+            return LeaveTypePolicy.IsPaid(r.Type) ? PaymentCategory.EmployerPaid : PaymentCategory.Unpaid;
+        }
+
+        private static string TypeLabelOf(LeaveRequest r, Ctx ctx)
+        {
+            if (r.LeaveTypeId.HasValue && ctx.Types != null && ctx.Types.TryGetValue(r.LeaveTypeId.Value, out var def))
+                return string.IsNullOrWhiteSpace(def.LabelFr) ? def.LabelAr : def.LabelFr;
+            return TypeLabel(r.Type);
+        }
+
+        // ---- context building ----
+
+        private Ctx BuildCtx(IUnitOfWork uow, long companyId, DateTime from, DateTime to)
+        {
+            LeaveSettings settings = ReadSettings(uow, companyId);
+            Dictionary<long, LeaveTypeDefinition> types = uow.LeaveTypes.GetForCompany(companyId).ToDictionary(t => t.Id);
+            ISet<DateTime> holidays = settings.ExcludeHolidays ? BuildHolidaySet(uow, companyId, from, to) : NoHolidays;
+            return new Ctx { Settings = settings, Holidays = holidays, Types = types };
+        }
+
+        private LeaveBalance GetBalanceInternal(IUnitOfWork uow, long employeeId, int year, Ctx ctx)
+        {
+            Employee employee = uow.Employees.GetById(employeeId);
+            List<LeaveRequest> requests = uow.Leave.GetByEmployeeRange(employeeId, FirstOfYear(year), LastOfYear(year)).ToList();
+            LeaveBalance balance = BuildBalance(employee, requests, year, ctx);
+            balance.EmployeeId = employeeId;
+            return balance;
+        }
+
+        private static ISet<DateTime> BuildHolidaySet(IUnitOfWork uow, long companyId, DateTime from, DateTime to)
+        {
+            var set = new HashSet<DateTime>();
+            for (int y = from.Year; y <= to.Year; y++)
+            {
+                foreach (DateTime d in FixedCivilHolidays(y))
+                    if (d.Date >= from.Date && d.Date <= to.Date) set.Add(d.Date);
+            }
+            foreach (Holiday h in uow.Holidays.GetForCompanyRange(companyId, from, to)) set.Add(h.HolidayDate.Date);
+            return set;
+        }
+
+        /// <summary>The five fixed-date Algerian civil holidays of a year (always excluded when the option is on).</summary>
+        internal static IEnumerable<DateTime> FixedCivilHolidays(int year)
+        {
+            yield return new DateTime(year, 1, 1);   // Nouvel An
+            yield return new DateTime(year, 1, 12);  // Yennayer
+            yield return new DateTime(year, 5, 1);   // Fête du travail
+            yield return new DateTime(year, 7, 5);   // Indépendance
+            yield return new DateTime(year, 11, 1);  // Anniversaire de la Révolution
+        }
+
+        private LeaveSettings ReadSettings(IUnitOfWork uow, long companyId)
         {
             var settings = new LeaveSettings();
 
             AppSetting perMonth = uow.AppSettings.Get(KeyDaysPerMonth);
-            if (perMonth != null && decimal.TryParse(perMonth.SettingValue, NumberStyles.Number,
-                    CultureInfo.InvariantCulture, out decimal d) && d > 0m && d <= 10m)
-            {
+            if (perMonth != null && decimal.TryParse(perMonth.SettingValue, NumberStyles.Number, CultureInfo.InvariantCulture, out decimal d) && d > 0m && d <= 10m)
                 settings.DaysPerMonth = d;
-            }
 
             AppSetting cap = uow.AppSettings.Get(KeyAnnualCap);
-            if (cap != null && decimal.TryParse(cap.SettingValue, NumberStyles.Number,
-                    CultureInfo.InvariantCulture, out decimal c) && c > 0m && c <= 365m)
-            {
+            if (cap != null && decimal.TryParse(cap.SettingValue, NumberStyles.Number, CultureInfo.InvariantCulture, out decimal c) && c > 0m && c <= 365m)
                 settings.AnnualCap = c;
-            }
 
             AppSetting exclude = uow.AppSettings.Get(KeyExcludeRest);
-            if (exclude != null)
-            {
-                settings.ExcludeRestDays = exclude.SettingValue != "0";
-            }
+            if (exclude != null) settings.ExcludeRestDays = exclude.SettingValue != "0";
+
+            AppSetting maternity = uow.AppSettings.Get(KeyMaternityDays);
+            if (maternity != null && decimal.TryParse(maternity.SettingValue, NumberStyles.Number, CultureInfo.InvariantCulture, out decimal mat) && mat > 0m && mat <= 400m)
+                settings.MaternityDays = mat;
 
             AppSetting weekend = uow.AppSettings.Get(KeyWeekendDays);
             if (weekend != null && !string.IsNullOrWhiteSpace(weekend.SettingValue))
             {
-                try
-                {
-                    settings.WeekendDays = new HashSet<DayOfWeek>(
-                        WeekendConfig.FromStorageString(weekend.SettingValue).WeekendDays);
-                }
-                catch
-                {
-                    // Malformed value — keep the Friday/Saturday default.
-                }
+                try { settings.WeekendDays = new HashSet<DayOfWeek>(WeekendConfig.FromStorageString(weekend.SettingValue).WeekendDays); }
+                catch { /* malformed → keep default */ }
+            }
+
+            if (companyId > 0)
+            {
+                settings.ExcludeHolidays = Flag(uow, Scoped(KeyExcludeHolidays, companyId));
+                settings.CalendarDayCount = Flag(uow, Scoped(KeyCalendarCount, companyId));
+                settings.ReferenceJulyToJune = Flag(uow, Scoped(KeyRefJulyJune, companyId));
+                settings.AccrualExcludesUnpaid = Flag(uow, Scoped(KeyAccrualExclUnpaid, companyId));
+                settings.StrictCnasTreatment = Flag(uow, Scoped(KeyStrictCnas, companyId));
             }
 
             return settings;
+        }
+
+        private static bool Flag(IUnitOfWork uow, string key)
+        {
+            AppSetting s = uow.AppSettings.Get(key);
+            return s != null && s.SettingValue == "1";
+        }
+
+        private static string Scoped(string baseKey, long companyId) => baseKey + "." + companyId.ToString(CultureInfo.InvariantCulture);
+
+        private static Employee CloneWithExit(Employee e, DateTime exit)
+        {
+            return new Employee
+            {
+                Id = e.Id, CompanyId = e.CompanyId, HireDate = e.HireDate, ExitDate = exit,
+                BaseSalary = e.BaseSalary, LastNameFr = e.LastNameFr, FirstNameFr = e.FirstNameFr
+            };
         }
 
         internal static string TypeLabel(LeaveType type)
@@ -801,7 +874,26 @@ namespace OptiPaie.Services
             }
         }
 
+        // ---- refusal helpers: return the Result AND log it (never a silent failure) ----
+
+        private Result Fail(string message, string code)
+        {
+            Logger?.Warn("Congé refusé [" + code + "] : " + message);
+            return Result.Fail(message, code);
+        }
+
+        private Result<T> Fail<T>(string message, string code)
+        {
+            Logger?.Warn("Congé refusé [" + code + "] : " + message);
+            return Result.Fail<T>(message, code);
+        }
+
         private static string Fmt(decimal value) => value.ToString("0.##", CultureInfo.InvariantCulture);
+        private static long CompanyOf(IUnitOfWork uow, long employeeId)
+        {
+            Employee e = uow.Employees.GetById(employeeId);
+            return e != null ? e.CompanyId : 0L;
+        }
 
         private static DateTime FirstOfYear(int year) => new DateTime(year, 1, 1);
         private static DateTime LastOfYear(int year) => new DateTime(year, 12, 31);

@@ -61,5 +61,26 @@ namespace OptiPaie.Core.Interfaces.Services
         LeaveSettings GetSettings();
 
         Result SaveSettings(LeaveSettings settings);
+
+        /// <summary>Company-scoped settings (regulatory options); falls back to the historical defaults when unset.</summary>
+        LeaveSettings GetSettings(long companyId);
+
+        /// <summary>Saves company-scoped settings.</summary>
+        Result SaveSettings(long companyId, LeaveSettings settings);
+
+        /// <summary>Active configurable leave types visible to a company (its own + global defaults).</summary>
+        IReadOnlyList<LeaveTypeDefinition> GetTypes(long companyId);
+
+        /// <summary>
+        /// Live preview of a request before it is saved: days actually counted (week-end + holidays per
+        /// settings), payment category, balance before/after, and any blocking reason with its Arabic-ready code.
+        /// </summary>
+        LeavePreview Preview(LeaveRequest request);
+
+        /// <summary>Month-by-month annual-leave accrual detail for one employee in a year.</summary>
+        IReadOnlyList<AccrualMonth> GetAccrualDetail(long employeeId, int year);
+
+        /// <summary>Reliquat de congé (solde de tout compte) owed to an employee leaving on a given date.</summary>
+        FinalSettlement ComputeFinalSettlement(long employeeId, DateTime exitDate);
     }
 }
