@@ -197,6 +197,7 @@ namespace OptiPaie.Desktop.ViewModels
             BalancesCommand = new RelayCommand(OpenBalances);
             SettingsCommand = new RelayCommand(OpenSettings);
             TypesCommand = new RelayCommand(OpenTypes);
+            HolidaysCommand = new RelayCommand(OpenHolidays);
         }
 
         public ObservableCollection<int> Years { get; } = new ObservableCollection<int>();
@@ -272,6 +273,7 @@ namespace OptiPaie.Desktop.ViewModels
         public ICommand BalancesCommand { get; }
         public ICommand SettingsCommand { get; }
         public ICommand TypesCommand { get; }
+        public ICommand HolidaysCommand { get; }
 
         public void OnActivated()
         {
@@ -504,6 +506,18 @@ namespace OptiPaie.Desktop.ViewModels
             vm.RequestClose = () => window.Close();
             window.ShowDialog();
             Load(); // configured types may have changed → refresh the badges
+        }
+
+        private void OpenHolidays()
+        {
+            if (_selectedCompany == null) { Dialogs.Info(L("Leave_NeedCompany")); return; }
+
+            var vm = new HolidaysViewModel(_services, _selectedCompany.Id);
+            var window = new HolidaysWindow { DataContext = vm, Owner = Application.Current.MainWindow };
+            App.ApplyFlowDirection(window);
+            vm.RequestClose = () => window.Close();
+            window.ShowDialog();
+            Load(); // holidays may have changed → refresh
         }
 
         private void OpenBalances()

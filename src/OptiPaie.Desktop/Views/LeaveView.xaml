@@ -55,6 +55,7 @@
                     <MenuItem Header="{loc:Loc Common_More}" Height="32" Padding="8,0" VerticalContentAlignment="Center">
                         <MenuItem Header="{loc:Loc Leave_TeamBalances}" Command="{Binding BalancesCommand}" />
                         <MenuItem Header="{loc:Loc Leave_Types}" Command="{Binding TypesCommand}" />
+                        <MenuItem Header="{loc:Loc Leave_Holidays}" Command="{Binding HolidaysCommand}" />
                         <MenuItem Header="{loc:Loc Shell_Nav_Settings}" Command="{Binding SettingsCommand}" />
                     </MenuItem>
                 </Menu>

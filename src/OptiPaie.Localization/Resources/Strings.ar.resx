@@ -1630,4 +1630,28 @@
   <data name="LeaveTypes_Deactivate" xml:space="preserve">
     <value>تعطيل</value>
   </data>
+  <data name="Leave_Holidays" xml:space="preserve">
+    <value>الأعياد الرسمية</value>
+  </data>
+  <data name="Holidays_Title" xml:space="preserve">
+    <value>الأعياد والعطل الرسمية</value>
+  </data>
+  <data name="Holidays_Hint" xml:space="preserve">
+    <value>الأعياد المدنية بتواريخ ثابتة (يمكن ملؤها تلقائيًا). الأعياد الدينية تتغيّر كل سنة فتُدخَل يدويًا. اليوم الرسمي ضمن فترة عطلة لا يُخصم من الرصيد (عند تفعيل خيار المؤسسة).</value>
+  </data>
+  <data name="Holidays_Prefill" xml:space="preserve">
+    <value>ملء الأعياد المدنية</value>
+  </data>
+  <data name="Holidays_Religious" xml:space="preserve">
+    <value>ديني</value>
+  </data>
+  <data name="Holidays_Add" xml:space="preserve">
+    <value>إضافة</value>
+  </data>
+  <data name="Holidays_Name" xml:space="preserve">
+    <value>الاسم</value>
+  </data>
+  <data name="Holidays_Date" xml:space="preserve">
+    <value>التاريخ</value>
+  </data>
 </root>
