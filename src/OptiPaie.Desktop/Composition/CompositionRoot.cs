@@ -140,7 +140,7 @@ namespace OptiPaie.Desktop.Composition
             }
             IUpdateService updateService = new UpdateService(releaseChannel, updateMetadata, updateOptions, logger);
 
-            return new AppServices(
+            AppServices appServices = new AppServices(
                 configuration,
                 logger,
                 companyService,
@@ -177,6 +177,11 @@ namespace OptiPaie.Desktop.Composition
                 atsDrtDocumentService,
                 customerAccount,
                 activationState);
+
+            // Configurable-types + holidays services (post-construction, like leaveService.Audit above).
+            appServices.LeaveTypes = new LeaveTypeService(unitOfWorkFactory);
+            appServices.Holidays = new HolidayService(unitOfWorkFactory);
+            return appServices;
         }
     }
 }

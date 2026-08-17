@@ -1588,4 +1588,46 @@
   <data name="Leave_ColBalance" xml:space="preserve">
     <value>الرصيد</value>
   </data>
+  <data name="Leave_Types" xml:space="preserve">
+    <value>أنواع العطل</value>
+  </data>
+  <data name="LeaveTypes_Title" xml:space="preserve">
+    <value>أنواع العطل</value>
+  </data>
+  <data name="LeaveTypes_Hint" xml:space="preserve">
+    <value>لكل نوع فئة الأجر وهل يُخصم من الرصيد السنوي. النوع المعطَّل لا يظهر عند إنشاء طلب.</value>
+  </data>
+  <data name="LeaveTypes_Label" xml:space="preserve">
+    <value>التسمية</value>
+  </data>
+  <data name="LeaveTypes_LabelAr" xml:space="preserve">
+    <value>التسمية (عربي)</value>
+  </data>
+  <data name="LeaveTypes_LabelFr" xml:space="preserve">
+    <value>التسمية (فرنسي)</value>
+  </data>
+  <data name="LeaveTypes_BaseType" xml:space="preserve">
+    <value>النوع الأساسي (للأجر)</value>
+  </data>
+  <data name="LeaveTypes_Payment" xml:space="preserve">
+    <value>فئة الأجر</value>
+  </data>
+  <data name="LeaveTypes_Decrements" xml:space="preserve">
+    <value>يُخصم من الرصيد السنوي</value>
+  </data>
+  <data name="LeaveTypes_Once" xml:space="preserve">
+    <value>مرة واحدة في المسار المهني</value>
+  </data>
+  <data name="LeaveTypes_Active" xml:space="preserve">
+    <value>نشط</value>
+  </data>
+  <data name="LeaveTypes_Duration" xml:space="preserve">
+    <value>المدة القانونية (أيام)</value>
+  </data>
+  <data name="LeaveTypes_New" xml:space="preserve">
+    <value>جديد</value>
+  </data>
+  <data name="LeaveTypes_Deactivate" xml:space="preserve">
+    <value>تعطيل</value>
+  </data>
 </root>

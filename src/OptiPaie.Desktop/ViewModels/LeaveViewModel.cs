@@ -196,6 +196,7 @@ namespace OptiPaie.Desktop.ViewModels
             DeleteCommand = new RelayCommand(Delete, () => _selectedRequest != null);
             BalancesCommand = new RelayCommand(OpenBalances);
             SettingsCommand = new RelayCommand(OpenSettings);
+            TypesCommand = new RelayCommand(OpenTypes);
         }
 
         public ObservableCollection<int> Years { get; } = new ObservableCollection<int>();
@@ -270,6 +271,7 @@ namespace OptiPaie.Desktop.ViewModels
         public ICommand DeleteCommand { get; }
         public ICommand BalancesCommand { get; }
         public ICommand SettingsCommand { get; }
+        public ICommand TypesCommand { get; }
 
         public void OnActivated()
         {
@@ -490,6 +492,18 @@ namespace OptiPaie.Desktop.ViewModels
                 Load();
                 StatusMessage = "Paramètres enregistrés.";
             }
+        }
+
+        private void OpenTypes()
+        {
+            if (_selectedCompany == null) { Dialogs.Info(L("Leave_NeedCompany")); return; }
+
+            var vm = new LeaveTypesViewModel(_services, _selectedCompany.Id);
+            var window = new LeaveTypesWindow { DataContext = vm, Owner = Application.Current.MainWindow };
+            App.ApplyFlowDirection(window);
+            vm.RequestClose = () => window.Close();
+            window.ShowDialog();
+            Load(); // configured types may have changed → refresh the badges
         }
 
         private void OpenBalances()

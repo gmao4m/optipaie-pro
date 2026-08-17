@@ -152,6 +152,12 @@ namespace OptiPaie.Desktop.Composition
         /// <summary>Leave module (premium) — writes approved days into Attendance.</summary>
         public ILeaveService Leave { get; }
 
+        /// <summary>CRUD of configurable leave types (wired post-construction by the composition root).</summary>
+        public ILeaveTypeService LeaveTypes { get; set; }
+
+        /// <summary>Public-holidays calendar (wired post-construction by the composition root).</summary>
+        public IHolidayService Holidays { get; set; }
+
         /// <summary>Loans module (premium) — feeds instalments into payroll as deductions.</summary>
         public ILoanService Loans { get; }
 
