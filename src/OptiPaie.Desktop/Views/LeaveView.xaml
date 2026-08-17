@@ -54,6 +54,7 @@
                 <Menu Background="Transparent" VerticalAlignment="Center" Margin="6,0,0,0">
                     <MenuItem Header="{loc:Loc Common_More}" Height="32" Padding="8,0" VerticalContentAlignment="Center">
                         <MenuItem Header="{loc:Loc Leave_TeamBalances}" Command="{Binding BalancesCommand}" />
+                        <MenuItem Header="{loc:Loc Leave_Calendar}" Command="{Binding CalendarCommand}" />
                         <MenuItem Header="{loc:Loc Leave_Types}" Command="{Binding TypesCommand}" />
                         <MenuItem Header="{loc:Loc Leave_Holidays}" Command="{Binding HolidaysCommand}" />
                         <MenuItem Header="{loc:Loc Shell_Nav_Settings}" Command="{Binding SettingsCommand}" />
@@ -204,6 +205,8 @@
                                             <MenuItem Header="{loc:Loc Leave_PrintDecision}" Command="{Binding PrintDecisionCommand}" />
                                             <MenuItem Header="{loc:Loc Leave_PrintBalanceCert}" Command="{Binding PrintBalanceCertCommand}" />
                                             <MenuItem Header="{loc:Loc Leave_PrintSettlement}" Command="{Binding PrintSettlementCommand}" />
+                                            <Separator />
+                                            <MenuItem Header="{loc:Loc Leave_Accrual}" Command="{Binding AccrualCommand}" />
                                             <Separator />
                                             <MenuItem Header="{loc:Loc Common_Delete}" Command="{Binding DeleteCommand}" />
                                         </ContextMenu>

@@ -200,6 +200,8 @@ namespace OptiPaie.Desktop.ViewModels
             SettingsCommand = new RelayCommand(OpenSettings);
             TypesCommand = new RelayCommand(OpenTypes);
             HolidaysCommand = new RelayCommand(OpenHolidays);
+            AccrualCommand = new RelayCommand(OpenAccrual, () => _selectedRequest != null);
+            CalendarCommand = new RelayCommand(OpenCalendar);
             PrintDecisionCommand = new RelayCommand(PrintDecision, () => _selectedRequest != null && _selectedRequest.IsApproved);
             PrintBalanceCertCommand = new RelayCommand(PrintBalanceCert, () => _selectedRequest != null);
             PrintSettlementCommand = new RelayCommand(PrintSettlement, () => _selectedRequest != null);
@@ -279,6 +281,8 @@ namespace OptiPaie.Desktop.ViewModels
         public ICommand SettingsCommand { get; }
         public ICommand TypesCommand { get; }
         public ICommand HolidaysCommand { get; }
+        public ICommand AccrualCommand { get; }
+        public ICommand CalendarCommand { get; }
         public ICommand PrintDecisionCommand { get; }
         public ICommand PrintBalanceCertCommand { get; }
         public ICommand PrintSettlementCommand { get; }
@@ -538,6 +542,26 @@ namespace OptiPaie.Desktop.ViewModels
 
             var vm = new LeaveBalancesViewModel(_services, _selectedCompany, _selectedYear);
             var window = new LeaveBalancesWindow { DataContext = vm, Owner = Application.Current.MainWindow };
+            App.ApplyFlowDirection(window);
+            vm.RequestClose = () => window.Close();
+            window.ShowDialog();
+        }
+
+        private void OpenAccrual()
+        {
+            if (_selectedRequest == null) return;
+            var vm = new AccrualDetailViewModel(_services, _selectedRequest.Request.EmployeeId, _selectedRequest.EmployeeName, _selectedYear);
+            var window = new AccrualDetailWindow { DataContext = vm, Owner = Application.Current.MainWindow };
+            App.ApplyFlowDirection(window);
+            vm.RequestClose = () => window.Close();
+            window.ShowDialog();
+        }
+
+        private void OpenCalendar()
+        {
+            if (_selectedCompany == null) { Dialogs.Info(L("Leave_NeedCompany")); return; }
+            var vm = new AbsenceCalendarViewModel(_services, _selectedCompany, _selectedYear);
+            var window = new AbsenceCalendarWindow { DataContext = vm, Owner = Application.Current.MainWindow };
             App.ApplyFlowDirection(window);
             vm.RequestClose = () => window.Close();
             window.ShowDialog();
