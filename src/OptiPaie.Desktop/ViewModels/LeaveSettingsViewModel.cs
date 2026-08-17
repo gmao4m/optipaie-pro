@@ -1,5 +1,8 @@
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Linq;
 using System.Windows.Input;
 using OptiPaie.Core.Dtos;
 using OptiPaie.Core.Interfaces.Services;
@@ -31,6 +34,19 @@ namespace OptiPaie.Desktop.ViewModels
             _annualCap = current.AnnualCap.ToString("0.##", CultureInfo.InvariantCulture);
             _excludeRestDays = current.ExcludeRestDays;
 
+            var fr = CultureInfo.GetCultureInfo("fr-FR");
+            // Working week starts Sunday in Algeria; list the days in that order.
+            DayOfWeek[] order =
+            {
+                DayOfWeek.Sunday, DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday,
+                DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday
+            };
+            foreach (DayOfWeek day in order)
+            {
+                bool off = current.WeekendDays != null && current.WeekendDays.Contains(day);
+                WeekendDays.Add(new WeekendDayToggle(day, fr.DateTimeFormat.GetDayName(day), off));
+            }
+
             SaveCommand = new RelayCommand(Save);
             CancelCommand = new RelayCommand(() => RequestClose?.Invoke(false));
         }
@@ -41,6 +57,9 @@ namespace OptiPaie.Desktop.ViewModels
         public string DaysPerMonth { get => _daysPerMonth; set => Set(ref _daysPerMonth, value); }
         public string AnnualCap { get => _annualCap; set => Set(ref _annualCap, value); }
         public bool ExcludeRestDays { get => _excludeRestDays; set => Set(ref _excludeRestDays, value); }
+
+        /// <summary>The company's weekly rest days (a checkbox per day; default Friday + Saturday).</summary>
+        public ObservableCollection<WeekendDayToggle> WeekendDays { get; } = new ObservableCollection<WeekendDayToggle>();
 
         public ICommand SaveCommand { get; }
         public ICommand CancelCommand { get; }
@@ -59,11 +78,14 @@ namespace OptiPaie.Desktop.ViewModels
                 return;
             }
 
+            var weekend = new HashSet<DayOfWeek>(WeekendDays.Where(d => d.IsOff).Select(d => d.Day));
+
             Result result = _service.SaveSettings(new LeaveSettings
             {
                 DaysPerMonth = perMonth,
                 AnnualCap = cap,
-                ExcludeRestDays = _excludeRestDays
+                ExcludeRestDays = _excludeRestDays,
+                WeekendDays = weekend
             });
 
             if (result.IsFailure)
@@ -74,5 +96,22 @@ namespace OptiPaie.Desktop.ViewModels
 
             RequestClose?.Invoke(true);
         }
+    }
+
+    /// <summary>One weekly day with a toggle for "counts as a company rest day".</summary>
+    public sealed class WeekendDayToggle : ObservableObject
+    {
+        private bool _isOff;
+
+        public WeekendDayToggle(DayOfWeek day, string label, bool isOff)
+        {
+            Day = day;
+            Label = string.IsNullOrEmpty(label) ? day.ToString() : char.ToUpper(label[0]) + label.Substring(1);
+            _isOff = isOff;
+        }
+
+        public DayOfWeek Day { get; }
+        public string Label { get; }
+        public bool IsOff { get => _isOff; set => Set(ref _isOff, value); }
     }
 }

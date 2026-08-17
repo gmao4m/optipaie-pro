@@ -55,7 +55,8 @@ namespace OptiPaie.Desktop.ViewModels
                 Title = "Nouvelle demande de congé";
             }
 
-            SaveCommand = new RelayCommand(Save);
+            SubmitCommand = new RelayCommand(() => Persist(false));
+            SaveDraftCommand = new RelayCommand(() => Persist(true));
             CancelCommand = new RelayCommand(() => RequestClose?.Invoke(false));
 
             RecomputeDays();
@@ -106,7 +107,8 @@ namespace OptiPaie.Desktop.ViewModels
         /// <summary>Days that will actually be consumed (Friday/Saturday excluded).</summary>
         public string DaysText { get => _daysText; private set => Set(ref _daysText, value); }
 
-        public ICommand SaveCommand { get; }
+        public ICommand SubmitCommand { get; }
+        public ICommand SaveDraftCommand { get; }
         public ICommand CancelCommand { get; }
 
         private void RecomputeDays()
@@ -115,7 +117,7 @@ namespace OptiPaie.Desktop.ViewModels
             DaysText = days.ToString("0.##", CultureInfo.InvariantCulture) + " jour(s) décompté(s)";
         }
 
-        private void Save()
+        private void Persist(bool asDraft)
         {
             if (_selectedEmployee == null)
             {
@@ -134,6 +136,7 @@ namespace OptiPaie.Desktop.ViewModels
             _request.StartDate = _startDate;
             _request.EndDate = _endDate;
             _request.Reason = _reason;
+            _request.IsDraft = asDraft; // "Soumettre" = live (En attente); "Enregistrer le brouillon" = Brouillon
 
             Result<long> result = _services.Leave.Save(_request);
             if (result.IsFailure)

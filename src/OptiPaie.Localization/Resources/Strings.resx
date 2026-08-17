@@ -1498,4 +1498,67 @@
   <data name="Perf_Alert_Pending" xml:space="preserve">
     <value>Échéance proche — {0} : {1} employé(s) à évaluer</value>
   </data>
+  <data name="Leave_ActSubmit" xml:space="preserve">
+    <value>Soumettre</value>
+  </data>
+  <data name="Leave_ActApprove" xml:space="preserve">
+    <value>Accepter</value>
+  </data>
+  <data name="Leave_ActReject" xml:space="preserve">
+    <value>Refuser</value>
+  </data>
+  <data name="Leave_ActReturn" xml:space="preserve">
+    <value>Renvoyer</value>
+  </data>
+  <data name="Leave_ActCancel" xml:space="preserve">
+    <value>Annuler</value>
+  </data>
+  <data name="Leave_SaveDraft" xml:space="preserve">
+    <value>Enregistrer le brouillon</value>
+  </data>
+  <data name="Leave_FilterStatus" xml:space="preserve">
+    <value>Statut</value>
+  </data>
+  <data name="Leave_FilterEmployee" xml:space="preserve">
+    <value>Employé</value>
+  </data>
+  <data name="Leave_FilterMonth" xml:space="preserve">
+    <value>Mois</value>
+  </data>
+  <data name="Common_All" xml:space="preserve">
+    <value>Tous</value>
+  </data>
+  <data name="Leave_MotifReject" xml:space="preserve">
+    <value>Motif du refus</value>
+  </data>
+  <data name="Leave_MotifCancel" xml:space="preserve">
+    <value>Motif de l'annulation</value>
+  </data>
+  <data name="Leave_MotifReturn" xml:space="preserve">
+    <value>Motif (optionnel)</value>
+  </data>
+  <data name="Leave_ConfirmApprove" xml:space="preserve">
+    <value>Approuver cette demande ? Les jours seront écrits dans la présence.</value>
+  </data>
+  <data name="Leave_ConfirmReject" xml:space="preserve">
+    <value>Refuser cette demande ?</value>
+  </data>
+  <data name="Enum_LeaveStatus_Draft" xml:space="preserve">
+    <value>Brouillon</value>
+  </data>
+  <data name="Common_Ok" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Common_Required" xml:space="preserve">
+    <value>Ce champ est obligatoire.</value>
+  </data>
+  <data name="Leave_Available" xml:space="preserve">
+    <value>Disponible</value>
+  </data>
+  <data name="Leave_Reserved" xml:space="preserve">
+    <value>Réservé</value>
+  </data>
+  <data name="LeaveSet_WeekendDays" xml:space="preserve">
+    <value>Jours de repos hebdomadaires (société)</value>
+  </data>
 </root>

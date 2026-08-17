@@ -1498,4 +1498,67 @@
   <data name="Perf_Alert_Pending" xml:space="preserve">
     <value>الموعد يقترب — {0}: {1} موظف بحاجة لتقييم</value>
   </data>
+  <data name="Leave_ActSubmit" xml:space="preserve">
+    <value>تقديم</value>
+  </data>
+  <data name="Leave_ActApprove" xml:space="preserve">
+    <value>قبول</value>
+  </data>
+  <data name="Leave_ActReject" xml:space="preserve">
+    <value>رفض</value>
+  </data>
+  <data name="Leave_ActReturn" xml:space="preserve">
+    <value>إرجاع</value>
+  </data>
+  <data name="Leave_ActCancel" xml:space="preserve">
+    <value>إلغاء</value>
+  </data>
+  <data name="Leave_SaveDraft" xml:space="preserve">
+    <value>حفظ المسودة</value>
+  </data>
+  <data name="Leave_FilterStatus" xml:space="preserve">
+    <value>الحالة</value>
+  </data>
+  <data name="Leave_FilterEmployee" xml:space="preserve">
+    <value>الموظف</value>
+  </data>
+  <data name="Leave_FilterMonth" xml:space="preserve">
+    <value>الشهر</value>
+  </data>
+  <data name="Common_All" xml:space="preserve">
+    <value>الكل</value>
+  </data>
+  <data name="Leave_MotifReject" xml:space="preserve">
+    <value>سبب الرفض</value>
+  </data>
+  <data name="Leave_MotifCancel" xml:space="preserve">
+    <value>سبب الإلغاء</value>
+  </data>
+  <data name="Leave_MotifReturn" xml:space="preserve">
+    <value>السبب (اختياري)</value>
+  </data>
+  <data name="Leave_ConfirmApprove" xml:space="preserve">
+    <value>الموافقة على هذا الطلب؟ ستُكتب الأيام في سجل الحضور.</value>
+  </data>
+  <data name="Leave_ConfirmReject" xml:space="preserve">
+    <value>رفض هذا الطلب؟</value>
+  </data>
+  <data name="Enum_LeaveStatus_Draft" xml:space="preserve">
+    <value>مسودة</value>
+  </data>
+  <data name="Common_Ok" xml:space="preserve">
+    <value>موافق</value>
+  </data>
+  <data name="Common_Required" xml:space="preserve">
+    <value>هذا الحقل إلزامي.</value>
+  </data>
+  <data name="Leave_Available" xml:space="preserve">
+    <value>المتاح</value>
+  </data>
+  <data name="Leave_Reserved" xml:space="preserve">
+    <value>محجوز</value>
+  </data>
+  <data name="LeaveSet_WeekendDays" xml:space="preserve">
+    <value>أيام الراحة الأسبوعية (المؤسسة)</value>
+  </data>
 </root>

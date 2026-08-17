@@ -22,6 +22,20 @@ namespace OptiPaie.Desktop.Common
             return MessageBox.Show(message, "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes;
         }
 
+        /// <summary>
+        /// Shows a small themed text prompt. Returns the entered text, or <c>null</c> when the user
+        /// cancels. When <paramref name="required"/> is true, an empty value keeps the dialog open.
+        /// </summary>
+        public static string Prompt(string title, string label, string initial = null, bool required = true)
+        {
+            var window = new TextPromptWindow(title, label, initial, required)
+            {
+                Owner = Application.Current.MainWindow
+            };
+            App.ApplyFlowDirection(window);
+            return window.ShowDialog() == true ? window.Value : null;
+        }
+
         public static bool ShowEmployeeEditor(EmployeeEditViewModel vm)
         {
             var window = new EmployeeEditWindow
