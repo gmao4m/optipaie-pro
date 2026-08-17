@@ -1,6 +1,6 @@
 {
-  "latest_version": "1.24.0",
-  "download_url": "https://github.com/gmao4m/optipaie-pro/releases/download/v1.24.0/OptiPaie-PRO-Setup.exe",
-  "release_notes": "- Correctif majeur : après déconnexion, un poste déjà activé n'est plus jamais bloqué et la licence n'est plus redemandée — l'application s'ouvre directement. La licence n'est demandée qu'à la toute première activation.\n- Mise à niveau sûre : tout poste déjà activé (même sur une ancienne version) est reconnu comme activé, sans réactivation.\n- Messages d'erreur clairs en arabe à la connexion + journal local horodaté pour le diagnostic.\n- Nouveau bouton « التحقق من التحديثات » sur l'écran de connexion.\n- Moteur de paie inchangé ; données clients intactes (aucune migration destructive).",
+  "latest_version": "1.25.0",
+  "download_url": "https://github.com/gmao4m/optipaie-pro/releases/download/v1.25.0/OptiPaie-PRO-Setup.exe",
+  "release_notes": "- Nouveau : gestion complète des congés — accepter / refuser avec des boutons clairs (قبول / رفض / إرجاع / إلغاء).\n- Soldes de congé calculés automatiquement : acquis, consommé, réservé, disponible ; alerte quand le solde est insuffisant.\n- Aucun chevauchement possible entre deux demandes d'un même employé.\n- Le congé approuvé est reflété directement dans la présence (et donc la paie), et chaque opération est journalisée.\n- Jours de repos hebdomadaires configurables par société.\n- Moteur de paie inchangé ; données intactes ; la licence n'est pas redemandée.",
   "mandatory": false
 }
