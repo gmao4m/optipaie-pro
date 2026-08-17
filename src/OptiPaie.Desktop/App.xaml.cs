@@ -44,11 +44,6 @@ namespace OptiPaie.Desktop
             try { System.Net.ServicePointManager.SecurityProtocol |= System.Net.SecurityProtocolType.Tls12; } catch { }
             try { System.Net.ServicePointManager.SecurityProtocol |= System.Net.SecurityProtocolType.Tls13; } catch { }
 
-            // Velopack install/update hooks must run before anything else. In a normal
-            // launch this returns immediately; during install/update Velopack handles
-            // its hook arguments and exits. Never touches business data.
-            Velopack.VelopackApp.Build().Run();
-
             base.OnStartup(e);
 
             // NOTE: this QuestPDF version predates the community-licence API
@@ -334,8 +329,8 @@ namespace OptiPaie.Desktop
         }
 
         /// <summary>
-        /// Checks for updates at startup and every 24 hours. Only active for a
-        /// Velopack-installed build with a configured feed; otherwise a no-op.
+        /// Checks for updates at startup and every 24 hours. Only active when an
+        /// update source (version.json / GitHub) is configured; otherwise a no-op.
         /// </summary>
         private void StartUpdateChecks()
         {

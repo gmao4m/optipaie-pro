@@ -68,7 +68,7 @@ namespace OptiPaie.Core.Updates
     }
 
     /// <summary>
-    /// Abstracts the update transport (Velopack). Kept separate so the update policy
+    /// Abstracts the update transport. Kept separate so the update policy
     /// and orchestration can be tested with a fake channel — no network required.
     /// </summary>
     public interface IReleaseChannel
@@ -113,13 +113,10 @@ namespace OptiPaie.Core.Updates
         /// <summary>GitHub "owner/repo" whose Releases host the installer. Preferred source.</summary>
         public string GitHubRepo { get; set; }
 
-        /// <summary>Velopack feed URL (RELEASES + packages) — used when no GitHub repo is set.</summary>
-        public string FeedUrl { get; set; }
-
         /// <summary>
         /// URL of a simple version.json manifest ({latest_version, download_url,
         /// release_notes, mandatory}). The simplest source — one hosted file — and it
-        /// takes precedence over the GitHub/Velopack channels when set.
+        /// takes precedence over the GitHub channel when set.
         /// </summary>
         public string VersionJsonUrl { get; set; }
 
@@ -129,10 +126,9 @@ namespace OptiPaie.Core.Updates
         /// <summary>Publishable/anon key for the metadata read.</summary>
         public string AnonKey { get; set; }
 
-        /// <summary>True when at least one update source (version.json, GitHub or Velopack feed) is configured.</summary>
+        /// <summary>True when at least one update source (version.json or GitHub) is configured.</summary>
         public bool IsConfigured =>
             !string.IsNullOrWhiteSpace(VersionJsonUrl) ||
-            !string.IsNullOrWhiteSpace(GitHubRepo) ||
-            !string.IsNullOrWhiteSpace(FeedUrl);
+            !string.IsNullOrWhiteSpace(GitHubRepo);
     }
 }

@@ -12,8 +12,8 @@ namespace OptiPaie.Services.Updates
     /// Orchestrates auto-update: asks the release channel for the latest version,
     /// resolves the mandatory flag + notes from the metadata source, and applies the
     /// pure <see cref="UpdatePolicy"/>. Handles offline/download failures gracefully.
-    /// Free of any Velopack dependency — the channel is injected — so it is fully
-    /// unit-testable with fakes.
+    /// Free of any concrete update-transport dependency — the channel is injected — so it
+    /// is fully unit-testable with fakes.
     /// </summary>
     public sealed class UpdateService : IUpdateService
     {

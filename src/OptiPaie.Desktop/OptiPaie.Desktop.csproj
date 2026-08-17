@@ -32,8 +32,6 @@
     <!-- Declarative, fixed-layout PDF engine for the Fiche de Paie (A4, print-identical).
          2022.12.x targets netstandard2.0 and is consumable from .NET Framework 4.8. -->
     <PackageReference Include="QuestPDF" Version="2022.12.1" />
-    <!-- Auto-update framework (Setup.exe + full/delta packages + RELEASES). Matches the vpk CLI. -->
-    <PackageReference Include="Velopack" Version="1.2.0" />
   </ItemGroup>
 
   <!-- Reads licensing endpoints/anon key from App.config (ConfigurationManager). -->

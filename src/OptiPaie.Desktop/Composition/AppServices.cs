@@ -143,7 +143,7 @@ namespace OptiPaie.Desktop.Composition
         /// <summary>Combined access decision (license + trial) for startup gating.</summary>
         public IAccessController Access { get; }
 
-        /// <summary>Auto-update service (Velopack / GitHub Releases).</summary>
+        /// <summary>Auto-update service (version.json / GitHub Releases).</summary>
         public IUpdateService Update { get; }
 
         /// <summary>Attendance module (premium) — shares Employees/Companies.</summary>

@@ -10,7 +10,6 @@ using OptiPaie.Core.Updates;
 using OptiPaie.Data.Backup;
 using OptiPaie.Data.Context;
 using OptiPaie.Data.Licensing;
-using OptiPaie.Desktop.Updates;
 using OptiPaie.Localization;
 using OptiPaie.PayrollEngine;
 using OptiPaie.Services;
@@ -112,14 +111,17 @@ namespace OptiPaie.Desktop.Composition
             // gate trust a prior activation and never re-ask a paying customer for the license.
             IActivationState activationState = new ActivationState(settingsService);
 
-            // Auto-update (Velopack). The channel is the only Velopack-aware piece; the
-            // service + metadata source are provider-agnostic and unit-tested. Disabled
-            // gracefully (IsSupported=false) on non-installed/dev runs or when unconfigured.
+            // Auto-update. The release channel is injected; the service + metadata source are
+            // provider-agnostic and unit-tested. Disabled gracefully (IsSupported=false) on
+            // non-installed/dev runs or when unconfigured.
             UpdateOptions updateOptions = UpdateConfig.Build(licensingOptions);
-            // Update-source precedence — all IReleaseChannel, so the pop-up, orchestration and
+            // Update-source precedence — both IReleaseChannel, so the pop-up, orchestration and
             // offline handling are identical: (1) a self-hosted version.json (simplest: one file
-            // carrying the version + installer URL + mandatory flag), (2) GitHub Releases,
-            // (3) a Velopack feed. Any dev/unconfigured run reports IsSupported=false (no-op).
+            // carrying the version + installer URL + mandatory flag), else (2) GitHub Releases.
+            // Any dev/unconfigured run reports IsSupported=false (no-op).
+            //
+            // The old Velopack feed rail was REMOVED (2026-08-17): its Setup.exe stub statically
+            // imports GetDpiForSystem and cannot launch on Windows 7 SP1. Do not reintroduce it.
             IReleaseChannel releaseChannel;
             IUpdateMetadataSource updateMetadata;
             if (!string.IsNullOrWhiteSpace(updateOptions.VersionJsonUrl))
@@ -128,14 +130,9 @@ namespace OptiPaie.Desktop.Composition
                 releaseChannel = versionJson;
                 updateMetadata = versionJson; // mandatory flag + notes come from the same manifest
             }
-            else if (!string.IsNullOrWhiteSpace(updateOptions.GitHubRepo))
-            {
-                releaseChannel = new GitHubReleaseChannel(updateOptions, logger);
-                updateMetadata = new SupabaseUpdateMetadataSource(updateOptions, logger);
-            }
             else
             {
-                releaseChannel = new VelopackReleaseChannel(updateOptions, logger);
+                releaseChannel = new GitHubReleaseChannel(updateOptions, logger);
                 updateMetadata = new SupabaseUpdateMetadataSource(updateOptions, logger);
             }
             IUpdateService updateService = new UpdateService(releaseChannel, updateMetadata, updateOptions, logger);
