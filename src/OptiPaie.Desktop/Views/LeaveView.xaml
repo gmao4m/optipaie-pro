@@ -156,7 +156,26 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn Header="{loc:Loc Leave_Reason}" Binding="{Binding Reason}" Width="220" />
+                <!-- Plainte n°2 : les deux indicateurs par demande, toujours visibles -->
+                <DataGridTemplateColumn Header="{loc:Loc Leave_ColPayment}" Width="140">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Border Style="{StaticResource StatusPill}">
+                                <TextBlock Style="{StaticResource PillText}" Text="{Binding PaymentLabel}" />
+                            </Border>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="{loc:Loc Leave_ColBalance}" Width="130">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Border Style="{StaticResource StatusPill}">
+                                <TextBlock Style="{StaticResource PillText}" Text="{Binding DecrementsLabel}" />
+                            </Border>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="{loc:Loc Leave_Reason}" Binding="{Binding Reason}" Width="180" />
                 <DataGridTemplateColumn Width="92" CanUserResize="False" CanUserSort="False">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>

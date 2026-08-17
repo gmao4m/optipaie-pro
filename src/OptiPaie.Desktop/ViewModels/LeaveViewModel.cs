@@ -21,10 +21,18 @@ namespace OptiPaie.Desktop.ViewModels
     /// <summary>One leave request as shown in the list.</summary>
     public sealed class LeaveRowViewModel
     {
-        public LeaveRowViewModel(LeaveRequest request, string employeeName)
+        public LeaveRowViewModel(LeaveRequest request, string employeeName,
+            IReadOnlyDictionary<long, LeaveTypeDefinition> types)
         {
             Request = request;
             EmployeeName = employeeName;
+
+            PaymentCategory cat = LeaveTypeResolver.Category(request.LeaveTypeId, request.Type, types);
+            bool decrements = LeaveTypeResolver.Decrements(request.LeaveTypeId, request.Type, types);
+            PaymentLabel = TranslationSource.Instance[LeaveTypeResolver.PaymentKey(cat)];
+            PaymentKind = LeaveTypeResolver.PaymentKind(cat);
+            DecrementsLabel = TranslationSource.Instance[LeaveTypeResolver.DecrementKey(decrements)];
+            DecrementsKind = LeaveTypeResolver.DecrementKind(decrements);
         }
 
         public LeaveRequest Request { get; }
@@ -33,6 +41,14 @@ namespace OptiPaie.Desktop.ViewModels
         public string EmployeeName { get; }
         public string TypeLabel => LeaveLabels.Type(Request.Type);
         public bool IsDraft => Request.IsDraft;
+
+        /// <summary>« مدفوعة من طرف صاحب العمل / الضمان الاجتماعي / غير مدفوعة » badge for this request.</summary>
+        public string PaymentLabel { get; }
+        public string PaymentKind { get; }
+
+        /// <summary>« تُخصم من الرصيد / لا تُخصم » badge for this request.</summary>
+        public string DecrementsLabel { get; }
+        public string DecrementsKind { get; }
 
         /// <summary>A draft is shown as "Brouillon" even though it is stored at Status=Pending.</summary>
         public string StatusLabel => IsDraft
@@ -145,6 +161,7 @@ namespace OptiPaie.Desktop.ViewModels
         private readonly AppServices _services;
         private readonly Dictionary<long, string> _employeeNames = new Dictionary<long, string>();
         private readonly List<LeaveRowViewModel> _allRows = new List<LeaveRowViewModel>();
+        private readonly Dictionary<long, LeaveTypeDefinition> _types = new Dictionary<long, LeaveTypeDefinition>();
 
         private Company _selectedCompany;
         private int _selectedYear = DateTime.Today.Year;
@@ -277,10 +294,13 @@ namespace OptiPaie.Desktop.ViewModels
                 _employeeNames[employee.Id] = (employee.LastNameFr + " " + employee.FirstNameFr).Trim();
             }
 
+            _types.Clear();
+            foreach (LeaveTypeDefinition t in _services.Leave.GetTypes(_selectedCompany.Id)) _types[t.Id] = t;
+
             foreach (LeaveRequest request in _services.Leave.GetByCompanyYear(_selectedCompany.Id, _selectedYear))
             {
                 _employeeNames.TryGetValue(request.EmployeeId, out string name);
-                _allRows.Add(new LeaveRowViewModel(request, name ?? "—"));
+                _allRows.Add(new LeaveRowViewModel(request, name ?? "—", _types));
             }
 
             RebuildEmployeeFilter();

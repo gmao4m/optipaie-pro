@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Windows.Input;
+using OptiPaie.Core.Dtos;
 using OptiPaie.Core.Entities;
 using OptiPaie.Core.Enums;
+using OptiPaie.Core.Leave;
 using OptiPaie.Core.Primitives;
 using OptiPaie.Desktop.Common;
 using OptiPaie.Desktop.Composition;
+using OptiPaie.Desktop.Localization;
 using OptiPaie.Desktop.Mvvm;
 
 namespace OptiPaie.Desktop.ViewModels
@@ -28,6 +31,11 @@ namespace OptiPaie.Desktop.ViewModels
         private DateTime _endDate;
         private string _reason;
         private string _daysText = "0";
+        private string _paymentLabel = string.Empty;
+        private string _decrementsLabel = string.Empty;
+        private string _balanceText = string.Empty;
+        private string _alertText = string.Empty;
+        private bool _hasAlert;
 
         public LeaveEditViewModel(AppServices services, IReadOnlyList<Employee> employees, LeaveRequest existing)
         {
@@ -59,7 +67,7 @@ namespace OptiPaie.Desktop.ViewModels
             SaveDraftCommand = new RelayCommand(() => Persist(true));
             CancelCommand = new RelayCommand(() => RequestClose?.Invoke(false));
 
-            RecomputeDays();
+            RecomputePreview();
         }
 
         /// <summary>Set by the host window: true = saved, false = cancelled.</summary>
@@ -76,14 +84,27 @@ namespace OptiPaie.Desktop.ViewModels
         public Employee SelectedEmployee
         {
             get => _selectedEmployee;
-            set => Set(ref _selectedEmployee, value);
+            set { if (Set(ref _selectedEmployee, value)) RecomputePreview(); }
         }
 
         public LeaveTypeOption SelectedType
         {
             get => _selectedType;
-            set => Set(ref _selectedType, value);
+            set { if (Set(ref _selectedType, value)) RecomputePreview(); }
         }
+
+        /// <summary>Payment badge for the selected type (« مدفوعة … / غير مدفوعة »).</summary>
+        public string PaymentLabel { get => _paymentLabel; private set => Set(ref _paymentLabel, value); }
+
+        /// <summary>Balance badge for the selected type (« تُخصم من الرصيد / لا تُخصم »).</summary>
+        public string DecrementsLabel { get => _decrementsLabel; private set => Set(ref _decrementsLabel, value); }
+
+        /// <summary>Available balance before → after, when the type consumes the balance.</summary>
+        public string BalanceText { get => _balanceText; private set => Set(ref _balanceText, value); }
+
+        /// <summary>Precise blocking reason (Arabic) shown before validation; empty when the request is valid.</summary>
+        public string AlertText { get => _alertText; private set => Set(ref _alertText, value); }
+        public bool HasAlert { get => _hasAlert; private set => Set(ref _hasAlert, value); }
 
         public DateTime StartDate
         {
@@ -92,14 +113,14 @@ namespace OptiPaie.Desktop.ViewModels
             {
                 if (!Set(ref _startDate, value)) return;
                 if (_endDate < _startDate) EndDate = _startDate;
-                RecomputeDays();
+                RecomputePreview();
             }
         }
 
         public DateTime EndDate
         {
             get => _endDate;
-            set { if (Set(ref _endDate, value)) RecomputeDays(); }
+            set { if (Set(ref _endDate, value)) RecomputePreview(); }
         }
 
         public string Reason { get => _reason; set => Set(ref _reason, value); }
@@ -111,11 +132,40 @@ namespace OptiPaie.Desktop.ViewModels
         public ICommand SaveDraftCommand { get; }
         public ICommand CancelCommand { get; }
 
-        private void RecomputeDays()
+        private void RecomputePreview()
         {
-            decimal days = _endDate < _startDate ? 0m : _services.Leave.CountDays(_startDate, _endDate);
-            DaysText = days.ToString("0.##", CultureInfo.InvariantCulture) + " jour(s) décompté(s)";
+            if (_selectedEmployee == null || _selectedType == null)
+            {
+                DaysText = "0 jour(s)";
+                PaymentLabel = DecrementsLabel = BalanceText = AlertText = string.Empty;
+                HasAlert = false;
+                return;
+            }
+
+            var probe = new LeaveRequest
+            {
+                EmployeeId = _selectedEmployee.Id,
+                Type = _selectedType.Value,
+                LeaveTypeId = _request.LeaveTypeId,
+                StartDate = _startDate,
+                EndDate = _endDate
+            };
+
+            LeavePreview p = _services.Leave.Preview(probe);
+
+            DaysText = p.Days.ToString("0.##", CultureInfo.InvariantCulture) + " jour(s) décompté(s)";
+            PaymentLabel = L(LeaveTypeResolver.PaymentKey(p.Category));
+            DecrementsLabel = L(LeaveTypeResolver.DecrementKey(p.DecrementsBalance));
+            BalanceText = p.DecrementsBalance
+                ? p.AvailableBefore.ToString("0.##", CultureInfo.InvariantCulture) + " → " +
+                  p.AvailableAfter.ToString("0.##", CultureInfo.InvariantCulture)
+                : "—";
+
+            HasAlert = !p.Ok;
+            AlertText = p.Ok ? string.Empty : p.Reason;
         }
+
+        private static string L(string key) => TranslationSource.Instance[key];
 
         private void Persist(bool asDraft)
         {

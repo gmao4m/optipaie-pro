@@ -745,18 +745,10 @@ namespace OptiPaie.Services
         // ---- policy resolution (configurable type, else legacy) ----
 
         private static bool ResolveDecrements(LeaveRequest r, Ctx ctx)
-        {
-            if (r.LeaveTypeId.HasValue && ctx.Types != null && ctx.Types.TryGetValue(r.LeaveTypeId.Value, out var def))
-                return def.DecrementsAnnualBalance;
-            return LeaveTypePolicy.DecrementsAnnualBalance(r.Type);
-        }
+            => OptiPaie.Core.Leave.LeaveTypeResolver.Decrements(r.LeaveTypeId, r.Type, ctx.Types);
 
         private static PaymentCategory ResolveCategory(LeaveRequest r, Ctx ctx)
-        {
-            if (r.LeaveTypeId.HasValue && ctx.Types != null && ctx.Types.TryGetValue(r.LeaveTypeId.Value, out var def))
-                return def.PaymentCategory;
-            return LeaveTypePolicy.IsPaid(r.Type) ? PaymentCategory.EmployerPaid : PaymentCategory.Unpaid;
-        }
+            => OptiPaie.Core.Leave.LeaveTypeResolver.Category(r.LeaveTypeId, r.Type, ctx.Types);
 
         private static string TypeLabelOf(LeaveRequest r, Ctx ctx)
         {

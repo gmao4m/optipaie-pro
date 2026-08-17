@@ -1567,4 +1567,25 @@
   <data name="Leave_NeedEmployee" xml:space="preserve">
     <value>Aucun employé actif dans cette entreprise — ajoutez un employé avant de créer une demande.</value>
   </data>
+  <data name="Leave_Pay_Employer" xml:space="preserve">
+    <value>Payé (employeur)</value>
+  </data>
+  <data name="Leave_Pay_Cnas" xml:space="preserve">
+    <value>Payé (CNAS)</value>
+  </data>
+  <data name="Leave_Pay_Unpaid" xml:space="preserve">
+    <value>Non payé</value>
+  </data>
+  <data name="Leave_Decrements" xml:space="preserve">
+    <value>Décompté du solde</value>
+  </data>
+  <data name="Leave_NoDecrement" xml:space="preserve">
+    <value>Non décompté</value>
+  </data>
+  <data name="Leave_ColPayment" xml:space="preserve">
+    <value>Paiement</value>
+  </data>
+  <data name="Leave_ColBalance" xml:space="preserve">
+    <value>Solde</value>
+  </data>
 </root>

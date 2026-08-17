@@ -49,8 +49,31 @@
                 </StackPanel>
             </Grid>
 
-            <Border Background="{DynamicResource BrandSoft}" CornerRadius="8" Padding="10,7" Margin="0,12,0,0">
-                <TextBlock FontSize="12.5" Foreground="{DynamicResource TextSecondary}" Text="{Binding DaysText}" />
+            <!-- Aperçu à la saisie : jours décomptés, catégorie de paiement, impact sur le solde -->
+            <Border Background="{DynamicResource BrandSoft}" CornerRadius="8" Padding="12,10" Margin="0,12,0,0">
+                <StackPanel>
+                    <TextBlock FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" Text="{Binding DaysText}" />
+                    <WrapPanel Margin="0,8,0,0">
+                        <Border Style="{StaticResource StatusPill}" Margin="0,0,8,0">
+                            <TextBlock Style="{StaticResource PillText}" Text="{Binding PaymentLabel}" />
+                        </Border>
+                        <Border Style="{StaticResource StatusPill}">
+                            <TextBlock Style="{StaticResource PillText}" Text="{Binding DecrementsLabel}" />
+                        </Border>
+                    </WrapPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0"
+                                Visibility="{Binding BalanceText, Converter={StaticResource NonEmptyToVis}}">
+                        <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Leave_ColBalance}" VerticalAlignment="Center" />
+                        <TextBlock Margin="6,0,0,0" FontFamily="{StaticResource MonoFont}" FontSize="13" FlowDirection="LeftToRight"
+                                   Foreground="{DynamicResource TextPrimary}" Text="{Binding BalanceText}" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Alerte précise (solde insuffisant / chevauchement / employé non actif) AVANT validation -->
+            <Border Background="{DynamicResource StatusDangerSoft}" CornerRadius="8" Padding="10,8" Margin="0,10,0,0"
+                    Visibility="{Binding HasAlert, Converter={StaticResource BoolToVis}}">
+                <TextBlock Foreground="{DynamicResource StatusDangerText}" FontSize="12.5" TextWrapping="Wrap" Text="{Binding AlertText}" />
             </Border>
 
             <TextBlock Style="{StaticResource Caption}" Margin="0,12,0,0" Text="{loc:Loc Leave_Reason}" />

@@ -1567,4 +1567,25 @@
   <data name="Leave_NeedEmployee" xml:space="preserve">
     <value>لا يوجد موظف نشط في هذه المؤسسة — أضف موظفًا قبل إنشاء طلب.</value>
   </data>
+  <data name="Leave_Pay_Employer" xml:space="preserve">
+    <value>مدفوعة (صاحب العمل)</value>
+  </data>
+  <data name="Leave_Pay_Cnas" xml:space="preserve">
+    <value>مدفوعة (الضمان الاجتماعي)</value>
+  </data>
+  <data name="Leave_Pay_Unpaid" xml:space="preserve">
+    <value>غير مدفوعة</value>
+  </data>
+  <data name="Leave_Decrements" xml:space="preserve">
+    <value>تُخصم من الرصيد</value>
+  </data>
+  <data name="Leave_NoDecrement" xml:space="preserve">
+    <value>لا تُخصم</value>
+  </data>
+  <data name="Leave_ColPayment" xml:space="preserve">
+    <value>الأجر</value>
+  </data>
+  <data name="Leave_ColBalance" xml:space="preserve">
+    <value>الرصيد</value>
+  </data>
 </root>
