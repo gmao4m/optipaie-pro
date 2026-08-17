@@ -1,6 +1,6 @@
 {
-  "latest_version": "1.23.0",
-  "download_url": "https://github.com/gmao4m/optipaie-pro/releases/latest/download/OptiPaie-PRO-Setup.exe",
-  "release_notes": "- Chaque licence débloque TOUTES les sections (paie, pointage, congés, prêts, évaluation, contrats, formation, biens, attestations, ATS/DRT, déclarations, rapports…). Plus aucun verrou ni module séparé.\n- Activation fiable (TLS 1.2) et essai 48 h inchangés.",
+  "latest_version": "1.24.0",
+  "download_url": "https://github.com/gmao4m/optipaie-pro/releases/download/v1.24.0/OptiPaie-PRO-Setup.exe",
+  "release_notes": "- Correctif majeur : après déconnexion, un poste déjà activé n'est plus jamais bloqué et la licence n'est plus redemandée — l'application s'ouvre directement. La licence n'est demandée qu'à la toute première activation.\n- Mise à niveau sûre : tout poste déjà activé (même sur une ancienne version) est reconnu comme activé, sans réactivation.\n- Messages d'erreur clairs en arabe à la connexion + journal local horodaté pour le diagnostic.\n- Nouveau bouton « التحقق من التحديثات » sur l'écran de connexion.\n- Moteur de paie inchangé ; données clients intactes (aucune migration destructive).",
   "mandatory": false
 }
