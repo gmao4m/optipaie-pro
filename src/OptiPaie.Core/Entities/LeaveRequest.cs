@@ -18,6 +18,14 @@ namespace OptiPaie.Core.Entities
 
         public LeaveStatus Status { get; set; }
 
+        /// <summary>
+        /// True while the request is a <b>Brouillon</b> (draft): saved but not yet submitted
+        /// for a decision. A draft reserves no balance and is not "live" for the overlap
+        /// rule. Stored additively (migration 0030) so the <see cref="Status"/> column and
+        /// its existing CHECK (1..4) are never touched. Submitting clears this flag.
+        /// </summary>
+        public bool IsDraft { get; set; }
+
         /// <summary>First day of leave (inclusive).</summary>
         public DateTime StartDate { get; set; }
 

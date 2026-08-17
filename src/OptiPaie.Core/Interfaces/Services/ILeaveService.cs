@@ -13,8 +13,18 @@ namespace OptiPaie.Core.Interfaces.Services
     /// </summary>
     public interface ILeaveService
     {
-        /// <summary>Creates or updates a request (only while it is still pending).</summary>
+        /// <summary>
+        /// Creates or updates a request while it is still editable (a Brouillon draft or a
+        /// pending request). Set <see cref="LeaveRequest.IsDraft"/> to save a draft; leave it
+        /// false to submit straight away (En attente).
+        /// </summary>
         Result<long> Save(LeaveRequest request);
+
+        /// <summary>Submits a draft for a decision: Brouillon → En attente (reserves the balance).</summary>
+        Result Submit(long id);
+
+        /// <summary>Sends a submitted request back to draft for correction: En attente → Brouillon.</summary>
+        Result ReturnToDraft(long id, string note);
 
         /// <summary>
         /// Approves a request and writes its days into attendance (paid types as

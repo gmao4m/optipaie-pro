@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+
 namespace OptiPaie.Core.Dtos
 {
     /// <summary>
@@ -26,6 +29,13 @@ namespace OptiPaie.Core.Dtos
         /// <summary>Entitlement − taken (pending is shown separately, not deducted).</summary>
         public decimal Remaining { get; set; }
 
+        /// <summary>
+        /// Solde disponible = acquis − consommé − en attente. Unlike <see cref="Remaining"/>,
+        /// this DOES reserve the pending (submitted-but-undecided) days, so two requests can
+        /// never engage the same days twice. This is the value the service validates against.
+        /// </summary>
+        public decimal Available { get; set; }
+
         /// <summary>Approved days of every other type (sick, unpaid, maternity, special).</summary>
         public decimal OtherLeaveDays { get; set; }
 
@@ -42,7 +52,15 @@ namespace OptiPaie.Core.Dtos
         /// <summary>Yearly cap on annual leave (30 days).</summary>
         public decimal AnnualCap { get; set; } = 30m;
 
-        /// <summary>Whether Friday/Saturday (the Algerian weekend) are excluded from the count.</summary>
+        /// <summary>Whether the company weekly rest days are excluded from the count.</summary>
         public bool ExcludeRestDays { get; set; } = true;
+
+        /// <summary>
+        /// The company's weekly rest days, excluded from the day count when
+        /// <see cref="ExcludeRestDays"/> is on. Default = the Algerian weekend (Friday + Saturday);
+        /// configurable per company.
+        /// </summary>
+        public ISet<DayOfWeek> WeekendDays { get; set; } =
+            new HashSet<DayOfWeek> { DayOfWeek.Friday, DayOfWeek.Saturday };
     }
 }
