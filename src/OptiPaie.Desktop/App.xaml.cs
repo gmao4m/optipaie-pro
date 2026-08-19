@@ -294,12 +294,55 @@ namespace OptiPaie.Desktop
                 return true;
             }
 
-            var viewModel = new LoginViewModel(Services);
-            var window = new LoginWindow { DataContext = viewModel };
+            // Loop so the permanent « الدخول بمفتاح الترخيص » escape can bounce to the activation
+            // screen and back without ever stranding the user. Every turn waits on a user action.
+            while (true)
+            {
+                var viewModel = new LoginViewModel(Services);
+                var window = new LoginWindow { DataContext = viewModel };
+                ApplyFlowDirection(window);
+                viewModel.CloseRequested = ok => { try { window.DialogResult = ok; } catch { window.Close(); } };
+                window.ShowDialog();
+
+                if (IsAuthenticated())
+                {
+                    return true;
+                }
+
+                if (viewModel.ActivationRequested)
+                {
+                    // Owner recovery: re-activating with the license key re-creates the account
+                    // with a new password and signs it in — so a forgotten password is never a
+                    // lock-out. If it worked, proceed; otherwise re-show the login screen.
+                    ShowActivationScreen();
+                    if (IsAuthenticated())
+                    {
+                        return true;
+                    }
+                    continue;
+                }
+
+                // The user closed the login without signing in and without asking for activation.
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Shows the activation screen UNCONDITIONALLY (unlike <see cref="EnsureAccess"/>, which
+        /// skips it when the license is already valid). Reached from the login screen's permanent
+        /// license-key escape so an owner who forgot their password can re-activate and regain
+        /// access even on an already-activated poste.
+        /// </summary>
+        private void ShowActivationScreen()
+        {
+            string knownEmail = Services.CustomerAccount != null && Services.CustomerAccount.HasAccount
+                ? Services.CustomerAccount.Email
+                : null;
+            var viewModel = new ActivationViewModel(Services, ActivationMode.Activate, knownEmail);
+            var window = new ActivationWindow { DataContext = viewModel };
             ApplyFlowDirection(window);
             viewModel.CloseRequested = ok => { try { window.DialogResult = ok; } catch { window.Close(); } };
             window.ShowDialog();
-            return IsAuthenticated();
         }
 
         /// <summary>True when either principal is established: the owner session or a local user.</summary>

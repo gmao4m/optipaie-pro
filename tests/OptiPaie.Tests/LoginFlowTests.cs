@@ -204,6 +204,37 @@ namespace OptiPaie.Tests
             Assert.That(AppShellPolicy.ShutdownModeDuringGate, Is.EqualTo(AppShutdownMode.OnExplicitShutdown));
         }
 
+        // -- recovery escapes on the unified login screen (fix of the 1.27.0 regressions) ----
+
+        [Test]
+        public void LoginScreen_AlwaysOffers_LicenseEscape_AndUpdateCheck()
+        {
+            // Both affordances are PERMANENT (never conditioned on a failed attempt): the
+            // license-key escape to activation (owner recovery) and the update check. The login
+            // view/screen bind to these, so a blocked user is never stranded.
+            Assert.That(LoginScreenAffordances.LicenseKeyEscapeAlwaysVisible, Is.True, "path to activation must exist & be visible");
+            Assert.That(LoginScreenAffordances.UpdateCheckAlwaysVisible, Is.True, "update check must be present on the login screen");
+        }
+
+        [Test]
+        public void Owner_ForgotPassword_NoLocalUser_RegainsAccess_ViaReactivation_NotLockedOut()
+        {
+            // Owner exists, is signed out, and has forgotten the password; no local user exists.
+            _owner.Register("boss@corp.dz", "Corp", "old-password");
+            _owner.SignOut();
+            Assert.That(_owner.SignIn("boss@corp.dz", "forgotten-guess"), Is.False, "the old password is lost");
+            Assert.That(_users.HasActiveAdmin(), Is.False, "no local user to fall back to");
+
+            // The login screen's « الدخول بمفتاح الترخيص » escape opens activation, where
+            // re-activating re-creates the account with a NEW password and signs it in.
+            _owner.Register("boss@corp.dz", "Corp", "new-password"); // = what activation does on success
+
+            Assert.That(_owner.IsSignedIn, Is.True, "re-activation signs the owner back in — NOT locked out");
+            _owner.SignOut();
+            Assert.That(_owner.SignIn("boss@corp.dz", "new-password"), Is.True, "the new password works");
+            Assert.That(_owner.SignIn("boss@corp.dz", "old-password"), Is.False, "the old one no longer does");
+        }
+
         // -- test doubles ------------------------------------------------------
 
         private sealed class PassThroughCipher : ILocalCipher
