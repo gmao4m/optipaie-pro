@@ -507,6 +507,18 @@
   <data name="Login_Username" xml:space="preserve"><value>Nom d'utilisateur</value></data>
   <data name="Login_Password" xml:space="preserve"><value>Mot de passe</value></data>
   <data name="Login_SignIn" xml:space="preserve"><value>Se connecter</value></data>
+  <data name="Login_Subtitle" xml:space="preserve"><value>Connexion</value></data>
+  <data name="Login_Identifier" xml:space="preserve"><value>Identifiant ou email</value></data>
+  <data name="Login_IdentifierHint" xml:space="preserve"><value>Saisissez votre email propriétaire ou votre nom d'utilisateur.</value></data>
+  <data name="Login_RememberMe" xml:space="preserve"><value>Rester connecté</value></data>
+  <data name="Login_ForgotPassword" xml:space="preserve"><value>Mot de passe oublié ?</value></data>
+  <data name="Login_ForgotHelp" xml:space="preserve"><value>Pour réinitialiser un mot de passe : demandez à un administrateur de le changer dans « Utilisateurs &amp; accès ». Le compte propriétaire peut toujours se connecter avec son email. Si tout est oublié, réactivez la licence avec la clé du produit.</value></data>
+  <data name="Login_Err_NeedUsername" xml:space="preserve"><value>Veuillez saisir l'identifiant.</value></data>
+  <data name="Login_Err_NeedPassword" xml:space="preserve"><value>Veuillez saisir le mot de passe.</value></data>
+  <data name="Login_Err_BadCredentials" xml:space="preserve"><value>Identifiant ou mot de passe incorrect.</value></data>
+  <data name="Login_Err_Disabled" xml:space="preserve"><value>Ce compte est désactivé.</value></data>
+  <data name="Login_Err_Technical" xml:space="preserve"><value>Erreur technique — consultez le journal des erreurs.</value></data>
+  <data name="Users_NeedAdminToEnable" xml:space="preserve"><value>Créez au moins un administrateur actif avant d'activer la connexion.</value></data>
 
   <!-- Users &amp; access window -->
   <data name="Users_Title" xml:space="preserve"><value>Utilisateurs &amp; accès</value></data>

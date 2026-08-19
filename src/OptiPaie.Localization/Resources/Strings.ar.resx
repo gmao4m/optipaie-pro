@@ -507,6 +507,18 @@
   <data name="Login_Username" xml:space="preserve"><value>اسم المستخدم</value></data>
   <data name="Login_Password" xml:space="preserve"><value>كلمة المرور</value></data>
   <data name="Login_SignIn" xml:space="preserve"><value>تسجيل الدخول</value></data>
+  <data name="Login_Subtitle" xml:space="preserve"><value>تسجيل الدخول</value></data>
+  <data name="Login_Identifier" xml:space="preserve"><value>اسم المستخدم أو البريد الإلكتروني</value></data>
+  <data name="Login_IdentifierHint" xml:space="preserve"><value>أدخل بريد المالك الإلكتروني أو اسم المستخدم المحلي.</value></data>
+  <data name="Login_RememberMe" xml:space="preserve"><value>تذكّرني</value></data>
+  <data name="Login_ForgotPassword" xml:space="preserve"><value>هل نسيت كلمة المرور؟</value></data>
+  <data name="Login_ForgotHelp" xml:space="preserve"><value>لإعادة تعيين كلمة المرور: اطلب من مسؤول تغييرها من «المستخدمون والصلاحيات». يمكن لحساب المالك تسجيل الدخول دائمًا ببريده الإلكتروني. وإذا نسيت كل شيء، أعد تفعيل الترخيص باستخدام مفتاح المنتج.</value></data>
+  <data name="Login_Err_NeedUsername" xml:space="preserve"><value>يجب إدخال اسم المستخدم</value></data>
+  <data name="Login_Err_NeedPassword" xml:space="preserve"><value>يجب إدخال كلمة المرور</value></data>
+  <data name="Login_Err_BadCredentials" xml:space="preserve"><value>اسم المستخدم أو كلمة المرور غير صحيحة</value></data>
+  <data name="Login_Err_Disabled" xml:space="preserve"><value>هذا الحساب معطّل</value></data>
+  <data name="Login_Err_Technical" xml:space="preserve"><value>خطأ تقني — راجع سجل الأخطاء</value></data>
+  <data name="Users_NeedAdminToEnable" xml:space="preserve"><value>أنشئ مسؤولاً نشطًا واحدًا على الأقل قبل تفعيل تسجيل الدخول.</value></data>
 
   <!-- Users &amp; access window -->
   <data name="Users_Title" xml:space="preserve"><value>المستخدمون والوصول</value></data>

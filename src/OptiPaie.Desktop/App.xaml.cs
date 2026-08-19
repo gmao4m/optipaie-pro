@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -11,6 +12,7 @@ using OptiPaie.Desktop.Composition;
 using OptiPaie.Desktop.Shell;
 using OptiPaie.Desktop.ViewModels;
 using OptiPaie.Desktop.Views;
+using OptiPaie.Services.Auth;
 
 namespace OptiPaie.Desktop
 {
@@ -29,6 +31,8 @@ namespace OptiPaie.Desktop
         private DispatcherTimer _trialWatchdog;
         private bool _updateDialogOpen;
         private bool _accessBlocked;
+        private MainWindow _shell;
+        private bool _timersStarted;
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -36,6 +40,15 @@ namespace OptiPaie.Desktop
             // composition, or later navigation is written to disk (see Common/CrashLog).
             CrashLog.Install(this);
             CrashLog.Breadcrumb("OnStartup");
+
+            // CRITICAL: drive shutdown EXPLICITLY. With the WPF default (OnLastWindowClose) the
+            // process dies the instant a login/activation dialog closes while it is the only open
+            // window — before MainWindow exists — so a correct sign-in silently closed the app
+            // (the v1.26 production crash). The main window's own close triggers Shutdown() via
+            // Shell_Closed. See OptiPaie.Services.Auth.AppShellPolicy + LoginFlowTests.
+            ShutdownMode = AppShellPolicy.ShutdownModeDuringGate == AppShutdownMode.OnExplicitShutdown
+                ? ShutdownMode.OnExplicitShutdown
+                : ShutdownMode.OnLastWindowClose;
 
             // Force modern TLS for every outbound HTTPS call (Supabase activation, GitHub
             // updates). .NET Framework can otherwise negotiate only TLS 1.0/1.1, which
@@ -109,15 +122,7 @@ namespace OptiPaie.Desktop
             // opens on the trusted marker and never re-asks for the license.
             if (!EnsureAccess())
             {
-                Shutdown();
-                return;
-            }
-
-            // Customer-session gate: after the first activation the customer stays signed in
-            // automatically (no account, no license re-entry). Only a manual logout brings up
-            // the sign-in screen, and then it asks for email + password ONLY.
-            if (!EnsureCustomerSession())
-            {
+                CrashLog.Breadcrumb("access/activation gate not passed at startup -> exit");
                 Shutdown();
                 return;
             }
@@ -127,21 +132,67 @@ namespace OptiPaie.Desktop
             // Never runs for a licensed install or a database that already has data.
             SeedDemoDataIfTrial();
 
-            // Optional login gate (dormant unless an admin enabled it and users exist).
-            if (!EnsureLogin())
+            // Single sign-in gate → single path to the main window. Cold start and post-signout
+            // both converge here, and any exception is shown (not a silent process kill).
+            try
             {
-                Shutdown();
-                return;
+                if (AuthenticateIfNeeded())
+                {
+                    ShowMainShell();
+                }
+                else
+                {
+                    CrashLog.Breadcrumb("sign-in cancelled at startup -> exit");
+                    Shutdown();
+                }
             }
+            catch (Exception ex)
+            {
+                CrashLog.Fatal("Startup sign-in flow", ex);
+                MessageBox.Show(StartupErrorText(), "OptiPaie PRO", MessageBoxButton.OK, MessageBoxImage.Error);
+                Shutdown(-1);
+            }
+        }
 
+        /// <summary>
+        /// Builds and shows a FRESH main window — the single place the app is opened, used by
+        /// both cold start and post-signout so the two paths cannot diverge. The main window's
+        /// own close drives an explicit app shutdown (ShutdownMode is OnExplicitShutdown).
+        /// </summary>
+        private void ShowMainShell()
+        {
             var window = new MainWindow();
+            _shell = window;
             MainWindow = window;
             ApplyFlowDirection(window);
+            window.Closed += Shell_Closed;
             window.Show();
+            CrashLog.Breadcrumb("main shell shown");
 
-            StartBackgroundLicenseSync();
-            StartUpdateChecks();
-            StartTrialWatchdog();
+            if (!_timersStarted)
+            {
+                _timersStarted = true;
+                StartBackgroundLicenseSync();
+                StartUpdateChecks();
+                StartTrialWatchdog();
+            }
+        }
+
+        private void Shell_Closed(object sender, EventArgs e)
+        {
+            // Only a genuine user close of the CURRENT shell exits the app. During signout the
+            // handler is detached before the old shell is closed, so a rebuild never exits.
+            if (ReferenceEquals(sender, _shell))
+            {
+                CrashLog.Breadcrumb("main window closed by user -> shutdown");
+                Shutdown();
+            }
+        }
+
+        private static string StartupErrorText()
+        {
+            return "حدث خطأ تقني. تم تسجيل التفاصيل في:\n" + CrashLog.Directory +
+                   "\n\nUne erreur technique est survenue. Détails enregistrés dans le dossier ci-dessus.";
         }
 
         /// <summary>
@@ -174,10 +225,10 @@ namespace OptiPaie.Desktop
         }
 
         /// <summary>
-        /// Signs out of the current session and returns to the sign-in screen. The license
-        /// AND the local account are kept, so the next sign-in needs only email + password —
-        /// never the license key again. If no customer account exists (trial / legacy install)
-        /// it falls back to the optional login gate or the activation screen.
+        /// Signs out and returns to the SINGLE sign-in screen — never closes the app. The
+        /// license AND the local account are kept, so signing back in never re-asks for the
+        /// license key. Converges with startup: on success a FRESH main window is built via
+        /// the same <see cref="ShowMainShell"/> used at cold start.
         /// </summary>
         public void SignOut()
         {
@@ -186,100 +237,105 @@ namespace OptiPaie.Desktop
                 return;
             }
 
-            // End sessions but keep the license and the local account intact.
-            Services.Session.Current = null;              // dormant multi-user session (if any)
+            CrashLog.Breadcrumb("SignOut");
+
+            // End both principals but keep the license and the local account intact.
+            Services.Session.Current = null;
             Services.CustomerAccount.SignOut();
 
-            Window main = MainWindow;
-            if (main != null)
+            // Close the current shell WITHOUT exiting the process: detach the close->shutdown
+            // handler first (ShutdownMode is OnExplicitShutdown, so no window = no auto-exit).
+            MainWindow oldShell = _shell;
+            if (oldShell != null)
             {
-                main.Hide();
+                oldShell.Closed -= Shell_Closed;
+                _shell = null;
+                oldShell.Close();
             }
 
-            bool proceed;
-            if (Services.CustomerAccount.HasAccount)
+            try
             {
-                // The normal path: email + password only (no license).
-                proceed = PromptCustomerSignIn();
-
-                // Mirror startup: if the optional multi-user login is also enabled, re-authenticate
-                // the operator so their per-user session (and role) is re-established — never leave
-                // Session.Current null, which would read as unrestricted admin.
-                if (proceed && Services.Users.IsLoginRequired())
+                if (AuthenticateIfNeeded() && (Services.Access.Evaluate().CanUseApp || EnsureAccess()))
                 {
-                    proceed = EnsureLogin();
+                    ShowMainShell();
+                }
+                else
+                {
+                    CrashLog.Breadcrumb("sign-in cancelled after signout -> exit");
+                    Shutdown();
                 }
             }
-            else if (Services.Users.IsLoginRequired())
+            catch (Exception ex)
             {
-                proceed = EnsureLogin();
-            }
-            else
-            {
-                // No customer account (trial / legacy) — show the activation / trial screen.
-                proceed = EnsureAccess();
-            }
-
-            // After a successful sign-in the license normally still applies; if it lapsed
-            // while signed out, offer activation before giving up.
-            if (proceed && (Services.Access.Evaluate().CanUseApp || EnsureAccess()))
-            {
-                if (main != null)
-                {
-                    main.Show();
-                }
-            }
-            else
-            {
-                Shutdown();
+                CrashLog.Fatal("SignOut sign-in flow", ex);
+                MessageBox.Show(StartupErrorText(), "OptiPaie PRO", MessageBoxButton.OK, MessageBoxImage.Error);
+                Shutdown(-1);
             }
         }
 
         /// <summary>
-        /// Customer-session gate: auto-opens when the account is signed in (or when there is
-        /// no account yet — a trial or a legacy licensed install); after a manual logout it
-        /// asks for email + password ONLY (never the license again). Returns true to proceed.
+        /// The single authentication gate. Shows the ONE unified login screen only when a
+        /// sign-in is actually needed (owner account signed out, or the local login gate is on
+        /// with no active session). Returns true once an authenticated principal exists — the
+        /// owner account (email) OR a local user (username), auto-detected on the same screen.
+        /// A remembered local user is restored silently first.
         /// </summary>
-        private bool EnsureCustomerSession()
+        private bool AuthenticateIfNeeded()
         {
-            OptiPaie.Core.Licensing.ICustomerAccountService account = Services.CustomerAccount;
-            if (account == null || !account.HasAccount || account.IsSignedIn)
+            TryRestoreRememberedUser();
+
+            ICustomerAccountService account = Services.CustomerAccount;
+            bool ownerNeedsSignin = account != null && account.HasAccount && !account.IsSignedIn;
+            bool localGateOn = Services.Users.IsLoginRequired();
+            bool haveLocalSession = Services.Session != null && Services.Session.IsAuthenticated;
+
+            if (!ownerNeedsSignin && (!localGateOn || haveLocalSession))
             {
                 return true;
             }
 
-            return PromptCustomerSignIn();
-        }
-
-        /// <summary>Shows the sign-in screen (email + password only) for the local account.</summary>
-        private bool PromptCustomerSignIn()
-        {
-            var viewModel = new ActivationViewModel(Services, ActivationMode.SignIn, Services.CustomerAccount.Email);
-            var window = new ActivationWindow { DataContext = viewModel };
+            var viewModel = new LoginViewModel(Services);
+            var window = new LoginWindow { DataContext = viewModel };
             ApplyFlowDirection(window);
             viewModel.CloseRequested = ok => { try { window.DialogResult = ok; } catch { window.Close(); } };
             window.ShowDialog();
-            return Services.CustomerAccount.IsSignedIn;
+            return IsAuthenticated();
+        }
+
+        /// <summary>True when either principal is established: the owner session or a local user.</summary>
+        private bool IsAuthenticated()
+        {
+            bool owner = Services.CustomerAccount != null && Services.CustomerAccount.IsSignedIn;
+            bool local = Services.Session != null && Services.Session.IsAuthenticated;
+            return owner || local;
         }
 
         /// <summary>
-        /// Shows the login screen when the gate is enabled and users exist; returns true once
-        /// signed in. When login is not enforced, returns true immediately (full access).
+        /// "Remember me": silently restores a previously-remembered local user (still active)
+        /// so the login screen is skipped. Never throws — any issue just falls through to login.
         /// </summary>
-        private bool EnsureLogin()
+        private void TryRestoreRememberedUser()
         {
-            if (Services == null || !Services.Users.IsLoginRequired())
+            try
             {
-                return true;
+                if (Services.Session != null && Services.Session.IsAuthenticated) return;
+                if (!Services.Users.IsLoginRequired()) return;
+
+                string remembered = Services.Settings.Get(LoginViewModel.RememberedUserKey, null);
+                if (string.IsNullOrWhiteSpace(remembered)) return;
+
+                Core.Entities.User user = Services.Users.GetAll()
+                    .FirstOrDefault(u => u.IsActive &&
+                        string.Equals(u.Username, remembered, StringComparison.OrdinalIgnoreCase));
+                if (user != null)
+                {
+                    Services.Session.Current = user;
+                }
             }
-
-            var viewModel = new ViewModels.LoginViewModel(Services);
-            var window = new LoginWindow { DataContext = viewModel };
-            ApplyFlowDirection(window);
-            viewModel.CloseRequested = result => { try { window.DialogResult = result; } catch { window.Close(); } };
-
-            bool ok = window.ShowDialog() == true;
-            return ok && Services.Session.IsAuthenticated;
+            catch
+            {
+                // A failed auto-restore must never block the login screen.
+            }
         }
 
         /// <summary>

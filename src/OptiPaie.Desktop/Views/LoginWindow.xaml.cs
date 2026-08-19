@@ -3,7 +3,7 @@ using OptiPaie.Desktop.ViewModels;
 
 namespace OptiPaie.Desktop.Views
 {
-    /// <summary>Startup login screen (shown only when the login gate is enabled).</summary>
+    /// <summary>The single unified sign-in screen (owner email or local username).</summary>
     public partial class LoginWindow
     {
         public LoginWindow()
@@ -15,7 +15,10 @@ namespace OptiPaie.Desktop.Views
                 {
                     vm.PasswordAccessor = () => PasswordBox.Password;
                 }
-                UsernameBox.Focus();
+
+                // Focus the password when the identifier is pre-filled, otherwise the identifier.
+                if (string.IsNullOrEmpty(IdentifierBox.Text)) IdentifierBox.Focus();
+                else PasswordBox.Focus();
             };
         }
     }

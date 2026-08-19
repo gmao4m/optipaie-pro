@@ -53,7 +53,23 @@ namespace OptiPaie.Desktop.Common
             if (app != null)
             {
                 app.DispatcherUnhandledException += (s, e) =>
+                {
                     Fatal("Application.DispatcherUnhandledException", e.Exception);
+
+                    // Show the user a clear message and KEEP the process alive — a UI-thread
+                    // exception must never silently close the app (e.g. on the login path).
+                    try
+                    {
+                        MessageBox.Show(
+                            "حدث خطأ تقني ولم يُغلق البرنامج. تم تسجيل التفاصيل في:\n" + Directory +
+                            "\n\nUne erreur technique est survenue ; l'application reste ouverte.\n" +
+                            "Détails enregistrés dans le dossier ci-dessus.",
+                            "OptiPaie PRO", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    }
+                    catch { /* showing the dialog must never itself crash the handler */ }
+
+                    e.Handled = true;
+                };
             }
 
             Breadcrumb("crash handlers installed · logs in " + Directory);
