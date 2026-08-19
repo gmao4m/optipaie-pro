@@ -58,21 +58,21 @@ Write-Host "==> Building Setup.exe bootstrapper..." -ForegroundColor Cyan
 if ($LASTEXITCODE -ne 0) { throw "Setup.exe build failed." }
 
 # ---------------------------------------------------------------------------
-# RELEASE GUARD — Windows 7 SP1 compatibility.
+# RELEASE GUARD - Windows 7 SP1 compatibility.
 # The retired Velopack installer stub statically imported GetDpiForSystem
 # (a Windows 10 1607+ API), so it could not even launch on Windows 7 SP1.
 # Refuse to ship any Setup.exe carrying that import so the bug cannot silently
 # return. NOTE: we check ONLY "GetDpiForSystem". GetDpiForMonitor / GetDpiForWindow
 # legitimately appear in the WiX/thmutil bootstrapper as GetProcAddress-resolved
-# strings with a graceful fallback and are Windows 7-safe — do not guard on those.
+# strings with a graceful fallback and are Windows 7-safe - do not guard on those.
 $setupExe = Join-Path $outDir "OptiPaie PRO Setup.exe"
 Write-Host "==> Release guard: checking $setupExe for a GetDpiForSystem import..." -ForegroundColor Cyan
 $latin1  = [System.Text.Encoding]::GetEncoding("ISO-8859-1")   # 1 byte -> 1 char (binary-safe scan)
 $content = [System.IO.File]::ReadAllText($setupExe, $latin1)
 if ($content.IndexOf("GetDpiForSystem", [System.StringComparison]::Ordinal) -ge 0) {
-    throw "RELEASE GUARD FAILED: '$setupExe' references GetDpiForSystem — this installer will NOT launch on Windows 7 SP1. Refusing to ship. (This is the exact defect that retired the Velopack rail; see release/README.md and docs/WIN7-VERIFICATION.md.)"
+    throw "RELEASE GUARD FAILED: '$setupExe' references GetDpiForSystem - this installer will NOT launch on Windows 7 SP1. Refusing to ship. (This is the exact defect that retired the Velopack rail; see release/README.md and docs/WIN7-VERIFICATION.md.)"
 }
-Write-Host "    OK — no GetDpiForSystem import; Windows 7 SP1-safe." -ForegroundColor Green
+Write-Host "    OK - no GetDpiForSystem import; Windows 7 SP1-safe." -ForegroundColor Green
 # ---------------------------------------------------------------------------
 
 Remove-Item (Join-Path $outDir "*.wixpdb") -Force -ErrorAction SilentlyContinue
