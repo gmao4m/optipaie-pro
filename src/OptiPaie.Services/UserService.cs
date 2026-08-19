@@ -167,10 +167,17 @@ namespace OptiPaie.Services
 
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
-                User user = uow.Users.GetByUsername(username.Trim());
+                // Look up regardless of active state so a disabled account with the RIGHT password
+                // gets a precise "account disabled" reason instead of "wrong password".
+                User user = uow.Users.GetByUsernameIncludingInactive(username.Trim());
                 if (user == null || !Verify(password, user.Salt, user.PasswordHash))
                 {
                     return Result.Fail<User>("Nom d'utilisateur ou mot de passe incorrect.", "User_BadCredentials");
+                }
+
+                if (!user.IsActive)
+                {
+                    return Result.Fail<User>("Ce compte est désactivé.", "User_Disabled");
                 }
 
                 return Result.Ok(user);
@@ -182,6 +189,14 @@ namespace OptiPaie.Services
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 return uow.Users.CountActive();
+            }
+        }
+
+        public bool HasActiveAdmin()
+        {
+            using (IUnitOfWork uow = _unitOfWorkFactory.Create())
+            {
+                return uow.Users.CountAdmins() > 0;
             }
         }
 
@@ -197,6 +212,13 @@ namespace OptiPaie.Services
 
         public void SetLoginEnabled(bool enabled)
         {
+            // Never allow enabling the gate with no active administrator — that would raise a login
+            // screen no one can pass (a lock-out). Disabling is always allowed.
+            if (enabled && !HasActiveAdmin())
+            {
+                return;
+            }
+
             _settings.Set(AuthEnabledKey, enabled ? "true" : "false");
         }
 

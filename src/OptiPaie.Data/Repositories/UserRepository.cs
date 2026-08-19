@@ -27,6 +27,14 @@ namespace OptiPaie.Data.Repositories
                 new { username }, Transaction);
         }
 
+        public User GetByUsernameIncludingInactive(string username)
+        {
+            // Active row preferred when a username collision exists; still excludes deleted rows.
+            return Connection.QuerySingleOrDefault<User>(
+                "SELECT * FROM Users WHERE Username = @username AND IsDeleted = 0 ORDER BY IsActive DESC LIMIT 1;",
+                new { username }, Transaction);
+        }
+
         public IEnumerable<User> GetAll()
         {
             return Connection.Query<User>(

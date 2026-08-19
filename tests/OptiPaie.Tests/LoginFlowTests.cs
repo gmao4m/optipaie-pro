@@ -1,0 +1,208 @@
+using System;
+using System.IO;
+using NUnit.Framework;
+using OptiPaie.Common.Logging;
+using OptiPaie.Core.Entities;
+using OptiPaie.Core.Enums;
+using OptiPaie.Core.Interfaces.Repositories;
+using OptiPaie.Core.Interfaces.Services;
+using OptiPaie.Core.Licensing;
+using OptiPaie.Data.Context;
+using OptiPaie.Data.Migrations;
+using OptiPaie.Services;
+using OptiPaie.Services.Auth;
+using OptiPaie.Services.Licensing;
+
+namespace OptiPaie.Tests
+{
+    /// <summary>
+    /// The unified login flow: ONE screen, ONE identifier that is auto-detected as the owner
+    /// email or a local username, converging on a single "open the app" path. Also proves the
+    /// v1.26 production crash mechanism (ShutdownMode) with a WPF-free model.
+    /// </summary>
+    [TestFixture]
+    public sealed class LoginFlowTests
+    {
+        private string _directory;
+        private IUnitOfWorkFactory _uowf;
+        private ISettingsService _settings;
+        private IUserService _users;
+        private ICustomerAccountService _owner;
+        private LoginCoordinator _coordinator;
+
+        [SetUp]
+        public void SetUp()
+        {
+            _directory = Path.Combine(Path.GetTempPath(), "optipaie-login-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(_directory);
+            SqliteTypeHandlers.Register();
+            var factory = new SqliteConnectionFactory(Path.Combine(_directory, "test.db"));
+            using (var c = factory.CreateOpenConnection()) new MigrationRunner(c).Run();
+
+            _uowf = new UnitOfWorkFactory(factory);
+            _settings = new SettingsService(_uowf);
+            _users = new UserService(_uowf, _settings);
+            _owner = new CustomerAccountService(_settings, new PassThroughCipher(), new SilentLogger());
+            _coordinator = new LoginCoordinator(_owner, _users);
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            System.Data.SQLite.SQLiteConnection.ClearAllPools();
+            try { Directory.Delete(_directory, true); } catch (IOException) { }
+        }
+
+        // -- unified auth: local username -------------------------------------
+
+        [Test]
+        public void Login_LocalUsername_CorrectPassword_SignsInAsLocalUser()
+        {
+            _users.Create("chef", "Chef Prod", "pass1234", UserRole.Manager, "Production");
+
+            LoginOutcome outcome = _coordinator.Login("chef", "pass1234");
+
+            Assert.That(outcome.Success, Is.True);
+            Assert.That(outcome.Principal, Is.EqualTo(LoginPrincipal.LocalUser));
+            Assert.That(outcome.User, Is.Not.Null);
+            Assert.That(outcome.User.Username, Is.EqualTo("chef"));
+        }
+
+        // -- unified auth: owner email ----------------------------------------
+
+        [Test]
+        public void Login_OwnerEmail_CorrectPassword_SignsInAsOwner()
+        {
+            _owner.Register("boss@corp.dz", "Corp", "owner-pass");
+            _owner.SignOut();
+
+            LoginOutcome outcome = _coordinator.Login("BOSS@corp.dz", "owner-pass"); // case-insensitive
+
+            Assert.That(outcome.Success, Is.True);
+            Assert.That(outcome.Principal, Is.EqualTo(LoginPrincipal.Owner));
+            Assert.That(_owner.IsSignedIn, Is.True, "the owner session is opened");
+        }
+
+        [Test]
+        public void Login_OwnerEmail_IsAnIndependentRescuePath_WhateverTheLocalUsers()
+        {
+            _owner.Register("boss@corp.dz", "Corp", "owner-pass");
+            _owner.SignOut();
+
+            // A local admin exists and the gate is ON — the owner email is still its own path,
+            // so a client who forgot every local password can always get back in.
+            _users.Create("admin", "Admin", "adminpass", UserRole.Admin, null);
+            _users.SetLoginEnabled(true);
+
+            LoginOutcome outcome = _coordinator.Login("boss@corp.dz", "owner-pass");
+            Assert.That(outcome.Success, Is.True);
+            Assert.That(outcome.Principal, Is.EqualTo(LoginPrincipal.Owner));
+            Assert.That(_owner.IsSignedIn, Is.True);
+        }
+
+        // -- precise failures --------------------------------------------------
+
+        [Test]
+        public void Login_DisabledLocalUser_CorrectPassword_ReportsDisabled_NotBadPassword()
+        {
+            _users.Create("admin", "Admin", "adminpass", UserRole.Admin, null); // keep an active admin
+            long id = _users.Create("old", "Old User", "pass1234", UserRole.Manager, null).Value;
+            User u = _users.Get(id);
+            u.IsActive = false;
+            _users.Update(u);
+
+            LoginOutcome outcome = _coordinator.Login("old", "pass1234"); // RIGHT password, disabled account
+            Assert.That(outcome.Success, Is.False);
+            Assert.That(outcome.Failure, Is.EqualTo(LoginFailure.Disabled));
+        }
+
+        [Test]
+        public void Login_WrongPassword_ReportsBadCredentials()
+        {
+            _users.Create("chef", "Chef", "pass1234", UserRole.Manager, null);
+            Assert.That(_coordinator.Login("chef", "nope").Failure, Is.EqualTo(LoginFailure.BadCredentials));
+        }
+
+        [Test]
+        public void Login_MissingFields_ReportedDistinctly()
+        {
+            Assert.That(_coordinator.Login("", "x").Failure, Is.EqualTo(LoginFailure.MissingIdentifier));
+            Assert.That(_coordinator.Login("someone", "").Failure, Is.EqualTo(LoginFailure.MissingPassword));
+        }
+
+        // -- PROOF #1: the ShutdownMode crash mechanism (WPF-free model) -------
+        //
+        // The real WPF ShutdownMode termination cannot be exercised headlessly (no STA
+        // Application). WindowLifecycleModel is a faithful model of the exact mechanism —
+        // open-window count + shutdown mode — so the bug and its fix are provable.
+
+        [TestCase(AppShutdownMode.OnLastWindowClose, true)]    // WPF default (current) → process dies
+        [TestCase(AppShutdownMode.OnExplicitShutdown, false)]  // the fix → process survives
+        public void StartupGate_LoginWindowCloseTerminatesProcess_OnlyUnderLastWindowClose(
+            AppShutdownMode mode, bool expectTerminated)
+        {
+            // At the gate the login window is the ONLY window (MainWindow is created only
+            // AFTER a successful login).
+            var life = new WindowLifecycleModel(mode);
+            life.OpenWindow();   // unified login dialog shown (sole window)
+            life.CloseWindow();  // correct credentials → dialog closes
+            Assert.That(life.Terminated, Is.EqualTo(expectTerminated));
+        }
+
+        [Test]
+        public void LocalLogin_CorrectPassword_ReachesMainWindow_ProcessStaysAlive()
+        {
+            // Uses the SAME shutdown policy the real WPF App applies at startup.
+            var life = new WindowLifecycleModel(AppShellPolicy.ShutdownModeDuringGate);
+            life.OpenWindow();   // login shown (sole window)
+            life.CloseWindow();  // correct local password → closes
+            Assert.That(life.Terminated, Is.False, "a correct login must NEVER close the app");
+
+            life.OpenWindow();   // MainWindow now opens
+            Assert.That(life.Terminated, Is.False);
+            Assert.That(life.OpenWindows, Is.EqualTo(1), "the main window is open and the process is alive");
+        }
+
+        [Test]
+        public void TwoSuccessiveSignOutLoginCycles_KeepTheProcessAlive()
+        {
+            var life = new WindowLifecycleModel(AppShellPolicy.ShutdownModeDuringGate);
+            life.OpenWindow(); // MainWindow after first startup
+
+            for (int cycle = 0; cycle < 2; cycle++)
+            {
+                life.CloseWindow();  // signout closes the shell
+                Assert.That(life.Terminated, Is.False, "signout must return to login, not exit");
+                life.OpenWindow();   // unified login
+                life.CloseWindow();  // re-login success
+                Assert.That(life.Terminated, Is.False);
+                life.OpenWindow();   // fresh MainWindow
+            }
+
+            Assert.That(life.Terminated, Is.False);
+            Assert.That(life.OpenWindows, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void App_UsesTheSurvivingShutdownMode()
+        {
+            Assert.That(AppShellPolicy.ShutdownModeDuringGate, Is.EqualTo(AppShutdownMode.OnExplicitShutdown));
+        }
+
+        // -- test doubles ------------------------------------------------------
+
+        private sealed class PassThroughCipher : ILocalCipher
+        {
+            public string Protect(string plainText) => plainText;
+            public string Unprotect(string protectedBase64) => protectedBase64;
+        }
+
+        private sealed class SilentLogger : ILogger
+        {
+            public void Info(string message) { }
+            public void Warn(string message) { }
+            public void Error(string message) { }
+            public void Error(string message, Exception exception) { }
+        }
+    }
+}

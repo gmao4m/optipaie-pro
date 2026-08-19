@@ -34,13 +34,19 @@ namespace OptiPaie.Core.Interfaces.Services
         /// <summary>Number of active users.</summary>
         int ActiveUserCount();
 
+        /// <summary>True when at least one active administrator exists (the login gate requires one).</summary>
+        bool HasActiveAdmin();
+
         /// <summary>True when a login should be enforced (the gate is enabled AND a user exists).</summary>
         bool IsLoginRequired();
 
         /// <summary>Whether the login gate is switched on.</summary>
         bool IsLoginEnabled();
 
-        /// <summary>Turns the login gate on/off (only meaningful once at least one admin exists).</summary>
+        /// <summary>
+        /// Turns the login gate on/off. Enabling is REFUSED (no-op) when no active administrator
+        /// exists, so a client can never lock itself out with an unreachable login screen.
+        /// </summary>
         void SetLoginEnabled(bool enabled);
     }
 }

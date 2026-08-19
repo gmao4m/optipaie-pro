@@ -11,6 +11,12 @@ namespace OptiPaie.Core.Interfaces.Repositories
         /// <summary>The active, non-deleted user with this username, or null.</summary>
         User GetByUsername(string username);
 
+        /// <summary>
+        /// The non-deleted user with this username REGARDLESS of active state (active preferred),
+        /// or null. Used at sign-in so a disabled account can be told apart from a wrong password.
+        /// </summary>
+        User GetByUsernameIncludingInactive(string username);
+
         IEnumerable<User> GetAll();
 
         long Insert(User user);

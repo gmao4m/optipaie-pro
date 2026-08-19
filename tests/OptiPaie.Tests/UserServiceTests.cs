@@ -104,6 +104,57 @@ namespace OptiPaie.Tests
         }
 
         [Test]
+        public void Authenticate_DisabledAccount_CorrectPassword_ReportsDisabled_NotBadCredentials()
+        {
+            _users.Create("admin", "Admin", "adminpass", UserRole.Admin, null); // keep an active admin
+            long id = _users.Create("old", "Old", "pass1234", UserRole.Manager, null).Value;
+            User u = _users.Get(id);
+            u.IsActive = false;
+            Assert.That(_users.Update(u).IsSuccess, Is.True);
+
+            Result<User> right = _users.Authenticate("old", "pass1234"); // correct password, disabled
+            Assert.That(right.IsFailure, Is.True);
+            Assert.That(right.ErrorCode, Is.EqualTo("User_Disabled"));
+
+            Result<User> wrong = _users.Authenticate("old", "WRONG");     // wrong password, disabled
+            Assert.That(wrong.ErrorCode, Is.EqualTo("User_BadCredentials"), "a wrong password never leaks the disabled state");
+        }
+
+        [Test]
+        public void SetLoginEnabled_IsRefused_WhenNoActiveAdminExists()
+        {
+            // A manager alone is not enough — enabling the gate needs an active admin.
+            _users.Create("chef", "Chef", "pass1234", UserRole.Manager, "Production");
+            Assert.That(_users.HasActiveAdmin(), Is.False);
+
+            _users.SetLoginEnabled(true);
+            Assert.That(_users.IsLoginEnabled(), Is.False, "cannot enable login without an active admin (lock-out guard)");
+
+            // Add an admin → enabling now works.
+            _users.Create("admin", "Admin", "adminpass", UserRole.Admin, null);
+            Assert.That(_users.HasActiveAdmin(), Is.True);
+            _users.SetLoginEnabled(true);
+            Assert.That(_users.IsLoginEnabled(), Is.True);
+        }
+
+        [Test]
+        public void LastActiveAdmin_CannotBeDisabled_SoTheClientIsNeverLockedOut()
+        {
+            long a1 = _users.Create("admin", "Admin", "adminpass", UserRole.Admin, null).Value;
+            long a2 = _users.Create("admin2", "Admin2", "adminpas2", UserRole.Admin, null).Value;
+
+            // Disabling one admin is fine while another stays active.
+            User u1 = _users.Get(a1); u1.IsActive = false;
+            Assert.That(_users.Update(u1).IsSuccess, Is.True);
+            Assert.That(_users.HasActiveAdmin(), Is.True);
+
+            // Disabling the LAST active admin is refused → an active admin always remains.
+            User u2 = _users.Get(a2); u2.IsActive = false;
+            Assert.That(_users.Update(u2).IsFailure, Is.True, "the last active admin must stay");
+            Assert.That(_users.HasActiveAdmin(), Is.True);
+        }
+
+        [Test]
         public void ChangePassword_Rehashes_AndOldPasswordStopsWorking()
         {
             long id = _users.Create("u", "U", "old12345", UserRole.Manager, null).Value;
