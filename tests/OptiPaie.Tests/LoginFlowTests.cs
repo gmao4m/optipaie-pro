@@ -207,6 +207,32 @@ namespace OptiPaie.Tests
         // -- recovery escapes on the unified login screen (fix of the 1.27.0 regressions) ----
 
         [Test]
+        public void LoginMessageMap_EachFailure_MapsToADistinctMessageKey()
+        {
+            Assert.That(LoginMessageMap.KeyFor(LoginFailure.MissingIdentifier, false), Is.EqualTo("Login_Err_NeedUsername"));
+            Assert.That(LoginMessageMap.KeyFor(LoginFailure.MissingPassword, false), Is.EqualTo("Login_Err_NeedPassword"));
+            Assert.That(LoginMessageMap.KeyFor(LoginFailure.Disabled, true), Is.EqualTo("Login_Err_Disabled"));
+            Assert.That(LoginMessageMap.KeyFor(LoginFailure.Technical, false), Is.EqualTo("Login_Err_Technical"));
+
+            // A generic bad-credentials is split for clarity — unknown identifier vs wrong password.
+            Assert.That(LoginMessageMap.KeyFor(LoginFailure.BadCredentials, identifierExists: false), Is.EqualTo("Login_Err_UnknownIdentifier"));
+            Assert.That(LoginMessageMap.KeyFor(LoginFailure.BadCredentials, identifierExists: true), Is.EqualTo("Login_Err_WrongPassword"));
+
+            // Every distinct case yields a distinct, non-empty key (each error shows its own message).
+            var keys = new[]
+            {
+                LoginMessageMap.KeyFor(LoginFailure.MissingIdentifier, false),
+                LoginMessageMap.KeyFor(LoginFailure.MissingPassword, false),
+                LoginMessageMap.KeyFor(LoginFailure.BadCredentials, false),
+                LoginMessageMap.KeyFor(LoginFailure.BadCredentials, true),
+                LoginMessageMap.KeyFor(LoginFailure.Disabled, false),
+                LoginMessageMap.KeyFor(LoginFailure.Technical, false),
+            };
+            Assert.That(keys, Is.Unique);
+            Assert.That(keys, Has.None.Empty);
+        }
+
+        [Test]
         public void LoginScreen_AlwaysOffers_LicenseEscape_AndUpdateCheck()
         {
             // Both affordances are PERMANENT (never conditioned on a failed attempt): the

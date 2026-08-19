@@ -1,5 +1,6 @@
 using System;
 using System.Configuration;
+using System.Linq;
 using System.Threading;
 using System.Windows.Input;
 using OptiPaie.Core.Updates;
@@ -91,7 +92,7 @@ namespace OptiPaie.Desktop.ViewModels
             if (!outcome.Success)
             {
                 IsError = true;
-                StatusMessage = L(MessageKey(outcome.Failure));
+                StatusMessage = L(LoginMessageMap.KeyFor(outcome.Failure, IdentifierExists(_identifier)));
                 if (outcome.Failure == LoginFailure.Technical)
                 {
                     _services.Logger.Warn("Login failed with a technical error for identifier '" + (_identifier ?? string.Empty).Trim() + "'.");
@@ -173,15 +174,29 @@ namespace OptiPaie.Desktop.ViewModels
             return string.IsNullOrWhiteSpace(repo) ? string.Empty : "https://github.com/" + repo + "/releases/latest";
         }
 
-        private static string MessageKey(LoginFailure failure)
+        /// <summary>
+        /// Read-only, presentation-only check: does the typed identifier correspond to a known
+        /// owner email or local username? Used ONLY to pick a clearer message ("wrong password"
+        /// vs "unknown identifier"). It does not authenticate and changes no auth decision.
+        /// </summary>
+        private bool IdentifierExists(string identifier)
         {
-            switch (failure)
+            string id = (identifier ?? string.Empty).Trim();
+            if (id.Length == 0) return false;
+            try
             {
-                case LoginFailure.MissingIdentifier: return "Login_Err_NeedUsername";
-                case LoginFailure.MissingPassword: return "Login_Err_NeedPassword";
-                case LoginFailure.Disabled: return "Login_Err_Disabled";
-                case LoginFailure.Technical: return "Login_Err_Technical";
-                default: return "Login_Err_BadCredentials";
+                var account = _services.CustomerAccount;
+                if (account != null && account.HasAccount &&
+                    string.Equals(id, account.Email, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+                return _services.Users.GetAll()
+                    .Any(u => string.Equals(u.Username, id, StringComparison.OrdinalIgnoreCase));
+            }
+            catch
+            {
+                return false;
             }
         }
 
