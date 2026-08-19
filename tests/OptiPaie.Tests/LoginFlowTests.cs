@@ -7,6 +7,7 @@ using OptiPaie.Core.Enums;
 using OptiPaie.Core.Interfaces.Repositories;
 using OptiPaie.Core.Interfaces.Services;
 using OptiPaie.Core.Licensing;
+using OptiPaie.Core.Primitives;
 using OptiPaie.Data.Context;
 using OptiPaie.Data.Migrations;
 using OptiPaie.Services;
@@ -130,6 +131,20 @@ namespace OptiPaie.Tests
             Assert.That(_coordinator.Login("someone", "").Failure, Is.EqualTo(LoginFailure.MissingPassword));
         }
 
+        [Test]
+        public void Login_ExceptionOnTheLoginPath_IsContained_ReportedAsTechnical_NeverThrows()
+        {
+            // An unexpected failure in the auth backend must be turned into a shown/logged reason,
+            // never an unhandled exception that could close the app.
+            var coordinator = new LoginCoordinator(_owner, new ThrowingUserService());
+
+            LoginOutcome outcome = null;
+            Assert.DoesNotThrow(() => outcome = coordinator.Login("someone", "whatever"));
+            Assert.That(outcome, Is.Not.Null);
+            Assert.That(outcome.Success, Is.False);
+            Assert.That(outcome.Failure, Is.EqualTo(LoginFailure.Technical));
+        }
+
         // -- PROOF #1: the ShutdownMode crash mechanism (WPF-free model) -------
         //
         // The real WPF ShutdownMode termination cannot be exercised headlessly (no STA
@@ -203,6 +218,25 @@ namespace OptiPaie.Tests
             public void Warn(string message) { }
             public void Error(string message) { }
             public void Error(string message, Exception exception) { }
+        }
+
+        /// <summary>An IUserService whose Authenticate throws — to prove the coordinator contains it.</summary>
+        private sealed class ThrowingUserService : IUserService
+        {
+            public Result<User> Authenticate(string username, string password) =>
+                throw new InvalidOperationException("injected failure on the login path");
+
+            public Result<long> Create(string username, string fullName, string password, UserRole role, string department) => throw new NotSupportedException();
+            public Result Update(User user) => throw new NotSupportedException();
+            public Result ChangePassword(long userId, string newPassword) => throw new NotSupportedException();
+            public Result Delete(long userId) => throw new NotSupportedException();
+            public User Get(long id) => throw new NotSupportedException();
+            public System.Collections.Generic.IReadOnlyList<User> GetAll() => throw new NotSupportedException();
+            public int ActiveUserCount() => 0;
+            public bool HasActiveAdmin() => false;
+            public bool IsLoginRequired() => false;
+            public bool IsLoginEnabled() => false;
+            public void SetLoginEnabled(bool enabled) { }
         }
     }
 }
