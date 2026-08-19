@@ -37,10 +37,15 @@
         <Border Grid.Row="1" Style="{StaticResource Card}" Margin="0,16,0,0" Padding="16,12">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                 <CheckBox VerticalAlignment="Center" IsChecked="{Binding LoginEnabled}"
+                          IsEnabled="{Binding CanEnableLogin}"
                           Content="{loc:Loc Users_RequireLogin}"
                           Foreground="{DynamicResource TextPrimary}" FontSize="13" FontWeight="SemiBold" />
                 <TextBlock VerticalAlignment="Center" Margin="16,0,0,0" FontSize="12"
-                           Foreground="{DynamicResource TextMuted}" Text="{loc:Loc Users_RequireLoginHint}" />
+                           Foreground="{DynamicResource TextMuted}" Text="{loc:Loc Users_RequireLoginHint}"
+                           Visibility="{Binding CanEnableLogin, Converter={StaticResource BoolToVis}}" />
+                <TextBlock VerticalAlignment="Center" Margin="16,0,0,0" FontSize="12" FontWeight="SemiBold"
+                           Foreground="{DynamicResource Deduction}" Text="{Binding LoginGateHint}"
+                           Visibility="{Binding CanEnableLogin, Converter={StaticResource InverseBoolToVis}}" />
             </StackPanel>
         </Border>
 

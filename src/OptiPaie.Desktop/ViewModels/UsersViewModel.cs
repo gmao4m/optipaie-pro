@@ -89,9 +89,11 @@ namespace OptiPaie.Desktop.ViewModels
             get => _services.Users.IsLoginEnabled();
             set
             {
-                if (value && _services.Users.ActiveUserCount() == 0)
+                // Never enable the login gate without an active administrator — that would raise
+                // a login screen no one can pass (a client locked out of their own app).
+                if (value && !_services.Users.HasActiveAdmin())
                 {
-                    Dialogs.Info("Créez au moins un administrateur avant d'activer la connexion.");
+                    Dialogs.Info(L("Users_NeedAdminToEnable"));
                     Raise(nameof(LoginEnabled));
                     return;
                 }
@@ -100,6 +102,12 @@ namespace OptiPaie.Desktop.ViewModels
                 StatusMessage = value ? "Connexion activée — effective au prochain démarrage." : "Connexion désactivée.";
             }
         }
+
+        /// <summary>The login gate can only be enabled when at least one active administrator exists.</summary>
+        public bool CanEnableLogin => _services.Users.HasActiveAdmin();
+
+        /// <summary>Permanent reason shown next to the toggle when it cannot be enabled (empty otherwise).</summary>
+        public string LoginGateHint => CanEnableLogin ? string.Empty : L("Users_NeedAdminToEnable");
 
         public string StatusMessage { get => _statusMessage; private set => Set(ref _statusMessage, value); }
 
@@ -119,6 +127,11 @@ namespace OptiPaie.Desktop.ViewModels
                 Users.Add(new UserRowViewModel(u, role, active));
             }
             StatusMessage = Users.Count + " " + L("Users_CountSuffix");
+
+            // The login-gate guard depends on whether an active admin exists — refresh it.
+            Raise(nameof(CanEnableLogin));
+            Raise(nameof(LoginGateHint));
+            Raise(nameof(LoginEnabled));
         }
 
         private string L(string key) => _services.Localization.GetString(key);
