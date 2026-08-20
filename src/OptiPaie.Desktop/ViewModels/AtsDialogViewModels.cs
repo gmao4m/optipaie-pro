@@ -1,20 +1,31 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Windows.Input;
-using OptiPaie.Core.Dtos;
+using Microsoft.Win32;
+using OptiPaie.Common.Constants;
 using OptiPaie.Core.Entities;
 using OptiPaie.Core.Enums;
 using OptiPaie.Core.Primitives;
 using OptiPaie.Desktop.Common;
 using OptiPaie.Desktop.Composition;
+using OptiPaie.Desktop.Localization;
 using OptiPaie.Desktop.Mvvm;
 
 namespace OptiPaie.Desktop.ViewModels
 {
-    /// <summary>Creates or edits a job posting.</summary>
+    /// <summary>A contract-type option for the posting editor (folded, optional).</summary>
+    public sealed class PostingContractTypeOption
+    {
+        public PostingContractTypeOption(ContractType? value, string label) { Value = value; Label = label; }
+        public ContractType? Value { get; }
+        public string Label { get; }
+        public override string ToString() => Label;
+    }
+
+    /// <summary>Create / edit a job posting. Only 3 fields are required; the rest is folded.</summary>
     public sealed class AtsPostingEditViewModel : ObservableObject
     {
         private readonly AppServices _services;
@@ -23,9 +34,11 @@ namespace OptiPaie.Desktop.ViewModels
 
         private string _title;
         private string _department;
-        private string _description;
-        private DateTime _openDate;
         private string _positions;
+        private PostingContractTypeOption _contractType;
+        private DateTime? _deadline;
+        private string _responsibleName;
+        private string _description;
 
         public AtsPostingEditViewModel(AppServices services, long companyId, JobPosting existing)
         {
@@ -33,20 +46,26 @@ namespace OptiPaie.Desktop.ViewModels
             _companyId = companyId;
             _posting = existing ?? new JobPosting();
 
+            ContractTypes.Add(new PostingContractTypeOption(null, L("Recruit_NotSpecified")));
+            ContractTypes.Add(new PostingContractTypeOption(ContractType.Cdi, L("Enum_ContractType_Cdi")));
+            ContractTypes.Add(new PostingContractTypeOption(ContractType.Cdd, L("Enum_ContractType_Cdd")));
+
             if (existing != null)
             {
                 _title = existing.Title;
                 _department = existing.Department;
-                _description = existing.Description;
-                _openDate = existing.OpenDate;
                 _positions = existing.Positions.ToString(CultureInfo.InvariantCulture);
-                Title = "Modifier l'offre";
+                _deadline = existing.Deadline;
+                _responsibleName = existing.ResponsibleName;
+                _description = existing.Description;
+                _contractType = ContractTypes.FirstOrDefault(o => o.Value == existing.ContractType) ?? ContractTypes[0];
+                HeaderTitle = L("Recruit_EditPosting");
             }
             else
             {
-                _openDate = DateTime.Today;
                 _positions = "1";
-                Title = "Nouvelle offre";
+                _contractType = ContractTypes[0];
+                HeaderTitle = L("Recruit_NewPosting");
             }
 
             SaveCommand = new RelayCommand(Save);
@@ -54,13 +73,17 @@ namespace OptiPaie.Desktop.ViewModels
         }
 
         public Action<bool> RequestClose { get; set; }
-        public string Title { get; }
+        public string HeaderTitle { get; }
 
         public string PostingTitle { get => _title; set => Set(ref _title, value); }
         public string Department { get => _department; set => Set(ref _department, value); }
-        public string Description { get => _description; set => Set(ref _description, value); }
-        public DateTime OpenDate { get => _openDate; set => Set(ref _openDate, value); }
         public string Positions { get => _positions; set => Set(ref _positions, value); }
+        public PostingContractTypeOption ContractTypeSel { get => _contractType; set => Set(ref _contractType, value); }
+        public DateTime? Deadline { get => _deadline; set => Set(ref _deadline, value); }
+        public string ResponsibleName { get => _responsibleName; set => Set(ref _responsibleName, value); }
+        public string Description { get => _description; set => Set(ref _description, value); }
+
+        public ObservableCollection<PostingContractTypeOption> ContractTypes { get; } = new ObservableCollection<PostingContractTypeOption>();
 
         public ICommand SaveCommand { get; }
         public ICommand CancelCommand { get; }
@@ -73,253 +96,207 @@ namespace OptiPaie.Desktop.ViewModels
             _posting.CompanyId = _companyId;
             _posting.Title = _title;
             _posting.Department = _department;
-            _posting.Description = _description;
-            _posting.OpenDate = _openDate;
             _posting.Positions = positions;
+            _posting.ContractType = _contractType != null ? _contractType.Value : null;
+            _posting.Deadline = _deadline;
+            _posting.ResponsibleName = _responsibleName;
+            _posting.Description = _description;
+            if (_posting.Id == 0) _posting.OpenDate = DateTime.Today;
 
             Result<long> result = _services.Ats.SavePosting(_posting);
-            if (result.IsFailure)
-            {
-                Dialogs.Error(result.Error);
-                return;
-            }
-
+            if (result.IsFailure) { Fail(result); return; }
             RequestClose?.Invoke(true);
         }
+
+        private void Fail(Result r) =>
+            Dialogs.Error(ResultText.Localize(_services.Localization, r.Error, r.ErrorCode));
+
+        private static string L(string key) => TranslationSource.Instance[key];
     }
 
-    /// <summary>A pipeline stage option with its French label.</summary>
-    public sealed class StageOption
-    {
-        public StageOption(CandidateStage value) { Value = value; Label = AtsLabels.Stage(value); }
-        public CandidateStage Value { get; }
-        public string Label { get; }
-    }
-
-    /// <summary>One candidate row in the pipeline.</summary>
-    public sealed class CandidateRowViewModel
-    {
-        private static readonly CultureInfo Fr = CultureInfo.GetCultureInfo("fr-FR");
-
-        public CandidateRowViewModel(Candidate candidate)
-        {
-            Candidate = candidate;
-        }
-
-        public Candidate Candidate { get; }
-        public long Id => Candidate.Id;
-        public string FullName => (Candidate.LastName + " " + Candidate.FirstName).Trim();
-        public string Phone => Candidate.Phone;
-        public string Email => Candidate.Email;
-        public string StageLabel => AtsLabels.Stage(Candidate.Stage);
-        public string RatingText => Candidate.Rating > 0 ? Candidate.Rating + " / 5" : "—";
-        public string AppliedText => Candidate.AppliedDate.ToString("dd/MM/yyyy", Fr);
-        public bool IsHired => Candidate.Stage == CandidateStage.Hired;
-    }
-
-    /// <summary>Manages the candidate pipeline of one posting (add, move, hire, reject).</summary>
-    public sealed class AtsPipelineViewModel : ObservableObject
-    {
-        private readonly AppServices _services;
-        private readonly long _postingId;
-
-        private CandidateRowViewModel _selectedCandidate;
-        private StageOption _selectedStage;
-        private string _statusMessage = string.Empty;
-
-        public AtsPipelineViewModel(AppServices services, long postingId, string title)
-        {
-            _services = services;
-            _postingId = postingId;
-            PostingTitle = title;
-
-            // Stages the user can move a candidate to (Hired/Rejected have their own buttons).
-            foreach (CandidateStage s in new[] { CandidateStage.Applied, CandidateStage.Screening, CandidateStage.Interview, CandidateStage.Offer })
-            {
-                Stages.Add(new StageOption(s));
-            }
-
-            AddCommand = new RelayCommand(Add);
-            MoveCommand = new RelayCommand(Move, () => _selectedCandidate != null && !_selectedCandidate.IsHired && _selectedStage != null);
-            HireCommand = new RelayCommand(Hire, () => _selectedCandidate != null && !_selectedCandidate.IsHired);
-            RejectCommand = new RelayCommand(Reject, () => _selectedCandidate != null && !_selectedCandidate.IsHired);
-            DeleteCommand = new RelayCommand(Delete, () => _selectedCandidate != null && !_selectedCandidate.IsHired);
-            CloseCommand = new RelayCommand(() => RequestClose?.Invoke());
-
-            Load();
-        }
-
-        public Action RequestClose { get; set; }
-
-        public string PostingTitle { get; }
-
-        public ObservableCollection<CandidateRowViewModel> Candidates { get; } = new ObservableCollection<CandidateRowViewModel>();
-        public ObservableCollection<StageOption> Stages { get; } = new ObservableCollection<StageOption>();
-
-        public CandidateRowViewModel SelectedCandidate
-        {
-            get => _selectedCandidate;
-            set => Set(ref _selectedCandidate, value);
-        }
-
-        public StageOption SelectedStage
-        {
-            get => _selectedStage;
-            set => Set(ref _selectedStage, value);
-        }
-
-        public string StatusMessage { get => _statusMessage; private set => Set(ref _statusMessage, value); }
-
-        public ICommand AddCommand { get; }
-        public ICommand MoveCommand { get; }
-        public ICommand HireCommand { get; }
-        public ICommand RejectCommand { get; }
-        public ICommand DeleteCommand { get; }
-        public ICommand CloseCommand { get; }
-
-        private void Load()
-        {
-            Candidates.Clear();
-            foreach (Candidate c in _services.Ats.GetCandidates(_postingId))
-            {
-                Candidates.Add(new CandidateRowViewModel(c));
-            }
-
-            int hired = Candidates.Count(c => c.IsHired);
-            StatusMessage = Candidates.Count + " candidat(s) · " + hired + " recruté(s)";
-        }
-
-        private void Add()
-        {
-            var vm = new AtsCandidateEditViewModel(_services, _postingId);
-            var window = new Views.AtsCandidateEditWindow { DataContext = vm, Owner = System.Windows.Application.Current.MainWindow };
-            App.ApplyFlowDirection(window);
-            vm.RequestClose = ok => window.DialogResult = ok;
-
-            if (window.ShowDialog() == true)
-            {
-                Load();
-            }
-        }
-
-        private void Move()
-        {
-            Run(_services.Ats.MoveStage(_selectedCandidate.Id, _selectedStage.Value), "Candidat déplacé.");
-        }
-
-        private void Hire()
-        {
-            if (!Dialogs.Confirm("Recruter ce candidat ? Un employé sera créé dans le module Employés."))
-            {
-                return;
-            }
-
-            Result<HireResult> result = _services.Ats.Hire(_selectedCandidate.Id);
-            if (result.IsFailure)
-            {
-                Dialogs.Error(result.Error);
-                return;
-            }
-
-            Load();
-            StatusMessage = "Candidat recruté — l'employé a été créé" +
-                            (result.Value.PostingFilled ? " et l'offre est pourvue." : ".");
-        }
-
-        private void Reject()
-        {
-            // Motif obligatoire (une seule zone de texte). The full single-screen UI arrives in B4.
-            string reason = Dialogs.Prompt("Refuser le candidat", "Motif du refus :", null, required: true);
-            if (string.IsNullOrWhiteSpace(reason)) return;
-            Run(_services.Ats.Reject(_selectedCandidate.Id, reason), "Candidat écarté.");
-        }
-
-        private void Delete()
-        {
-            if (!Dialogs.Confirm("Supprimer ce candidat ?"))
-            {
-                return;
-            }
-
-            Run(_services.Ats.DeleteCandidate(_selectedCandidate.Id), "Candidat supprimé.");
-        }
-
-        private void Run(Result result, string success)
-        {
-            if (result.IsFailure)
-            {
-                Dialogs.Error(result.Error);
-                return;
-            }
-
-            Load();
-            StatusMessage = success;
-        }
-    }
-
-    /// <summary>Creates or edits a candidate.</summary>
+    /// <summary>
+    /// The candidate fiche: 3 required fields + folded optionals, plus the interviews and CV
+    /// attachments (only for a candidate that already exists). No jargon; Arabic messages.
+    /// </summary>
     public sealed class AtsCandidateEditViewModel : ObservableObject
     {
         private readonly AppServices _services;
         private readonly long _postingId;
+        private readonly long _companyId;
+        private Candidate _candidate;
 
-        private string _lastName;
-        private string _firstName;
-        private string _phone;
-        private string _email;
-        private string _source;
-        private string _rating;
-        private string _notes;
+        private string _lastName, _firstName, _phone, _email, _source, _education, _experience, _notes;
 
-        public AtsCandidateEditViewModel(AppServices services, long postingId)
+        // Inline "add interview" mini-form.
+        private DateTime _interviewDate = DateTime.Today;
+        private string _interviewType, _interviewer, _interviewResult;
+
+        public AtsCandidateEditViewModel(AppServices services, long postingId, Candidate existing)
         {
             _services = services;
             _postingId = postingId;
-            _rating = "0";
+            _companyId = services.CompanyContext.Active != null ? services.CompanyContext.Active.Id : 0;
+            _candidate = existing ?? new Candidate { PostingId = postingId };
+
+            if (existing != null)
+            {
+                _lastName = existing.LastName; _firstName = existing.FirstName; _phone = existing.Phone;
+                _email = existing.Email; _source = existing.Source; _education = existing.EducationLevel;
+                _experience = existing.ExperienceYears?.ToString(CultureInfo.InvariantCulture);
+                _notes = existing.Notes;
+                HeaderTitle = (existing.LastName + " " + existing.FirstName).Trim();
+                LoadDetails();
+            }
+            else
+            {
+                HeaderTitle = L("Recruit_NewCandidate");
+            }
 
             SaveCommand = new RelayCommand(Save);
             CancelCommand = new RelayCommand(() => RequestClose?.Invoke(false));
+            AddInterviewCommand = new RelayCommand(AddInterview, () => Exists);
+            DeleteInterviewCommand = new RelayCommand(p => DeleteInterview(p as Interview));
+            AddCvCommand = new RelayCommand(AddCv, () => Exists);
+            OpenAttachmentCommand = new RelayCommand(p => OpenAttachment(p as CandidateAttachment));
+            DeleteAttachmentCommand = new RelayCommand(p => DeleteAttachment(p as CandidateAttachment));
         }
 
         public Action<bool> RequestClose { get; set; }
+        public string HeaderTitle { get; }
+
+        /// <summary>True once the candidate is saved — interviews / CVs attach to a real row.</summary>
+        public bool Exists => _candidate.Id > 0;
 
         public string LastName { get => _lastName; set => Set(ref _lastName, value); }
         public string FirstName { get => _firstName; set => Set(ref _firstName, value); }
         public string Phone { get => _phone; set => Set(ref _phone, value); }
         public string Email { get => _email; set => Set(ref _email, value); }
         public string Source { get => _source; set => Set(ref _source, value); }
-        public string Rating { get => _rating; set => Set(ref _rating, value); }
+        public string Education { get => _education; set => Set(ref _education, value); }
+        public string Experience { get => _experience; set => Set(ref _experience, value); }
         public string Notes { get => _notes; set => Set(ref _notes, value); }
+
+        public DateTime InterviewDate { get => _interviewDate; set => Set(ref _interviewDate, value); }
+        public string InterviewType { get => _interviewType; set => Set(ref _interviewType, value); }
+        public string Interviewer { get => _interviewer; set => Set(ref _interviewer, value); }
+        public string InterviewResult { get => _interviewResult; set => Set(ref _interviewResult, value); }
+
+        public ObservableCollection<Interview> Interviews { get; } = new ObservableCollection<Interview>();
+        public ObservableCollection<CandidateAttachment> Attachments { get; } = new ObservableCollection<CandidateAttachment>();
 
         public ICommand SaveCommand { get; }
         public ICommand CancelCommand { get; }
+        public ICommand AddInterviewCommand { get; }
+        public ICommand DeleteInterviewCommand { get; }
+        public ICommand AddCvCommand { get; }
+        public ICommand OpenAttachmentCommand { get; }
+        public ICommand DeleteAttachmentCommand { get; }
+
+        private void LoadDetails()
+        {
+            Interviews.Clear();
+            foreach (Interview i in _services.Ats.GetInterviews(_candidate.Id)) Interviews.Add(i);
+            Attachments.Clear();
+            foreach (CandidateAttachment a in _services.Ats.GetAttachments(_candidate.Id)) Attachments.Add(a);
+        }
 
         private void Save()
         {
-            int.TryParse(_rating, NumberStyles.Integer, CultureInfo.InvariantCulture, out int rating);
-            if (rating < 0) rating = 0;
-            if (rating > 5) rating = 5;
+            int.TryParse(_experience, NumberStyles.Integer, CultureInfo.InvariantCulture, out int years);
 
-            Result<long> result = _services.Ats.SaveCandidate(new Candidate
-            {
-                PostingId = _postingId,
-                LastName = _lastName,
-                FirstName = _firstName,
-                Phone = _phone,
-                Email = _email,
-                Source = _source,
-                Rating = rating,
-                Notes = _notes,
-                AppliedDate = DateTime.Today
-            });
+            _candidate.PostingId = _postingId;
+            _candidate.LastName = _lastName;
+            _candidate.FirstName = _firstName;
+            _candidate.Phone = _phone;
+            _candidate.Email = _email;
+            _candidate.Source = _source;
+            _candidate.EducationLevel = _education;
+            _candidate.ExperienceYears = string.IsNullOrWhiteSpace(_experience) ? (int?)null : Math.Max(0, years);
+            _candidate.Notes = _notes;
+            if (_candidate.Id == 0) _candidate.AppliedDate = DateTime.Today;
 
-            if (result.IsFailure)
-            {
-                Dialogs.Error(result.Error);
-                return;
-            }
-
+            Result<long> result = _services.Ats.SaveCandidate(_candidate);
+            if (result.IsFailure) { Fail(result); return; }
             RequestClose?.Invoke(true);
         }
+
+        private void AddInterview()
+        {
+            var interview = new Interview
+            {
+                CandidateId = _candidate.Id, ScheduledDate = _interviewDate,
+                Type = _interviewType, Interviewer = _interviewer, Result = _interviewResult
+            };
+            Result<long> r = _services.Ats.SaveInterview(interview);
+            if (r.IsFailure) { Fail(r); return; }
+
+            InterviewType = Interviewer = InterviewResult = string.Empty;
+            LoadDetails();
+        }
+
+        private void DeleteInterview(Interview interview)
+        {
+            if (interview == null || !Dialogs.Confirm(L("Recruit_ConfirmDeleteInterview"))) return;
+            _services.Ats.DeleteInterview(interview.Id);
+            LoadDetails();
+        }
+
+        private void AddCv()
+        {
+            var dialog = new OpenFileDialog { Filter = "PDF, Word, images|*.pdf;*.doc;*.docx;*.jpg;*.png|Tous|*.*" };
+            if (dialog.ShowDialog() != true) return;
+
+            try
+            {
+                string relDir = Path.Combine("Recrutement", _companyId.ToString(), _candidate.Id.ToString());
+                string absDir = Path.Combine(DataRoot(), relDir);
+                Directory.CreateDirectory(absDir);
+                string fileName = Path.GetFileName(dialog.FileName);
+                string relPath = Path.Combine(relDir, fileName);
+                File.Copy(dialog.FileName, Path.Combine(DataRoot(), relPath), overwrite: true);
+
+                Result<long> r = _services.Ats.AddAttachment(new CandidateAttachment
+                {
+                    CandidateId = _candidate.Id, FileName = fileName, RelativePath = relPath, Kind = "CV", AddedAt = DateTime.UtcNow
+                });
+                if (r.IsFailure) { Fail(r); return; }
+                LoadDetails();
+            }
+            catch (Exception ex)
+            {
+                _services.Logger.Warn("Recrutement CV: " + ex.Message);
+                Dialogs.Error(L("Recruit_CvError"));
+            }
+        }
+
+        private void OpenAttachment(CandidateAttachment a)
+        {
+            if (a == null) return;
+            try
+            {
+                string full = Path.Combine(DataRoot(), a.RelativePath);
+                if (File.Exists(full)) System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(full) { UseShellExecute = true });
+                else Dialogs.Info(L("Recruit_CvMissing"));
+            }
+            catch (Exception ex) { _services.Logger.Warn("Recrutement open CV: " + ex.Message); }
+        }
+
+        private void DeleteAttachment(CandidateAttachment a)
+        {
+            if (a == null || !Dialogs.Confirm(L("Recruit_ConfirmDeleteCv"))) return;
+            _services.Ats.DeleteAttachment(a.Id);
+            LoadDetails();
+        }
+
+        private static string DataRoot() =>
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), AppConstants.DataFolderName);
+
+        private void Fail(Result r)
+        {
+            _services.Logger.Warn("Recrutement: " + r.ErrorCode + " — " + r.Error);
+            Dialogs.Error(ResultText.Localize(_services.Localization, r.Error, r.ErrorCode));
+        }
+
+        private static string L(string key) => TranslationSource.Instance[key];
     }
 }

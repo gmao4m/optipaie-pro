@@ -1700,4 +1700,70 @@
   <data name="Calendar_Title" xml:space="preserve">
     <value>Calendrier des absences</value>
   </data>
+  <data name="Recruit_Title" xml:space="preserve"><value>Recrutement</value></data>
+  <data name="Recruit_Postings" xml:space="preserve"><value>Postes</value></data>
+  <data name="Recruit_Candidates" xml:space="preserve"><value>Candidats</value></data>
+  <data name="Recruit_CandidatesShort" xml:space="preserve"><value>candidats</value></data>
+  <data name="Recruit_AddPosting" xml:space="preserve"><value>+ Poste</value></data>
+  <data name="Recruit_AddCandidate" xml:space="preserve"><value>+ Candidat</value></data>
+  <data name="Recruit_More" xml:space="preserve"><value>Plus</value></data>
+  <data name="Recruit_ContractType" xml:space="preserve"><value>Type de contrat</value></data>
+  <data name="Recruit_Deadline" xml:space="preserve"><value>Date limite</value></data>
+  <data name="Recruit_Responsible" xml:space="preserve"><value>Responsable</value></data>
+  <data name="Recruit_LastName" xml:space="preserve"><value>Nom</value></data>
+  <data name="Recruit_FirstName" xml:space="preserve"><value>Prénom</value></data>
+  <data name="Recruit_Phone" xml:space="preserve"><value>Téléphone</value></data>
+  <data name="Recruit_Email" xml:space="preserve"><value>Email</value></data>
+  <data name="Recruit_Education" xml:space="preserve"><value>Niveau d'études</value></data>
+  <data name="Recruit_Experience" xml:space="preserve"><value>Expérience (ans)</value></data>
+  <data name="Recruit_Source" xml:space="preserve"><value>Source de candidature</value></data>
+  <data name="Recruit_Interviews" xml:space="preserve"><value>Entretiens</value></data>
+  <data name="Recruit_AddInterview" xml:space="preserve"><value>Ajouter un entretien</value></data>
+  <data name="Recruit_InterviewType" xml:space="preserve"><value>Type d'entretien</value></data>
+  <data name="Recruit_InterviewResult" xml:space="preserve"><value>Résultat</value></data>
+  <data name="Recruit_AddShort" xml:space="preserve"><value>Ajouter</value></data>
+  <data name="Recruit_Attachments" xml:space="preserve"><value>Documents (CV)</value></data>
+  <data name="Recruit_AddCv" xml:space="preserve"><value>Ajouter un CV</value></data>
+  <data name="Recruit_SaveFirst" xml:space="preserve"><value>Enregistrez d'abord le candidat pour ajouter des entretiens et un CV.</value></data>
+  <data name="Recruit_Back" xml:space="preserve"><value>Étape précédente</value></data>
+  <data name="Recruit_Reject" xml:space="preserve"><value>Refuser</value></data>
+  <data name="Recruit_Desist" xml:space="preserve"><value>Désistement</value></data>
+  <data name="Recruit_ToggleOpen" xml:space="preserve"><value>Ouvrir / Fermer</value></data>
+  <data name="Recruit_Hire" xml:space="preserve"><value>Recruter</value></data>
+  <data name="Recruit_Rejected" xml:space="preserve"><value>Refusé</value></data>
+  <data name="Recruit_Withdrawn" xml:space="preserve"><value>Désisté</value></data>
+  <data name="Recruit_NotSpecified" xml:space="preserve"><value>Non précisé</value></data>
+  <data name="Recruit_NewPosting" xml:space="preserve"><value>Nouveau poste</value></data>
+  <data name="Recruit_EditPosting" xml:space="preserve"><value>Modifier le poste</value></data>
+  <data name="Recruit_NewCandidate" xml:space="preserve"><value>Nouveau candidat</value></data>
+  <data name="Recruit_NeedCompany" xml:space="preserve"><value>Sélectionnez d'abord une entreprise.</value></data>
+  <data name="Recruit_PostingsSummary" xml:space="preserve"><value>{0} poste(s) · {1} ouvert(s)</value></data>
+  <data name="Recruit_ReasonLabel" xml:space="preserve"><value>Motif :</value></data>
+  <data name="Recruit_ConfirmHire" xml:space="preserve"><value>Recruter ce candidat ? Un employé et un contrat brouillon seront créés.</value></data>
+  <data name="Recruit_HiredAndFilled" xml:space="preserve"><value>Recruté — l'employé a été créé et le poste est pourvu.</value></data>
+  <data name="Recruit_Hired" xml:space="preserve"><value>Recruté — l'employé a été créé.</value></data>
+  <data name="Recruit_ConfirmBack" xml:space="preserve"><value>Revenir d'une étape ?</value></data>
+  <data name="Recruit_ConfirmDeletePosting" xml:space="preserve"><value>Supprimer ce poste et ses candidats ?</value></data>
+  <data name="Recruit_ConfirmDeleteCandidate" xml:space="preserve"><value>Supprimer ce candidat ?</value></data>
+  <data name="Recruit_ConfirmDeleteInterview" xml:space="preserve"><value>Supprimer cet entretien ?</value></data>
+  <data name="Recruit_ConfirmDeleteCv" xml:space="preserve"><value>Supprimer ce document ?</value></data>
+  <data name="Recruit_CvError" xml:space="preserve"><value>Impossible d'ajouter le fichier.</value></data>
+  <data name="Recruit_CvMissing" xml:space="preserve"><value>Fichier introuvable.</value></data>
+  <data name="Ats_TitleRequired" xml:space="preserve"><value>L'intitulé du poste est obligatoire.</value></data>
+  <data name="Ats_DepartmentRequired" xml:space="preserve"><value>Le département est obligatoire.</value></data>
+  <data name="Ats_CompanyRequired" xml:space="preserve"><value>Une entreprise est obligatoire.</value></data>
+  <data name="Ats_PostingNotFound" xml:space="preserve"><value>Offre introuvable.</value></data>
+  <data name="Ats_CandidateNotFound" xml:space="preserve"><value>Candidat introuvable.</value></data>
+  <data name="Ats_CandidateNameRequired" xml:space="preserve"><value>Le nom du candidat est obligatoire.</value></data>
+  <data name="Ats_CandidateFirstNameRequired" xml:space="preserve"><value>Le prénom du candidat est obligatoire.</value></data>
+  <data name="Ats_CandidatePhoneRequired" xml:space="preserve"><value>Le téléphone du candidat est obligatoire.</value></data>
+  <data name="Ats_NoSkip" xml:space="preserve"><value>Une étape à la fois.</value></data>
+  <data name="Ats_UseHire" xml:space="preserve"><value>Utilisez « Recruter ».</value></data>
+  <data name="Ats_UseRejectOrDesist" xml:space="preserve"><value>Utilisez « Refuser » ou « Désistement ».</value></data>
+  <data name="Ats_MustBeOffer" xml:space="preserve"><value>Le candidat doit être à l'étape « Retenu » avant d'être recruté.</value></data>
+  <data name="Ats_AlreadyHired" xml:space="preserve"><value>Ce candidat est déjà recruté.</value></data>
+  <data name="Ats_ClosedFile" xml:space="preserve"><value>Ce dossier est clôturé.</value></data>
+  <data name="Ats_InvalidStage" xml:space="preserve"><value>Étape invalide.</value></data>
+  <data name="Ats_ReasonRequired" xml:space="preserve"><value>Le motif est obligatoire.</value></data>
+  <data name="Ats_CandidateHired" xml:space="preserve"><value>Ce candidat a été recruté — gérez l'employé depuis le module Employés.</value></data>
 </root>

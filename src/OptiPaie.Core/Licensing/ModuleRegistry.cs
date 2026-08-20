@@ -78,7 +78,7 @@ namespace OptiPaie.Core.Licensing
             _all = new List<ModuleDescriptor>
             {
                 new ModuleDescriptor(ModuleKeys.Payroll,         "Paie",                       "الأجور",            true,  10),
-                new ModuleDescriptor(ModuleKeys.Ats,             "ATS / DRT",                  "ATS / DRT",         false, 20),
+                new ModuleDescriptor(ModuleKeys.Ats,             "Recrutement",                "التوظيف",           false, 20),
                 new ModuleDescriptor(ModuleKeys.Attendance,      "Gestion du pointage",        "إدارة الحضور",      false, 30),
                 new ModuleDescriptor(ModuleKeys.Leave,           "Gestion des congés",         "إدارة العطل",       false, 40),
                 new ModuleDescriptor(ModuleKeys.Loans,           "Prêts & avances",            "القروض والتسبيقات", false, 50),

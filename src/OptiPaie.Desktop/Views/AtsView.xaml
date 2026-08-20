@@ -2,144 +2,188 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:loc="clr-namespace:OptiPaie.Desktop.Localization"
-             xmlns:beh="clr-namespace:OptiPaie.Desktop.Behaviors">
+             Background="{DynamicResource Canvas}" FontFamily="{StaticResource AppFont}">
     <UserControl.Resources>
-        <Style x:Key="GridHeader" TargetType="DataGridColumnHeader">
-            <Setter Property="Background" Value="{DynamicResource BrandSoft}" />
-            <Setter Property="Foreground" Value="{DynamicResource BrandText}" />
-            <Setter Property="FontSize" Value="12" />
-            <Setter Property="FontWeight" Value="SemiBold" />
-            <Setter Property="Height" Value="34" />
-            <Setter Property="Padding" Value="8,0" />
-            <Setter Property="VerticalContentAlignment" Value="Center" />
-            <Setter Property="BorderBrush" Value="{DynamicResource Border}" />
-            <Setter Property="BorderThickness" Value="0,0,1,1" />
-        </Style>
-        <Style x:Key="CenterText" TargetType="TextBlock">
-            <Setter Property="FontFamily" Value="{StaticResource MonoFont}" />
-            <Setter Property="TextAlignment" Value="Center" />
+        <!-- One small pill style, coloured by the semantic "kind" string. -->
+        <Style x:Key="Pill" TargetType="Border">
+            <Setter Property="CornerRadius" Value="9" />
+            <Setter Property="Padding" Value="8,2" />
             <Setter Property="VerticalAlignment" Value="Center" />
-        </Style>
-        <Style x:Key="Kpi" TargetType="Border">
-            <Setter Property="Background" Value="{DynamicResource Surface}" />
-            <Setter Property="BorderBrush" Value="{DynamicResource Border}" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="CornerRadius" Value="10" />
-            <Setter Property="Padding" Value="16,11" />
-            <Setter Property="Margin" Value="0,0,12,0" />
+            <Setter Property="Background" Value="{DynamicResource SurfaceMuted}" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding StatusKind}" Value="success">
+                    <Setter Property="Background" Value="{DynamicResource GainSoft}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding StatusKind}" Value="accent">
+                    <Setter Property="Background" Value="{DynamicResource AccentSoft}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding StageKind}" Value="success">
+                    <Setter Property="Background" Value="{DynamicResource GainSoft}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding StageKind}" Value="accent">
+                    <Setter Property="Background" Value="{DynamicResource AccentSoft}" />
+                </DataTrigger>
+            </Style.Triggers>
         </Style>
     </UserControl.Resources>
 
-    <Grid Margin="24,20">
+    <Grid Margin="20,18">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0">
-            <StackPanel HorizontalAlignment="Left">
-                <TextBlock Style="{StaticResource H1}" Text="{loc:Loc Ats_Title}" />
-                <TextBlock Style="{StaticResource Caption}" Margin="0,5,0,0" Text="{loc:Loc Ats_Subtitle}" />
-            </StackPanel>
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
-                <!-- Company selection is global (header selector) -->
+        <TextBlock Grid.Row="0" Style="{StaticResource H1}" Text="{loc:Loc Recruit_Title}" Margin="0,0,0,12" />
 
-                <Button Style="{StaticResource PrimaryButton}" Height="32" Margin="10,0,0,0"
-                        Content="{loc:Loc Ats_New}" Command="{Binding NewCommand}" />
-            </StackPanel>
-        </Grid>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="360" />
+                <ColumnDefinition Width="16" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
 
-        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,18,0,0">
-            <Border Style="{StaticResource Kpi}">
-                <StackPanel>
-                    <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Ats_OpenPostings}" />
-                    <TextBlock FontFamily="{StaticResource MonoFont}" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" Text="{Binding OpenText}" />
-                </StackPanel>
-            </Border>
-            <Border Style="{StaticResource Kpi}">
-                <StackPanel>
-                    <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_Candidates}" />
-                    <TextBlock FontFamily="{StaticResource MonoFont}" FontSize="20" FontWeight="SemiBold" Text="{Binding CandidatesText}" />
-                </StackPanel>
-            </Border>
-        </StackPanel>
+            <!-- Postings (start side) -->
+            <Border Grid.Column="0" Style="{StaticResource Card}" Padding="14">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0" Margin="0,0,0,10">
+                        <TextBlock Style="{StaticResource H2}" Text="{loc:Loc Recruit_Postings}" VerticalAlignment="Center" />
+                        <Button Style="{StaticResource PrimaryButton}" HorizontalAlignment="Right" Height="34" Padding="14,0"
+                                Content="{loc:Loc Recruit_AddPosting}" Command="{Binding NewPostingCommand}" />
+                    </Grid>
 
-        <DataGrid x:Name="PostingsGrid" Grid.Row="2" Margin="0,18,0,0" ItemsSource="{Binding Postings}" SelectedItem="{Binding SelectedPosting}"
-                  AutoGenerateColumns="False" HeadersVisibility="Column" IsReadOnly="True"
-                  CanUserAddRows="False" CanUserResizeRows="False" GridLinesVisibility="All"
-                  RowHeight="32" FontFamily="{StaticResource AppFont}" FontSize="12.5" Background="{DynamicResource Surface}"
-                  RowBackground="{DynamicResource Surface}" AlternatingRowBackground="{DynamicResource SurfaceMuted}"
-                  BorderBrush="{DynamicResource Border}" BorderThickness="1"
-                  HorizontalGridLinesBrush="{DynamicResource Border}" VerticalGridLinesBrush="{DynamicResource Border}"
-                  ColumnHeaderStyle="{StaticResource GridHeader}">
-            <DataGrid.RowStyle>
-                <Style TargetType="DataGridRow">
-                    <Setter Property="Cursor" Value="Hand" />
-                </Style>
-            </DataGrid.RowStyle>
-            <DataGrid.InputBindings>
-                <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding PipelineCommand}" />
-            </DataGrid.InputBindings>
-            <DataGrid.ContextMenu>
-                <ContextMenu DataContext="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
-                    <MenuItem Header="{loc:Loc Ats_PipelineRow}" Command="{Binding PipelineCommand}" />
-                    <MenuItem Header="{loc:Loc Common_Edit}" Command="{Binding EditCommand}" />
-                    <MenuItem Header="{loc:Loc Ats_CloseOffer}" Command="{Binding CloseCommand}" />
-                    <MenuItem Header="{loc:Loc Ats_Reopen}" Command="{Binding ReopenCommand}" />
-                    <Separator />
-                    <MenuItem Header="{loc:Loc Common_Delete}" Command="{Binding DeleteCommand}" />
-                </ContextMenu>
-            </DataGrid.ContextMenu>
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="{loc:Loc Employee_Poste}" Binding="{Binding Title}" Width="*" />
-                <DataGridTextColumn Header="{loc:Loc Users_ColDepartment}" Binding="{Binding Department}" Width="160" />
-                <DataGridTextColumn Header="{loc:Loc Ats_OpenedOn}" Binding="{Binding OpenText}" Width="110" ElementStyle="{StaticResource CenterText}" />
-                <DataGridTextColumn Header="{loc:Loc Ats_Positions}" Binding="{Binding PositionsText}" Width="80" ElementStyle="{StaticResource CenterText}" />
-                <DataGridTextColumn Header="{loc:Loc Ats_Recruited}" Binding="{Binding CandidatesText}" Width="90" ElementStyle="{StaticResource CenterText}" />
-                <DataGridTemplateColumn Header="{loc:Loc Common_Status}" Width="110">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <Border Style="{StaticResource StatusPill}">
-                                <TextBlock Style="{StaticResource PillText}" Text="{Binding StatusLabel}" />
-                            </Border>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-                <DataGridTemplateColumn Width="92" CanUserResize="False" CanUserSort="False">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                <Button Style="{StaticResource RowIconButton}" Content="⋯" ToolTip="{loc:Loc Common_MoreActions}"
-                                        beh:RowActions.SelectRow="True" beh:RowActions.OpenMenuOnClick="True"
-                                        Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=DataGrid}}">
-                                    <Button.ContextMenu>
-                                        <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
-                                            <MenuItem Header="{loc:Loc Ats_PipelineRow}" Command="{Binding PipelineCommand}" />
-                                            <MenuItem Header="{loc:Loc Common_Edit}" Command="{Binding EditCommand}" />
-                                            <MenuItem Header="{loc:Loc Ats_CloseOffer}" Command="{Binding CloseCommand}" />
-                                            <MenuItem Header="{loc:Loc Ats_Reopen}" Command="{Binding ReopenCommand}" />
+                    <ListBox Grid.Row="1" ItemsSource="{Binding Postings}" SelectedItem="{Binding SelectedPosting}"
+                             Background="Transparent" BorderThickness="0" HorizontalContentAlignment="Stretch"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="Padding" Value="0" />
+                                <Setter Property="Margin" Value="0,3" />
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="{DynamicResource Surface}" CornerRadius="10" Padding="12,10"
+                                        BorderBrush="{DynamicResource Border}" BorderThickness="1"
+                                        Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ListBox}}">
+                                    <Border.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="{loc:Loc Common_Edit}"
+                                                      Command="{Binding PlacementTarget.Tag.EditPostingCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                      CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                                            <MenuItem Header="{loc:Loc Recruit_ToggleOpen}"
+                                                      Command="{Binding PlacementTarget.Tag.TogglePostingCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                      CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
                                             <Separator />
-                                            <MenuItem Header="{loc:Loc Common_Delete}" Command="{Binding DeleteCommand}" />
+                                            <MenuItem Header="{loc:Loc Common_Delete}"
+                                                      Command="{Binding PlacementTarget.Tag.DeletePostingCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                      CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
                                         </ContextMenu>
-                                    </Button.ContextMenu>
-                                </Button>
-                                <Button Style="{StaticResource RowIconButton}" Content="›" ToolTip="{loc:Loc Common_Open}"
-                                        beh:RowActions.SelectRow="True"
-                                        Command="{Binding DataContext.PipelineCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" />
-                            </StackPanel>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-            </DataGrid.Columns>
-        </DataGrid>
+                                    </Border.ContextMenu>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextPrimary}" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Text="{Binding Department}" FontSize="12" Foreground="{DynamicResource TextMuted}" Margin="0,2,0,6" />
+                                        <StackPanel Orientation="Horizontal">
+                                            <Border Style="{StaticResource Pill}">
+                                                <TextBlock Text="{Binding StatusLabel}" FontSize="11.5" Foreground="{DynamicResource TextPrimary}" />
+                                            </Border>
+                                            <TextBlock Text="{Binding CountText}" Margin="10,0,0,0" VerticalAlignment="Center"
+                                                       FontSize="12" Foreground="{DynamicResource TextMuted}" />
+                                            <TextBlock Text="{loc:Loc Recruit_CandidatesShort}" Margin="4,0,0,0" VerticalAlignment="Center"
+                                                       FontSize="12" Foreground="{DynamicResource TextMuted}" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </Border>
 
-        <TextBlock Grid.Row="2" Margin="0,18,0,0" Style="{StaticResource EmptyStateMessage}" Text="{loc:Loc Msg_NoData}"
-                   Visibility="{Binding HasItems, ElementName=PostingsGrid, Converter={StaticResource InverseBoolToVis}}" />
+            <!-- Candidates of the selected posting -->
+            <Border Grid.Column="2" Style="{StaticResource Card}" Padding="14">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0" Margin="0,0,0,10">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource H2}" Text="{loc:Loc Recruit_Candidates}" />
+                            <TextBlock Text="{Binding CandidatesHeader}" FontSize="12.5" Foreground="{DynamicResource TextMuted}" Margin="0,2,0,0" />
+                        </StackPanel>
+                        <Button Style="{StaticResource PrimaryButton}" HorizontalAlignment="Right" VerticalAlignment="Top" Height="34" Padding="14,0"
+                                Content="{loc:Loc Recruit_AddCandidate}" Command="{Binding NewCandidateCommand}"
+                                IsEnabled="{Binding HasSelectedPosting}" />
+                    </Grid>
 
-        <Grid Grid.Row="3" Margin="0,14,0,0">
-            <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Center" HorizontalAlignment="Left" FlowDirection="LeftToRight" Text="{Binding StatusMessage}" />
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding Candidates}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="{DynamicResource Surface}" CornerRadius="10" Padding="14,12" Margin="0,3"
+                                            BorderBrush="{DynamicResource Border}" BorderThickness="1" Cursor="Hand"
+                                            Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ItemsControl}}">
+                                        <Border.InputBindings>
+                                            <MouseBinding MouseAction="LeftClick"
+                                                          Command="{Binding DataContext.OpenCandidateCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                          CommandParameter="{Binding}" />
+                                        </Border.InputBindings>
+                                        <Border.ContextMenu>
+                                            <ContextMenu>
+                                                <MenuItem Header="{loc:Loc Recruit_Back}"
+                                                          Command="{Binding PlacementTarget.Tag.BackStepCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                          CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                                                <Separator />
+                                                <MenuItem Header="{loc:Loc Recruit_Reject}"
+                                                          Command="{Binding PlacementTarget.Tag.RejectCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                          CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                                                <MenuItem Header="{loc:Loc Recruit_Desist}"
+                                                          Command="{Binding PlacementTarget.Tag.DesistCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                          CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                                                <Separator />
+                                                <MenuItem Header="{loc:Loc Common_Delete}"
+                                                          Command="{Binding PlacementTarget.Tag.DeleteCandidateCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                          CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                                            </ContextMenu>
+                                        </Border.ContextMenu>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock Text="{Binding FullName}" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextPrimary}" />
+                                                <TextBlock Text="{Binding Phone}" FontSize="12" Foreground="{DynamicResource TextMuted}" Margin="0,2,0,6" />
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Border Style="{StaticResource Pill}">
+                                                        <TextBlock Text="{Binding StageLabel}" FontSize="11.5" Foreground="{DynamicResource TextPrimary}" />
+                                                    </Border>
+                                                    <TextBlock Text="{Binding ClosureLabel}" Margin="10,0,0,0" VerticalAlignment="Center"
+                                                               FontSize="12" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource TextMuted}" />
+                                                </StackPanel>
+                                            </StackPanel>
+                                            <Button Grid.Column="1" VerticalAlignment="Center" Height="34" Padding="14,0"
+                                                    Style="{StaticResource PrimaryButton}"
+                                                    Content="{Binding NextActionLabel}"
+                                                    Visibility="{Binding ShowNextAction, Converter={StaticResource BoolToVis}}"
+                                                    Command="{Binding DataContext.NextStepCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                    CommandParameter="{Binding}" />
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
         </Grid>
+
+        <TextBlock Grid.Row="2" Style="{StaticResource Caption}" Margin="2,10,2,0" Text="{Binding StatusMessage}" />
     </Grid>
 </UserControl>

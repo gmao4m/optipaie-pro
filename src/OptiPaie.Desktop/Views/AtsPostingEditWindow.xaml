@@ -2,8 +2,9 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:loc="clr-namespace:OptiPaie.Desktop.Localization"
-        Title="{Binding Title}" Height="430" Width="460"
-        ResizeMode="NoResize" WindowStartupLocation="CenterOwner" Background="{DynamicResource Canvas}">
+        Title="{Binding HeaderTitle}" Height="440" Width="460"
+        ResizeMode="NoResize" WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource Canvas}" FontFamily="{StaticResource AppFont}">
     <Grid Margin="24,20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -11,42 +12,55 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Style="{StaticResource H2}" Text="{Binding Title}" />
+        <TextBlock Grid.Row="0" Style="{StaticResource H2}" Text="{Binding HeaderTitle}" />
 
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,16,0,0" Padding="0,0,6,0">
-        <StackPanel>
-            <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc AtsEdit_JobTitle}" />
-            <TextBox Style="{StaticResource AppTextBox}" Margin="0,4,0,0" Text="{Binding PostingTitle, UpdateSourceTrigger=PropertyChanged}" />
+            <StackPanel>
+                <!-- The 3 required fields. -->
+                <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc AtsEdit_JobTitle}" />
+                <TextBox Style="{StaticResource AppTextBox}" Margin="0,4,0,0" Text="{Binding PostingTitle, UpdateSourceTrigger=PropertyChanged}" />
 
-            <Grid Margin="0,12,0,0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="12" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0">
-                    <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Users_ColDepartment}" />
-                    <TextBox Style="{StaticResource AppTextBox}" Margin="0,4,0,0" Text="{Binding Department, UpdateSourceTrigger=PropertyChanged}" />
-                </StackPanel>
-                <StackPanel Grid.Column="2">
-                    <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc AtsEdit_PositionCount}" />
-                    <TextBox Style="{StaticResource AppTextBox}" Margin="0,4,0,0" Text="{Binding Positions, UpdateSourceTrigger=PropertyChanged}" />
-                </StackPanel>
-            </Grid>
+                <Grid Margin="0,12,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="110" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Users_ColDepartment}" />
+                        <TextBox Style="{StaticResource AppTextBox}" Margin="0,4,0,0" Text="{Binding Department, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc AtsEdit_PositionCount}" />
+                        <TextBox Style="{StaticResource AppTextBox}" Margin="0,4,0,0" Text="{Binding Positions, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                </Grid>
 
-            <TextBlock Style="{StaticResource Caption}" Margin="0,12,0,0" Text="{loc:Loc AtsEdit_OpenDate}" />
-            <DatePicker Height="32" Margin="0,4,0,0" SelectedDate="{Binding OpenDate}" />
+                <!-- Everything else is optional and folded away. -->
+                <Expander Header="{loc:Loc Recruit_More}" Margin="0,14,0,0" Foreground="{DynamicResource TextMuted}">
+                    <StackPanel Margin="0,10,0,0">
+                        <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Recruit_ContractType}" />
+                        <ComboBox Style="{StaticResource AppComboBox}" Height="32" Margin="0,4,0,0"
+                                  ItemsSource="{Binding ContractTypes}" SelectedItem="{Binding ContractTypeSel}" />
 
-            <TextBlock Style="{StaticResource Caption}" Margin="0,12,0,0" Text="{loc:Loc Common_Description}" />
-            <TextBox Style="{StaticResource AppTextBox}" Height="80" Margin="0,4,0,0"
-                     AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top"
-                     Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" />
-        </StackPanel>
+                        <TextBlock Style="{StaticResource Caption}" Margin="0,10,0,0" Text="{loc:Loc Recruit_Deadline}" />
+                        <DatePicker Height="32" Margin="0,4,0,0" SelectedDate="{Binding Deadline}" />
+
+                        <TextBlock Style="{StaticResource Caption}" Margin="0,10,0,0" Text="{loc:Loc Recruit_Responsible}" />
+                        <TextBox Style="{StaticResource AppTextBox}" Margin="0,4,0,0" Text="{Binding ResponsibleName, UpdateSourceTrigger=PropertyChanged}" />
+
+                        <TextBlock Style="{StaticResource Caption}" Margin="0,10,0,0" Text="{loc:Loc Common_Description}" />
+                        <TextBox Style="{StaticResource AppTextBox}" Height="64" Margin="0,4,0,0"
+                                 AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top"
+                                 Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                </Expander>
+            </StackPanel>
         </ScrollViewer>
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
             <Button Style="{StaticResource SecondaryButton}" Content="{loc:Loc Common_Cancel}" Command="{Binding CancelCommand}" />
-            <Button Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Content="{loc:Loc Common_Save}" Command="{Binding SaveCommand}" />
+            <Button Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Content="{loc:Loc Common_Save}" Command="{Binding SaveCommand}" IsDefault="True" />
         </StackPanel>
     </Grid>
 </Window>
