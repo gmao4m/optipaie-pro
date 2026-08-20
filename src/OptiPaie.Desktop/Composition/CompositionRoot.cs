@@ -77,9 +77,11 @@ namespace OptiPaie.Desktop.Composition
             contractService.Audit = auditService;
             loanService.Audit = auditService;
             assetService.Audit = auditService;
+            employeeService.Audit = auditService;   // employee lifecycle + salary changes
             var backupService = new BackupService(backupProvider, unitOfWorkFactory, configuration, logger);
             var localizationService = new LocalizationService();
             var userService = new UserService(unitOfWorkFactory, settingsService);
+            userService.Audit = auditService;        // user management + login-gate changes
 
             IPayrollEngine engine = new PayrollCalculationEngine();
             var payrollService = new PayrollService(unitOfWorkFactory, configurationService, engine);
@@ -178,6 +180,28 @@ namespace OptiPaie.Desktop.Composition
             // Configurable-types + holidays services (post-construction, like leaveService.Audit above).
             appServices.LeaveTypes = new LeaveTypeService(unitOfWorkFactory);
             appServices.Holidays = new HolidayService(unitOfWorkFactory);
+
+            // Attribute every audit entry to WHO performed it. Evaluated at record time so it
+            // always reflects the CURRENT session: the signed-in local user (username), else the
+            // owner account (email), else null → AuditService falls back to a generic actor.
+            auditService.ActorProvider = () =>
+            {
+                UserSession session = appServices.Session;
+                if (session != null && session.IsAuthenticated && session.Current != null &&
+                    !string.IsNullOrWhiteSpace(session.Current.Username))
+                {
+                    return session.Current.Username;
+                }
+
+                OptiPaie.Core.Licensing.ICustomerAccountService owner = appServices.CustomerAccount;
+                if (owner != null && owner.IsSignedIn && !string.IsNullOrWhiteSpace(owner.Email))
+                {
+                    return owner.Email;
+                }
+
+                return null;
+            };
+
             return appServices;
         }
     }

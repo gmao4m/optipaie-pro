@@ -20,13 +20,33 @@ namespace OptiPaie.Services
     {
         private readonly IUnitOfWorkFactory _unitOfWorkFactory;
         private readonly ILogger _logger;
-        private readonly string _actor;
+        private readonly string _fallbackActor;
 
         public AuditService(IUnitOfWorkFactory unitOfWorkFactory, ILogger logger, string actor = null)
         {
             _unitOfWorkFactory = Guard.AgainstNull(unitOfWorkFactory, nameof(unitOfWorkFactory));
             _logger = Guard.AgainstNull(logger, nameof(logger));
-            _actor = string.IsNullOrWhiteSpace(actor) ? "Utilisateur" : actor;
+            _fallbackActor = string.IsNullOrWhiteSpace(actor) ? "Utilisateur" : actor;
+        }
+
+        /// <summary>
+        /// Resolves WHO is performing the action, evaluated at record time (so it reflects the
+        /// currently signed-in user, not the state at construction). Typically wired to the
+        /// session: local username, else owner email, else null → the fallback actor is used.
+        /// </summary>
+        public Func<string> ActorProvider { get; set; }
+
+        private string ResolveActor()
+        {
+            try
+            {
+                string actor = ActorProvider != null ? ActorProvider() : null;
+                return string.IsNullOrWhiteSpace(actor) ? _fallbackActor : actor;
+            }
+            catch
+            {
+                return _fallbackActor;
+            }
         }
 
         public void Record(string entityType, long entityId, AuditAction action, string summary,
@@ -44,7 +64,7 @@ namespace OptiPaie.Services
                         Summary = summary,
                         OldValue = oldValue,
                         NewValue = newValue,
-                        Actor = _actor
+                        Actor = ResolveActor()
                     });
                 }
             }

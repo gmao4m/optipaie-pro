@@ -24,8 +24,9 @@ namespace OptiPaie.Core.Entities
         public string NewValue { get; set; }
 
         /// <summary>
-        /// Who performed the action. This is a single-user desktop product, so it is the
-        /// local operator name (configurable) rather than an authenticated identity.
+        /// Who performed the action — the signed-in principal, resolved at record time: the
+        /// local user's username, else the owner account email, else a generic fallback when
+        /// no one is signed in (trial / no login gate).
         /// </summary>
         public string Actor { get; set; }
     }

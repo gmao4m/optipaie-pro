@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using OptiPaie.Common.Validation;
+using OptiPaie.Core.Auditing;
 using OptiPaie.Core.Entities;
 using OptiPaie.Core.Enums;
 using OptiPaie.Core.Interfaces.Repositories;
@@ -31,6 +32,9 @@ namespace OptiPaie.Services
             _unitOfWorkFactory = Guard.AgainstNull(unitOfWorkFactory, nameof(unitOfWorkFactory));
             _settings = Guard.AgainstNull(settings, nameof(settings));
         }
+
+        /// <summary>Audit trail for user management + the login gate (security-relevant). Best-effort.</summary>
+        public IAuditSink Audit { get; set; } = NullAuditSink.Instance;
 
         public Result<long> Create(string username, string fullName, string password, UserRole role, string department)
         {
@@ -64,6 +68,7 @@ namespace OptiPaie.Services
                 };
 
                 long id = uow.Users.Insert(user);
+                Audit.Record("User", id, AuditAction.Created, "Utilisateur créé : " + user.Username + " (" + role + ")");
                 return Result.Ok(id);
             }
         }
@@ -91,11 +96,14 @@ namespace OptiPaie.Services
                     return Result.Fail("Au moins un administrateur actif est requis.", "User_LastAdmin");
                 }
 
+                bool wasActive = existing.IsActive;
                 existing.FullName = user.FullName;
                 existing.Role = user.Role;
                 existing.Department = user.Department;
                 existing.IsActive = user.IsActive;
                 uow.Users.Update(existing);
+                Audit.Record("User", existing.Id, AuditAction.Updated, "Utilisateur modifié : " + existing.Username,
+                    wasActive ? "actif" : "inactif", user.IsActive ? "actif" : "inactif");
                 return Result.Ok();
             }
         }
@@ -118,6 +126,7 @@ namespace OptiPaie.Services
                 existing.Salt = NewSalt();
                 existing.PasswordHash = Hash(newPassword, existing.Salt);
                 uow.Users.Update(existing);
+                Audit.Record("User", userId, AuditAction.Updated, "Mot de passe réinitialisé : " + existing.Username);
                 return Result.Ok();
             }
         }
@@ -138,6 +147,7 @@ namespace OptiPaie.Services
                 }
 
                 uow.Users.SoftDelete(userId);
+                Audit.Record("User", userId, AuditAction.Deleted, "Utilisateur supprimé : " + existing.Username);
                 return Result.Ok();
             }
         }
@@ -220,6 +230,8 @@ namespace OptiPaie.Services
             }
 
             _settings.Set(AuthEnabledKey, enabled ? "true" : "false");
+            Audit.Record("Settings", 0, AuditAction.StatusChanged,
+                enabled ? "Connexion au démarrage activée" : "Connexion au démarrage désactivée");
         }
 
         // -- hashing -----------------------------------------------------------
