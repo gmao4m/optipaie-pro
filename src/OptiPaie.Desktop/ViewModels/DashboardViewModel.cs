@@ -136,7 +136,7 @@ namespace OptiPaie.Desktop.ViewModels
             foreach (DeadlineItem d in s.Deadlines) Deadlines.Add(d);
 
             RecentActivity.Clear();
-            foreach (Core.Entities.AuditEntry e in _services.Audit.GetRecent(12))
+            foreach (Core.Entities.AuditEntry e in _services.Audit.GetRecentForCompany(companyId, 12))
             {
                 RecentActivity.Add(new ActivityLine
                 {

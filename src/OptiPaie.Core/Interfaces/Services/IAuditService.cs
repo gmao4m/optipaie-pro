@@ -16,5 +16,12 @@ namespace OptiPaie.Core.Interfaces.Services
 
         /// <summary>The most recent entries across all modules.</summary>
         IReadOnlyList<AuditEntry> GetRecent(int limit = 20);
+
+        /// <summary>
+        /// The most recent entries for ONE company (the activity feed). <paramref name="companyId"/>
+        /// is MANDATORY (throws for &lt;= 0). Entries written before the isolation update
+        /// (CompanyId NULL) are excluded — never shown, never leaked across companies.
+        /// </summary>
+        IReadOnlyList<AuditEntry> GetRecentForCompany(long companyId, int limit = 20);
     }
 }

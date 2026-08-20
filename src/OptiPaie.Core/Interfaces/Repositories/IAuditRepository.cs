@@ -13,5 +13,11 @@ namespace OptiPaie.Core.Interfaces.Repositories
 
         /// <summary>The most recent entries across everything (for an activity feed).</summary>
         IEnumerable<AuditEntry> GetRecent(int limit);
+
+        /// <summary>
+        /// The most recent entries for ONE company. Entries with CompanyId NULL (written before
+        /// migration 0034) are excluded — never shown in a per-company journal, never leaked.
+        /// </summary>
+        IEnumerable<AuditEntry> GetRecentByCompany(long companyId, int limit);
     }
 }

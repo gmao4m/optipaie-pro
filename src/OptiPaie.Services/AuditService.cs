@@ -36,6 +36,15 @@ namespace OptiPaie.Services
         /// </summary>
         public Func<string> ActorProvider { get; set; }
 
+        /// <summary>
+        /// Resolves WHICH company the action belongs to, evaluated at record time — the single
+        /// choke point through which EVERY audit write passes, so no call site can forget to
+        /// scope its entry. Typically wired to the active company (CompanyContext.ActiveId);
+        /// returns null when none is active yet (e.g. demo seeding before login) → the entry is
+        /// stored with CompanyId NULL and stays out of every per-company journal.
+        /// </summary>
+        public Func<long?> CompanyProvider { get; set; }
+
         private string ResolveActor()
         {
             try
@@ -46,6 +55,19 @@ namespace OptiPaie.Services
             catch
             {
                 return _fallbackActor;
+            }
+        }
+
+        private long? ResolveCompany()
+        {
+            try
+            {
+                long? id = CompanyProvider != null ? CompanyProvider() : null;
+                return id.HasValue && id.Value > 0 ? id : (long?)null;
+            }
+            catch
+            {
+                return null;
             }
         }
 
@@ -60,6 +82,7 @@ namespace OptiPaie.Services
                     {
                         EntityType = entityType,
                         EntityId = entityId,
+                        CompanyId = ResolveCompany(),
                         Action = action,
                         Summary = summary,
                         OldValue = oldValue,
@@ -88,6 +111,22 @@ namespace OptiPaie.Services
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 return uow.Audit.GetRecent(limit).ToList();
+            }
+        }
+
+        public IReadOnlyList<AuditEntry> GetRecentForCompany(long companyId, int limit = 20)
+        {
+            // A valid company is required — the activity feed is strictly single-company, never
+            // an all-companies view (that would leak one client's actions into another's).
+            if (companyId <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(companyId),
+                    "Une société active est obligatoire pour le journal d'activité (jamais « toutes »).");
+            }
+
+            using (IUnitOfWork uow = _unitOfWorkFactory.Create())
+            {
+                return uow.Audit.GetRecentByCompany(companyId, limit).ToList();
             }
         }
     }

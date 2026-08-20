@@ -121,6 +121,72 @@ namespace OptiPaie.Tests
             Assert.That(_audit.GetForEntity("Leave", leaveId).Count, Is.EqualTo(0), "no sink wired → nothing recorded, no crash");
         }
 
+        // ------------------------------------------------------------------
+        // Company isolation of the activity journal (mandatory test #3).
+
+        [Test]
+        public void GetRecentForCompany_ShowsOnlyThatCompany_NeverAnother()
+        {
+            // The CompanyProvider is the single choke point: whatever is active at record time
+            // tags the entry. Company 1 acts, then company 2 acts.
+            long active = 1;
+            _audit.CompanyProvider = () => active;
+
+            active = 1;
+            _audit.Record("Leave", 10, AuditAction.Approved, "Congé approuvé (société 1)");
+            _audit.Record("Asset", 11, AuditAction.Assigned, "Matériel attribué (société 1)");
+
+            active = 2;
+            _audit.Record("Leave", 20, AuditAction.Approved, "Congé approuvé (société 2)");
+
+            var journal1 = _audit.GetRecentForCompany(1, 50);
+            var journal2 = _audit.GetRecentForCompany(2, 50);
+
+            Assert.That(journal1.Count, Is.EqualTo(2), "society 1 sees its own two entries");
+            Assert.That(journal1.All(e => e.CompanyId == 1), Is.True);
+            Assert.That(journal1.Any(e => e.Summary.Contains("société 2")), Is.False,
+                "society 2's action must NEVER appear in society 1's journal");
+
+            Assert.That(journal2.Count, Is.EqualTo(1), "society 2 sees only its own entry");
+            Assert.That(journal2.All(e => e.CompanyId == 2), Is.True);
+            Assert.That(journal2.Any(e => e.Summary.Contains("société 1")), Is.False,
+                "society 1's actions must NEVER appear in society 2's journal");
+        }
+
+        [Test]
+        public void GetRecentForCompany_ExcludesLegacyNullEntries_ButKeepsThemInTheStore()
+        {
+            // No active company (pre-isolation / demo-seeding state) → CompanyId NULL.
+            _audit.CompanyProvider = () => null;
+            _audit.Record("Contract", 99, AuditAction.Created, "Ancienne entrée sans société");
+
+            // The row is KEPT (visible to the all-companies query) ...
+            Assert.That(_audit.GetRecent(50).Any(e => e.EntityId == 99 && e.CompanyId == null), Is.True,
+                "the legacy NULL entry is preserved in the store");
+
+            // ... but EXCLUDED from every per-company journal (never shown, never leaked).
+            Assert.That(_audit.GetRecentForCompany(1, 50).Any(e => e.EntityId == 99), Is.False);
+            Assert.That(_audit.GetRecentForCompany(2, 50).Any(e => e.EntityId == 99), Is.False);
+        }
+
+        [Test]
+        public void GetRecentForCompany_WithoutACompany_Throws()
+        {
+            Assert.That(() => _audit.GetRecentForCompany(0), Throws.TypeOf<ArgumentOutOfRangeException>());
+            Assert.That(() => _audit.GetRecentForCompany(-1), Throws.TypeOf<ArgumentOutOfRangeException>());
+        }
+
+        [Test]
+        public void Record_WithoutACompanyProvider_StoresNull_AndStaysOutOfJournals()
+        {
+            // No provider wired at all (e.g. a test or a headless path) — must not crash, and the
+            // entry simply carries no company, so it never surfaces in a per-company journal.
+            _audit.Record("User", 1, AuditAction.Created, "Utilisateur créé");
+
+            Assert.That(_audit.GetRecent(10).Single().CompanyId, Is.Null);
+            Assert.That(_audit.GetRecentForCompany(1, 10).Count, Is.EqualTo(0));
+        }
+
         private static DateTime NextSunday()
         {
             var d = DateTime.Today.AddDays(7);

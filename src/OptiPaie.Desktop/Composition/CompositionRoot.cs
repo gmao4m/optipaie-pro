@@ -203,6 +203,17 @@ namespace OptiPaie.Desktop.Composition
                 return null;
             };
 
+            // Scope every audit entry to the ACTIVE company, resolved at record time. This is the
+            // single choke point through which all module writes pass, so no call site can forget
+            // to tag its entry — the per-company journal can never leak one client's actions into
+            // another's. Null when no company is active yet (e.g. demo seeding before login): the
+            // entry is stored with CompanyId NULL and stays out of every per-company journal.
+            auditService.CompanyProvider = () =>
+            {
+                long id = appServices.CompanyContext.ActiveId;
+                return id > 0 ? id : (long?)null;
+            };
+
             return appServices;
         }
     }

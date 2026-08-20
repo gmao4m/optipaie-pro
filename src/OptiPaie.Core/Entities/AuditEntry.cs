@@ -15,6 +15,14 @@ namespace OptiPaie.Core.Entities
         /// <summary>The changed record's id.</summary>
         public long EntityId { get; set; }
 
+        /// <summary>
+        /// The company this entry belongs to, resolved from the active company at record time.
+        /// NULLABLE: entries written before the multi-company isolation update (migration 0034)
+        /// keep NULL and are excluded from every per-company journal — never shown, never leaked
+        /// across companies, but kept in the database.
+        /// </summary>
+        public long? CompanyId { get; set; }
+
         public AuditAction Action { get; set; }
 
         /// <summary>Human-readable French summary of the change.</summary>

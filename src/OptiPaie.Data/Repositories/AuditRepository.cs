@@ -19,8 +19,8 @@ namespace OptiPaie.Data.Repositories
             entry.CreatedAtUtc = DateTime.UtcNow;
 
             const string sql =
-                "INSERT INTO AuditLog (EntityType, EntityId, Action, Summary, OldValue, NewValue, Actor, CreatedAtUtc) " +
-                "VALUES (@EntityType, @EntityId, @Action, @Summary, @OldValue, @NewValue, @Actor, @CreatedAtUtc); " +
+                "INSERT INTO AuditLog (EntityType, EntityId, CompanyId, Action, Summary, OldValue, NewValue, Actor, CreatedAtUtc) " +
+                "VALUES (@EntityType, @EntityId, @CompanyId, @Action, @Summary, @OldValue, @NewValue, @Actor, @CreatedAtUtc); " +
                 "SELECT last_insert_rowid();";
 
             long id = Connection.ExecuteScalar<long>(sql, entry, Transaction);
@@ -41,6 +41,16 @@ namespace OptiPaie.Data.Repositories
             return Connection.Query<AuditEntry>(
                 "SELECT * FROM AuditLog ORDER BY CreatedAtUtc DESC, Id DESC LIMIT @limit;",
                 new { limit }, Transaction);
+        }
+
+        public IEnumerable<AuditEntry> GetRecentByCompany(long companyId, int limit)
+        {
+            // Only this company's entries. Rows with CompanyId NULL (pre-0034, cross-company
+            // era) are excluded by the equality test — kept in the table, never surfaced here.
+            return Connection.Query<AuditEntry>(
+                "SELECT * FROM AuditLog WHERE CompanyId = @companyId " +
+                "ORDER BY CreatedAtUtc DESC, Id DESC LIMIT @limit;",
+                new { companyId, limit }, Transaction);
         }
     }
 }
