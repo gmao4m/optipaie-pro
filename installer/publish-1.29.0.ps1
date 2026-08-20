@@ -57,8 +57,16 @@ if ($pv -notlike "$ver*") { throw "Setup.exe ProductVersion '$pv' does not match
 $env:GH_TOKEN = (gh auth token --hostname github.com --user gmao4m).Trim()
 if (-not $env:GH_TOKEN) { throw "No gmao4m gh token available (gh auth token --user gmao4m)." }
 
-gh release view $tag --repo $repo 2>$null | Out-Null
-if ($LASTEXITCODE -eq 0) { throw "Release $tag already exists. Aborting to avoid overwriting a live release." }
+# Existence check. gh writes "release not found" to stderr on the (normal) missing case;
+# under $ErrorActionPreference='Stop' a REDIRECTED native stderr becomes a terminating error
+# in Windows PowerShell 5.1, so relax the preference just around this call and read the exit
+# code explicitly. (Unredirected native stderr - git push, gh release create - does NOT throw.)
+$eapPrev = $ErrorActionPreference
+$ErrorActionPreference = 'Continue'
+gh release view $tag --repo $repo 1>$null 2>$null
+$releaseExists = ($LASTEXITCODE -eq 0)
+$ErrorActionPreference = $eapPrev
+if ($releaseExists) { throw "Release $tag already exists. Aborting to avoid overwriting a live release." }
 
 # --- 1. Asset name (hyphenated, load-bearing) -------------------------------
 Write-Host "==> Copying Setup.exe to the release asset name..." -ForegroundColor Cyan
