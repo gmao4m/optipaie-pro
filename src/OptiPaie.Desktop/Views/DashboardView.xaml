@@ -159,7 +159,10 @@
                             <TextBlock Style="{StaticResource KpiValue}" Foreground="{DynamicResource Deduction}" Text="{Binding LoanOutstanding}" /></StackPanel>
                     </Grid>
                 </Border>
-                <Border Style="{StaticResource Kpi}">
+                <Border Style="{StaticResource Kpi}" Cursor="Hand">
+                    <Border.InputBindings>
+                        <MouseBinding MouseAction="LeftClick" Command="{Binding OpenCommand}" CommandParameter="ats" />
+                    </Border.InputBindings>
                     <Grid>
                         <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
                         <Border Grid.Column="0" Style="{StaticResource KpiIcon}" Background="{DynamicResource BrandSoft}">
@@ -169,7 +172,10 @@
                             <TextBlock Style="{StaticResource KpiValue}" Text="{Binding OpenPostings}" /></StackPanel>
                     </Grid>
                 </Border>
-                <Border Style="{StaticResource Kpi}">
+                <Border Style="{StaticResource Kpi}" Cursor="Hand">
+                    <Border.InputBindings>
+                        <MouseBinding MouseAction="LeftClick" Command="{Binding OpenCommand}" CommandParameter="ats" />
+                    </Border.InputBindings>
                     <Grid>
                         <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
                         <Border Grid.Column="0" Style="{StaticResource KpiIcon}" Background="{DynamicResource AccentSoft}">

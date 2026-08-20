@@ -140,6 +140,19 @@ namespace OptiPaie.Services
                     snapshot.Candidates += p.CandidateCount;
                 }
 
+                // Candidates awaiting an interview → "À traiter".
+                foreach (Candidate cand in _ats.GetCandidatesByCompany(company.Id))
+                {
+                    if (cand.Stage != CandidateStage.Interview) continue;
+                    snapshot.Approvals.Add(new ApprovalItem
+                    {
+                        Kind = "recruitment",
+                        Title = "Entretien à planifier — " + (cand.LastName + " " + cand.FirstName).Trim(),
+                        Detail = "Candidat en cours de recrutement",
+                        ModuleKey = ModuleKeys.Ats
+                    });
+                }
+
                 // Assets.
                 foreach (AssetSummary asset in _assets.GetByCompany(company.Id))
                 {
