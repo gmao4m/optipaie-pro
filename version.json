@@ -1,6 +1,6 @@
 {
-  "latest_version": "1.29.0",
-  "download_url": "https://github.com/gmao4m/optipaie-pro/releases/download/v1.29.0/OptiPaie-PRO-Setup.exe",
-  "release_notes": "🔴 مهم لمن يدير أكثر من مؤسسة: أصبح كل رقم في لوحة القيادة يخصّ المؤسسة المختارة وحدها (كانت الأرقام تُجمع من كل المؤسسات معًا). ستلاحظ أرقامًا أصغر ممّا اعتدت، وهذا صحيح ومقصود — ولم تُفقد أيّ بيانات، كلّها محفوظة ومصنّفة حسب المؤسسة.\nإن بدت لك الأرقام غير متوقّعة، تأكّد أوّلًا من اسم المؤسسة المعروض في أعلى الشاشة.\nعزل كامل بين المؤسسات: لوحة القيادة وسجلّ النشاط وجرس التنبيهات والتقارير تخصّ المؤسسة النشطة وحدها.\nعند فتح البرنامج: مؤسسة واحدة تُفتح مباشرةً؛ عدّة مؤسسات تظهر شاشة اختيار قبل أيّ بيانات.\nوحدة التوظيف الجديدة: شاشة واحدة بسيطة، و«التوظيف» يُنشئ الموظّف وعقده المبدئي تلقائيًا.\nمحرّك الرواتب لم يتغيّر؛ لا حذف لأيّ بيانات؛ ولا يُطلب الترخيص من جديد بعد التحديث.\nلأيّ استفسار حول هذا التحديث، تواصل معنا مباشرةً.",
+  "latest_version": "1.27.0",
+  "download_url": "https://github.com/gmao4m/optipaie-pro/releases/download/v1.27.0/OptiPaie-PRO-Setup.exe",
+  "release_notes": "- Correctif majeur : l'application ne se ferme plus après une connexion réussie — le tableau de bord s'ouvre toujours (fin de la boucle de reconnexion).\n- Écran de connexion unique en arabe : le propriétaire entre son email, les utilisateurs leur nom d'utilisateur — le système détecte automatiquement.\n- Récupération d'accès : « الدخول بمفتاح الترخيص » si le mot de passe du propriétaire est oublié, et « التحقق من التحديثات » directement sur l'écran de connexion.\n- Messages d'erreur clairs et distincts en arabe ; plus aucune fermeture silencieuse de l'application.\n- Protections : impossible d'activer la connexion sans administrateur actif ; le dernier administrateur ne peut être supprimé ni désactivé.\n- Moteur de paie inchangé ; données intactes ; la licence n'est pas redemandée.",
   "mandatory": false
 }
