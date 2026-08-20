@@ -10,7 +10,12 @@ namespace OptiPaie.Core.Interfaces.Services
     /// </summary>
     public interface INotificationService
     {
-        /// <summary>All current notifications, most urgent (then soonest) first.</summary>
-        IReadOnlyList<Notification> GetNotifications(int expiryWindowDays = 30);
+        /// <summary>
+        /// The current notifications for ONE company, most urgent (then soonest) first.
+        /// <paramref name="companyId"/> is MANDATORY (throws for &lt;= 0) — the bell is strictly
+        /// single-company, never an all-companies view (that would leak one client's employees
+        /// into another's header).
+        /// </summary>
+        IReadOnlyList<Notification> GetNotifications(long companyId, int expiryWindowDays = 30);
     }
 }

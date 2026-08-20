@@ -44,13 +44,18 @@ namespace OptiPaie.Services
             _performance = Guard.AgainstNull(performance, nameof(performance));
         }
 
-        public IReadOnlyList<Notification> GetNotifications(int expiryWindowDays = 30)
+        public IReadOnlyList<Notification> GetNotifications(long companyId, int expiryWindowDays = 30)
         {
-            var items = new List<Notification>();
-            foreach (Company company in _companies.GetAll())
+            // A valid active company is MANDATORY — the bell is strictly single-company. An
+            // all-companies view would show another client's employees in the header.
+            if (companyId <= 0)
             {
-                Collect(company, expiryWindowDays, items);
+                throw new ArgumentOutOfRangeException(nameof(companyId),
+                    "Une société active est obligatoire pour les notifications (jamais « toutes »).");
             }
+
+            var items = new List<Notification>();
+            Collect(companyId, expiryWindowDays, items);
 
             // Most urgent first, then soonest date, then title.
             return items
@@ -61,14 +66,14 @@ namespace OptiPaie.Services
                 .ToList();
         }
 
-        private void Collect(Company company, int window, List<Notification> items)
+        private void Collect(long companyId, int window, List<Notification> items)
         {
             int year = DateTime.Today.Year;
-            var names = _employees.GetByCompany(company.Id)
+            var names = _employees.GetByCompany(companyId)
                 .ToDictionary(e => e.Id, e => (e.LastNameFr + " " + e.FirstNameFr).Trim());
 
             // Contract expiries — urgency escalates as the end date nears.
-            foreach (ContractSummary c in _contracts.GetExpiring(company.Id, window))
+            foreach (ContractSummary c in _contracts.GetExpiring(companyId, window))
             {
                 int days = c.DaysUntilExpiry ?? 0;
                 items.Add(new Notification
@@ -86,7 +91,7 @@ namespace OptiPaie.Services
             }
 
             // Leave awaiting approval.
-            foreach (LeaveRequest l in _leave.GetByCompanyYear(company.Id, year))
+            foreach (LeaveRequest l in _leave.GetByCompanyYear(companyId, year))
             {
                 if (l.Status != LeaveStatus.Pending) continue;
                 names.TryGetValue(l.EmployeeId, out string name);
@@ -103,7 +108,7 @@ namespace OptiPaie.Services
 
             // Trainings starting within a week.
             DateTime today = DateTime.Today;
-            foreach (TrainingSummary t in _training.GetByCompany(company.Id))
+            foreach (TrainingSummary t in _training.GetByCompany(companyId))
             {
                 if (t.Status != TrainingStatus.Planned && t.Status != TrainingStatus.Ongoing) continue;
                 int days = (int)(t.StartDate.Date - today).TotalDays;
@@ -120,7 +125,7 @@ namespace OptiPaie.Services
             }
 
             // Performance — pending evaluations whose period is closing or overdue.
-            foreach (EvaluationReminder r in _performance.GetReminders(company.Id, today))
+            foreach (EvaluationReminder r in _performance.GetReminders(companyId, today))
             {
                 items.Add(new Notification
                 {

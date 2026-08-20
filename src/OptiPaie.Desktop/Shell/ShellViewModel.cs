@@ -166,9 +166,17 @@ namespace OptiPaie.Desktop.Shell
         private void RefreshNotifications()
         {
             Notifications.Clear();
-            foreach (OptiPaie.Core.Dtos.Notification n in _services.Notifications.GetNotifications())
+
+            // The bell is strictly scoped to the active company — never a cross-company view
+            // (that would show another client's employees in the header). The startup gate
+            // guarantees a company is active; guard defensively all the same.
+            long companyId = _services.CompanyContext.ActiveId;
+            if (companyId > 0)
             {
-                Notifications.Add(n);
+                foreach (OptiPaie.Core.Dtos.Notification n in _services.Notifications.GetNotifications(companyId))
+                {
+                    Notifications.Add(n);
+                }
             }
 
             NotificationCount = Notifications.Count;

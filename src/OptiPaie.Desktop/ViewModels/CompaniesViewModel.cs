@@ -142,6 +142,12 @@ namespace OptiPaie.Desktop.ViewModels
             if (result.IsSuccess)
             {
                 LoadCompanies();
+
+                // Keep the shared active-company context in sync: never leave the header showing
+                // a deleted company. If the ACTIVE company was the one removed, Reload re-points to
+                // a remaining one (raising ActiveChanged → the shell rebuilds); if none remain, it
+                // clears the selection and the rebuild routes back to the company gate.
+                _services.CompanyContext.Reload();
             }
             else
             {

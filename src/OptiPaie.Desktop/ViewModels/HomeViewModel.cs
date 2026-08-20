@@ -77,16 +77,13 @@ namespace OptiPaie.Desktop.ViewModels
 
             MonthLabel = month + " " + now.Year;
 
-            System.Collections.Generic.IReadOnlyList<Company> companies = _services.Companies.GetAll();
-            Companies = companies.Count;
+            // Tenant meta (how many companies this install manages) — a count, not one client's
+            // data shown under another. The employee KPI, however, is strictly the ACTIVE company:
+            // never a cross-company sum (that would mix clients' headcounts on one screen).
+            Companies = _services.Companies.GetAll().Count;
 
-            int employees = 0;
-            foreach (Company company in companies)
-            {
-                employees += _services.Employees.GetByCompany(company.Id).Count;
-            }
-
-            Employees = employees;
+            long companyId = _services.CompanyContext.ActiveId;
+            Employees = companyId > 0 ? _services.Employees.GetByCompany(companyId).Count : 0;
             Raise(nameof(HasRecent));
         }
 

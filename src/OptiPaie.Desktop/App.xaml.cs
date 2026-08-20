@@ -298,6 +298,17 @@ namespace OptiPaie.Desktop
                     oldShell.Close();
                 }
 
+                // Defensive: if the change left no valid active company (e.g. the active company was
+                // just deleted, or all companies were removed), re-run the gate instead of building a
+                // shell with no company — which would throw in Navigate. The gate re-picks or offers
+                // to create one; if the user declines, exit cleanly rather than crash.
+                if (Services.CompanyContext.ActiveId <= 0 && !EnsureCompanySelected())
+                {
+                    CrashLog.Breadcrumb("no company after change -> exit");
+                    Shutdown();
+                    return;
+                }
+
                 ShowMainShell();
             }
             catch (Exception ex)

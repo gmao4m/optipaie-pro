@@ -80,7 +80,7 @@ namespace OptiPaie.Tests
             }).Value;
             _contracts.Activate(c);
 
-            var n = _notifications.GetNotifications(30);
+            var n = _notifications.GetNotifications(_companyId, 30);
 
             var contract = n.FirstOrDefault(x => x.Kind == "contract");
             Assert.That(contract, Is.Not.Null);
@@ -96,7 +96,7 @@ namespace OptiPaie.Tests
             _leave.Save(new LeaveRequest { EmployeeId = _employeeId, Type = LeaveType.Annual, StartDate = start, EndDate = start.AddDays(1) });
             _training.Save(new TrainingSession { CompanyId = _companyId, Title = "Sécurité", StartDate = DateTime.Today.AddDays(3) });
 
-            var n = _notifications.GetNotifications(30);
+            var n = _notifications.GetNotifications(_companyId, 30);
 
             Assert.That(n.Any(x => x.Kind == "leave" && x.Severity == NotificationSeverity.Warning), Is.True);
             Assert.That(n.Any(x => x.Kind == "training" && x.ModuleKey == ModuleKeys.Training), Is.True);
@@ -113,7 +113,7 @@ namespace OptiPaie.Tests
             _contracts.Activate(c);
             _training.Save(new TrainingSession { CompanyId = _companyId, Title = "Info", StartDate = DateTime.Today.AddDays(5) });
 
-            var n = _notifications.GetNotifications(30);
+            var n = _notifications.GetNotifications(_companyId, 30);
 
             Assert.That(n.Count, Is.GreaterThanOrEqualTo(2));
             Assert.That(n[0].Severity, Is.EqualTo(NotificationSeverity.Urgent), "the most urgent alert is first");
@@ -122,7 +122,56 @@ namespace OptiPaie.Tests
         [Test]
         public void GetNotifications_QuietWhenNothingIsDue()
         {
-            Assert.That(_notifications.GetNotifications(30).Count, Is.EqualTo(0));
+            Assert.That(_notifications.GetNotifications(_companyId, 30).Count, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void GetNotifications_WithoutACompany_Throws()
+        {
+            Assert.That(() => _notifications.GetNotifications(0), Throws.TypeOf<ArgumentOutOfRangeException>());
+            Assert.That(() => _notifications.GetNotifications(-1), Throws.TypeOf<ArgumentOutOfRangeException>());
+        }
+
+        [Test]
+        public void GetNotifications_ShowsOnlyTheActiveCompany_NeverAnother()
+        {
+            // Company A: an urgent expiring contract for BENALI.
+            long ca = _contracts.Save(new EmploymentContract
+            {
+                EmployeeId = _employeeId, Type = ContractType.Cdd, BaseSalary = 60000m, Position = "X",
+                StartDate = DateTime.Today.AddMonths(-6), EndDate = DateTime.Today.AddDays(3)
+            }).Value;
+            _contracts.Activate(ca);
+
+            // Company B: its own employee HADDAD with an urgent expiring contract + pending leave.
+            long companyB = _companies.Create(new Company { NameFr = "SARL Autre", Nif = "111111111111111" }).Value;
+            long empB = _employees.Create(new Employee
+            {
+                CompanyId = companyB, LastNameFr = "HADDAD", FirstNameFr = "Nabil",
+                Gender = Gender.Male, MaritalStatus = MaritalStatus.Single, PaymentMode = PaymentMode.Cash,
+                ContractType = ContractType.Cdd, HireDate = new DateTime(2021, 1, 1), BaseSalary = 55000m, IsActive = true
+            }).Value;
+            long cb = _contracts.Save(new EmploymentContract
+            {
+                EmployeeId = empB, Type = ContractType.Cdd, BaseSalary = 55000m, Position = "Y",
+                StartDate = DateTime.Today.AddMonths(-6), EndDate = DateTime.Today.AddDays(3)
+            }).Value;
+            _contracts.Activate(cb);
+            DateTime start = NextSunday();
+            _leave.Save(new LeaveRequest { EmployeeId = empB, Type = LeaveType.Annual, StartDate = start, EndDate = start.AddDays(1) });
+
+            var bellA = _notifications.GetNotifications(_companyId, 30);
+            var bellB = _notifications.GetNotifications(companyB, 30);
+
+            // Company A's bell shows BENALI only — never HADDAD (company B's employee).
+            Assert.That(bellA.Any(n => n.Title.Contains("BENALI")), Is.True);
+            Assert.That(bellA.Any(n => n.Title.Contains("HADDAD")), Is.False,
+                "company B's employee must NEVER appear in company A's bell");
+
+            // Company B's bell shows HADDAD only — never BENALI.
+            Assert.That(bellB.Any(n => n.Title.Contains("HADDAD")), Is.True);
+            Assert.That(bellB.Any(n => n.Title.Contains("BENALI")), Is.False,
+                "company A's employee must NEVER appear in company B's bell");
         }
 
         private static DateTime NextSunday()
