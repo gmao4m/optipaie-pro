@@ -32,6 +32,25 @@ namespace OptiPaie.Core.Entities
 
         public DateTime AppliedDate { get; set; }
 
+        // -- v1.29 recruitment fields (additive, all optional) ----------------
+
+        /// <summary>Highest education level (free text, optional).</summary>
+        public string EducationLevel { get; set; }
+
+        /// <summary>Years of experience (optional).</summary>
+        public int? ExperienceYears { get; set; }
+
+        /// <summary>
+        /// When Stage = Rejected, tells a refusal (by us) apart from a withdrawal (by the
+        /// candidate); null when the file is still open. The CHECK on Stage is never touched.
+        /// </summary>
+        public CandidateClosure? ClosureType { get; set; }
+
+        /// <summary>Mandatory reason captured when the file is closed (refus / désistement).</summary>
+        public string ClosureReason { get; set; }
+
+        public DateTime? ClosureDate { get; set; }
+
         /// <summary>The shared employee created when this candidate was hired, or null.</summary>
         public long? HiredEmployeeId { get; set; }
 

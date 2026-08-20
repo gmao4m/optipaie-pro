@@ -39,9 +39,11 @@ namespace OptiPaie.Data.Repositories
             const string sql =
                 "INSERT INTO JobPostings " +
                 "(CompanyId, Title, Department, Description, Status, OpenDate, Positions, Notes, " +
+                " ContractType, Deadline, ResponsibleName, ClosureType, ClosureReason, " +
                 " CreatedAtUtc, UpdatedAtUtc, IsDeleted) " +
                 "VALUES " +
                 "(@CompanyId, @Title, @Department, @Description, @Status, @OpenDate, @Positions, @Notes, " +
+                " @ContractType, @Deadline, @ResponsibleName, @ClosureType, @ClosureReason, " +
                 " @CreatedAtUtc, @UpdatedAtUtc, @IsDeleted); " +
                 "SELECT last_insert_rowid();";
 
@@ -59,6 +61,8 @@ namespace OptiPaie.Data.Repositories
                 "UPDATE JobPostings SET " +
                 "CompanyId = @CompanyId, Title = @Title, Department = @Department, Description = @Description, " +
                 "Status = @Status, OpenDate = @OpenDate, Positions = @Positions, Notes = @Notes, " +
+                "ContractType = @ContractType, Deadline = @Deadline, ResponsibleName = @ResponsibleName, " +
+                "ClosureType = @ClosureType, ClosureReason = @ClosureReason, " +
                 "UpdatedAtUtc = @UpdatedAtUtc, IsDeleted = @IsDeleted " +
                 "WHERE Id = @Id;";
 
@@ -88,6 +92,17 @@ namespace OptiPaie.Data.Repositories
                 new { postingId }, Transaction);
         }
 
+        public IEnumerable<Candidate> GetCandidatesByCompany(long companyId)
+        {
+            // Company scope via the posting — never returns another company's candidates.
+            return Connection.Query<Candidate>(
+                "SELECT c.* FROM Candidates c " +
+                "JOIN JobPostings p ON p.Id = c.PostingId " +
+                "WHERE p.CompanyId = @companyId AND c.IsDeleted = 0 AND p.IsDeleted = 0 " +
+                "ORDER BY c.Stage, c.AppliedDate DESC, c.Id DESC;",
+                new { companyId }, Transaction);
+        }
+
         public long InsertCandidate(Candidate candidate)
         {
             candidate.CreatedAtUtc = DateTime.UtcNow;
@@ -96,9 +111,11 @@ namespace OptiPaie.Data.Repositories
             const string sql =
                 "INSERT INTO Candidates " +
                 "(PostingId, FirstName, LastName, Phone, Email, Stage, Rating, Source, Notes, AppliedDate, " +
+                " EducationLevel, ExperienceYears, ClosureType, ClosureReason, ClosureDate, " +
                 " HiredEmployeeId, CreatedAtUtc, UpdatedAtUtc, IsDeleted) " +
                 "VALUES " +
                 "(@PostingId, @FirstName, @LastName, @Phone, @Email, @Stage, @Rating, @Source, @Notes, @AppliedDate, " +
+                " @EducationLevel, @ExperienceYears, @ClosureType, @ClosureReason, @ClosureDate, " +
                 " @HiredEmployeeId, @CreatedAtUtc, @UpdatedAtUtc, @IsDeleted); " +
                 "SELECT last_insert_rowid();";
 
@@ -116,8 +133,9 @@ namespace OptiPaie.Data.Repositories
                 "UPDATE Candidates SET " +
                 "PostingId = @PostingId, FirstName = @FirstName, LastName = @LastName, Phone = @Phone, " +
                 "Email = @Email, Stage = @Stage, Rating = @Rating, Source = @Source, Notes = @Notes, " +
-                "AppliedDate = @AppliedDate, HiredEmployeeId = @HiredEmployeeId, UpdatedAtUtc = @UpdatedAtUtc, " +
-                "IsDeleted = @IsDeleted " +
+                "AppliedDate = @AppliedDate, EducationLevel = @EducationLevel, ExperienceYears = @ExperienceYears, " +
+                "ClosureType = @ClosureType, ClosureReason = @ClosureReason, ClosureDate = @ClosureDate, " +
+                "HiredEmployeeId = @HiredEmployeeId, UpdatedAtUtc = @UpdatedAtUtc, IsDeleted = @IsDeleted " +
                 "WHERE Id = @Id;";
 
             Connection.Execute(sql, candidate, Transaction);
@@ -128,6 +146,70 @@ namespace OptiPaie.Data.Repositories
             Connection.Execute(
                 "UPDATE Candidates SET IsDeleted = 1, UpdatedAtUtc = @now WHERE Id = @id;",
                 new { id, now = DateTime.UtcNow }, Transaction);
+        }
+
+        // -- interviews --------------------------------------------------------
+
+        public long InsertInterview(Interview interview)
+        {
+            interview.CreatedAtUtc = DateTime.UtcNow;
+            interview.ScheduledDate = SqliteDate.Day(interview.ScheduledDate);
+
+            const string sql =
+                "INSERT INTO Interviews " +
+                "(CandidateId, ScheduledDate, Type, Interviewer, Result, Notes, CreatedAtUtc, IsDeleted) " +
+                "VALUES (@CandidateId, @ScheduledDate, @Type, @Interviewer, @Result, @Notes, @CreatedAtUtc, @IsDeleted); " +
+                "SELECT last_insert_rowid();";
+
+            long id = Connection.ExecuteScalar<long>(sql, interview, Transaction);
+            interview.Id = id;
+            return id;
+        }
+
+        public IEnumerable<Interview> GetInterviewsByCandidate(long candidateId)
+        {
+            return Connection.Query<Interview>(
+                "SELECT * FROM Interviews WHERE CandidateId = @candidateId AND IsDeleted = 0 " +
+                "ORDER BY ScheduledDate DESC, Id DESC;",
+                new { candidateId }, Transaction);
+        }
+
+        public void SoftDeleteInterview(long id)
+        {
+            Connection.Execute(
+                "UPDATE Interviews SET IsDeleted = 1 WHERE Id = @id;", new { id }, Transaction);
+        }
+
+        // -- attachments -------------------------------------------------------
+
+        public long InsertAttachment(CandidateAttachment attachment)
+        {
+            attachment.CreatedAtUtc = DateTime.UtcNow;
+            if (attachment.AddedAt == default(DateTime)) attachment.AddedAt = DateTime.UtcNow;
+
+            const string sql =
+                "INSERT INTO CandidateAttachments " +
+                "(CandidateId, FileName, RelativePath, Kind, AddedAt, CreatedAtUtc, IsDeleted) " +
+                "VALUES (@CandidateId, @FileName, @RelativePath, @Kind, @AddedAt, @CreatedAtUtc, @IsDeleted); " +
+                "SELECT last_insert_rowid();";
+
+            long id = Connection.ExecuteScalar<long>(sql, attachment, Transaction);
+            attachment.Id = id;
+            return id;
+        }
+
+        public IEnumerable<CandidateAttachment> GetAttachmentsByCandidate(long candidateId)
+        {
+            return Connection.Query<CandidateAttachment>(
+                "SELECT * FROM CandidateAttachments WHERE CandidateId = @candidateId AND IsDeleted = 0 " +
+                "ORDER BY AddedAt DESC, Id DESC;",
+                new { candidateId }, Transaction);
+        }
+
+        public void SoftDeleteAttachment(long id)
+        {
+            Connection.Execute(
+                "UPDATE CandidateAttachments SET IsDeleted = 1 WHERE Id = @id;", new { id }, Transaction);
         }
     }
 }

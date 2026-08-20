@@ -27,6 +27,21 @@ namespace OptiPaie.Core.Entities
 
         public string Notes { get; set; }
 
+        // -- v1.29 recruitment fields (additive, all optional) ----------------
+
+        /// <summary>Contract type advertised (optional).</summary>
+        public ContractType? ContractType { get; set; }
+
+        /// <summary>Application deadline (optional).</summary>
+        public DateTime? Deadline { get; set; }
+
+        /// <summary>Person in charge of this recruitment (free text, optional).</summary>
+        public string ResponsibleName { get; set; }
+
+        /// <summary>Closure qualification (reserved; e.g. cancellation), with a reason.</summary>
+        public int? ClosureType { get; set; }
+        public string ClosureReason { get; set; }
+
         public DateTime? UpdatedAtUtc { get; set; }
 
         public bool IsDeleted { get; set; }
