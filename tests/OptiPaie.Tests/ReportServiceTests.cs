@@ -54,7 +54,7 @@ namespace OptiPaie.Tests
             _attendance = new AttendanceService(_uow);
             _leave = new LeaveService(_uow);
             _loans = new LoanService(_uow);
-            _ats = new AtsService(_uow);
+            _ats = new AtsService(_uow, new OptiPaie.Services.Validation.EmployeeValidator());
             _assets = new AssetService(_uow);
             _training = new TrainingService(_uow);
             _reports = new ReportService(_companies, _employees, _attendance, _leave, _loans, _ats, _assets, _training);
@@ -148,8 +148,8 @@ namespace OptiPaie.Tests
             }).Value;
             _assets.Assign(asset, _employeeId, DateTime.Today, null, null);
 
-            long posting = _ats.SavePosting(new JobPosting { CompanyId = _companyId, Title = "Magasinier", OpenDate = DateTime.Today, Positions = 1 }).Value;
-            _ats.SaveCandidate(new Candidate { PostingId = posting, LastName = "ZIANE" });
+            long posting = _ats.SavePosting(new JobPosting { CompanyId = _companyId, Title = "Magasinier", Department = "Logistique", OpenDate = DateTime.Today, Positions = 1 }).Value;
+            _ats.SaveCandidate(new Candidate { PostingId = posting, LastName = "ZIANE", FirstName = "Sofiane", Phone = "0555111222" });
 
             ReportTable assets = _reports.Build(ReportService.Assets, _companyId, Year, 1);
             Assert.That(assets.Rows[0][5], Is.EqualTo("Attribué"));

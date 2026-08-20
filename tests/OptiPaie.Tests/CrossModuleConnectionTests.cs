@@ -61,7 +61,7 @@ namespace OptiPaie.Tests
             _attendance = new AttendanceService(_uow);
             _leave = new LeaveService(_uow);
             _loans = new LoanService(_uow);
-            _ats = new AtsService(_uow);
+            _ats = new AtsService(_uow, new OptiPaie.Services.Validation.EmployeeValidator());
             _assets = new AssetService(_uow);
             _training = new TrainingService(_uow);
             _payroll = new PayrollService(_uow, new ConfigurationService(_uow), new PayrollCalculationEngine());

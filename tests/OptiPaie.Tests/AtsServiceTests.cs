@@ -12,6 +12,7 @@ using OptiPaie.Core.Primitives;
 using OptiPaie.Data.Context;
 using OptiPaie.Data.Migrations;
 using OptiPaie.Services;
+using OptiPaie.Services.Validation;
 
 namespace OptiPaie.Tests
 {
@@ -44,7 +45,7 @@ namespace OptiPaie.Tests
             }
 
             _unitOfWorkFactory = new UnitOfWorkFactory(factory);
-            _service = new AtsService(_unitOfWorkFactory);
+            _service = new AtsService(_unitOfWorkFactory, new EmployeeValidator());
 
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
@@ -100,12 +101,13 @@ namespace OptiPaie.Tests
         }
 
         [Test]
-        public void MoveStage_AdvancesThePipeline()
+        public void MoveNext_AdvancesThePipeline_OneStepAtATime()
         {
             long postingId = _service.SavePosting(NewPosting("Comptable", 1)).Value;
             long candidateId = _service.SaveCandidate(NewCandidate(postingId, "AMRANI", "Yacine")).Value;
 
-            _service.MoveStage(candidateId, CandidateStage.Interview);
+            _service.MoveNext(candidateId); // Applied -> Screening
+            _service.MoveNext(candidateId); // Screening -> Interview
 
             Assert.That(_service.GetCandidate(candidateId).Stage, Is.EqualTo(CandidateStage.Interview));
         }
@@ -125,7 +127,7 @@ namespace OptiPaie.Tests
         public void Hire_CreatesTheSharedEmployee()
         {
             long postingId = _service.SavePosting(NewPosting("Comptable", 1)).Value;
-            long candidateId = _service.SaveCandidate(NewCandidate(postingId, "AMRANI", "Yacine")).Value;
+            long candidateId = HireReadyCandidate(postingId, "AMRANI", "Yacine");
 
             Assert.That(EmployeeCount(), Is.EqualTo(0));
 
@@ -153,7 +155,7 @@ namespace OptiPaie.Tests
         public void Hire_FillsThePostingWhenPositionsAreMet()
         {
             long postingId = _service.SavePosting(NewPosting("Comptable", 1)).Value;
-            long candidateId = _service.SaveCandidate(NewCandidate(postingId, "AMRANI", "Yacine")).Value;
+            long candidateId = HireReadyCandidate(postingId, "AMRANI", "Yacine");
 
             Result<HireResult> hired = _service.Hire(candidateId);
 
@@ -165,8 +167,8 @@ namespace OptiPaie.Tests
         public void Hire_DoesNotFillWhileMorePositionsRemain()
         {
             long postingId = _service.SavePosting(NewPosting("Comptable", 2)).Value; // two positions
-            long c1 = _service.SaveCandidate(NewCandidate(postingId, "AMRANI", "Yacine")).Value;
-            long c2 = _service.SaveCandidate(NewCandidate(postingId, "BOUDIAF", "Lina")).Value;
+            long c1 = HireReadyCandidate(postingId, "AMRANI", "Yacine");
+            long c2 = HireReadyCandidate(postingId, "BOUDIAF", "Lina");
 
             _service.Hire(c1);
             Assert.That(_service.GetPosting(postingId).Status, Is.EqualTo(JobStatus.Open), "one of two filled");
@@ -180,7 +182,7 @@ namespace OptiPaie.Tests
         public void Hire_AnAlreadyHiredCandidate_IsRejected()
         {
             long postingId = _service.SavePosting(NewPosting("Comptable", 5)).Value;
-            long candidateId = _service.SaveCandidate(NewCandidate(postingId, "AMRANI", "Yacine")).Value;
+            long candidateId = HireReadyCandidate(postingId, "AMRANI", "Yacine");
             _service.Hire(candidateId);
 
             Result<HireResult> again = _service.Hire(candidateId);
@@ -193,7 +195,7 @@ namespace OptiPaie.Tests
         public void DeleteCandidate_AfterHire_IsRejected_ToProtectTheRealEmployee()
         {
             long postingId = _service.SavePosting(NewPosting("Comptable", 5)).Value;
-            long candidateId = _service.SaveCandidate(NewCandidate(postingId, "AMRANI", "Yacine")).Value;
+            long candidateId = HireReadyCandidate(postingId, "AMRANI", "Yacine");
             _service.Hire(candidateId);
 
             Assert.That(_service.DeleteCandidate(candidateId).IsFailure, Is.True);
@@ -206,7 +208,7 @@ namespace OptiPaie.Tests
         public void GetPostingsByCompany_ReturnsCandidateAndHiredCounts()
         {
             long postingId = _service.SavePosting(NewPosting("Comptable", 3)).Value;
-            long c1 = _service.SaveCandidate(NewCandidate(postingId, "AMRANI", "Yacine")).Value;
+            long c1 = HireReadyCandidate(postingId, "AMRANI", "Yacine");
             _service.SaveCandidate(NewCandidate(postingId, "BOUDIAF", "Lina"));
             _service.Hire(c1);
 
@@ -223,9 +225,19 @@ namespace OptiPaie.Tests
             long postingId = _service.SavePosting(NewPosting("Comptable", 1)).Value;
             long candidateId = _service.SaveCandidate(NewCandidate(postingId, "AMRANI", "Yacine")).Value;
 
-            _service.Reject(candidateId);
+            _service.Reject(candidateId, "Profil non retenu");
 
             Assert.That(_service.GetCandidate(candidateId).Stage, Is.EqualTo(CandidateStage.Rejected));
+        }
+
+        /// <summary>Creates a candidate and advances it to « Retenu » (Offer) so it can be hired.</summary>
+        private long HireReadyCandidate(long postingId, string last, string first)
+        {
+            long id = _service.SaveCandidate(NewCandidate(postingId, last, first)).Value;
+            _service.MoveNext(id); // Applied -> Screening
+            _service.MoveNext(id); // Screening -> Interview
+            _service.MoveNext(id); // Interview -> Offer
+            return id;
         }
 
         private JobPosting NewPosting(string title, int positions)

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using OptiPaie.Common.Validation;
+using OptiPaie.Core.Auditing;
 using OptiPaie.Core.Dtos;
 using OptiPaie.Core.Entities;
 using OptiPaie.Core.Enums;
@@ -12,20 +13,29 @@ using OptiPaie.Core.Primitives;
 namespace OptiPaie.Services
 {
     /// <summary>
-    /// Recruitment (ATS) orchestration. Manages job postings and their candidate
-    /// pipeline. The ecosystem link is <see cref="Hire"/>: it creates the SHARED employee
-    /// for the posting's company inside one transaction, links it to the candidate, and
-    /// fills the posting once its positions are met — so a new hire flows straight into
-    /// contracts and payroll without any re-entry. The payroll engine is untouched.
+    /// Recruitment orchestration. Postings + a strictly-ordered candidate pipeline
+    /// (Reçu→Présélectionné→Entretien→Retenu→Recruté). The pipeline order is enforced HERE,
+    /// in the service — the UI only ever offers the single legal next step. Hiring is the
+    /// ecosystem link (<see cref="Hire"/>): in ONE atomic transaction it creates the SHARED
+    /// employee through the same validated + audited path as any hire, opens a draft contract,
+    /// fills the posting when its positions are met, and links the candidate both ways. The
+    /// payroll engine is untouched.
     /// </summary>
     public sealed class AtsService : IAtsService
     {
         private readonly IUnitOfWorkFactory _unitOfWorkFactory;
+        private readonly IValidator<Employee> _employeeValidator;
 
-        public AtsService(IUnitOfWorkFactory unitOfWorkFactory)
+        public AtsService(IUnitOfWorkFactory unitOfWorkFactory, IValidator<Employee> employeeValidator)
         {
             _unitOfWorkFactory = Guard.AgainstNull(unitOfWorkFactory, nameof(unitOfWorkFactory));
+            _employeeValidator = Guard.AgainstNull(employeeValidator, nameof(employeeValidator));
         }
+
+        /// <summary>Audit trail (candidate hired → employee, etc.). Best-effort.</summary>
+        public IAuditSink Audit { get; set; } = NullAuditSink.Instance;
+
+        // -- postings ----------------------------------------------------------
 
         public Result<long> SavePosting(JobPosting posting)
         {
@@ -37,6 +47,11 @@ namespace OptiPaie.Services
             if (string.IsNullOrWhiteSpace(posting.Title))
             {
                 return Result.Fail<long>("L'intitulé du poste est obligatoire.", "Ats_TitleRequired");
+            }
+
+            if (string.IsNullOrWhiteSpace(posting.Department))
+            {
+                return Result.Fail<long>("Le département est obligatoire.", "Ats_DepartmentRequired");
             }
 
             if (posting.CompanyId <= 0)
@@ -115,6 +130,7 @@ namespace OptiPaie.Services
 
         public IReadOnlyList<JobPostingSummary> GetPostingsByCompany(long companyId)
         {
+            RequireCompany(companyId);
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 return uow.Ats.GetPostingsByCompany(companyId).Select(p => Summarise(uow, p)).ToList();
@@ -135,6 +151,16 @@ namespace OptiPaie.Services
                 return Result.Fail<long>("Le nom du candidat est obligatoire.", "Ats_CandidateNameRequired");
             }
 
+            if (string.IsNullOrWhiteSpace(candidate.FirstName))
+            {
+                return Result.Fail<long>("Le prénom du candidat est obligatoire.", "Ats_CandidateFirstNameRequired");
+            }
+
+            if (string.IsNullOrWhiteSpace(candidate.Phone))
+            {
+                return Result.Fail<long>("Le téléphone du candidat est obligatoire.", "Ats_CandidatePhoneRequired");
+            }
+
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 if (uow.Ats.GetPostingById(candidate.PostingId) == null)
@@ -150,8 +176,11 @@ namespace OptiPaie.Services
                         return Result.Fail<long>("Candidat introuvable.", "Ats_CandidateNotFound");
                     }
 
-                    // Hiring is handled by Hire(); an edit never changes the link or a hired stage.
+                    // Stage/closure/link are driven by the pipeline actions, never by an edit.
                     candidate.Stage = existing.Stage;
+                    candidate.ClosureType = existing.ClosureType;
+                    candidate.ClosureReason = existing.ClosureReason;
+                    candidate.ClosureDate = existing.ClosureDate;
                     candidate.HiredEmployeeId = existing.HiredEmployeeId;
                     candidate.CreatedAtUtc = existing.CreatedAtUtc;
                     uow.Ats.UpdateCandidate(candidate);
@@ -164,11 +193,86 @@ namespace OptiPaie.Services
             }
         }
 
-        public Result MoveStage(long candidateId, CandidateStage stage)
+        // -- pipeline (strict, service-enforced) -------------------------------
+
+        /// <summary>The active pipeline stages, in order. Hired/Rejected are terminal (own actions).</summary>
+        private const int FirstActive = (int)CandidateStage.Applied;   // 1
+        private const int LastActive = (int)CandidateStage.Offer;      // 4
+
+        public Result MoveStage(long candidateId, CandidateStage target)
         {
-            if (stage == CandidateStage.Hired)
+            using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
-                return Result.Fail("Utilisez « Recruter » pour embaucher un candidat.", "Ats_UseHire");
+                Candidate candidate = uow.Ats.GetCandidateById(candidateId);
+                if (candidate == null)
+                {
+                    return Result.Fail("Candidat introuvable.", "Ats_CandidateNotFound");
+                }
+
+                if (candidate.Stage == CandidateStage.Hired)
+                {
+                    return Result.Fail("Ce candidat est déjà recruté.", "Ats_AlreadyHired");
+                }
+
+                if (candidate.Stage == CandidateStage.Rejected)
+                {
+                    return Result.Fail("Ce dossier est clôturé.", "Ats_ClosedFile");
+                }
+
+                if (target == CandidateStage.Hired)
+                {
+                    return Result.Fail("Utilisez « Recruter » pour embaucher un candidat.", "Ats_UseHire");
+                }
+
+                if (target == CandidateStage.Rejected)
+                {
+                    return Result.Fail("Utilisez « Refuser » ou « Désistement ».", "Ats_UseRejectOrDesist");
+                }
+
+                int cur = (int)candidate.Stage;
+                int tgt = (int)target;
+                if (tgt < FirstActive || tgt > LastActive)
+                {
+                    return Result.Fail("Étape invalide.", "Ats_InvalidStage");
+                }
+
+                // Exactly one step forward or back — no skipping.
+                if (Math.Abs(tgt - cur) != 1)
+                {
+                    return Result.Fail("Une étape à la fois.", "Ats_NoSkip");
+                }
+
+                candidate.Stage = target;
+                uow.Ats.UpdateCandidate(candidate);
+                return Result.Ok();
+            }
+        }
+
+        /// <summary>Advance to the immediate next stage (the single "étape suivante" action).</summary>
+        public Result MoveNext(long candidateId)
+        {
+            Candidate c = GetCandidate(candidateId);
+            if (c == null) return Result.Fail("Candidat introuvable.", "Ats_CandidateNotFound");
+            return MoveStage(candidateId, (CandidateStage)((int)c.Stage + 1));
+        }
+
+        /// <summary>Step back exactly one stage to correct a mistake (UI confirms).</summary>
+        public Result MoveBack(long candidateId)
+        {
+            Candidate c = GetCandidate(candidateId);
+            if (c == null) return Result.Fail("Candidat introuvable.", "Ats_CandidateNotFound");
+            return MoveStage(candidateId, (CandidateStage)((int)c.Stage - 1));
+        }
+
+        public Result Reject(long candidateId, string reason) => Close(candidateId, CandidateClosure.Rejected, reason);
+
+        public Result Desist(long candidateId, string reason) => Close(candidateId, CandidateClosure.Withdrawn, reason);
+
+        private Result Close(long candidateId, CandidateClosure type, string reason)
+        {
+            if (string.IsNullOrWhiteSpace(reason))
+            {
+                return Result.Fail("Le motif est obligatoire.", "Ats_ReasonRequired");
             }
 
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
@@ -184,13 +288,21 @@ namespace OptiPaie.Services
                     return Result.Fail("Ce candidat est déjà recruté.", "Ats_AlreadyHired");
                 }
 
-                candidate.Stage = stage;
+                if (candidate.Stage == CandidateStage.Rejected)
+                {
+                    return Result.Fail("Ce dossier est déjà clôturé.", "Ats_ClosedFile");
+                }
+
+                candidate.Stage = CandidateStage.Rejected;
+                candidate.ClosureType = type;
+                candidate.ClosureReason = reason.Trim();
+                candidate.ClosureDate = DateTime.Today;
                 uow.Ats.UpdateCandidate(candidate);
                 return Result.Ok();
             }
         }
 
-        public Result Reject(long candidateId) => MoveStage(candidateId, CandidateStage.Rejected);
+        // -- hire (the atomic conversion) --------------------------------------
 
         public Result<HireResult> Hire(long candidateId)
         {
@@ -207,6 +319,13 @@ namespace OptiPaie.Services
                     return Result.Fail<HireResult>("Ce candidat est déjà recruté.", "Ats_AlreadyHired");
                 }
 
+                // Strict order: a hire only happens from « Retenu ».
+                if (candidate.Stage != CandidateStage.Offer)
+                {
+                    return Result.Fail<HireResult>(
+                        "Le candidat doit être à l'étape « Retenu » avant d'être recruté.", "Ats_MustBeOffer");
+                }
+
                 JobPosting posting = uow.Ats.GetPostingById(candidate.PostingId);
                 if (posting == null)
                 {
@@ -216,33 +335,41 @@ namespace OptiPaie.Services
                 uow.BeginTransaction();
                 try
                 {
-                    // Create the SHARED employee. Sensible defaults are used for the fields
-                    // recruitment doesn't capture; HR completes the record and issues a
-                    // contract afterwards. This is the single source of truth — the new
-                    // hire is now visible to every other module.
-                    long employeeId = uow.Employees.Insert(new Employee
+                    var employee = new Employee
                     {
                         CompanyId = posting.CompanyId,
                         LastNameFr = candidate.LastName,
-                        FirstNameFr = candidate.FirstName,
+                        // Defensive fallback for legacy candidates without a first name (validator requires it).
+                        FirstNameFr = string.IsNullOrWhiteSpace(candidate.FirstName) ? candidate.LastName : candidate.FirstName,
                         Gender = Gender.Male,
                         MaritalStatus = MaritalStatus.Single,
                         PaymentMode = PaymentMode.BankTransfer,
-                        ContractType = ContractType.Cdi,
+                        ContractType = posting.ContractType ?? ContractType.Cdi,
                         Poste = posting.Title,
                         HireDate = DateTime.Today,
                         BaseSalary = 0m,
                         IsActive = true
-                    });
+                    };
+
+                    // SAME validated + audited path as EmployeeService.Create, inside this transaction.
+                    Result<long> inserted = EmployeeCreation.InsertValidated(uow, employee, _employeeValidator, Audit);
+                    if (inserted.IsFailure)
+                    {
+                        uow.Rollback();
+                        return Result.Fail<HireResult>(inserted.Error, inserted.ErrorCode);
+                    }
+
+                    long employeeId = inserted.Value;
 
                     candidate.Stage = CandidateStage.Hired;
                     candidate.HiredEmployeeId = employeeId;
                     uow.Ats.UpdateCandidate(candidate);
 
-                    // Fill the posting when its positions have been met.
-                    int hired = uow.Ats.GetCandidatesByPosting(posting.Id)
-                        .Count(c => c.Stage == CandidateStage.Hired);
+                    // Draft contract, same transaction (activation stays manual).
+                    Result<long> contract = EmployeeCreation.InsertDraftContract(uow, employeeId, employee);
 
+                    // Fill the posting when its positions are met.
+                    int hired = uow.Ats.GetCandidatesByPosting(posting.Id).Count(c => c.Stage == CandidateStage.Hired);
                     bool filled = false;
                     if (hired >= posting.Positions && posting.Status != JobStatus.Filled)
                     {
@@ -251,8 +378,16 @@ namespace OptiPaie.Services
                         filled = true;
                     }
 
+                    Audit.Record("Recruitment", candidateId, AuditAction.StatusChanged,
+                        "Candidat recruté → employé #" + employeeId, "Retenu", "Recruté");
+
                     uow.Commit();
-                    return Result.Ok(new HireResult { EmployeeId = employeeId, PostingFilled = filled });
+                    return Result.Ok(new HireResult
+                    {
+                        EmployeeId = employeeId,
+                        ContractId = contract.Value,
+                        PostingFilled = filled
+                    });
                 }
                 catch
                 {
@@ -274,8 +409,6 @@ namespace OptiPaie.Services
 
                 if (candidate.HiredEmployeeId.HasValue)
                 {
-                    // The employee already exists in the shared table and is managed there;
-                    // removing the candidate row must not delete a real employee.
                     return Result.Fail(
                         "Ce candidat a été recruté — gérez l'employé depuis le module Employés.", "Ats_CandidateHired");
                 }
@@ -301,7 +434,100 @@ namespace OptiPaie.Services
             }
         }
 
+        public IReadOnlyList<Candidate> GetCandidatesByCompany(long companyId)
+        {
+            RequireCompany(companyId);
+            using (IUnitOfWork uow = _unitOfWorkFactory.Create())
+            {
+                return uow.Ats.GetCandidatesByCompany(companyId).ToList();
+            }
+        }
+
+        // -- interviews --------------------------------------------------------
+
+        public Result<long> SaveInterview(Interview interview)
+        {
+            if (interview == null || interview.CandidateId <= 0)
+            {
+                return Result.Fail<long>("Entretien invalide.", "Ats_InterviewRequired");
+            }
+
+            using (IUnitOfWork uow = _unitOfWorkFactory.Create())
+            {
+                if (uow.Ats.GetCandidateById(interview.CandidateId) == null)
+                {
+                    return Result.Fail<long>("Candidat introuvable.", "Ats_CandidateNotFound");
+                }
+
+                if (interview.ScheduledDate == default(DateTime)) interview.ScheduledDate = DateTime.Today;
+                return Result.Ok(uow.Ats.InsertInterview(interview));
+            }
+        }
+
+        public IReadOnlyList<Interview> GetInterviews(long candidateId)
+        {
+            using (IUnitOfWork uow = _unitOfWorkFactory.Create())
+            {
+                return uow.Ats.GetInterviewsByCandidate(candidateId).ToList();
+            }
+        }
+
+        public Result DeleteInterview(long interviewId)
+        {
+            using (IUnitOfWork uow = _unitOfWorkFactory.Create())
+            {
+                uow.Ats.SoftDeleteInterview(interviewId);
+                return Result.Ok();
+            }
+        }
+
+        // -- attachments (metadata; the file itself is copied by the caller) ---
+
+        public Result<long> AddAttachment(CandidateAttachment attachment)
+        {
+            if (attachment == null || attachment.CandidateId <= 0 || string.IsNullOrWhiteSpace(attachment.FileName))
+            {
+                return Result.Fail<long>("Pièce jointe invalide.", "Ats_AttachmentRequired");
+            }
+
+            using (IUnitOfWork uow = _unitOfWorkFactory.Create())
+            {
+                if (uow.Ats.GetCandidateById(attachment.CandidateId) == null)
+                {
+                    return Result.Fail<long>("Candidat introuvable.", "Ats_CandidateNotFound");
+                }
+
+                if (attachment.AddedAt == default(DateTime)) attachment.AddedAt = DateTime.UtcNow;
+                return Result.Ok(uow.Ats.InsertAttachment(attachment));
+            }
+        }
+
+        public IReadOnlyList<CandidateAttachment> GetAttachments(long candidateId)
+        {
+            using (IUnitOfWork uow = _unitOfWorkFactory.Create())
+            {
+                return uow.Ats.GetAttachmentsByCandidate(candidateId).ToList();
+            }
+        }
+
+        public Result DeleteAttachment(long attachmentId)
+        {
+            using (IUnitOfWork uow = _unitOfWorkFactory.Create())
+            {
+                uow.Ats.SoftDeleteAttachment(attachmentId);
+                return Result.Ok();
+            }
+        }
+
         // -- internals ---------------------------------------------------------
+
+        private static void RequireCompany(long companyId)
+        {
+            if (companyId <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(companyId), "Une société valide est obligatoire (jamais « toutes »).");
+            }
+        }
 
         private static JobPostingSummary Summarise(IUnitOfWork uow, JobPosting posting)
         {

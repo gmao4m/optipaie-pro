@@ -24,6 +24,9 @@ namespace OptiPaie.Core.Dtos
         /// <summary>The new shared employee's id.</summary>
         public long EmployeeId { get; set; }
 
+        /// <summary>The draft contract created for the hire (same atomic transaction).</summary>
+        public long ContractId { get; set; }
+
         /// <summary>True when the posting became Filled as a result.</summary>
         public bool PostingFilled { get; set; }
     }

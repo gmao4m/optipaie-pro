@@ -226,7 +226,13 @@ namespace OptiPaie.Desktop.ViewModels
                             (result.Value.PostingFilled ? " et l'offre est pourvue." : ".");
         }
 
-        private void Reject() => Run(_services.Ats.Reject(_selectedCandidate.Id), "Candidat écarté.");
+        private void Reject()
+        {
+            // Motif obligatoire (une seule zone de texte). The full single-screen UI arrives in B4.
+            string reason = Dialogs.Prompt("Refuser le candidat", "Motif du refus :", null, required: true);
+            if (string.IsNullOrWhiteSpace(reason)) return;
+            Run(_services.Ats.Reject(_selectedCandidate.Id, reason), "Candidat écarté.");
+        }
 
         private void Delete()
         {

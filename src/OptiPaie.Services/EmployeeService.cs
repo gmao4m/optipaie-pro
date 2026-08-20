@@ -34,22 +34,10 @@ namespace OptiPaie.Services
 
         public Result<long> Create(Employee employee)
         {
-            ValidationResult validation = _validator.Validate(employee);
-            if (!validation.IsValid)
-            {
-                return validation.ToFailure<long>();
-            }
-
+            // The single validated + audited creation path (shared with recruitment's Hire).
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
-                if (!uow.Companies.ExistsById(employee.CompanyId))
-                {
-                    return Result.Fail<long>("Entreprise introuvable.", ErrorCodes.EmployeeCompanyNotFound);
-                }
-
-                long id = uow.Employees.Insert(employee);
-                Audit.Record("Employee", id, AuditAction.Created, "Employé créé : " + NameOf(employee));
-                return Result.Ok(id);
+                return EmployeeCreation.InsertValidated(uow, employee, _validator, Audit);
             }
         }
 

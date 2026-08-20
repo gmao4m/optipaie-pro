@@ -28,15 +28,25 @@ namespace OptiPaie.Core.Interfaces.Services
 
         Result<long> SaveCandidate(Candidate candidate);
 
-        /// <summary>Moves a candidate to a new pipeline stage (Hired/Rejected use their own methods).</summary>
+        /// <summary>Strictly-ordered move (one active step forward/back only). Enforced in the service.</summary>
         Result MoveStage(long candidateId, Core.Enums.CandidateStage stage);
 
-        /// <summary>Marks a candidate rejected.</summary>
-        Result Reject(long candidateId);
+        /// <summary>Advance to the immediate next stage — the single "étape suivante" action.</summary>
+        Result MoveNext(long candidateId);
+
+        /// <summary>Step back exactly one stage to correct a mistake.</summary>
+        Result MoveBack(long candidateId);
+
+        /// <summary>Closes the file as a refusal (motif obligatoire).</summary>
+        Result Reject(long candidateId, string reason);
+
+        /// <summary>Closes the file as a withdrawal by the candidate (motif obligatoire).</summary>
+        Result Desist(long candidateId, string reason);
 
         /// <summary>
-        /// Hires a candidate: creates the SHARED employee for the posting's company,
-        /// links it to the candidate, and fills the posting when its positions are met.
+        /// Hires a candidate (from « Retenu »): in one atomic transaction creates the SHARED
+        /// employee (validated + audited), a draft contract, links it to the candidate, and
+        /// fills the posting when its positions are met.
         /// </summary>
         Result<HireResult> Hire(long candidateId);
 
@@ -45,5 +55,24 @@ namespace OptiPaie.Core.Interfaces.Services
         Candidate GetCandidate(long candidateId);
 
         IReadOnlyList<Candidate> GetCandidates(long postingId);
+
+        /// <summary>Every candidate of a COMPANY (company-scoped; throws for companyId &lt;= 0).</summary>
+        IReadOnlyList<Candidate> GetCandidatesByCompany(long companyId);
+
+        // -- interviews --------------------------------------------------------
+
+        Result<long> SaveInterview(Interview interview);
+
+        IReadOnlyList<Interview> GetInterviews(long candidateId);
+
+        Result DeleteInterview(long interviewId);
+
+        // -- attachments -------------------------------------------------------
+
+        Result<long> AddAttachment(CandidateAttachment attachment);
+
+        IReadOnlyList<CandidateAttachment> GetAttachments(long candidateId);
+
+        Result DeleteAttachment(long attachmentId);
     }
 }

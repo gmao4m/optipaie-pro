@@ -60,7 +60,7 @@ namespace OptiPaie.Tests
             _attendance = new AttendanceService(_uowFactory);
             _leave = new LeaveService(_uowFactory);
             _loans = new LoanService(_uowFactory);
-            _ats = new AtsService(_uowFactory);
+            _ats = new AtsService(_uowFactory, new OptiPaie.Services.Validation.EmployeeValidator());
             _assets = new AssetService(_uowFactory);
             _training = new TrainingService(_uowFactory);
 
@@ -134,9 +134,9 @@ namespace OptiPaie.Tests
             // An open posting with a candidate.
             long posting = _ats.SavePosting(new JobPosting
             {
-                CompanyId = _companyId, Title = "Magasinier", OpenDate = DateTime.Today, Positions = 1
+                CompanyId = _companyId, Title = "Magasinier", Department = "Logistique", OpenDate = DateTime.Today, Positions = 1
             }).Value;
-            _ats.SaveCandidate(new Candidate { PostingId = posting, LastName = "ZIANE", FirstName = "Ali" });
+            _ats.SaveCandidate(new Candidate { PostingId = posting, LastName = "ZIANE", FirstName = "Ali", Phone = "0555111222" });
 
             // An assigned asset.
             long asset = _assets.Save(new Asset

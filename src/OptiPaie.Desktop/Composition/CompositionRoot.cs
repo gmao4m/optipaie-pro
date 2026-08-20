@@ -52,7 +52,7 @@ namespace OptiPaie.Desktop.Composition
             var assetService = new AssetService(unitOfWorkFactory);
             var departmentService = new DepartmentService(unitOfWorkFactory);
             var trainingService = new TrainingService(unitOfWorkFactory);
-            var atsService = new AtsService(unitOfWorkFactory);
+            var atsService = new AtsService(unitOfWorkFactory, new EmployeeValidator());
             var certificateService = new WorkCertificateService(unitOfWorkFactory);
             var dashboardService = new DashboardService(
                 companyService, employeeService, contractService, leaveService, loanService,
@@ -78,6 +78,7 @@ namespace OptiPaie.Desktop.Composition
             loanService.Audit = auditService;
             assetService.Audit = auditService;
             employeeService.Audit = auditService;   // employee lifecycle + salary changes
+            atsService.Audit = auditService;         // recruitment: candidate hired -> employee
             var backupService = new BackupService(backupProvider, unitOfWorkFactory, configuration, logger);
             var localizationService = new LocalizationService();
             var userService = new UserService(unitOfWorkFactory, settingsService);
