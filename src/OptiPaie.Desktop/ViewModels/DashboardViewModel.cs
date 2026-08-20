@@ -106,9 +106,16 @@ namespace OptiPaie.Desktop.ViewModels
             CultureInfo culture = _services.Localization.CurrentCulture;
             DateLabel = Capitalize(DateTime.Now.ToString("dddd d MMMM yyyy", culture));
 
-            DashboardSnapshot s = _services.Dashboard.Build(30);
+            // The dashboard is strictly scoped to the active company (never all companies).
+            long companyId = _services.CompanyContext.ActiveId;
+            if (companyId <= 0)
+            {
+                // No active company yet — show nothing rather than a cross-company or zero total.
+                return;
+            }
 
-            Companies = s.Companies.ToString();
+            DashboardSnapshot s = _services.Dashboard.Build(companyId, 30);
+
             Employees = s.Employees.ToString();
             ActiveContracts = s.ActiveContracts.ToString();
             Expiring = s.ContractsExpiringSoon.ToString();

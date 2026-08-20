@@ -164,9 +164,8 @@ namespace OptiPaie.Tests
         [Test]
         public void Build_RollsUpEveryModule()
         {
-            DashboardSnapshot s = _dashboard.Build(30);
+            DashboardSnapshot s = _dashboard.Build(_companyId, 30);
 
-            Assert.That(s.Companies, Is.EqualTo(1));
             Assert.That(s.Employees, Is.EqualTo(1));
             Assert.That(s.ActiveContracts, Is.EqualTo(1));
             Assert.That(s.ContractsExpiringSoon, Is.EqualTo(1), "the CDD ends within the 30-day window");
@@ -183,7 +182,7 @@ namespace OptiPaie.Tests
         [Test]
         public void Build_ProducesTheDeadlinesAndApprovalsQueues()
         {
-            DashboardSnapshot s = _dashboard.Build(30);
+            DashboardSnapshot s = _dashboard.Build(_companyId, 30);
 
             Assert.That(s.Deadlines.Count, Is.EqualTo(1));
             Assert.That(s.Deadlines[0].Kind, Is.EqualTo("contract"));
@@ -198,7 +197,7 @@ namespace OptiPaie.Tests
         public void Build_ExpiryWindow_ExcludesFarContracts()
         {
             // A 5-day window: the CDD (15 days out) is no longer "expiring soon".
-            DashboardSnapshot s = _dashboard.Build(5);
+            DashboardSnapshot s = _dashboard.Build(_companyId, 5);
 
             Assert.That(s.ContractsExpiringSoon, Is.EqualTo(0));
             Assert.That(s.Deadlines.Count, Is.EqualTo(0));
@@ -211,10 +210,76 @@ namespace OptiPaie.Tests
             long leaveId = _leave.GetByEmployee(_employeeId).First().Id;
             _leave.Approve(leaveId, null);
 
-            DashboardSnapshot s = _dashboard.Build(30);
+            DashboardSnapshot s = _dashboard.Build(_companyId, 30);
 
             Assert.That(s.PendingLeave, Is.EqualTo(0));
             Assert.That(s.Approvals.Count, Is.EqualTo(0), "an approved request leaves the queue");
+        }
+
+        // ------------------------------------------------------------------
+        // Company isolation (mandatory tests #1 and #2).
+
+        [Test]
+        public void Build_WithoutACompany_Throws()
+        {
+            // The dashboard is strictly single-company: an all-companies total would leak
+            // one client's data into another's. Calling without a valid company must fail.
+            Assert.That(() => _dashboard.Build(0), Throws.TypeOf<ArgumentOutOfRangeException>());
+            Assert.That(() => _dashboard.Build(-1), Throws.TypeOf<ArgumentOutOfRangeException>());
+        }
+
+        [Test]
+        public void Build_IsScopedToTheActiveCompany_NeverTheSumOfTwo()
+        {
+            // A SECOND company, populated differently from the first (2 employees, 2 open
+            // postings, 3 candidates, no loans/leave/assets/training/attendance).
+            long companyB = _companies.Create(new Company { NameFr = "SARL Autre", Nif = "111111111111111" }).Value;
+
+            long empB1 = _employees.Create(new Employee
+            {
+                CompanyId = companyB, LastNameFr = "HADDAD", FirstNameFr = "Nabil",
+                Gender = Gender.Male, MaritalStatus = MaritalStatus.Single, PaymentMode = PaymentMode.Cash,
+                ContractType = ContractType.Cdi, HireDate = new DateTime(2021, 3, 1), BaseSalary = 80000m, IsActive = true
+            }).Value;
+            _employees.Create(new Employee
+            {
+                CompanyId = companyB, LastNameFr = "MEZIANE", FirstNameFr = "Sara",
+                Gender = Gender.Female, MaritalStatus = MaritalStatus.Single, PaymentMode = PaymentMode.Cash,
+                ContractType = ContractType.Cdi, HireDate = new DateTime(2023, 6, 1), BaseSalary = 70000m, IsActive = true
+            });
+
+            long postingB1 = _ats.SavePosting(new JobPosting
+            {
+                CompanyId = companyB, Title = "Chauffeur", Department = "Transport", OpenDate = DateTime.Today, Positions = 1
+            }).Value;
+            long postingB2 = _ats.SavePosting(new JobPosting
+            {
+                CompanyId = companyB, Title = "Agent", Department = "Administration", OpenDate = DateTime.Today, Positions = 1
+            }).Value;
+            _ats.SaveCandidate(new Candidate { PostingId = postingB1, LastName = "A", FirstName = "A", Phone = "0555000001" });
+            _ats.SaveCandidate(new Candidate { PostingId = postingB1, LastName = "B", FirstName = "B", Phone = "0555000002" });
+            _ats.SaveCandidate(new Candidate { PostingId = postingB2, LastName = "C", FirstName = "C", Phone = "0555000003" });
+
+            DashboardSnapshot a = _dashboard.Build(_companyId, 30);
+            DashboardSnapshot b = _dashboard.Build(companyB, 30);
+
+            // Each company reports ITS OWN numbers — different, and never the sum of both.
+            Assert.That(a.Employees, Is.EqualTo(1));
+            Assert.That(b.Employees, Is.EqualTo(2));
+            Assert.That(a.Employees, Is.Not.EqualTo(b.Employees));
+            Assert.That(b.Employees, Is.Not.EqualTo(a.Employees + b.Employees), "never the cross-company sum (3)");
+
+            Assert.That(a.OpenPostings, Is.EqualTo(1));
+            Assert.That(b.OpenPostings, Is.EqualTo(2));
+            Assert.That(a.Candidates, Is.EqualTo(1));
+            Assert.That(b.Candidates, Is.EqualTo(3));
+
+            // Company A's exclusive data never bleeds into B's snapshot.
+            Assert.That(b.ActiveLoans, Is.EqualTo(0), "company B has no loan; company A's must not appear");
+            Assert.That(b.PendingLeave, Is.EqualTo(0), "company B has no leave; company A's must not appear");
+            Assert.That(b.AssetsAssigned, Is.EqualTo(0));
+            Assert.That(b.TrainingUpcoming, Is.EqualTo(0));
+            Assert.That(b.PresentToday, Is.EqualTo(0));
         }
     }
 }

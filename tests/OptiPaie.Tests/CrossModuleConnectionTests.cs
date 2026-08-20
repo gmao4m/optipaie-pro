@@ -140,7 +140,7 @@ namespace OptiPaie.Tests
             });
 
             // ---- Arrow: every module → Dashboard aggregation ----
-            DashboardSnapshot dash = _dashboard.Build();
+            DashboardSnapshot dash = _dashboard.Build(_companyId);
             Assert.That(dash.Employees, Is.GreaterThanOrEqualTo(1));
             Assert.That(dash.AssetsAssigned, Is.GreaterThanOrEqualTo(1), "dashboard sees the assigned asset");
             Assert.That(dash.ActiveLoans, Is.GreaterThanOrEqualTo(1), "dashboard sees the loan");

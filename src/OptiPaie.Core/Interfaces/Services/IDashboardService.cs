@@ -9,9 +9,10 @@ namespace OptiPaie.Core.Interfaces.Services
     public interface IDashboardService
     {
         /// <summary>
-        /// Aggregates a company-wide snapshot. <paramref name="expiryWindowDays"/> is the
-        /// horizon for "expiring soon" and the deadlines widget.
+        /// Aggregates the snapshot for ONE company. <paramref name="companyId"/> is MANDATORY
+        /// (throws for &lt;= 0) — the dashboard is strictly single-company, never an all-companies
+        /// total. <paramref name="expiryWindowDays"/> is the horizon for "expiring soon".
         /// </summary>
-        DashboardSnapshot Build(int expiryWindowDays = 30);
+        DashboardSnapshot Build(long companyId, int expiryWindowDays = 30);
     }
 }

@@ -53,117 +53,119 @@ namespace OptiPaie.Services
             _training = Guard.AgainstNull(training, nameof(training));
         }
 
-        public DashboardSnapshot Build(int expiryWindowDays = 30)
+        public DashboardSnapshot Build(long companyId, int expiryWindowDays = 30)
         {
+            // A valid active company is MANDATORY — the dashboard is strictly single-company,
+            // never an all-companies total (that would leak one client's data into another's).
+            if (companyId <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(companyId),
+                    "Une société active est obligatoire pour le tableau de bord (jamais « toutes »).");
+            }
+
             var snapshot = new DashboardSnapshot();
             DateTime today = DateTime.Today;
             int year = today.Year;
 
-            IReadOnlyList<Company> companies = _companies.GetAll();
-            snapshot.Companies = companies.Count;
+            // Employee names (for approval/deadline labels) — from the shared record.
+            var names = _employees.GetByCompany(companyId)
+                .ToDictionary(e => e.Id, e => (e.LastNameFr + " " + e.FirstNameFr).Trim());
 
-            foreach (Company company in companies)
+            snapshot.Employees = _employees.GetByCompany(companyId, false).Count;
+
+            // Contracts.
+            foreach (ContractSummary c in _contracts.GetByCompany(companyId))
             {
-                // Employee names (for approval/deadline labels) — from the shared record.
-                var names = _employees.GetByCompany(company.Id)
-                    .ToDictionary(e => e.Id, e => (e.LastNameFr + " " + e.FirstNameFr).Trim());
+                if (c.Status == ContractStatus.Active) snapshot.ActiveContracts++;
+            }
 
-                snapshot.Employees += _employees.GetByCompany(company.Id, false).Count;
-
-                // Contracts.
-                foreach (ContractSummary c in _contracts.GetByCompany(company.Id))
+            foreach (ContractSummary c in _contracts.GetExpiring(companyId, expiryWindowDays))
+            {
+                snapshot.ContractsExpiringSoon++;
+                snapshot.Deadlines.Add(new DeadlineItem
                 {
-                    if (c.Status == ContractStatus.Active) snapshot.ActiveContracts++;
-                }
+                    Kind = "contract",
+                    Title = "Fin de contrat — " + (c.EmployeeName ?? "—"),
+                    Detail = "Le " + (c.EndDate.HasValue ? c.EndDate.Value.ToString("dd/MM/yyyy", Fr) : "—") +
+                             (c.DaysUntilExpiry.HasValue ? " (" + Countdown(c.DaysUntilExpiry.Value) + ")" : string.Empty),
+                    Date = c.EndDate ?? today,
+                    DaysLeft = c.DaysUntilExpiry ?? 0,
+                    ModuleKey = ModuleKeys.Contracts
+                });
+            }
 
-                foreach (ContractSummary c in _contracts.GetExpiring(company.Id, expiryWindowDays))
+            // Leave — pending approvals.
+            foreach (LeaveRequest l in _leave.GetByCompanyYear(companyId, year))
+            {
+                if (l.Status != LeaveStatus.Pending) continue;
+                snapshot.PendingLeave++;
+                names.TryGetValue(l.EmployeeId, out string name);
+                snapshot.Approvals.Add(new ApprovalItem
                 {
-                    snapshot.ContractsExpiringSoon++;
-                    snapshot.Deadlines.Add(new DeadlineItem
-                    {
-                        Kind = "contract",
-                        Title = "Fin de contrat — " + (c.EmployeeName ?? "—"),
-                        Detail = "Le " + (c.EndDate.HasValue ? c.EndDate.Value.ToString("dd/MM/yyyy", Fr) : "—") +
-                                 (c.DaysUntilExpiry.HasValue ? " (" + Countdown(c.DaysUntilExpiry.Value) + ")" : string.Empty),
-                        Date = c.EndDate ?? today,
-                        DaysLeft = c.DaysUntilExpiry ?? 0,
-                        ModuleKey = ModuleKeys.Contracts
-                    });
-                }
+                    Kind = "leave",
+                    Title = "Congé à approuver — " + (name ?? "—"),
+                    Detail = l.StartDate.ToString("dd/MM/yyyy", Fr) + " → " + l.EndDate.ToString("dd/MM/yyyy", Fr),
+                    ModuleKey = ModuleKeys.Leave
+                });
+            }
 
-                // Leave — pending approvals.
-                foreach (LeaveRequest l in _leave.GetByCompanyYear(company.Id, year))
-                {
-                    if (l.Status != LeaveStatus.Pending) continue;
-                    snapshot.PendingLeave++;
-                    names.TryGetValue(l.EmployeeId, out string name);
-                    snapshot.Approvals.Add(new ApprovalItem
-                    {
-                        Kind = "leave",
-                        Title = "Congé à approuver — " + (name ?? "—"),
-                        Detail = l.StartDate.ToString("dd/MM/yyyy", Fr) + " → " + l.EndDate.ToString("dd/MM/yyyy", Fr),
-                        ModuleKey = ModuleKeys.Leave
-                    });
-                }
+            // Loans.
+            foreach (LoanSummary loan in _loans.GetByCompany(companyId))
+            {
+                if (loan.Status != LoanStatus.Active) continue;
+                snapshot.ActiveLoans++;
+                snapshot.LoanOutstanding += loan.Outstanding;
+            }
 
-                // Loans.
-                foreach (LoanSummary loan in _loans.GetByCompany(company.Id))
+            // Attendance — today's live snapshot.
+            foreach (AttendanceRecord a in _attendance.GetCompanyDay(companyId, today))
+            {
+                switch (a.Status)
                 {
-                    if (loan.Status != LoanStatus.Active) continue;
-                    snapshot.ActiveLoans++;
-                    snapshot.LoanOutstanding += loan.Outstanding;
+                    case AttendanceStatus.Present:
+                    case AttendanceStatus.Late:
+                        snapshot.PresentToday++;
+                        break;
+                    case AttendanceStatus.Mission:
+                        snapshot.PresentToday++;
+                        snapshot.OnMissionToday++;
+                        break;
+                    case AttendanceStatus.Leave:
+                        snapshot.OnLeaveToday++;
+                        break;
                 }
+            }
 
-                // Attendance — today's live snapshot.
-                foreach (AttendanceRecord a in _attendance.GetCompanyDay(company.Id, today))
-                {
-                    switch (a.Status)
-                    {
-                        case AttendanceStatus.Present:
-                        case AttendanceStatus.Late:
-                            snapshot.PresentToday++;
-                            break;
-                        case AttendanceStatus.Mission:
-                            snapshot.PresentToday++;
-                            snapshot.OnMissionToday++;
-                            break;
-                        case AttendanceStatus.Leave:
-                            snapshot.OnLeaveToday++;
-                            break;
-                    }
-                }
+            // Recruitment.
+            foreach (JobPostingSummary p in _ats.GetPostingsByCompany(companyId))
+            {
+                if (p.Status == JobStatus.Open) snapshot.OpenPostings++;
+                snapshot.Candidates += p.CandidateCount;
+            }
 
-                // Recruitment.
-                foreach (JobPostingSummary p in _ats.GetPostingsByCompany(company.Id))
+            // Candidates awaiting an interview → "À traiter".
+            foreach (Candidate cand in _ats.GetCandidatesByCompany(companyId))
+            {
+                if (cand.Stage != CandidateStage.Interview) continue;
+                snapshot.Approvals.Add(new ApprovalItem
                 {
-                    if (p.Status == JobStatus.Open) snapshot.OpenPostings++;
-                    snapshot.Candidates += p.CandidateCount;
-                }
+                    Kind = "recruitment",
+                    Title = "Entretien à planifier — " + (cand.LastName + " " + cand.FirstName).Trim(),
+                    Detail = "Candidat en cours de recrutement",
+                    ModuleKey = ModuleKeys.Ats
+                });
+            }
 
-                // Candidates awaiting an interview → "À traiter".
-                foreach (Candidate cand in _ats.GetCandidatesByCompany(company.Id))
-                {
-                    if (cand.Stage != CandidateStage.Interview) continue;
-                    snapshot.Approvals.Add(new ApprovalItem
-                    {
-                        Kind = "recruitment",
-                        Title = "Entretien à planifier — " + (cand.LastName + " " + cand.FirstName).Trim(),
-                        Detail = "Candidat en cours de recrutement",
-                        ModuleKey = ModuleKeys.Ats
-                    });
-                }
+            // Assets.
+            foreach (AssetSummary asset in _assets.GetByCompany(companyId))
+            {
+                if (asset.Status == AssetStatus.Assigned) snapshot.AssetsAssigned++;
+            }
 
-                // Assets.
-                foreach (AssetSummary asset in _assets.GetByCompany(company.Id))
-                {
-                    if (asset.Status == AssetStatus.Assigned) snapshot.AssetsAssigned++;
-                }
-
-                // Training.
-                foreach (TrainingSummary t in _training.GetByCompany(company.Id))
-                {
-                    if (t.Status == TrainingStatus.Planned || t.Status == TrainingStatus.Ongoing) snapshot.TrainingUpcoming++;
-                }
+            // Training.
+            foreach (TrainingSummary t in _training.GetByCompany(companyId))
+            {
+                if (t.Status == TrainingStatus.Planned || t.Status == TrainingStatus.Ongoing) snapshot.TrainingUpcoming++;
             }
 
             snapshot.Deadlines = snapshot.Deadlines.OrderBy(d => d.Date).Take(20).ToList();
