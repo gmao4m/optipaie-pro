@@ -33,12 +33,73 @@ $wixVersion = "$appVersion.0"
 Write-Host "==> Product version = $appVersion (WiX $wixVersion)" -ForegroundColor Cyan
 
 Write-Host "==> Building Release payload..." -ForegroundColor Cyan
+# NOTE: 'dotnet build -o' (not 'publish'). For this .NET Framework app, 'dotnet publish'
+# DROPS the System.Data.SQLite native interop (SQLite.Interop.dll under x86/x64), which the
+# app needs at startup - 'build' copies it correctly. Payload completeness is enforced below
+# by two guards (managed closure + native interops) rather than by the build verb.
 if (Test-Path $stage) { Remove-Item -Recurse -Force $stage }
 dotnet build $desktopCsproj -c Release -o $stage -v minimal
 if ($LASTEXITCODE -ne 0) { throw "Release build failed." }
 
 Write-Host "==> Trimming payload (pdb, macOS natives)..." -ForegroundColor Cyan
 Get-ChildItem $stage -Recurse -Include *.pdb,*.dylib | Remove-Item -Force
+
+# ---------------------------------------------------------------------------
+# RELEASE GUARD - runtime dependency closure MUST be complete.
+# The 1.29.0 incident: the app crashed at startup on clients because a required
+# assembly (Newtonsoft.Json 13.0.0.0, used by licensing at launch) was absent
+# from the client's runtime folder, and the dev machine masked it. This guard
+# walks the app's ACTUAL reference closure (derived from the binaries - never a
+# hand-kept list that goes stale) and refuses to build if any non-framework
+# dependency is missing from the payload.
+Write-Host "==> Release guard: verifying the runtime dependency closure is complete..." -ForegroundColor Cyan
+$seen    = @{}
+$missing = New-Object System.Collections.Generic.List[string]
+function Test-FrameworkAssembly([string]$n) {
+    # .NET Framework / WPF assemblies (present on every machine, never shipped)...
+    if ($n -match '^(System($|\.)|Microsoft($|\.)|mscorlib$|netstandard$|WindowsBase$|PresentationCore$|PresentationFramework($|\.)|PresentationUI$|UIAutomation|Accessibility$|WindowsFormsIntegration$|ReachFramework$|DirectWriteForwarder$|Windows($|\.))') { return $true }
+    # ...and embedded-interop COM PIAs: their types are embedded into the referencing
+    # assembly at compile time, so the interop DLL is intentionally NOT shipped (and the app
+    # runs without it - it is absent from bin\Release too). e.g. office, stdole, VBIDE.
+    if ($n -match '^(office$|stdole$|VBIDE$|Microsoft\.Vbe($|\.))') { return $true }
+    return $false
+}
+function Test-DependencyClosure([System.Reflection.Assembly]$asm) {
+    foreach ($r in $asm.GetReferencedAssemblies()) {
+        $name = $r.Name
+        if ($seen.ContainsKey($name)) { continue }
+        $seen[$name] = $true
+        $dll = Join-Path $stage ($name + '.dll')
+        if (Test-Path $dll) {
+            try { Test-DependencyClosure ([System.Reflection.Assembly]::ReflectionOnlyLoadFrom($dll)) } catch { }
+        } elseif (-not (Test-FrameworkAssembly $name)) {
+            [void]$missing.Add($name)
+        }
+    }
+}
+$exePath = Join-Path $stage 'OptiPaie PRO.exe'
+Test-DependencyClosure ([System.Reflection.Assembly]::ReflectionOnlyLoadFrom($exePath))
+if ($missing.Count -gt 0) {
+    throw ("RELEASE GUARD FAILED: runtime dependencies missing from the installer payload: " +
+           (($missing | Sort-Object -Unique) -join ', ') +
+           ". Shipping this would crash clients at startup (the 1.29.0 Newtonsoft.Json class of bug). Refusing to build.")
+}
+Write-Host ("    OK - dependency closure complete ($($seen.Count) references checked; all present or framework).") -ForegroundColor Green
+
+# Native interops have NO managed assembly reference, so the closure walk above cannot see
+# them - yet the app dies at startup without them. Assert the known-critical natives are in
+# the payload (SQLite.Interop = database; libSkiaSharp/libHarfBuzzSharp = QuestPDF payslips).
+Write-Host "==> Release guard: verifying native interops are present..." -ForegroundColor Cyan
+$nativeMissing = New-Object System.Collections.Generic.List[string]
+foreach ($native in @("SQLite.Interop.dll","libSkiaSharp.dll","libHarfBuzzSharp.dll")) {
+    $hits = Get-ChildItem $stage -Recurse -Filter $native -ErrorAction SilentlyContinue
+    if (-not $hits) { [void]$nativeMissing.Add($native) } else { Write-Host ("    OK - " + $native) -ForegroundColor Green }
+}
+if ($nativeMissing.Count -gt 0) {
+    throw ("RELEASE GUARD FAILED: native interop(s) missing from the installer payload: " +
+           ($nativeMissing -join ', ') + ". The app cannot start without them. Refusing to build.")
+}
+# ---------------------------------------------------------------------------
 
 New-Item -ItemType Directory -Force $outDir | Out-Null
 
