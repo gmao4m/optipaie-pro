@@ -33,6 +33,8 @@ namespace OptiPaie.Desktop
         private bool _accessBlocked;
         private MainWindow _shell;
         private bool _timersStarted;
+        private bool _companyChangeHooked;
+        private bool _rebuildingShell;
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -138,6 +140,17 @@ namespace OptiPaie.Desktop
             {
                 if (AuthenticateIfNeeded())
                 {
+                    // Company gate: pick / create the active company BEFORE any data screen. A
+                    // multi-company install never auto-opens one silently; nothing is loaded until
+                    // a company is chosen. Closing the gate without a choice does not open the app.
+                    if (!EnsureCompanySelected())
+                    {
+                        CrashLog.Breadcrumb("no company selected at startup -> exit");
+                        Shutdown();
+                        return;
+                    }
+
+                    HookCompanyChange();
                     ShowMainShell();
                 }
                 else
@@ -193,6 +206,110 @@ namespace OptiPaie.Desktop
         {
             return "حدث خطأ تقني. تم تسجيل التفاصيل في:\n" + CrashLog.Directory +
                    "\n\nUne erreur technique est survenue. Détails enregistrés dans le dossier ci-dessus.";
+        }
+
+        /// <summary>
+        /// The blocking company gate, run BEFORE any data screen. Decides purely from how many
+        /// companies exist (see <see cref="CompanySelectionPolicy"/>):
+        /// <list type="bullet">
+        /// <item>exactly one → enter it directly (no screen, no question, no click);</item>
+        /// <item>several → a blocking picker (click a company to open it — no "validate" button);</item>
+        /// <item>none → the same screen, offering to create the first company.</item>
+        /// </list>
+        /// Returns true only once a company is active. Nothing else is loaded until it does, so a
+        /// data screen is never shown without an active company. Closing the gate without a choice
+        /// returns false — the caller then exits rather than opening the app.
+        /// </summary>
+        private bool EnsureCompanySelected()
+        {
+            System.Collections.Generic.IReadOnlyList<Core.Entities.Company> companies = Services.Companies.GetAll();
+
+            if (CompanySelectionPolicy.Decide(companies.Count) == CompanyStartupAction.EnterDirect)
+            {
+                // Exactly one company — open it directly, with no UI at all.
+                Services.CompanyContext.Active = companies[0];
+                return true;
+            }
+
+            // None (create the first) or several (choose) — a blocking screen the user cannot bypass.
+            var viewModel = new CompanySelectionViewModel(Services);
+            var window = new CompanySelectionWindow { DataContext = viewModel };
+            ApplyFlowDirection(window);
+            viewModel.CloseRequested = () => { try { window.DialogResult = true; } catch { window.Close(); } };
+            window.ShowDialog();
+
+            return Services.CompanyContext.ActiveId > 0;
+        }
+
+        /// <summary>Subscribes ONCE to header company switches so each one rebuilds the shell.</summary>
+        private void HookCompanyChange()
+        {
+            if (_companyChangeHooked)
+            {
+                return;
+            }
+
+            _companyChangeHooked = true;
+            Services.CompanyContext.ActiveChanged += OnHeaderCompanyChanged;
+        }
+
+        private void OnHeaderCompanyChanged(object sender, EventArgs e)
+        {
+            // Only a genuine header switch on a LIVE shell rebuilds. Company changes made before the
+            // shell exists (the startup/signout gate) or during an in-progress rebuild are ignored.
+            if (_shell == null || _rebuildingShell)
+            {
+                return;
+            }
+
+            _rebuildingShell = true; // coalesce re-entrancy; cleared when the rebuild completes
+            // Defer: closing the shell from inside the header ComboBox's own selection event is
+            // unsafe, so let that update finish first, then swap the shell.
+            Dispatcher.BeginInvoke(new Action(RebuildShellForCompanyChange));
+        }
+
+        /// <summary>
+        /// Changing the active company reloads EVERYTHING: every other open window is closed and a
+        /// FRESH shell is built (new view models), so no screen keeps a byte of the previous
+        /// company's data. There is no cache to leak between companies.
+        /// </summary>
+        private void RebuildShellForCompanyChange()
+        {
+            try
+            {
+                CrashLog.Breadcrumb("company changed -> full shell rebuild (no residual cache)");
+
+                // Close every other open window so nothing keeps the previous company's data.
+                foreach (Window w in Application.Current.Windows.OfType<Window>().ToList())
+                {
+                    if (!ReferenceEquals(w, _shell))
+                    {
+                        try { w.Close(); } catch { /* a window refusing to close must not block the rebuild */ }
+                    }
+                }
+
+                // Tear down the current shell WITHOUT exiting the process (detach close->shutdown),
+                // then build a brand-new one: new ShellViewModel, new module view models, no stale state.
+                MainWindow oldShell = _shell;
+                if (oldShell != null)
+                {
+                    oldShell.Closed -= Shell_Closed;
+                    _shell = null;
+                    oldShell.Close();
+                }
+
+                ShowMainShell();
+            }
+            catch (Exception ex)
+            {
+                CrashLog.Fatal("Company-change shell rebuild", ex);
+                MessageBox.Show(StartupErrorText(), "OptiPaie PRO", MessageBoxButton.OK, MessageBoxImage.Error);
+                Shutdown(-1);
+            }
+            finally
+            {
+                _rebuildingShell = false;
+            }
         }
 
         /// <summary>
@@ -257,6 +374,16 @@ namespace OptiPaie.Desktop
             {
                 if (AuthenticateIfNeeded() && (Services.Access.Evaluate().CanUseApp || EnsureAccess()))
                 {
+                    // Re-run the company gate on a fresh sign-in: a different user must not inherit
+                    // the previous session's company, and a multi-company install re-picks explicitly.
+                    if (!EnsureCompanySelected())
+                    {
+                        CrashLog.Breadcrumb("no company selected after signout -> exit");
+                        Shutdown();
+                        return;
+                    }
+
+                    HookCompanyChange();
                     ShowMainShell();
                 }
                 else

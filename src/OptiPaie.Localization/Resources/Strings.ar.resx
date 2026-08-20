@@ -508,6 +508,10 @@
   <data name="Login_Password" xml:space="preserve"><value>كلمة المرور</value></data>
   <data name="Login_SignIn" xml:space="preserve"><value>دخول</value></data>
   <data name="Login_Subtitle" xml:space="preserve"><value>تسجيل الدخول</value></data>
+  <data name="CompanyPick_Title" xml:space="preserve"><value>اختر مؤسسة</value></data>
+  <data name="CompanyPick_Subtitle" xml:space="preserve"><value>اختر المؤسسة التي تريد العمل عليها.</value></data>
+  <data name="CompanyPick_Empty" xml:space="preserve"><value>لا توجد أي مؤسسة بعد. أنشئ الأولى للبدء.</value></data>
+  <data name="CompanyPick_Create" xml:space="preserve"><value>مؤسسة جديدة</value></data>
   <data name="Login_Identifier" xml:space="preserve"><value>البريد الإلكتروني أو اسم المستخدم</value></data>
   <data name="Login_IdentifierHint" xml:space="preserve"><value>المالك يدخل ببريده — المستخدمون يدخلون باسم المستخدم</value></data>
   <data name="Login_RememberMe" xml:space="preserve"><value>تذكّرني</value></data>

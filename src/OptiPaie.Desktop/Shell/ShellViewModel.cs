@@ -78,25 +78,16 @@ namespace OptiPaie.Desktop.Shell
             ToggleThemeCommand = new RelayCommand(ToggleTheme);
             ManageUsersCommand = new RelayCommand(OpenUsers);
 
-            // Load the company list once and react to header company switches: re-activate
-            // the visible module so it reloads the new company's data (no stale data left).
+            // Load the company list for the header selector. The active company is already set by
+            // the startup gate; a header switch is handled by App (a full shell rebuild, so no
+            // stale data survives) — this shell does not itself react to the change.
             _services.CompanyContext.Reload();
-            _services.CompanyContext.ActiveChanged += OnActiveCompanyChanged;
 
             Navigate("dashboard"); // also refreshes the notification bell
         }
 
         /// <summary>The single active-company selection bound to the header selector.</summary>
         public CompanyContext CompanyContext => _services.CompanyContext;
-
-        private void OnActiveCompanyChanged(object sender, EventArgs e)
-        {
-            // Reload whatever screen is showing so it reflects the newly selected company,
-            // then refresh the cross-module alert bell for that company's data.
-            SafeActivate(_current);
-
-            RefreshNotifications();
-        }
 
         /// <summary>Cross-module alerts for the header bell.</summary>
         public ObservableCollection<OptiPaie.Core.Dtos.Notification> Notifications { get; } =
@@ -335,6 +326,10 @@ namespace OptiPaie.Desktop.Shell
 
         private void Navigate(string key)
         {
+            // A screen must never open without an active company — that would show an empty or
+            // cross-company view. The startup gate guarantees one is set; this fails loudly if not.
+            _services.CompanyContext.RequireActiveId();
+
             // Managers cannot reach the administrator screens even via a direct key.
             if (!_services.Session.IsAdmin && (key == "companies" || key == "settings"))
             {

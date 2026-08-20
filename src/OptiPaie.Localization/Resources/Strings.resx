@@ -508,6 +508,10 @@
   <data name="Login_Password" xml:space="preserve"><value>Mot de passe</value></data>
   <data name="Login_SignIn" xml:space="preserve"><value>Se connecter</value></data>
   <data name="Login_Subtitle" xml:space="preserve"><value>Connexion</value></data>
+  <data name="CompanyPick_Title" xml:space="preserve"><value>Choisissez une entreprise</value></data>
+  <data name="CompanyPick_Subtitle" xml:space="preserve"><value>Sélectionnez l'entreprise sur laquelle travailler.</value></data>
+  <data name="CompanyPick_Empty" xml:space="preserve"><value>Aucune entreprise pour le moment. Créez la première pour commencer.</value></data>
+  <data name="CompanyPick_Create" xml:space="preserve"><value>Nouvelle entreprise</value></data>
   <data name="Login_Identifier" xml:space="preserve"><value>Email ou nom d'utilisateur</value></data>
   <data name="Login_IdentifierHint" xml:space="preserve"><value>Le propriétaire se connecte avec son email — les utilisateurs avec leur nom d'utilisateur</value></data>
   <data name="Login_RememberMe" xml:space="preserve"><value>Rester connecté</value></data>

@@ -60,6 +60,24 @@ namespace OptiPaie.Desktop.Composition
         public long ActiveId => _active != null ? _active.Id : 0L;
 
         /// <summary>
+        /// Returns the active company's id, or THROWS if none is set. Once the app has started,
+        /// a company is always active (the startup gate guarantees it and the header selector has
+        /// no "none" option), so a screen opening with no active company is a bug — it must fail
+        /// loudly, never silently show an empty or cross-company view.
+        /// </summary>
+        public long RequireActiveId()
+        {
+            long id = ActiveId;
+            if (id <= 0)
+            {
+                throw new InvalidOperationException(
+                    "Aucune société active : un écran ne doit jamais s'ouvrir sans société sélectionnée.");
+            }
+
+            return id;
+        }
+
+        /// <summary>
         /// (Re)loads the company list from storage and keeps a valid active selection —
         /// preserving the current company if it still exists, otherwise the first one.
         /// </summary>
