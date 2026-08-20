@@ -61,6 +61,16 @@ namespace OptiPaie.Services
         /// <summary>The demo company name — used to detect whether the demo is already present.</summary>
         public const string DemoCompanyName = "SARL Atlas Industrie";
 
+        /// <summary>
+        /// Invoked with the demo company's id the moment it is created, BEFORE any other data is
+        /// written. The host wires this to make that company active, so every audited seed action
+        /// (employee created, contract activated, leave approved, asset assigned…) carries the
+        /// right CompanyId and shows up normally in the company's activity journal. Without it,
+        /// the seed runs with no active company and its entries would be CompanyId NULL — invisible
+        /// in the journal, which would make the sales-demo look broken.
+        /// </summary>
+        public Action<long> CompanyActivated { get; set; }
+
         /// <summary>True when there is no company yet (a fresh install / empty demo DB).</summary>
         public bool IsDatabaseEmpty()
         {
@@ -132,6 +142,12 @@ namespace OptiPaie.Services
                 int reviewYear = today.Year - 1;
 
                 long companyId = CreateCompany();
+
+                // Make the demo company active FIRST, so every audited action below is attributed
+                // to it and appears in the activity journal (the sales demo must never look empty).
+                // Creating the company itself is not audited, so nothing has been recorded yet.
+                CompanyActivated?.Invoke(companyId);
+
                 List<EmpSpec> roster = CreateEmployees(companyId);
                 var by = roster.ToDictionary(e => e.Code, e => e);
 

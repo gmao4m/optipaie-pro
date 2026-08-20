@@ -331,6 +331,19 @@ namespace OptiPaie.Desktop
                     Services.Leave, Services.Loans, Services.Assets, Services.Training,
                     Services.Certificates, Services.Performance);
 
+                // Activate the demo company as soon as it is created, so every audited seed action
+                // is attributed to it and shows up in the activity journal — the sales demo must
+                // never open with an empty journal. The company gate later confirms this same
+                // (single) company, so no picker is shown.
+                seeder.CompanyActivated = id =>
+                {
+                    Core.Entities.Company company = Services.Companies.Get(id);
+                    if (company != null)
+                    {
+                        Services.CompanyContext.Active = company;
+                    }
+                };
+
                 // Ensure the Algerian demo is present in trial mode: seeds on an empty DB, and
                 // replaces any leftover (non-demo) data so the demo always shows.
                 seeder.EnsureDemo();
