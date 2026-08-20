@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 using OptiPaie.Common.Constants;
+using OptiPaie.Common.Diagnostics;
 using OptiPaie.Core.Licensing;
 using OptiPaie.Core.Updates;
 using OptiPaie.Desktop.Common;
@@ -60,6 +61,15 @@ namespace OptiPaie.Desktop
             try { System.Net.ServicePointManager.SecurityProtocol |= System.Net.SecurityProtocolType.Tls13; } catch { }
 
             base.OnStartup(e);
+
+            // Fail fast with a CLEAR message if the install is INCOMPLETE (a required runtime
+            // assembly is missing next to the exe — e.g. after an interrupted update, the class of
+            // failure behind the 1.29.0 Newtonsoft.Json crash). Better than the cryptic
+            // "Erreur d'initialisation" that a missing DLL otherwise produces deep in composition.
+            if (!EnsureRuntimeIntegrity())
+            {
+                return;
+            }
 
             // NOTE: this QuestPDF version predates the community-licence API
             // (Settings.License / LicenseType were introduced in QuestPDF 2023.4+),
@@ -206,6 +216,34 @@ namespace OptiPaie.Desktop
         {
             return "حدث خطأ تقني. تم تسجيل التفاصيل في:\n" + CrashLog.Directory +
                    "\n\nUne erreur technique est survenue. Détails enregistrés dans le dossier ci-dessus.";
+        }
+
+        /// <summary>
+        /// Verifies the app folder contains the runtime assemblies loaded at startup. If any is
+        /// missing (an interrupted / partial install — the class of failure behind the 1.29.0
+        /// Newtonsoft.Json crash), shows a CLEAR bilingual message naming the file and directing
+        /// to reinstall / contact support, then shuts down — instead of a cryptic crash deep in
+        /// composition. Returns true when the install is complete.
+        /// </summary>
+        private bool EnsureRuntimeIntegrity()
+        {
+            System.Collections.Generic.IReadOnlyList<string> missing =
+                RuntimeIntegrity.MissingCriticalFiles(AppDomain.CurrentDomain.BaseDirectory);
+            if (missing.Count == 0)
+            {
+                return true;
+            }
+
+            string files = string.Join(", ", missing);
+            CrashLog.Breadcrumb("incomplete install - missing runtime file(s): " + files);
+            MessageBox.Show(
+                "التثبيت غير مكتمل: ملفّ مطلوب مفقود (" + files + ").\n" +
+                "يُرجى إعادة تثبيت التطبيق باستخدام برنامج التثبيت، أو التواصل مع الدعم.\n\n" +
+                "Installation incomplète : un fichier requis est manquant (" + files + ").\n" +
+                "Veuillez réinstaller l'application via le programme d'installation, ou contacter le support.",
+                "OptiPaie PRO", MessageBoxButton.OK, MessageBoxImage.Error);
+            Shutdown(-1);
+            return false;
         }
 
         /// <summary>
