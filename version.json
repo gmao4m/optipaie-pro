@@ -1,6 +1,6 @@
 {
-  "latest_version": "1.27.0",
-  "download_url": "https://github.com/gmao4m/optipaie-pro/releases/download/v1.27.0/OptiPaie-PRO-Setup.exe",
-  "release_notes": "- Correctif majeur : l'application ne se ferme plus après une connexion réussie — le tableau de bord s'ouvre toujours (fin de la boucle de reconnexion).\n- Écran de connexion unique en arabe : le propriétaire entre son email, les utilisateurs leur nom d'utilisateur — le système détecte automatiquement.\n- Récupération d'accès : « الدخول بمفتاح الترخيص » si le mot de passe du propriétaire est oublié, et « التحقق من التحديثات » directement sur l'écran de connexion.\n- Messages d'erreur clairs et distincts en arabe ; plus aucune fermeture silencieuse de l'application.\n- Protections : impossible d'activer la connexion sans administrateur actif ; le dernier administrateur ne peut être supprimé ni désactivé.\n- Moteur de paie inchangé ; données intactes ; la licence n'est pas redemandée.",
+  "latest_version": "1.29.1",
+  "download_url": "https://github.com/gmao4m/optipaie-pro/releases/latest/download/OptiPaie-PRO-Setup.exe",
+  "release_notes": "- fix(update): detached sequenced installer launch + startup self-repair (1.29.1)\n- feat(startup): clear message + fail-fast on incomplete install (1.29.1) [skip ci]\n- docs(release): mandatory clean-machine install test before every diffusion [skip ci]\n- fix(installer): guarantee complete runtime payload + bump 1.29.1 [skip ci]\n- revert(release): version.json -> 1.27.0 -- HALT 1.29.0 rollout (Newtonsoft.Json 13.0.0.0 missing at client startup) [skip ci]\n- fix(release-script): existence check no longer crashes under PS 5.1 Stop [skip ci]\n- chore(release): version.json -> 1.29.0 (diffusion) [skip ci]",
   "mandatory": false
 }
