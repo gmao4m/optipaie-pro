@@ -1,6 +1,6 @@
 {
   "latest_version": "1.29.1",
   "download_url": "https://github.com/gmao4m/optipaie-pro/releases/latest/download/OptiPaie-PRO-Setup.exe",
-  "release_notes": "- fix(update): detached sequenced installer launch + startup self-repair (1.29.1)\n- feat(startup): clear message + fail-fast on incomplete install (1.29.1) [skip ci]\n- docs(release): mandatory clean-machine install test before every diffusion [skip ci]\n- fix(installer): guarantee complete runtime payload + bump 1.29.1 [skip ci]\n- revert(release): version.json -> 1.27.0 -- HALT 1.29.0 rollout (Newtonsoft.Json 13.0.0.0 missing at client startup) [skip ci]\n- fix(release-script): existence check no longer crashes under PS 5.1 Stop [skip ci]\n- chore(release): version.json -> 1.29.0 (diffusion) [skip ci]",
+  "release_notes": "🛠️ يعالج هذا الإصدار مشكلة عدم فتح البرنامج بعد التحديث لدى بعض العملاء (كانت بسبب انقطاع التثبيت). التحديث الآن أكثر أمانًا: يُغلق البرنامج بالكامل قبل بدء التثبيت، ويُعاد فتحه بعده؛ وإن فشل التثبيت يُعاد فتح البرنامج كما كان.\nإن نقص ملفٌّ مطلوب، زرّ «إصلاح» واحد يُصلح التثبيت تلقائيًا ويعيد فتح البرنامج.\n🔴 مهم لمن يدير أكثر من مؤسسة: أصبح كل رقم في لوحة القيادة يخصّ المؤسسة المختارة وحدها (كانت الأرقام تُجمع). ستلاحظ أرقامًا أصغر، وهذا صحيح ومقصود، ولم تُفقد أيّ بيانات.\nعزل كامل بين المؤسسات، وشاشة اختيار المؤسسة عند فتح البرنامج، ووحدة التوظيف الجديدة.\nبياناتك محفوظة؛ ولا يُطلب الترخيص من جديد بعد التحديث.",
   "mandatory": false
 }
