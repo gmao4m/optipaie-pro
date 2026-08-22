@@ -14,6 +14,7 @@ using OptiPaie.Desktop.Shell;
 using OptiPaie.Desktop.ViewModels;
 using OptiPaie.Desktop.Views;
 using OptiPaie.Services.Auth;
+using OptiPaie.Services.Updates;
 
 namespace OptiPaie.Desktop
 {
@@ -225,25 +226,76 @@ namespace OptiPaie.Desktop
         /// to reinstall / contact support, then shuts down — instead of a cryptic crash deep in
         /// composition. Returns true when the install is complete.
         /// </summary>
+        private static string RepairMarkerPath
+        {
+            get { return System.IO.Path.Combine(System.IO.Path.GetTempPath(), "OptiPaiePRO-Update", "repair-attempted.marker"); }
+        }
+
         private bool EnsureRuntimeIntegrity()
         {
             System.Collections.Generic.IReadOnlyList<string> missing =
                 RuntimeIntegrity.MissingCriticalFiles(AppDomain.CurrentDomain.BaseDirectory);
             if (missing.Count == 0)
             {
+                TryClearRepairMarker(); // if we had just repaired, it worked — reset the guard
                 return true;
             }
 
-            string files = string.Join(", ", missing);
-            CrashLog.Breadcrumb("incomplete install - missing runtime file(s): " + files);
-            MessageBox.Show(
-                "التثبيت غير مكتمل: ملفّ مطلوب مفقود (" + files + ").\n" +
-                "يُرجى إعادة تثبيت التطبيق باستخدام برنامج التثبيت، أو التواصل مع الدعم.\n\n" +
-                "Installation incomplète : un fichier requis est manquant (" + files + ").\n" +
-                "Veuillez réinstaller l'application via le programme d'installation, ou contacter le support.",
-                "OptiPaie PRO", MessageBoxButton.OK, MessageBoxImage.Error);
-            Shutdown(-1);
+            CrashLog.Breadcrumb("incomplete install - missing runtime file(s): " + string.Join(", ", missing));
+
+            bool repairAlreadyTried = SafeFileExists(RepairMarkerPath);
+            string productCode = OptiPaie.Desktop.Common.AppRepair.FindProductCode();
+
+            // Repair already attempted and STILL broken, OR the app was not installed via our MSI
+            // (nothing msiexec can repair) → the plain "contact support" fallback, then exit.
+            if (repairAlreadyTried || string.IsNullOrEmpty(productCode))
+            {
+                TryClearRepairMarker();
+                ShowRepairDialog(true);
+                Shutdown(-1);
+                return false;
+            }
+
+            // Offer the single « إصلاح » button. On confirm, a detached helper waits for this app
+            // to exit, runs a visible elevated repair from the Installer cache, then reopens the app.
+            if (ShowRepairDialog(false))
+            {
+                TryWriteRepairMarker();
+                InstallerLauncher.LaunchRepairAndExit(productCode, null); // detached; calls Environment.Exit
+                return false;
+            }
+
+            Shutdown(-1); // user declined the repair
             return false;
+        }
+
+        private bool ShowRepairDialog(bool fallback)
+        {
+            var window = new RepairWindow(fallback);
+            ApplyFlowDirection(window);
+            window.ShowDialog();
+            return window.RepairRequested;
+        }
+
+        private static bool SafeFileExists(string path)
+        {
+            try { return System.IO.File.Exists(path); } catch { return false; }
+        }
+
+        private static void TryWriteRepairMarker()
+        {
+            try
+            {
+                System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(RepairMarkerPath));
+                System.IO.File.WriteAllText(RepairMarkerPath, "1");
+            }
+            catch { /* best effort */ }
+        }
+
+        private static void TryClearRepairMarker()
+        {
+            try { if (System.IO.File.Exists(RepairMarkerPath)) System.IO.File.Delete(RepairMarkerPath); }
+            catch { /* best effort */ }
         }
 
         /// <summary>

@@ -137,14 +137,9 @@ namespace OptiPaie.Services.Updates
 
         public void ApplyAndRestart()
         {
-            if (string.IsNullOrEmpty(_downloadedPath) || !File.Exists(_downloadedPath))
-            {
-                throw new InvalidOperationException("No downloaded installer to launch.");
-            }
-
-            // Launch the installer, then exit so it can replace the running binaries.
-            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(_downloadedPath) { UseShellExecute = true });
-            Environment.Exit(0);
+            // Detached, sequenced launch: the app fully exits and releases its files BEFORE the
+            // visible installer starts, and the app reopens afterwards. See InstallerLauncher.
+            InstallerLauncher.LaunchAndExit(_downloadedPath, _logger);
         }
 
         /// <summary>Pure parse of the version.json manifest — unit-tested, tolerant of key aliases.</summary>
