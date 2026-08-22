@@ -1,23 +1,23 @@
 name: Release
 
 # ============================================================================
-# Fully-automatic release + auto-update. No manual steps beyond a version bump.
+# Automatic release + auto-update — triggered ONLY by a product VERSION change.
 #
-# On every push to main it reads the PRODUCT version from Directory.Build.props
-# (<Version> — the single place to change). If that version has NOT been released
-# yet (no v<version> tag), it:
-#   1. builds the app + the WiX Setup.exe / MSI installer,
-#   2. creates a GitHub Release v<version> and uploads OptiPaie-PRO-Setup.exe,
-#   3. rewrites version.json (latest_version + notes) and pushes it back to main.
-# The desktop client reads version.json on launch and shows the update pop-up.
+# To diffuse a new version (see docs/RELEASE-HOWTO.md):
+#   1. bump <Version> in Directory.Build.props,
+#   2. write docs/CHANGELOG-<version>-ar.md (Arabic, client-facing),
+#   3. git push.
 #
-# So each release = bump <Version> by one line, then `git push`. Nothing else.
-# A push that does NOT change the version (or only touches docs / version.json)
-# runs a ~30 s no-op and releases nothing.
+# The workflow then, and ONLY when <Version> actually changed in the push:
+#   - REQUIRES docs/CHANGELOG-<version>-ar.md (else it FAILS, publishes nothing);
+#   - runs the tests (blocking);
+#   - builds the installer via build-installer.ps1 (completeness guards blocking);
+#   - creates the GitHub Release (body = the Arabic changelog — NEVER a commit list);
+#   - verifies the asset is publicly downloadable;
+#   - ONLY THEN flips version.json → clients are never pointed at a dead link.
 #
-# Loop-safe: the version.json commit uses the built-in GITHUB_TOKEN (which never
-# re-triggers workflows), carries [skip ci], and version.json is in paths-ignore;
-# and a re-run would skip anyway because the tag now exists.
+# A push that does NOT change <Version> releases nothing. version.json is pushed
+# back with the built-in token + [skip ci] and is path-ignored, so it never loops.
 # ============================================================================
 
 on:
@@ -45,7 +45,7 @@ jobs:
   release:
     runs-on: windows-latest
     steps:
-      - name: Checkout (full history for tags)
+      - name: Checkout (full history for tags + version diff)
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -55,25 +55,51 @@ jobs:
         shell: pwsh
         run: |
           [xml]$p = Get-Content "Directory.Build.props"
-          $v = ([string]($p.Project.PropertyGroup.Version)).Trim()
+          $v = ([string]$p.Project.PropertyGroup.Version).Trim()
           if (-not $v) { throw "No <Version> found in Directory.Build.props" }
           "version=$v" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
           "tag=v$v"    | Out-File -FilePath $env:GITHUB_OUTPUT -Append
           Write-Host "Product version = $v"
 
-      - name: Decide whether to release (skip if already tagged)
+      - name: "Gate — release ONLY when <Version> changed in this push"
         id: gate
         shell: pwsh
         run: |
+          $v     = "${{ steps.ver.outputs.version }}"
           $force = "${{ github.event.inputs.force }}" -eq "true"
-          $exists = [bool](git tag -l "${{ steps.ver.outputs.tag }}")
-          if ($force -or -not $exists) {
-            "go=true" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-            Write-Host "Releasing ${{ steps.ver.outputs.version }} (force=$force, tagExists=$exists)."
-          } else {
-            "go=false" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-            Write-Host "::notice::${{ steps.ver.outputs.tag }} is already released - nothing to do."
+
+          # Version at the commit BEFORE this push (empty on branch create / dispatch).
+          $before = "${{ github.event.before }}"
+          $prev = ""
+          if ($before -and ($before -notmatch '^0+$')) {
+            try {
+              $x = [xml](git show "${before}:Directory.Build.props" 2>$null)
+              $prev = ([string]$x.Project.PropertyGroup.Version).Trim()
+            } catch { $prev = "" }
           }
+
+          $changed   = ($v -ne $prev)
+          $tagExists = [bool](git tag -l "${{ steps.ver.outputs.tag }}")
+          $go = $force -or ($changed -and -not $tagExists)
+
+          "go=$($go.ToString().ToLower())" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          Write-Host "version=$v  previous=$prev  changed=$changed  tagExists=$tagExists  force=$force  => release=$go"
+          if (-not $go) { Write-Host "::notice::No version change (still $v) — nothing to release." }
+
+      - name: "Require the Arabic changelog for this version (else FAIL — never a commit list)"
+        if: steps.gate.outputs.go == 'true'
+        shell: pwsh
+        run: |
+          $f = "docs/CHANGELOG-${{ steps.ver.outputs.version }}-ar.md"
+          if (-not (Test-Path $f)) {
+            Write-Host "::error::Missing $f — refusing to publish ${{ steps.ver.outputs.version }} without its Arabic changelog."
+            exit 1
+          }
+          if (((Get-Content $f -Raw).Trim()).Length -lt 20) {
+            Write-Host "::error::$f is essentially empty — refusing to publish."
+            exit 1
+          }
+          Write-Host "Found $f"
 
       - name: Setup .NET SDK
         if: steps.gate.outputs.go == 'true'
@@ -81,59 +107,85 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
+      - name: "Run tests (BLOCKING — no release if a test fails)"
+        if: steps.gate.outputs.go == 'true'
+        shell: pwsh
+        run: |
+          dotnet test tests/OptiPaie.Tests/OptiPaie.Tests.csproj -c Debug --nologo
+          if ($LASTEXITCODE -ne 0) { Write-Host "::error::Tests failed — refusing to publish."; exit 1 }
+
       - name: Install WiX v5 CLI + extensions
         if: steps.gate.outputs.go == 'true'
         shell: pwsh
         run: |
           dotnet tool install --global wix --version 5.0.2
-          # Extensions MUST be pinned to the CLI version. Unpinned `wix extension add`
-          # grabs the latest (7.0.0 = WiX v6) which is incompatible with the v5 CLI
-          # (WIX6101 + exit code 1). Keep these in lockstep with the --version above.
+          # Extensions MUST be pinned to the CLI version (unpinned pulls WiX v6 = WIX6101).
           wix extension add -g WixToolset.UI.wixext/5.0.2
           wix extension add -g WixToolset.BootstrapperApplications.wixext/5.0.2
           wix extension add -g WixToolset.Netfx.wixext/5.0.2
 
-      - name: Build installer (Setup.exe + MSI)
+      - name: "Build installer (BLOCKING — completeness guards inside build-installer.ps1)"
         if: steps.gate.outputs.go == 'true'
         shell: pwsh
-        run: powershell -ExecutionPolicy Bypass -File installer/build-installer.ps1
+        run: |
+          powershell -ExecutionPolicy Bypass -File installer/build-installer.ps1
+          if ($LASTEXITCODE -ne 0) { Write-Host "::error::Installer build / guard failed — refusing to publish."; exit 1 }
 
       - name: Stage release asset (URL-friendly name for the updater)
         if: steps.gate.outputs.go == 'true'
         shell: pwsh
-        run: |
-          Copy-Item "installer/output/OptiPaie PRO Setup.exe" "installer/output/OptiPaie-PRO-Setup.exe" -Force
+        run: Copy-Item "installer/output/OptiPaie PRO Setup.exe" "installer/output/OptiPaie-PRO-Setup.exe" -Force
 
-      - name: Build release notes (commits since the last tag)
-        if: steps.gate.outputs.go == 'true'
-        shell: pwsh
-        run: |
-          $last = (git describe --tags --abbrev=0 2>$null)
-          if ($last) { $lines = git log "$last..HEAD" --no-merges --pretty=format:"- %s" }
-          else       { $lines = git log -20 --no-merges --pretty=format:"- %s" }
-          if (-not $lines) { $lines = "- Ameliorations et corrections" }
-          $lines = ($lines -split "`n" | Select-Object -First 25) -join "`n"
-          Set-Content -Path notes.txt -Value $lines -Encoding utf8
-          Write-Host $lines
-
-      - name: Create GitHub Release + upload installer
+      - name: "Create GitHub Release + upload installer (body = Arabic changelog)"
         if: steps.gate.outputs.go == 'true'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.ver.outputs.tag }}
           name: OptiPaie PRO ${{ steps.ver.outputs.version }}
-          body_path: notes.txt
+          body_path: docs/CHANGELOG-${{ steps.ver.outputs.version }}-ar.md
           make_latest: true
           files: |
             installer/output/OptiPaie-PRO-Setup.exe
             installer/output/OptiPaie PRO.msi
 
-      - name: Update version.json and push it back
+      - name: "Verify the asset is publicly downloadable (BLOCKING — before touching version.json)"
+        if: steps.gate.outputs.go == 'true'
+        shell: pwsh
+        run: |
+          $url = "https://github.com/${{ github.repository }}/releases/latest/download/OptiPaie-PRO-Setup.exe"
+          $ok = $false
+          for ($i = 1; $i -le 8; $i++) {
+            try {
+              $r = Invoke-WebRequest -Uri $url -Method Head -MaximumRedirection 5 -UseBasicParsing -TimeoutSec 30
+              if ($r.StatusCode -eq 200) { $ok = $true; break }
+            } catch { }
+            Write-Host "asset not reachable yet (attempt $i)..."
+            Start-Sleep -Seconds 6
+          }
+          if (-not $ok) {
+            Write-Host "::error::Released asset is NOT publicly downloadable — NOT flipping version.json (no dead-link notification)."
+            exit 1
+          }
+          Write-Host "Asset public download OK (200)."
+
+      - name: "Flip version.json (Arabic notes from the changelog) and push it back"
         if: steps.gate.outputs.go == 'true'
         shell: pwsh
         run: |
           $v = "${{ steps.ver.outputs.version }}"
-          $notes = (Get-Content notes.txt -Raw).Trim()
+          $md = Get-Content "docs/CHANGELOG-$v-ar.md" -Raw
+
+          # Strip markdown to clean plain text for the in-app updater dialog (no # * > markers).
+          $plain = foreach ($ln in ($md -split "`r?`n")) {
+            $t = $ln
+            $t = $t -replace '^\s{0,3}#{1,6}\s*', ''   # headings
+            $t = $t -replace '\*\*', ''                # bold
+            $t = $t -replace '^\s*>\s?', ''            # blockquote
+            $t = $t -replace '^\s*[-*]\s+', ''         # bullets
+            $t.Trim()
+          }
+          $notes = (($plain | Where-Object { $_ -ne '' }) -join "`n")
+
           $manifest = [ordered]@{
             latest_version = $v
             download_url   = "https://github.com/${{ github.repository }}/releases/latest/download/OptiPaie-PRO-Setup.exe"
@@ -141,6 +193,7 @@ jobs:
             mandatory      = $false
           }
           ($manifest | ConvertTo-Json -Depth 5) | Set-Content -Path version.json -Encoding utf8
+
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add version.json
