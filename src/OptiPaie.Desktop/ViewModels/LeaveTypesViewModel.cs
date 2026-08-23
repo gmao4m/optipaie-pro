@@ -152,7 +152,7 @@ namespace OptiPaie.Desktop.ViewModels
             decimal? duration = null;
             if (!string.IsNullOrWhiteSpace(_editLegalDuration))
             {
-                if (!decimal.TryParse(_editLegalDuration, NumberStyles.Number, CultureInfo.InvariantCulture, out decimal d) || d < 0m)
+                if (!OptiPaie.Common.Text.FlexibleNumber.TryParse(_editLegalDuration, out decimal d) || d < 0m)
                 {
                     Dialogs.Error("Durée légale invalide.");
                     return;

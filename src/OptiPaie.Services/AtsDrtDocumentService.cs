@@ -10,22 +10,22 @@ using Entities = OptiPaie.Core.Entities;
 namespace OptiPaie.Services
 {
     /// <summary>
-    /// Maps OptiPaie's stored employee/company files onto the ATS/DRT certificate models,
-    /// then drives the verbatim-ported certificate logic + the official-template DOCX filler.
-    /// The document format itself is untouched — only the pre-existing bookmarks are filled.
+    /// Maps OptiPaie's stored employee/company files onto the ATS/DRT certificate models, then
+    /// prints the values at ABSOLUTE millimetre coordinates onto the pre-printed CNAS form
+    /// (AtsDrtFormRenderer + the editable Assets/AtsDrtTemplates/form-layout.json). No text flow,
+    /// no bookmarks, no Word — a support agent can nudge any coordinate in the JSON without rebuilding.
     /// </summary>
     public sealed class AtsDrtDocumentService : IAtsDrtDocumentService
     {
         private readonly ICompanyService _companies;
         private readonly IEmployeeService _employees;
+        private FormLayoutConfig _layout;
 
         public AtsDrtDocumentService(ICompanyService companies, IEmployeeService employees)
         {
             _companies = Guard.AgainstNull(companies, nameof(companies));
             _employees = Guard.AgainstNull(employees, nameof(employees));
         }
-
-        public bool IsWordAvailable => DocxToPdfConverter.IsWordAvailable();
 
         public Company MapCompany(long companyId)
         {
@@ -70,37 +70,48 @@ namespace OptiPaie.Services
         }
 
         public string GenerateAts(Company company, Employee employee, WorkStoppage stoppage,
-            bool hasResumedWork, List<MonthlyContribution> contributions, WeekendConfig weekend, string outputDocxPath)
+            bool hasResumedWork, List<MonthlyContribution> contributions, WeekendConfig weekend,
+            double offsetXmm, double offsetYmm, string outputPdfPath)
         {
             var service = new CertificateService(weekend ?? new WeekendConfig());
             AtsCertificateData data = service.BuildAts(company, employee, stoppage, hasResumedWork, contributions);
             Dictionary<string, string> values = CertificateBookmarkMapper.MapAts(data);
-            DocxBookmarkFiller.Fill(TemplatePath("ATS_Template.docx"), outputDocxPath, values);
-            return outputDocxPath;
+            AtsDrtFormRenderer.RenderPdf(GetForm("ATS"), values, offsetXmm, offsetYmm, outputPdfPath);
+            return outputPdfPath;
         }
 
         public string GenerateDrt(Company company, Employee employee, WorkStoppage stoppage,
-            bool hasResumedWork, bool arabic, WeekendConfig weekend, string outputDocxPath)
+            bool hasResumedWork, WeekendConfig weekend,
+            double offsetXmm, double offsetYmm, string outputPdfPath)
         {
             var service = new CertificateService(weekend ?? new WeekendConfig());
             DrtCertificateData data = service.BuildDrt(company, employee, stoppage, hasResumedWork);
             Dictionary<string, string> values = CertificateBookmarkMapper.MapDrt(data);
-            string template = arabic ? "DRT_Template_AR.docx" : "DRT_Template_FR.docx";
-            DocxBookmarkFiller.Fill(TemplatePath(template), outputDocxPath, values);
-            return outputDocxPath;
+            AtsDrtFormRenderer.RenderPdf(GetForm("DRT"), values, offsetXmm, offsetYmm, outputPdfPath);
+            return outputPdfPath;
         }
 
-        public string ConvertToPdf(string docxPath, string pdfPath)
+        public string GenerateCalibrationSheet(double offsetXmm, double offsetYmm, string outputPdfPath)
         {
-            DocxToPdfConverter.ConvertToPdf(docxPath, pdfPath);
-            return pdfPath;
+            AtsDrtFormRenderer.RenderCalibrationPdf(offsetXmm, offsetYmm, outputPdfPath);
+            return outputPdfPath;
+        }
+
+        // ── layout ──────────────────────────────────────────────────────────
+
+        private FormDefinition GetForm(string name)
+        {
+            if (_layout == null) _layout = AtsDrtFormRenderer.LoadLayout(LayoutPath());
+            if (!_layout.Forms.TryGetValue(name, out FormDefinition form) || form == null)
+                throw new InvalidOperationException($"Form '{name}' not found in form-layout.json.");
+            return form;
         }
 
         /// <summary>
-        /// The official templates are shipped loose next to the exe (Content, PreserveNewest),
-        /// exactly as the source tool ships them — resolve them off the app base directory.
+        /// The editable coordinate file ships loose next to the exe (Content, PreserveNewest),
+        /// exactly like the old templates — resolve it off the app base directory.
         /// </summary>
-        private static string TemplatePath(string fileName) =>
-            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "AtsDrtTemplates", fileName);
+        private static string LayoutPath() =>
+            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "AtsDrtTemplates", "form-layout.json");
     }
 }

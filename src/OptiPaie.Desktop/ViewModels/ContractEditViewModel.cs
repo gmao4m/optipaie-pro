@@ -121,8 +121,7 @@ namespace OptiPaie.Desktop.ViewModels
                 return;
             }
 
-            if (!decimal.TryParse((_baseSalary ?? string.Empty).Replace(" ", "").Replace(',', '.'),
-                    NumberStyles.Any, CultureInfo.InvariantCulture, out decimal salary))
+            if (!OptiPaie.Common.Text.FlexibleNumber.TryParse(_baseSalary, out decimal salary))
             {
                 Dialogs.Error("Salaire de base invalide.");
                 return;
@@ -227,8 +226,7 @@ namespace OptiPaie.Desktop.ViewModels
 
         private void Confirm()
         {
-            if (!decimal.TryParse((_newSalaryText ?? string.Empty).Replace(" ", "").Replace(',', '.'),
-                    NumberStyles.Any, CultureInfo.InvariantCulture, out decimal salary) || salary <= 0m)
+            if (!OptiPaie.Common.Text.FlexibleNumber.TryParse(_newSalaryText, out decimal salary) || salary <= 0m)
             {
                 Dialogs.Error("Salaire invalide.");
                 return;

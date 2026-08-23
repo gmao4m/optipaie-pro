@@ -63,10 +63,17 @@ namespace OptiPaie.Core.Certificates
     /// </summary>
     public class MonthlyContribution
     {
-        public string MonthLabel { get; set; }            // e.g. "Janvier 2026"
-        public decimal? HoursWorked { get; set; }
-        public decimal? AbsenceDays { get; set; }
-        public decimal? ContributionBase { get; set; }     // "CT" — salaire soumis à cotisation
+        public string MonthLabel { get; set; }            // "Mois et année de référence"
+
+        /// <summary>"Nombre de jours travaillés" column — a DAY count, never hours.
+        /// (The old field carried hours here, which the CNAS form's day column rejects.)</summary>
+        public decimal? DaysWorked { get; set; }
+
+        /// <summary>"Motif absences" column — a free-text reason (e.g. "Maladie", "Congé"),
+        /// never a day count. Blank when there were no absences.</summary>
+        public string AbsenceReason { get; set; }
+
+        public decimal? ContributionBase { get; set; }     // "Salaire soumis à cotisations"
 
         /// <summary>
         /// True for months within the selected range (editable in the UI). False for

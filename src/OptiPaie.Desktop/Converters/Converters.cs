@@ -189,4 +189,65 @@ namespace OptiPaie.Desktop.Converters
             return value is Visibility vis && vis == Visibility.Visible;
         }
     }
+
+    /// <summary>
+    /// Two-way converter for EVERY editable numeric field (decimal / decimal? / double / double? / int / int?).
+    /// Input side accepts a comma OR a dot as the decimal separator, plus grouping spaces, whatever the
+    /// Windows locale — "1250,50" and "1250.50" both become 1250.5. A partially-typed / unparseable string
+    /// returns <see cref="Binding.DoNothing"/> so the keystroke is never rejected mid-typing; a blank value
+    /// clears a nullable to null (or a non-nullable to 0). Display uses the UI culture for consistency.
+    /// </summary>
+    public sealed class FlexibleDecimalConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value == null) return string.Empty;
+            switch (value)
+            {
+                case decimal d: return d.ToString(culture);
+                case double db: return db.ToString(culture);
+                case float f: return f.ToString(culture);
+                case int i: return i.ToString(culture);
+                case long l: return l.ToString(culture);
+                default: return value.ToString();
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            string s = value as string;
+            Type t = Nullable.GetUnderlyingType(targetType) ?? targetType;
+            bool nullable = Nullable.GetUnderlyingType(targetType) != null || !targetType.IsValueType;
+
+            if (string.IsNullOrWhiteSpace(s))
+                return nullable ? null : Zero(t);
+
+            if (!OptiPaie.Common.Text.FlexibleNumber.TryParse(s, out decimal dec))
+                return Binding.DoNothing; // mid-typing / garbage → keep current value, no validation error
+
+            try
+            {
+                if (t == typeof(decimal)) return dec;
+                if (t == typeof(double)) return (double)dec;
+                if (t == typeof(float)) return (float)dec;
+                if (t == typeof(int)) return decimal.ToInt32(decimal.Truncate(dec));
+                if (t == typeof(long)) return decimal.ToInt64(decimal.Truncate(dec));
+                return System.Convert.ChangeType(dec, t, CultureInfo.InvariantCulture);
+            }
+            catch
+            {
+                return Binding.DoNothing;
+            }
+        }
+
+        private static object Zero(Type t)
+        {
+            if (t == typeof(decimal)) return 0m;
+            if (t == typeof(double)) return 0d;
+            if (t == typeof(float)) return 0f;
+            if (t == typeof(int)) return 0;
+            if (t == typeof(long)) return 0L;
+            return Activator.CreateInstance(t);
+        }
+    }
 }

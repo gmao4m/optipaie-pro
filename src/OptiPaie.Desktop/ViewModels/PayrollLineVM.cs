@@ -89,9 +89,10 @@ namespace OptiPaie.Desktop.ViewModels
 
             string s = taux.Trim();
             bool percent = s.EndsWith("%");
-            string number = (percent ? s.Substring(0, s.Length - 1) : s).Trim().Replace(" ", "").Replace(',', '.');
+            string number = percent ? s.Substring(0, s.Length - 1) : s;
 
-            if (decimal.TryParse(number, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal value))
+            // Accept comma OR dot as the decimal separator, whatever the Windows locale.
+            if (OptiPaie.Common.Text.FlexibleNumber.TryParse(number, out decimal value))
             {
                 return percent ? value / 100m : value;
             }

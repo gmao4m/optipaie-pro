@@ -45,8 +45,13 @@ namespace OptiPaie.Core.Certificates
                 values["DATEREPRISE"] = "";
             }
 
-            // Always emit all 12 month slots — unused ones print "/", exactly matching
-            // the original tool's disabled-field placeholder.
+            // 12-month table (ATS page 2). Column order on the official form:
+            //   M   = Mois et année de référence
+            //   JT  = Nombre de jours travaillés   (a DAY count — never hours)
+            //   MT  = Motif absences               (free text — never a day count)
+            //   SS  = Salaire soumis à cotisations
+            //   PO  = Montant de la cotisation (part ouvrière) = 9 % of SS
+            // Unused trailing slots print "/", exactly matching the original tool.
             for (int i = 0; i < 12; i++)
             {
                 int n = i + 1;
@@ -54,12 +59,12 @@ namespace OptiPaie.Core.Certificates
                 bool isActive = row?.IsActive == true;
 
                 values[$"M{n}"] = isActive ? row.MonthLabel : "";
-                values[$"H{n}"] = isActive ? (row.HoursWorked?.ToString("0.##") ?? "") : "/";
-                values[$"ABS{n}"] = isActive ? (row.AbsenceDays?.ToString("0.##") ?? "") : "/";
-                values[$"CT{n}"] = isActive
+                values[$"JT{n}"] = isActive ? (row.DaysWorked?.ToString("0.##") ?? "") : "/";
+                values[$"MT{n}"] = isActive ? (row.AbsenceReason ?? "") : "/";
+                values[$"SS{n}"] = isActive
                     ? (row.ContributionBase.HasValue ? $"{row.ContributionBase:0.##} DA" : "")
                     : "/";
-                values[$"MSS{n}"] = isActive
+                values[$"PO{n}"] = isActive
                     ? (row.EmployeeShare.HasValue ? $"{row.EmployeeShare:0.##} DA" : "")
                     : "/";
             }
@@ -104,10 +109,14 @@ namespace OptiPaie.Core.Certificates
             return values;
         }
 
+        // Always format with InvariantCulture: these strings print onto an official CNAS form, so
+        // the digits must stay Latin and the "/" separator must be a plain slash — under an Arabic
+        // (ar-DZ) UI the ambient culture injects RTL marks (U+200F) around the separator, which
+        // SkiaSharp draws as stray glyphs on the form.
         private static string FormatDdMmYy(System.DateTime? date) =>
-            date.HasValue ? date.Value.ToString("ddMMyy") : "";
+            date.HasValue ? date.Value.ToString("ddMMyy", System.Globalization.CultureInfo.InvariantCulture) : "";
 
         private static string FormatDdMmYyyySlash(System.DateTime? date) =>
-            date.HasValue ? date.Value.ToString("dd/MM/yyyy") : "";
+            date.HasValue ? date.Value.ToString("dd/MM/yyyy", System.Globalization.CultureInfo.InvariantCulture) : "";
     }
 }

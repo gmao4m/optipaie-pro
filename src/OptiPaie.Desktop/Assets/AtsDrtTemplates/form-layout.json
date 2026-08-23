@@ -1,0 +1,124 @@
+{
+  "Forms": {
+    "ATS": {
+      "Pages": [
+        {
+          "WidthMm": 210, "HeightMm": 297, "BackgroundImage": "ATS_image1.jpeg",
+          "Fields": [
+            { "Name": "NMEMPLOYEUR", "Type": "dotted", "XMm": 38, "YMm": 72, "MaxWidthMm": 135, "FontSize": 10 },
+            { "Name": "NEMPLOYEUR", "Type": "rectangle", "XMm": 69, "YMm": 76, "WidthMm": 60, "HeightMm": 9, "FontSize": 11, "Align": "center" },
+            { "Name": "RS", "Type": "dotted", "XMm": 36, "YMm": 88.5, "MaxWidthMm": 138, "FontSize": 10 },
+            { "Name": "EADRESSE", "Type": "dotted", "XMm": 28, "YMm": 96.5, "MaxWidthMm": 146, "FontSize": 10 },
+
+            { "Name": "NMS", "Type": "dotted", "XMm": 41, "YMm": 118, "MaxWidthMm": 133, "FontSize": 10 },
+            { "Name": "NSS", "Type": "rectangle", "XMm": 69, "YMm": 121, "WidthMm": 65, "HeightMm": 9, "FontSize": 11, "Align": "center" },
+            { "Name": "DATEN", "Type": "grid", "XMm": 29.7, "YMm": 135, "PitchMm": 5.81, "Cells": 6, "FontSize": 11 },
+            { "Name": "NEA", "Type": "dotted", "XMm": 68, "YMm": 135, "MaxWidthMm": 58, "FontSize": 10 },
+            { "Name": "SADRESSE", "Type": "dotted", "XMm": 28, "YMm": 142.5, "MaxWidthMm": 146, "FontSize": 10 },
+            { "Name": "POSTE", "Type": "dotted", "XMm": 31, "YMm": 151.5, "MaxWidthMm": 143, "FontSize": 10 },
+
+            { "Name": "DATER", "Type": "grid", "XMm": 85.8, "YMm": 171.5, "PitchMm": 5.65, "Cells": 6, "FontSize": 11 },
+            { "Name": "DATEAT", "Type": "grid", "XMm": 85.8, "YMm": 178, "PitchMm": 5.65, "Cells": 6, "FontSize": 11 },
+            { "Name": "DATEREPRISE", "Type": "grid", "XMm": 85.8, "YMm": 184.5, "PitchMm": 5.65, "Cells": 6, "FontSize": 11 },
+            { "Name": "DATEAUJRH", "Type": "grid", "XMm": 85.8, "YMm": 191, "PitchMm": 5.65, "Cells": 6, "FontSize": 11 }
+          ]
+        },
+        {
+          "WidthMm": 297, "HeightMm": 210, "BackgroundImage": "ATS_image2.jpeg",
+          "Fields": [
+            { "Name": "M1", "Type": "dotted", "XMm": 14, "YMm": 37, "MaxWidthMm": 51, "FontSize": 9 },
+            { "Name": "JT1", "Type": "dotted", "XMm": 70, "YMm": 37, "MaxWidthMm": 50, "FontSize": 9 },
+            { "Name": "MT1", "Type": "dotted", "XMm": 126, "YMm": 37, "MaxWidthMm": 50, "FontSize": 9 },
+            { "Name": "SS1", "Type": "dotted", "XMm": 182, "YMm": 37, "MaxWidthMm": 50, "FontSize": 9 },
+            { "Name": "PO1", "Type": "dotted", "XMm": 238, "YMm": 37, "MaxWidthMm": 54, "FontSize": 9 },
+            { "Name": "M2", "Type": "dotted", "XMm": 14, "YMm": 43.45, "MaxWidthMm": 51, "FontSize": 9 },
+            { "Name": "JT2", "Type": "dotted", "XMm": 70, "YMm": 43.45, "MaxWidthMm": 50, "FontSize": 9 },
+            { "Name": "MT2", "Type": "dotted", "XMm": 126, "YMm": 43.45, "MaxWidthMm": 50, "FontSize": 9 },
+            { "Name": "SS2", "Type": "dotted", "XMm": 182, "YMm": 43.45, "MaxWidthMm": 50, "FontSize": 9 },
+            { "Name": "PO2", "Type": "dotted", "XMm": 238, "YMm": 43.45, "MaxWidthMm": 54, "FontSize": 9 },
+            { "Name": "M3", "Type": "dotted", "XMm": 14, "YMm": 49.9, "MaxWidthMm": 51, "FontSize": 9 },
+            { "Name": "JT3", "Type": "dotted", "XMm": 70, "YMm": 49.9, "MaxWidthMm": 50, "FontSize": 9 },
+            { "Name": "MT3", "Type": "dotted", "XMm": 126, "YMm": 49.9, "MaxWidthMm": 50, "FontSize": 9 },
+            { "Name": "SS3", "Type": "dotted", "XMm": 182, "YMm": 49.9, "MaxWidthMm": 50, "FontSize": 9 },
+            { "Name": "PO3", "Type": "dotted", "XMm": 238, "YMm": 49.9, "MaxWidthMm": 54, "FontSize": 9 },
+            { "Name": "M4", "Type": "dotted", "XMm": 14, "YMm": 56.35, "MaxWidthMm": 51, "FontSize": 9 },
+            { "Name": "JT4", "Type": "dotted", "XMm": 70, "YMm": 56.35, "MaxWidthMm": 50, "FontSize": 9 },
+            { "Name": "MT4", "Type": "dotted", "XMm": 126, "YMm": 56.35, "MaxWidthMm": 50, "FontSize": 9 },
+            { "Name": "SS4", "Type": "dotted", "XMm": 182, "YMm": 56.35, "MaxWidthMm": 50, "FontSize": 9 },
+            { "Name": "PO4", "Type": "dotted", "XMm": 238, "YMm": 56.35, "MaxWidthMm": 54, "FontSize": 9 },
+            { "Name": "M5", "Type": "dotted", "XMm": 14, "YMm": 62.8, "MaxWidthMm": 51, "FontSize": 9 },
+            { "Name": "JT5", "Type": "dotted", "XMm": 70, "YMm": 62.8, "MaxWidthMm": 50, "FontSize": 9 },
+            { "Name": "MT5", "Type": "dotted", "XMm": 126, "YMm": 62.8, "MaxWidthMm": 50, "FontSize": 9 },
+            { "Name": "SS5", "Type": "dotted", "XMm": 182, "YMm": 62.8, "MaxWidthMm": 50, "FontSize": 9 },
+            { "Name": "PO5", "Type": "dotted", "XMm": 238, "YMm": 62.8, "MaxWidthMm": 54, "FontSize": 9 },
+            { "Name": "M6", "Type": "dotted", "XMm": 14, "YMm": 69.25, "MaxWidthMm": 51, "FontSize": 9 },
+            { "Name": "JT6", "Type": "dotted", "XMm": 70, "YMm": 69.25, "MaxWidthMm": 50, "FontSize": 9 },
+            { "Name": "MT6", "Type": "dotted", "XMm": 126, "YMm": 69.25, "MaxWidthMm": 50, "FontSize": 9 },
+            { "Name": "SS6", "Type": "dotted", "XMm": 182, "YMm": 69.25, "MaxWidthMm": 50, "FontSize": 9 },
+            { "Name": "PO6", "Type": "dotted", "XMm": 238, "YMm": 69.25, "MaxWidthMm": 54, "FontSize": 9 },
+            { "Name": "M7", "Type": "dotted", "XMm": 14, "YMm": 75.7, "MaxWidthMm": 51, "FontSize": 9 },
+            { "Name": "JT7", "Type": "dotted", "XMm": 70, "YMm": 75.7, "MaxWidthMm": 50, "FontSize": 9 },
+            { "Name": "MT7", "Type": "dotted", "XMm": 126, "YMm": 75.7, "MaxWidthMm": 50, "FontSize": 9 },
+            { "Name": "SS7", "Type": "dotted", "XMm": 182, "YMm": 75.7, "MaxWidthMm": 50, "FontSize": 9 },
+            { "Name": "PO7", "Type": "dotted", "XMm": 238, "YMm": 75.7, "MaxWidthMm": 54, "FontSize": 9 },
+            { "Name": "M8", "Type": "dotted", "XMm": 14, "YMm": 82.15, "MaxWidthMm": 51, "FontSize": 9 },
+            { "Name": "JT8", "Type": "dotted", "XMm": 70, "YMm": 82.15, "MaxWidthMm": 50, "FontSize": 9 },
+            { "Name": "MT8", "Type": "dotted", "XMm": 126, "YMm": 82.15, "MaxWidthMm": 50, "FontSize": 9 },
+            { "Name": "SS8", "Type": "dotted", "XMm": 182, "YMm": 82.15, "MaxWidthMm": 50, "FontSize": 9 },
+            { "Name": "PO8", "Type": "dotted", "XMm": 238, "YMm": 82.15, "MaxWidthMm": 54, "FontSize": 9 },
+            { "Name": "M9", "Type": "dotted", "XMm": 14, "YMm": 88.6, "MaxWidthMm": 51, "FontSize": 9 },
+            { "Name": "JT9", "Type": "dotted", "XMm": 70, "YMm": 88.6, "MaxWidthMm": 50, "FontSize": 9 },
+            { "Name": "MT9", "Type": "dotted", "XMm": 126, "YMm": 88.6, "MaxWidthMm": 50, "FontSize": 9 },
+            { "Name": "SS9", "Type": "dotted", "XMm": 182, "YMm": 88.6, "MaxWidthMm": 50, "FontSize": 9 },
+            { "Name": "PO9", "Type": "dotted", "XMm": 238, "YMm": 88.6, "MaxWidthMm": 54, "FontSize": 9 },
+            { "Name": "M10", "Type": "dotted", "XMm": 14, "YMm": 95.05, "MaxWidthMm": 51, "FontSize": 9 },
+            { "Name": "JT10", "Type": "dotted", "XMm": 70, "YMm": 95.05, "MaxWidthMm": 50, "FontSize": 9 },
+            { "Name": "MT10", "Type": "dotted", "XMm": 126, "YMm": 95.05, "MaxWidthMm": 50, "FontSize": 9 },
+            { "Name": "SS10", "Type": "dotted", "XMm": 182, "YMm": 95.05, "MaxWidthMm": 50, "FontSize": 9 },
+            { "Name": "PO10", "Type": "dotted", "XMm": 238, "YMm": 95.05, "MaxWidthMm": 54, "FontSize": 9 },
+            { "Name": "M11", "Type": "dotted", "XMm": 14, "YMm": 101.5, "MaxWidthMm": 51, "FontSize": 9 },
+            { "Name": "JT11", "Type": "dotted", "XMm": 70, "YMm": 101.5, "MaxWidthMm": 50, "FontSize": 9 },
+            { "Name": "MT11", "Type": "dotted", "XMm": 126, "YMm": 101.5, "MaxWidthMm": 50, "FontSize": 9 },
+            { "Name": "SS11", "Type": "dotted", "XMm": 182, "YMm": 101.5, "MaxWidthMm": 50, "FontSize": 9 },
+            { "Name": "PO11", "Type": "dotted", "XMm": 238, "YMm": 101.5, "MaxWidthMm": 54, "FontSize": 9 },
+            { "Name": "M12", "Type": "dotted", "XMm": 14, "YMm": 107.95, "MaxWidthMm": 51, "FontSize": 9 },
+            { "Name": "JT12", "Type": "dotted", "XMm": 70, "YMm": 107.95, "MaxWidthMm": 50, "FontSize": 9 },
+            { "Name": "MT12", "Type": "dotted", "XMm": 126, "YMm": 107.95, "MaxWidthMm": 50, "FontSize": 9 },
+            { "Name": "SS12", "Type": "dotted", "XMm": 182, "YMm": 107.95, "MaxWidthMm": 50, "FontSize": 9 },
+            { "Name": "PO12", "Type": "dotted", "XMm": 238, "YMm": 107.95, "MaxWidthMm": 54, "FontSize": 9 },
+            { "Name": "LIEU", "Type": "dotted", "XMm": 211, "YMm": 133, "MaxWidthMm": 21, "FontSize": 10 },
+            { "Name": "AUJOURDHUI", "Type": "dotted", "XMm": 255, "YMm": 133, "MaxWidthMm": 32, "FontSize": 10 }
+          ]
+        }
+      ]
+    },
+    "DRT": {
+      "Pages": [
+        {
+          "WidthMm": 210, "HeightMm": 297, "BackgroundImage": "DRTFR_image1.png",
+          "Fields": [
+            { "Name": "NMS", "Type": "dotted", "XMm": 27.5, "YMm": 94, "MaxWidthMm": 80, "FontSize": 10 },
+            { "Name": "NMP", "Type": "dotted", "XMm": 39, "YMm": 105.5, "MaxWidthMm": 68, "FontSize": 10 },
+            { "Name": "NSS", "Type": "rectangle", "XMm": 113, "YMm": 90, "WidthMm": 72, "HeightMm": 10, "FontSize": 11, "Align": "center" },
+            { "Name": "DATEN", "Type": "grid", "XMm": 38.4, "YMm": 116.5, "PitchMm": 8.23, "Cells": 6, "FontSize": 11 },
+            { "Name": "NEA", "Type": "dotted", "XMm": 88, "YMm": 116, "MaxWidthMm": 98, "FontSize": 10 },
+            { "Name": "DATEAT", "Type": "grid", "XMm": 75.9, "YMm": 125.5, "PitchMm": 8.23, "Cells": 6, "FontSize": 11 },
+            { "Name": "Case1", "Type": "checkbox", "XMm": 69.6, "YMm": 131.7, "FontSize": 12, "Bold": true },
+            { "Name": "DATEREPRISE", "Type": "grid", "XMm": 147.5, "YMm": 133, "PitchMm": 8.24, "Cells": 6, "FontSize": 11 },
+            { "Name": "Case2", "Type": "checkbox", "XMm": 69.6, "YMm": 140.7, "FontSize": 12, "Bold": true },
+            { "Name": "DATEAUJRH", "Type": "grid", "XMm": 147.5, "YMm": 143, "PitchMm": 8.24, "Cells": 6, "FontSize": 11 },
+            { "Name": "LIEU", "Type": "dotted", "XMm": 108, "YMm": 151, "MaxWidthMm": 38, "FontSize": 10 },
+            { "Name": "AUJOURDHUI", "Type": "dotted", "XMm": 158, "YMm": 151, "MaxWidthMm": 33, "FontSize": 10 },
+
+            { "Name": "NMS2", "Type": "dotted", "XMm": 29.5, "YMm": 223.5, "MaxWidthMm": 80, "FontSize": 10 },
+            { "Name": "NMP2", "Type": "dotted", "XMm": 39, "YMm": 233, "MaxWidthMm": 68, "FontSize": 10 },
+            { "Name": "NSS2", "Type": "rectangle", "XMm": 113, "YMm": 222, "WidthMm": 72, "HeightMm": 10, "FontSize": 11, "Align": "center" },
+            { "Name": "DATEAUJRH2", "Type": "grid", "XMm": 148.75, "YMm": 245, "PitchMm": 8.23, "Cells": 6, "FontSize": 11 },
+            { "Name": "LIEU1", "Type": "dotted", "XMm": 111, "YMm": 260, "MaxWidthMm": 35, "FontSize": 10 },
+            { "Name": "AUJOURDHUI2", "Type": "dotted", "XMm": 158, "YMm": 260, "MaxWidthMm": 33, "FontSize": 10 }
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -39,10 +39,11 @@
     <Reference Include="System.Configuration" />
   </ItemGroup>
 
-  <!-- Official CNAS attestation templates (ATS + DRT AR/FR). Shipped loose next to the
-       exe (like the source tool) so the OpenXML filler + Word converter open them by path. -->
+  <!-- Editable ATS/DRT coordinate layout. Shipped loose next to the exe (Content,
+       PreserveNewest) so the absolute-coordinate renderer reads it by path and a support
+       agent can nudge any mm coordinate without recompiling. -->
   <ItemGroup>
-    <Content Include="Assets\AtsDrtTemplates\*.docx">
+    <Content Include="Assets\AtsDrtTemplates\form-layout.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

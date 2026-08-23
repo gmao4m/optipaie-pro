@@ -23,6 +23,9 @@
             <conv:GainToBrushConverter x:Key="GainBrush" />
             <conv:InitialsConverter x:Key="Initials" />
             <conv:ElementNatureConverter x:Key="ElementNature" />
+            <!-- Decimal input that accepts comma OR dot regardless of Windows locale — used on
+                 every editable numeric field (base, taux, montants, quantités, heures, %). -->
+            <conv:FlexibleDecimalConverter x:Key="FlexNum" />
 
             <!-- Every dialog/window is capped to the visible screen so tall forms never grow
                  off-screen (the main maximized shell is skipped by the behavior). Combined with

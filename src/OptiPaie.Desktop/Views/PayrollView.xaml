@@ -112,7 +112,7 @@
                             <Style TargetType="TextBox"><Setter Property="BorderThickness" Value="0" /><Setter Property="Padding" Value="6,0" /><Setter Property="VerticalContentAlignment" Value="Center" /></Style>
                         </DataGridTextColumn.EditingElementStyle>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Header="{loc:Loc Payroll_Col_Base}" Binding="{Binding Base, UpdateSourceTrigger=PropertyChanged}" Width="120"
+                    <DataGridTextColumn Header="{loc:Loc Payroll_Col_Base}" Binding="{Binding Base, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource FlexNum}}" Width="120"
                                         ElementStyle="{StaticResource RightText}" EditingElementStyle="{StaticResource RightEdit}" />
                     <DataGridTextColumn Header="{loc:Loc Payroll_Col_Rate}" Binding="{Binding Taux, UpdateSourceTrigger=PropertyChanged}" Width="100"
                                         ElementStyle="{StaticResource RightText}" EditingElementStyle="{StaticResource RightEdit}" />

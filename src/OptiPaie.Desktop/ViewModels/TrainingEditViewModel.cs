@@ -76,8 +76,7 @@ namespace OptiPaie.Desktop.ViewModels
 
         private void Save()
         {
-            if (!decimal.TryParse((_cost ?? string.Empty).Replace(" ", "").Replace(',', '.'),
-                    NumberStyles.Any, CultureInfo.InvariantCulture, out decimal cost))
+            if (!OptiPaie.Common.Text.FlexibleNumber.TryParse(_cost, out decimal cost))
             {
                 Dialogs.Error("Coût invalide.");
                 return;

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using DocumentFormat.OpenXml.Packaging;
 using NUnit.Framework;
 using OptiPaie.Core.Certificates;
 using OptiPaie.Services.Certificates;
@@ -79,9 +78,11 @@ namespace OptiPaie.Tests
             Assert.That(v["NMS"], Is.EqualTo("BENALI Karim"));
             Assert.That(v["NSS"], Is.EqualTo("12 3456 7890 12"));
             Assert.That(v["DATEAT"], Is.EqualTo(new DateTime(2026, 1, 1).ToString("ddMMyy")));
-            Assert.That(v["CT1"], Does.Contain(" DA"));
-            Assert.That(v["MSS1"], Is.EqualTo("3600 DA"), "9% of 40000 = 3600");
-            Assert.That(v["H12"], Is.EqualTo("/"), "unused trailing slot prints '/'");
+            Assert.That(v["JT1"], Is.EqualTo("22"), "days-worked column carries a DAY count, not hours");
+            Assert.That(v["MT1"], Is.EqualTo(""), "motif column is free text, not a day count");
+            Assert.That(v["SS1"], Does.Contain(" DA"), "salaire soumis à cotisations");
+            Assert.That(v["PO1"], Is.EqualTo("3600 DA"), "part ouvrière = 9% of 40000 = 3600");
+            Assert.That(v["JT12"], Is.EqualTo("/"), "unused trailing slot prints '/'");
             Assert.That(v["DATEAUJRH"], Is.Not.Empty, "not resumed → today's date is filled");
         }
 
@@ -98,55 +99,57 @@ namespace OptiPaie.Tests
             Assert.That(notResumed["NMS2"], Is.EqualTo("BENALI"), "déclaration sur l'honneur is filled when not resumed");
         }
 
-        // ── filling the REAL official templates ──────────────────────────────
+        // ── absolute-coordinate renderer (the mechanism that replaced .docx fill) ──
 
         [Test]
-        public void Fill_RealAtsTemplate_InjectsEmployeeAndAmounts()
+        public void RenderPdf_AllThreeZoneTypes_ProduceAValidPdf()
         {
-            string outPath = Path.Combine(_dir, "ats.docx");
-            DocxBookmarkFiller.Fill(TemplatePath("ATS_Template.docx"), outPath,
-                CertificateBookmarkMapper.MapAts(SampleAts(resumed: false, months: 2)));
-
-            string text = DocxText(outPath);
-            Assert.That(text, Does.Contain("BENALI Karim"), "employee name is filled onto the official form");
-            Assert.That(text, Does.Contain("12 3456 7890 12"), "formatted NSS is filled");
-            Assert.That(text, Does.Contain("3600 DA"), "the 9% employee share is filled");
-        }
-
-        [Test]
-        public void Fill_RealDrtTemplates_FrAndAr_InjectName()
-        {
-            foreach (string template in new[] { "DRT_Template_FR.docx", "DRT_Template_AR.docx" })
+            var form = new FormDefinition
             {
-                string outPath = Path.Combine(_dir, template);
-                DocxBookmarkFiller.Fill(TemplatePath(template), outPath,
-                    CertificateBookmarkMapper.MapDrt(SampleDrt(false)));
+                Pages =
+                {
+                    new FormPage
+                    {
+                        WidthMm = 210, HeightMm = 297,
+                        Fields =
+                        {
+                            new FormField { Name = "NAME", Type = "dotted", XMm = 20, YMm = 30, MaxWidthMm = 120, FontSize = 11 },
+                            new FormField { Name = "BOX",  Type = "rectangle", XMm = 20, YMm = 40, WidthMm = 60, HeightMm = 9, Align = "center" },
+                            new FormField { Name = "DATE", Type = "grid", XMm = 25, YMm = 60, PitchMm = 6, Cells = 6, FontSize = 11 },
+                            new FormField { Name = "CHK",  Type = "checkbox", XMm = 20, YMm = 70, FontSize = 12, Bold = true }
+                        }
+                    }
+                }
+            };
+            var values = new Dictionary<string, string>
+            { ["NAME"] = "BENALI Karim", ["BOX"] = "09 102 457 89", ["DATE"] = "120385", ["CHK"] = "X" };
 
-                string text = DocxText(outPath);
-                Assert.That(text, Does.Contain("BENALI"), template + " → last name filled");
-                Assert.That(text, Does.Contain("X"), template + " → the reprise/non-reprise box is checked");
-            }
+            string outPath = Path.Combine(_dir, "render.pdf");
+            AtsDrtFormRenderer.RenderPdf(form, values, 0, 0, outPath);
+
+            Assert.That(File.Exists(outPath), Is.True);
+            byte[] head = new byte[5];
+            using (var fs = File.OpenRead(outPath)) fs.Read(head, 0, 5);
+            Assert.That(System.Text.Encoding.ASCII.GetString(head), Is.EqualTo("%PDF-"), "a real PDF is produced");
+            Assert.That(new FileInfo(outPath).Length, Is.GreaterThan(500), "the PDF is non-trivial");
         }
 
-        /// <summary>
-        /// Emits real filled ATS + DRT (FR/AR) documents for manual inspection when
-        /// ATSDRT_ARTIFACT_DIR is set (skipped in the normal suite).
-        /// </summary>
         [Test]
-        public void GenerateSampleDocuments_ForInspection()
+        public void PrinterOffset_ShiftsEveryValue_ForPrePrintedCalibration()
         {
-            string outDir = Environment.GetEnvironmentVariable("ATSDRT_ARTIFACT_DIR");
-            if (string.IsNullOrEmpty(outDir)) { Assert.Ignore("Set ATSDRT_ARTIFACT_DIR to emit sample documents."); return; }
-            Directory.CreateDirectory(outDir);
+            // The same values at two different offsets must yield different PDFs — proving the
+            // global mm offset (printer calibration) actually moves the ink.
+            var form = new FormDefinition
+            {
+                Pages = { new FormPage { WidthMm = 210, HeightMm = 297,
+                    Fields = { new FormField { Name = "X", Type = "grid", XMm = 25, YMm = 60, PitchMm = 6, Cells = 6 } } } }
+            };
+            var values = new Dictionary<string, string> { ["X"] = "120385" };
 
-            DocxBookmarkFiller.Fill(TemplatePath("ATS_Template.docx"), Path.Combine(outDir, "ATS_BENALI_Karim.docx"),
-                CertificateBookmarkMapper.MapAts(SampleAts(resumed: false, months: 3)));
-            DocxBookmarkFiller.Fill(TemplatePath("DRT_Template_FR.docx"), Path.Combine(outDir, "DRT_FR_BENALI_Karim.docx"),
-                CertificateBookmarkMapper.MapDrt(SampleDrt(resumed: false)));
-            DocxBookmarkFiller.Fill(TemplatePath("DRT_Template_AR.docx"), Path.Combine(outDir, "DRT_AR_BENALI_Karim.docx"),
-                CertificateBookmarkMapper.MapDrt(SampleDrt(resumed: false)));
-
-            Assert.That(File.Exists(Path.Combine(outDir, "ATS_BENALI_Karim.docx")), Is.True);
+            string a = Path.Combine(_dir, "a.pdf"), b = Path.Combine(_dir, "b.pdf");
+            AtsDrtFormRenderer.RenderPdf(form, values, 0, 0, a);
+            AtsDrtFormRenderer.RenderPdf(form, values, 5, 3, b);
+            Assert.That(File.ReadAllBytes(a), Is.Not.EqualTo(File.ReadAllBytes(b)), "offset changes the output");
         }
 
         // ── helpers ──────────────────────────────────────────────────────────
@@ -177,7 +180,7 @@ namespace OptiPaie.Tests
             var svc = new CertificateService(new WeekendConfig());
             List<MonthlyContribution> grid = svc.BuildEmptyMonthGrid(new DateTime(2025, 12, 1), months, false);
             foreach (MonthlyContribution row in grid)
-                if (row.IsActive) { row.HoursWorked = 173.33m; row.AbsenceDays = 0m; row.ContributionBase = 40000m; }
+                if (row.IsActive) { row.DaysWorked = 22m; row.AbsenceReason = ""; row.ContributionBase = 40000m; }
 
             var stoppage = new WorkStoppage { StoppageDate = new DateTime(2026, 1, 4), NumberOfDays = 15 };
             return svc.BuildAts(SampleCompany(), SampleEmployee(), stoppage, resumed, grid);
@@ -188,15 +191,6 @@ namespace OptiPaie.Tests
             var svc = new CertificateService(new WeekendConfig());
             var stoppage = new WorkStoppage { StoppageDate = new DateTime(2026, 1, 4), NumberOfDays = 15 };
             return svc.BuildDrt(SampleCompany(), SampleEmployee(), stoppage, resumed);
-        }
-
-        private static string TemplatePath(string name) =>
-            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "AtsDrtTemplates", name);
-
-        private static string DocxText(string path)
-        {
-            using (var doc = WordprocessingDocument.Open(path, false))
-                return doc.MainDocumentPart.Document.Body.InnerText;
         }
     }
 }

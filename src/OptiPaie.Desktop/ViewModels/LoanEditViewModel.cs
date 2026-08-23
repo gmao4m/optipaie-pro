@@ -166,8 +166,7 @@ namespace OptiPaie.Desktop.ViewModels
 
         private static bool TryDecimal(string text, out decimal value)
         {
-            return decimal.TryParse((text ?? string.Empty).Replace(" ", "").Replace(',', '.'),
-                NumberStyles.Any, CultureInfo.InvariantCulture, out value);
+            return OptiPaie.Common.Text.FlexibleNumber.TryParse(text, out value);
         }
 
         private Employee FindEmployee(long id)

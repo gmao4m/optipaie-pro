@@ -46,7 +46,7 @@ namespace OptiPaie.Desktop.ViewModels
 
         private void Save()
         {
-            if (!decimal.TryParse(_standardHours, NumberStyles.Number, CultureInfo.InvariantCulture, out decimal hours))
+            if (!OptiPaie.Common.Text.FlexibleNumber.TryParse(_standardHours, out decimal hours))
             {
                 Dialogs.Error("Nombre d'heures standard invalide.");
                 return;

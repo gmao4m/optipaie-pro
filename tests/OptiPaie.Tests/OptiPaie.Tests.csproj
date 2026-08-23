@@ -20,15 +20,6 @@
     <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
     <!-- Ed25519 signing for the license-token round-trip test (same version Services uses). -->
     <PackageReference Include="BouncyCastle.Cryptography" Version="2.4.0" />
-    <!-- Read back filled ATS/DRT .docx bookmarks to prove the official templates are filled. -->
-    <PackageReference Include="DocumentFormat.OpenXml" Version="3.3.0" />
-  </ItemGroup>
-
-  <!-- The real official CNAS templates, copied next to the test binaries for fill-and-verify. -->
-  <ItemGroup>
-    <Content Include="..\..\src\OptiPaie.Desktop\Assets\AtsDrtTemplates\*.docx" Link="AtsDrtTemplates\%(Filename)%(Extension)">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
 
   <ItemGroup>

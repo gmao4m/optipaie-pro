@@ -66,13 +66,13 @@ namespace OptiPaie.Desktop.ViewModels
 
         private void Save()
         {
-            if (!decimal.TryParse(_daysPerMonth, NumberStyles.Number, CultureInfo.InvariantCulture, out decimal perMonth))
+            if (!OptiPaie.Common.Text.FlexibleNumber.TryParse(_daysPerMonth, out decimal perMonth))
             {
                 Dialogs.Error("Jours acquis par mois invalide.");
                 return;
             }
 
-            if (!decimal.TryParse(_annualCap, NumberStyles.Number, CultureInfo.InvariantCulture, out decimal cap))
+            if (!OptiPaie.Common.Text.FlexibleNumber.TryParse(_annualCap, out decimal cap))
             {
                 Dialogs.Error("Plafond annuel invalide.");
                 return;

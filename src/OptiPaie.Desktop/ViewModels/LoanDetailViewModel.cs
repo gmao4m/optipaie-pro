@@ -118,8 +118,7 @@ namespace OptiPaie.Desktop.ViewModels
 
         private void AddRepayment()
         {
-            if (!decimal.TryParse((_manualAmount ?? string.Empty).Replace(" ", "").Replace(',', '.'),
-                    NumberStyles.Any, CultureInfo.InvariantCulture, out decimal amount))
+            if (!OptiPaie.Common.Text.FlexibleNumber.TryParse(_manualAmount, out decimal amount))
             {
                 Dialogs.Error("Montant invalide.");
                 return;

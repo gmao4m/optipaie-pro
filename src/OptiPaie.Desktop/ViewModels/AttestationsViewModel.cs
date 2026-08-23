@@ -26,11 +26,15 @@ namespace OptiPaie.Desktop.ViewModels
         private Company _company;
         private Employee _selectedEmployee;
         private string _certType = "ATS";      // "ATS" | "DRT"
-        private bool _drtArabic = true;         // DRT language: Arabic (true) / French (false)
 
         private DateTime _stoppageDate = DateTime.Today;
         private int _numberOfDays = 15;
         private bool _hasResumedWork;
+
+        // Printer calibration for the pre-printed form: a global X/Y shift (mm) memorised per printer.
+        private string _selectedPrinter;
+        private decimal _offsetX, _offsetY;
+        private bool _loadingOffsets;
 
         // ATS 12-month grid controls.
         private DateTime _gridStartDate = new DateTime(DateTime.Today.Year, 1, 1);
@@ -49,11 +53,13 @@ namespace OptiPaie.Desktop.ViewModels
             _services = services;
             GenerateCommand = new RelayCommand(Generate, () => _selectedEmployee != null);
             BuildGridCommand = new RelayCommand(BuildGrid);
+            PrintCalibrationCommand = new RelayCommand(PrintCalibration);
         }
 
         // ── selection ────────────────────────────────────────────────────────
         public ObservableCollection<Employee> Employees { get; } = new ObservableCollection<Employee>();
         public ObservableCollection<ContributionRow> Contributions { get; } = new ObservableCollection<ContributionRow>();
+        public ObservableCollection<string> Printers { get; } = new ObservableCollection<string>();
 
         public string CompanyDisplay => _company?.NameFr ?? "—";
 
@@ -72,7 +78,6 @@ namespace OptiPaie.Desktop.ViewModels
 
         public bool IsAts { get => _certType == "ATS"; set { if (value) CertType = "ATS"; } }
         public bool IsDrt { get => _certType == "DRT"; set { if (value) CertType = "DRT"; } }
-        public bool DrtArabic { get => _drtArabic; set => Set(ref _drtArabic, value); }
 
         // ── work stoppage ────────────────────────────────────────────────────
         public DateTime StoppageDate { get => _stoppageDate; set { if (Set(ref _stoppageDate, value)) RaisePreviews(); } }
@@ -114,6 +119,19 @@ namespace OptiPaie.Desktop.ViewModels
 
         public ICommand GenerateCommand { get; }
         public ICommand BuildGridCommand { get; }
+        public ICommand PrintCalibrationCommand { get; }
+
+        // ── printer calibration (pre-printed form alignment) ─────────────────
+        public string SelectedPrinter
+        {
+            get => _selectedPrinter;
+            set { if (Set(ref _selectedPrinter, value)) LoadOffsets(); }
+        }
+
+        /// <summary>Global horizontal shift in mm applied to every printed value (per printer).</summary>
+        public decimal OffsetX { get => _offsetX; set { if (Set(ref _offsetX, value)) SaveOffsets(); } }
+        /// <summary>Global vertical shift in mm applied to every printed value (per printer).</summary>
+        public decimal OffsetY { get => _offsetY; set { if (Set(ref _offsetY, value)) SaveOffsets(); } }
 
         // ── lifecycle ────────────────────────────────────────────────────────
         public void OnActivated()
@@ -128,6 +146,67 @@ namespace OptiPaie.Desktop.ViewModels
 
             SelectedEmployee = Employees.Count > 0 ? Employees[0] : null;
             if (Contributions.Count == 0) BuildGrid();
+
+            LoadPrinters();
+        }
+
+        // ── printer calibration ──────────────────────────────────────────────
+        private void LoadPrinters()
+        {
+            if (Printers.Count > 0) return;
+            string current = null;
+            try
+            {
+                foreach (string p in System.Drawing.Printing.PrinterSettings.InstalledPrinters)
+                    Printers.Add(p);
+                current = new System.Drawing.Printing.PrinterSettings().PrinterName;
+            }
+            catch { /* headless / no print subsystem — offsets still work via the default bucket */ }
+
+            if (Printers.Count == 0) Printers.Add("(imprimante par défaut)");
+            SelectedPrinter = !string.IsNullOrEmpty(current) && Printers.Contains(current) ? current : Printers[0];
+        }
+
+        private static string OffsetKey(string printer, char axis) =>
+            "ats.offset." + (string.IsNullOrEmpty(printer) ? "default" : printer.Replace('.', '_')) + "." + axis;
+
+        private void LoadOffsets()
+        {
+            _loadingOffsets = true;
+            try
+            {
+                _offsetX = ParseMm(_services.Settings.Get(OffsetKey(_selectedPrinter, 'x'), "0"));
+                _offsetY = ParseMm(_services.Settings.Get(OffsetKey(_selectedPrinter, 'y'), "0"));
+                Raise(nameof(OffsetX));
+                Raise(nameof(OffsetY));
+            }
+            finally { _loadingOffsets = false; }
+        }
+
+        private void SaveOffsets()
+        {
+            if (_loadingOffsets || string.IsNullOrEmpty(_selectedPrinter)) return;
+            _services.Settings.Set(OffsetKey(_selectedPrinter, 'x'), _offsetX.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            _services.Settings.Set(OffsetKey(_selectedPrinter, 'y'), _offsetY.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        }
+
+        private static decimal ParseMm(string s) =>
+            OptiPaie.Common.Text.FlexibleNumber.TryParse(s, out decimal v) ? v : 0m;
+
+        private void PrintCalibration()
+        {
+            try
+            {
+                string path = Path.Combine(Path.GetTempPath(), "OptiPaie_mire_calage.pdf");
+                _services.AtsDrtDocuments.GenerateCalibrationSheet((double)_offsetX, (double)_offsetY, path);
+                SetStatus("Mire de calage générée : " + path, false);
+                TryOpen(path);
+            }
+            catch (Exception ex)
+            {
+                _services.Logger.Error("Calibration sheet failed.", ex);
+                SetStatus("Échec de la mire de calage : " + ex.Message, true);
+            }
         }
 
         private void AutoFill()
@@ -212,46 +291,33 @@ namespace OptiPaie.Desktop.ViewModels
             var weekend = new Cert.WeekendConfig();
 
             string suggested = (_certType + "_" + (_empLastName ?? "") + "_" + _empFirstName + "_" +
-                _stoppageDate.ToString("ddMMyy")).Replace(" ", "_") + ".docx";
+                _stoppageDate.ToString("ddMMyy")).Replace(" ", "_") + ".pdf";
             foreach (char c in Path.GetInvalidFileNameChars()) suggested = suggested.Replace(c, '_');
 
-            var dialog = new SaveFileDialog { Filter = "Document Word (*.docx)|*.docx", FileName = suggested };
+            var dialog = new SaveFileDialog { Filter = "Document PDF (*.pdf)|*.pdf", FileName = suggested };
             if (dialog.ShowDialog() != true) return;
 
             try
             {
-                string docxPath;
+                // The PDF carries ONLY the values, placed at absolute mm — it prints ON TOP of the
+                // blank pre-printed CNAS form. The per-printer offset shifts every value together.
+                double ox = (double)_offsetX, oy = (double)_offsetY;
+                string pdfPath;
                 if (_certType == "ATS")
                 {
                     var contribs = new List<Cert.MonthlyContribution>();
                     foreach (ContributionRow r in Contributions) contribs.Add(r.ToModel());
-                    docxPath = _services.AtsDrtDocuments.GenerateAts(
-                        certCompany, certEmployee, stoppage, _hasResumedWork, contribs, weekend, dialog.FileName);
+                    pdfPath = _services.AtsDrtDocuments.GenerateAts(
+                        certCompany, certEmployee, stoppage, _hasResumedWork, contribs, weekend, ox, oy, dialog.FileName);
                 }
                 else
                 {
-                    docxPath = _services.AtsDrtDocuments.GenerateDrt(
-                        certCompany, certEmployee, stoppage, _hasResumedWork, _drtArabic, weekend, dialog.FileName);
+                    pdfPath = _services.AtsDrtDocuments.GenerateDrt(
+                        certCompany, certEmployee, stoppage, _hasResumedWork, weekend, ox, oy, dialog.FileName);
                 }
 
-                string opened = docxPath;
-                // Produce a print-ready PDF next to the .docx when Word is available.
-                if (_services.AtsDrtDocuments.IsWordAvailable)
-                {
-                    try
-                    {
-                        string pdfPath = Path.ChangeExtension(docxPath, ".pdf");
-                        _services.AtsDrtDocuments.ConvertToPdf(docxPath, pdfPath);
-                        opened = pdfPath;
-                    }
-                    catch (Exception ex)
-                    {
-                        _services.Logger.Warn("ATS/DRT PDF export failed: " + ex.Message);
-                    }
-                }
-
-                SetStatus("Document généré : " + opened, false);
-                TryOpen(opened);
+                SetStatus("Document généré : " + pdfPath, false);
+                TryOpen(pdfPath);
             }
             catch (Exception ex)
             {
@@ -271,22 +337,25 @@ namespace OptiPaie.Desktop.ViewModels
         /// <summary>Editable row of the ATS 12-month contribution grid (MSS = 9% live).</summary>
         public sealed class ContributionRow : ObservableObject
         {
-            private decimal? _hours, _absence, _contributionBase;
+            private decimal? _daysWorked, _contributionBase;
+            private string _absenceReason;
 
             public ContributionRow(Cert.MonthlyContribution model)
             {
                 MonthLabel = model.MonthLabel;
                 IsActive = model.IsActive;
-                _hours = model.HoursWorked;
-                _absence = model.AbsenceDays;
+                _daysWorked = model.DaysWorked;
+                _absenceReason = model.AbsenceReason;
                 _contributionBase = model.ContributionBase;
             }
 
             public string MonthLabel { get; }
             public bool IsActive { get; }
 
-            public decimal? Hours { get => _hours; set => Set(ref _hours, value); }
-            public decimal? Absence { get => _absence; set => Set(ref _absence, value); }
+            /// <summary>"Nombre de jours travaillés" — a day count (not hours).</summary>
+            public decimal? DaysWorked { get => _daysWorked; set => Set(ref _daysWorked, value); }
+            /// <summary>"Motif absences" — a free-text reason, blank if none.</summary>
+            public string AbsenceReason { get => _absenceReason; set => Set(ref _absenceReason, value); }
             public decimal? ContributionBase { get => _contributionBase; set { if (Set(ref _contributionBase, value)) Raise(nameof(EmployeeShare)); } }
 
             /// <summary>Live employee CNAS share = 9% of the base (same rule as the certificate).</summary>
@@ -297,8 +366,8 @@ namespace OptiPaie.Desktop.ViewModels
             {
                 MonthLabel = MonthLabel,
                 IsActive = IsActive,
-                HoursWorked = _hours,
-                AbsenceDays = _absence,
+                DaysWorked = _daysWorked,
+                AbsenceReason = _absenceReason,
                 ContributionBase = _contributionBase
             };
         }

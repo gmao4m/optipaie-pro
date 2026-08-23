@@ -251,7 +251,7 @@ namespace OptiPaie.Desktop.ViewModels.Performance
         }
 
         private static decimal? Parse(string s) =>
-            decimal.TryParse(s, NumberStyles.Any, L.Fr, out decimal v) ? v : (decimal?)null;
+            OptiPaie.Common.Text.FlexibleNumber.TryParse(s, out decimal v) ? v : (decimal?)null;
     }
 
     public sealed class BehaviorItem
@@ -397,14 +397,14 @@ namespace OptiPaie.Desktop.ViewModels.Performance
         public string WeightText
         {
             get => _c.WeightPercent.ToString("0.#", L.Fr);
-            set { _c.WeightPercent = decimal.TryParse(value, NumberStyles.Any, L.Fr, out decimal v) ? v : 0m; _changed(); }
+            set { _c.WeightPercent = OptiPaie.Common.Text.FlexibleNumber.TryParse(value, out decimal v) ? v : 0m; _changed(); }
         }
         public decimal WeightValue => _c.WeightPercent;
 
         public string TargetText
         {
             get => _c.KpiTarget.HasValue ? _c.KpiTarget.Value.ToString("0.###", L.Fr) : string.Empty;
-            set { _c.KpiTarget = decimal.TryParse(value, NumberStyles.Any, L.Fr, out decimal v) ? v : (decimal?)null; }
+            set { _c.KpiTarget = OptiPaie.Common.Text.FlexibleNumber.TryParse(value, out decimal v) ? v : (decimal?)null; }
         }
 
         public EvalCriterion ToEntity() => _c;

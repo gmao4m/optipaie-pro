@@ -147,8 +147,7 @@ namespace OptiPaie.Desktop.ViewModels
 
         private void Save()
         {
-            if (!decimal.TryParse((_value ?? string.Empty).Replace(" ", "").Replace(',', '.'),
-                    NumberStyles.Any, CultureInfo.InvariantCulture, out decimal value))
+            if (!OptiPaie.Common.Text.FlexibleNumber.TryParse(_value, out decimal value))
             {
                 Dialogs.Error("Valeur invalide.");
                 return;
