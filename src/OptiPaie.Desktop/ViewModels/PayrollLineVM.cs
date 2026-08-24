@@ -17,7 +17,7 @@ namespace OptiPaie.Desktop.ViewModels
     {
         private readonly Action _changed;
         private string _rubrique;
-        private decimal? _base;
+        private string _base;
         private string _taux;
 
         public PayrollLineVM(Action changed)
@@ -44,11 +44,22 @@ namespace OptiPaie.Desktop.ViewModels
             set => Set(ref _rubrique, value);
         }
 
-        public decimal? Base
+        /// <summary>
+        /// Base as free text — bound directly to the grid (no value converter), exactly like
+        /// <see cref="Taux"/>. A raw string never rejects a keystroke, so the comma (26,5) or dot
+        /// (26.5) is always accepted whatever the Windows locale; the numeric value is parsed on the
+        /// fly by <see cref="BaseValue"/>. (A decimal binding + converter got the separator eaten
+        /// mid-typing inside the DataGrid — the exact blocker the client hit.)
+        /// </summary>
+        public string Base
         {
             get => _base;
             set { if (Set(ref _base, value)) { RaiseAmounts(); _changed?.Invoke(); } }
         }
+
+        /// <summary>The Base text as a number — comma or dot accepted; 0 when blank/invalid.</summary>
+        public decimal BaseValue =>
+            OptiPaie.Common.Text.FlexibleNumber.TryParse(_base, out decimal b) ? b : 0m;
 
         /// <summary>Rate text — "2" (multiplier) or "10%" (percentage).</summary>
         public string Taux
@@ -61,7 +72,7 @@ namespace OptiPaie.Desktop.ViewModels
         {
             get
             {
-                decimal b = _base ?? 0m;
+                decimal b = BaseValue;
                 decimal? factor = ParseFactor(_taux);
                 return factor.HasValue ? b * factor.Value : b;
             }

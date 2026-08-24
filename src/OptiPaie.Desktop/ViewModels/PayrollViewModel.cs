@@ -210,7 +210,7 @@ namespace OptiPaie.Desktop.ViewModels
                 IsBaseSalary = true,
                 IsGain = true,
                 Rubrique = "Salaire de base",
-                Base = SelectedEmployee.BaseSalary
+                Base = FmtBase(SelectedEmployee.BaseSalary)
             });
 
             foreach (EmployeeElement assignment in _services.Employees.GetElements(SelectedEmployee.Id))
@@ -231,7 +231,7 @@ namespace OptiPaie.Desktop.ViewModels
                     ElementId = el.Id,
                     IsGain = el.ElementType == ElementType.Gain,
                     Rubrique = el.NameFr,
-                    Base = assignment.Amount ?? el.DefaultAmount ?? 0m
+                    Base = FmtBase(assignment.Amount ?? el.DefaultAmount ?? 0m)
                 });
             }
 
@@ -250,7 +250,7 @@ namespace OptiPaie.Desktop.ViewModels
                         IsLoan = true,
                         IsGain = false,
                         Rubrique = "Remboursement prêt",
-                        Base = loanDue
+                        Base = FmtBase(loanDue)
                     });
                 }
             }
@@ -272,7 +272,7 @@ namespace OptiPaie.Desktop.ViewModels
                 ElementId = el.Id,
                 IsGain = el.ElementType == ElementType.Gain,
                 Rubrique = el.NameFr,
-                Base = el.DefaultAmount ?? 0m
+                Base = FmtBase(el.DefaultAmount ?? 0m)
             });
 
             Recompute();
@@ -537,7 +537,7 @@ namespace OptiPaie.Desktop.ViewModels
                 model.Lines.Add(new FicheLineModel
                 {
                     Label = line.Rubrique,
-                    BaseText = (line.Base ?? 0m).ToString("N2", Fr),
+                    BaseText = line.BaseValue.ToString("N2", Fr),
                     TauxText = string.IsNullOrWhiteSpace(line.Taux) ? string.Empty : line.Taux.Trim(),
                     Gain = line.IsGain ? line.Amount : (decimal?)null,
                     Retenue = line.IsGain ? (decimal?)null : line.Amount
@@ -571,6 +571,10 @@ namespace OptiPaie.Desktop.ViewModels
         }
 
         private static string Money(decimal v) => v.ToString("N2", Fr) + " DA";
+
+        /// <summary>Seeds the editable Base cell as clean 2-decimal text (the user may re-type it
+        /// afterwards with a comma or a dot — <see cref="PayrollLineVM.BaseValue"/> parses both).</summary>
+        private static string FmtBase(decimal v) => v.ToString("0.00", Fr);
 
         private static List<EnumOption> BuildMonths()
         {

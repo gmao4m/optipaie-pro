@@ -12,6 +12,12 @@ namespace OptiPaie.Tests
     [TestFixture]
     public sealed class FlexibleNumberTests
     {
+        [TestCase("26,5", 26.5)]
+        [TestCase("26.5", 26.5)]
+        [TestCase("10,5", 10.5)]
+        [TestCase("10.5", 10.5)]
+        [TestCase("0", 0)]
+        [TestCase("0,00", 0)]
         [TestCase("1250,50", 1250.50)]
         [TestCase("1250.50", 1250.50)]
         [TestCase("1250", 1250)]
@@ -55,6 +61,20 @@ namespace OptiPaie.Tests
                 }
                 finally { Thread.CurrentThread.CurrentCulture = prev; }
             }
+        }
+
+        [Test]
+        public void PayrollBaseTimesRate_CommaEqualsDot_ToTheCentime()
+        {
+            // Client case: Base 10,5 × Taux 1000 = 10 500,00 ; and 26,5 jours == 26.5 jours.
+            Assert.That(FlexibleNumber.TryParse("10,5", out decimal baseComma), Is.True);
+            Assert.That(FlexibleNumber.TryParse("10.5", out decimal baseDot), Is.True);
+            Assert.That(baseComma, Is.EqualTo(baseDot));
+            Assert.That(baseComma * 1000m, Is.EqualTo(10500m));
+
+            FlexibleNumber.TryParse("26,5", out decimal jComma);
+            FlexibleNumber.TryParse("26.5", out decimal jDot);
+            Assert.That(jComma, Is.EqualTo(jDot).And.EqualTo(26.5m));
         }
 
         [Test]

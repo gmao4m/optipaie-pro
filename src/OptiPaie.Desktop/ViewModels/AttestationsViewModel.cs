@@ -337,39 +337,48 @@ namespace OptiPaie.Desktop.ViewModels
         /// <summary>Editable row of the ATS 12-month contribution grid (MSS = 9% live).</summary>
         public sealed class ContributionRow : ObservableObject
         {
-            private decimal? _daysWorked, _contributionBase;
-            private string _absenceReason;
+            // Numeric cells are raw strings bound directly to the grid (like the payroll worksheet):
+            // a string never rejects a keystroke, so comma OR dot is always accepted whatever the
+            // Windows locale, and the number is parsed on the fly by FlexibleNumber.
+            private string _daysWorked, _contributionBase, _absenceReason;
 
             public ContributionRow(Cert.MonthlyContribution model)
             {
                 MonthLabel = model.MonthLabel;
                 IsActive = model.IsActive;
-                _daysWorked = model.DaysWorked;
+                _daysWorked = Fmt(model.DaysWorked);
                 _absenceReason = model.AbsenceReason;
-                _contributionBase = model.ContributionBase;
+                _contributionBase = Fmt(model.ContributionBase);
             }
 
             public string MonthLabel { get; }
             public bool IsActive { get; }
 
-            /// <summary>"Nombre de jours travaillés" — a day count (not hours).</summary>
-            public decimal? DaysWorked { get => _daysWorked; set => Set(ref _daysWorked, value); }
+            /// <summary>"Nombre de jours travaillés" — a day count (comma or dot accepted).</summary>
+            public string DaysWorked { get => _daysWorked; set => Set(ref _daysWorked, value); }
             /// <summary>"Motif absences" — a free-text reason, blank if none.</summary>
             public string AbsenceReason { get => _absenceReason; set => Set(ref _absenceReason, value); }
-            public decimal? ContributionBase { get => _contributionBase; set { if (Set(ref _contributionBase, value)) Raise(nameof(EmployeeShare)); } }
+            /// <summary>"Salaire soumis à cotisations" (comma or dot accepted).</summary>
+            public string ContributionBase { get => _contributionBase; set { if (Set(ref _contributionBase, value)) Raise(nameof(EmployeeShare)); } }
 
             /// <summary>Live employee CNAS share = 9% of the base (same rule as the certificate).</summary>
-            public decimal? EmployeeShare => _contributionBase.HasValue
-                ? Math.Round(_contributionBase.Value * 0.09m, 2) : (decimal?)null;
+            public decimal? EmployeeShare => ParseNum(_contributionBase) is decimal b
+                ? Math.Round(b * 0.09m, 2) : (decimal?)null;
 
             public Cert.MonthlyContribution ToModel() => new Cert.MonthlyContribution
             {
                 MonthLabel = MonthLabel,
                 IsActive = IsActive,
-                DaysWorked = _daysWorked,
+                DaysWorked = ParseNum(_daysWorked),
                 AbsenceReason = _absenceReason,
-                ContributionBase = _contributionBase
+                ContributionBase = ParseNum(_contributionBase)
             };
+
+            private static decimal? ParseNum(string s) =>
+                OptiPaie.Common.Text.FlexibleNumber.TryParse(s, out decimal v) ? v : (decimal?)null;
+
+            private static string Fmt(decimal? v) =>
+                v.HasValue ? v.Value.ToString("0.##", System.Globalization.CultureInfo.GetCultureInfo("fr-FR")) : string.Empty;
         }
     }
 }
