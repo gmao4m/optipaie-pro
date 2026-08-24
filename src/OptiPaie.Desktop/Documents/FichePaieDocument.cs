@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using OptiPaie.Core.Entities;
@@ -10,37 +11,36 @@ using QuestPDF.Infrastructure;
 namespace OptiPaie.Desktop.Documents
 {
     /// <summary>
-    /// The Algerian Fiche de Paie (A4) — a modern bulletin matching the product's
-    /// navy/teal identity: a coloured header band, light field-style employee boxes, a
-    /// rule-only earnings table (no cell grid, no Code column) with a TOTAL row, a compact
-    /// right-aligned summary, and a dominant navy "NET À PAYER" bar.
+    /// The Algerian Fiche de Paie (A4, one page). EVERYTHING lives in a single table, in the
+    /// order a comptable reads it: earnings → SALAIRE BRUT → salaire soumis à cotisation →
+    /// CNAS → SALAIRE IMPOSABLE → IRG → other deductions → TOTAL GAINS / TOTAL RETENUES →
+    /// NET À PAYER. Base and Taux are shown on every line that has them (CNAS/IRG included).
     ///
-    /// PRESENTATION ONLY — it renders the values it is given and computes nothing except
-    /// the display TOTAL of the already-computed line gains/retenues. The payroll engine,
-    /// its formulas, and every number are unchanged. Fixed layout → prints identically.
+    /// The abattement does NOT appear anywhere — it stays inside the engine's IRG computation.
+    /// The slip is self-verifying: NET À PAYER = TOTAL GAINS − TOTAL RETENUES, with no hidden term.
+    ///
+    /// PRESENTATION ONLY — every number comes from the already-computed model; the payroll engine
+    /// and its formulas are untouched, so the net is byte-for-byte the same as before.
     /// </summary>
     public sealed class FichePaieDocument
     {
-        // Brand identity (same emerald/gold palette as the rest of the app). The constant
-        // names are kept historical; their values are the current landing-page identity:
-        // a deep-emerald header/net band ("Navy") and a warm-gold highlight ("Teal").
-        private const string Navy = "#0E3B2C";
-        private const string Teal = "#E3B341";
+        private const string Navy = "#0E3B2C";   // deep emerald — header/net band
+        private const string Teal = "#E3B341";   // warm gold — period highlight
         private const string Ink = "#182B26";
         private const string Muted = "#5B6B66";
         private const string Divider = "#E4E1DA";
         private const string SoftFill = "#F5F4F0";
+        private const string BandFill = "#D5E4DA";   // intermediate-total bands (distinct from normal rows)
         private const string HeadFill = "#F2F1EC";
         private const string White = "#FFFFFF";
-        private const string Mono = PdfFonts.Mono; // tabular figures — bundled IBM Plex Mono
+        private const string Mono = PdfFonts.Mono;
 
         private static readonly CultureInfo Fr = CultureInfo.GetCultureInfo("fr-FR");
 
         private readonly FichePaieModel _m;
 
-        // Optional CACOBATPH overlay (BTPH sector, opt-in). Purely additive and read-only:
-        // computed from the already-calculated CNAS base. When off, the payslip is byte-for-byte
-        // identical to before — nothing below runs.
+        // CACOBATPH overlay (BTPH sector, opt-in): the employee share is a real deduction, so it
+        // appears as its own retenue line ONLY when enabled — keeping the net verifiable.
         private readonly bool _cacobatphOn;
         private readonly CacobatphResult _cacobatph;
 
@@ -51,28 +51,31 @@ namespace OptiPaie.Desktop.Documents
             _cacobatph = _cacobatphOn ? CacobatphCalculator.Compute(model.BaseCotisable) : null;
         }
 
-        /// <summary>The net actually paid: the engine's net, minus the CACOBATPH employee share when enabled.</summary>
-        private decimal NetToPay => _cacobatphOn ? _m.NetSalaire - _cacobatph.EmployeeTotal : _m.NetSalaire;
+        private decimal CacobatphEmployee => _cacobatphOn ? _cacobatph.EmployeeTotal : 0m;
+
+        private List<FicheLineModel> GainLines => _m.Lines.Where(l => l.Gain.HasValue).ToList();
+        private List<FicheLineModel> RetenueLines => _m.Lines.Where(l => l.Retenue.HasValue).ToList();
+
+        private decimal TotalGains => GainLines.Sum(l => l.Gain ?? 0m);
+        private decimal TotalRetenues =>
+            _m.CnasEmployee + _m.Irg + CacobatphEmployee + RetenueLines.Sum(l => l.Retenue ?? 0m);
+        private decimal NetToPay => TotalGains - TotalRetenues;
 
         public void Compose(IDocumentContainer container)
         {
             container.Page(page =>
             {
                 page.Size(PageSizes.A4);
-                page.Margin(26);
-                // IBM Plex Sans for the French bulletin; its Arabic sibling (which also
-                // carries a full Latin set) for the Arabic bulletin, so Arabic glyphs never
-                // fall back. Family only — no layout, value or number-format change.
+                page.Margin(24);
                 page.DefaultTextStyle(t => t.FontFamily(_m.IsArabic ? PdfFonts.SansArabic : PdfFonts.Sans).FontSize(9).FontColor(Ink));
 
                 page.Content().Column(col =>
                 {
                     col.Item().Element(Header);
-                    col.Item().PaddingTop(12).Element(EmployeeInfo);
-                    col.Item().PaddingTop(12).Element(MainTable);
-                    col.Item().PaddingTop(10).Element(Summary);
-                    col.Item().PaddingTop(10).Element(NetBar);
-                    col.Item().PaddingTop(12).Element(Stamp);
+                    col.Item().PaddingTop(10).Element(EmployeeInfo);
+                    col.Item().PaddingTop(10).Element(MainTable);
+                    col.Item().PaddingTop(8).Element(NetBar);
+                    col.Item().PaddingTop(16).Element(Stamp);
                 });
             });
         }
@@ -85,25 +88,19 @@ namespace OptiPaie.Desktop.Documents
             {
                 col.Item().Row(row =>
                 {
-                    row.ConstantItem(56).Height(56).AlignMiddle().Element(e =>
-                    {
-                        if (_m.Company?.Logo != null && _m.Company.Logo.Length > 0)
-                        {
-                            e.MaxHeight(56).Image(_m.Company.Logo);
-                        }
-                    });
+                    if (_m.Company?.Logo != null && _m.Company.Logo.Length > 0)
+                        row.ConstantItem(50).Height(50).AlignMiddle().MaxHeight(50).Image(_m.Company.Logo);
 
-                    row.RelativeItem().PaddingLeft(16).AlignMiddle().Column(cc =>
+                    row.RelativeItem().PaddingLeft(_m.Company?.Logo != null ? 14 : 0).AlignMiddle().Column(cc =>
                     {
-                        cc.Item().Text(CompanyName()).FontSize(17).Bold().FontColor(Navy);
-                        cc.Item().PaddingTop(2).Text(CompanyAddress()).FontSize(9).FontColor(Muted);
+                        cc.Item().Text(CompanyName()).FontSize(16).Bold().FontColor(Navy);
+                        cc.Item().PaddingTop(1).Text(CompanyAddress()).FontSize(9).FontColor(Muted);
                         if (!string.IsNullOrWhiteSpace(_m.Company?.CnasEmployerNumber))
                             cc.Item().Text("N° Adhérent CNAS : " + _m.Company.CnasEmployerNumber).FontSize(8.5f).FontColor(Muted);
                     });
                 });
 
-                // Full-width brand band: title left, period right.
-                col.Item().PaddingTop(10).Background(Navy).PaddingVertical(8).PaddingHorizontal(14).Row(row =>
+                col.Item().PaddingTop(9).Background(Navy).PaddingVertical(7).PaddingHorizontal(14).Row(row =>
                 {
                     row.RelativeItem().AlignMiddle().Text("BULLETIN DE PAIE").FontSize(13).Bold().FontColor(White);
                     row.AutoItem().AlignMiddle().Text(t =>
@@ -115,87 +112,103 @@ namespace OptiPaie.Desktop.Documents
             });
         }
 
-        // -- employee info (light field boxes, no grid) ----------------------------
+        // -- employee identity (two columns, label : value) ------------------------
 
         private void EmployeeInfo(IContainer c)
         {
-            c.Column(col =>
+            c.Border(0.75f).BorderColor(Divider).Background(SoftFill).Padding(2).Row(row =>
             {
-                col.Item().Row(row =>
+                row.RelativeItem().Column(left =>
                 {
-                    row.RelativeItem().PaddingRight(9).Column(left =>
-                    {
-                        left.Item().Element(e => Field(e, "Matricule", Matricule()));
-                        left.Item().Element(e => Field(e, "Nom et prénom", EmployeeName()));
-                        left.Item().Element(e => Field(e, "Situation familiale", SituationFamiliale()));
-                    });
-                    row.RelativeItem().PaddingLeft(9).Column(rightc =>
-                    {
-                        rightc.Item().Element(e => Field(e, "Fonction", Value(_m.Employee?.Poste)));
-                        rightc.Item().Element(e => Field(e, "Date d'entrée", HireDate()));
-                        rightc.Item().Element(e => Field(e, "N° Sécurité Sociale", Value(_m.Employee?.Nss)));
-                    });
+                    Id(left, "Matricule", Matricule());
+                    Id(left, "Nom et prénom", EmployeeName());
+                    Id(left, "N° Sécurité Soc.", Value(_m.Employee?.Nss));
+                    Id(left, "Situation fam.", SituationFamiliale());
                 });
-
-                col.Item().Row(row =>
+                row.RelativeItem().Column(rightc =>
                 {
-                    row.RelativeItem().PaddingRight(9).Element(e => Field(e, "Affectation", Value(_m.Employee?.Category)));
-                    row.RelativeItem().PaddingLeft(9).Element(e => Field(e, "N° Compte", Value(_m.Employee?.Rib)));
+                    Id(rightc, "Fonction", Value(_m.Employee?.Poste));
+                    Id(rightc, "Catégorie", Value(_m.Employee?.Category));
+                    Id(rightc, "Date d'entrée", HireDate());
+                    Id(rightc, "N° Compte", Value(_m.Employee?.Rib));
                 });
             });
         }
 
-        private static void Field(IContainer c, string label, string value)
+        private static void Id(ColumnDescriptor col, string label, string value)
         {
-            c.PaddingBottom(5).Column(col =>
+            col.Item().PaddingVertical(2).PaddingHorizontal(8).Row(row =>
             {
-                col.Item().Text(label).FontSize(8).SemiBold().FontColor(Muted);
-                col.Item().PaddingTop(2).Background(SoftFill).BorderBottom(1.4f).BorderColor(Divider)
-                    .PaddingVertical(4).PaddingHorizontal(9)
-                    .Text(string.IsNullOrWhiteSpace(value) ? "—" : value).FontSize(10).FontColor(Ink);
+                row.ConstantItem(96).Text(label).FontSize(8.5f).SemiBold().FontColor(Muted);
+                row.AutoItem().Text(":").FontSize(8.5f).FontColor(Muted);
+                row.RelativeItem().PaddingLeft(6).Text(string.IsNullOrWhiteSpace(value) ? "—" : value).FontSize(9).FontColor(Ink);
             });
         }
 
-        // -- earnings / deductions (rule-only, TOTAL row) --------------------------
+        // -- the single table ------------------------------------------------------
 
         private void MainTable(IContainer c)
         {
-            decimal totalGain = _m.Lines.Sum(l => l.Gain ?? 0m);
-            decimal totalRetenue = _m.Lines.Sum(l => l.Retenue ?? 0m);
-
             c.Table(table =>
             {
                 table.ColumnsDefinition(cols =>
                 {
-                    cols.RelativeColumn(3.6f);
-                    cols.RelativeColumn(1.3f);
-                    cols.RelativeColumn(1.1f);
-                    cols.RelativeColumn(1.5f);
-                    cols.RelativeColumn(1.5f);
+                    cols.RelativeColumn(3.5f);  // Libellé
+                    cols.RelativeColumn(1.3f);  // Base
+                    cols.RelativeColumn(1.1f);  // Taux
+                    cols.RelativeColumn(1.5f);  // Gain
+                    cols.RelativeColumn(1.5f);  // Retenue
                 });
 
-                // Header — light fill, strong navy underline, no vertical borders.
-                Th(table.Cell(), "Libellé", false);
-                Th(table.Cell(), "N/Base", true);
-                Th(table.Cell(), "Taux", true);
-                Th(table.Cell(), "Gain", true);
-                Th(table.Cell(), "Retenue", true);
+                // EVERY cell is positioned explicitly (Row + Column). The auto-placement cursor,
+                // combined with the full-width ColumnSpan bands, was fragile and could put a
+                // value on the wrong row (label/amount mismatch). Explicit coordinates make the
+                // layout deterministic and identical in the PDF and image backends.
+                uint r = 1;
 
-                foreach (FicheLineModel line in _m.Lines)
+                Th(table.Cell().Row(r).Column(1), "Libellé", false);
+                Th(table.Cell().Row(r).Column(2), "Base", true);
+                Th(table.Cell().Row(r).Column(3), "Taux", true);
+                Th(table.Cell().Row(r).Column(4), "Gain", true);
+                Th(table.Cell().Row(r).Column(5), "Retenue", true);
+                r++;
+
+                // 1) Earnings
+                foreach (FicheLineModel l in GainLines)
+                    RowAt(table, r++, l.Label, l.BaseText, l.TauxText, l.Gain, null);
+
+                // 2) SALAIRE BRUT + salaire soumis à cotisation
+                BandAt(table, r++, "SALAIRE BRUT", TotalGains, true);
+                BandAt(table, r++, "Salaire soumis à cotisation", _m.BaseCotisable, false);
+
+                // 3) CNAS (base + taux shown) [+ CACOBATPH employee share when enabled]
+                RowAt(table, r++, "Retenue CNAS", Money(_m.BaseCotisable), "9 %", null, _m.CnasEmployee);
+                if (_cacobatphOn)
+                    RowAt(table, r++, "CACOBATPH (part salarié)", Money(_m.BaseCotisable), null, null, _cacobatph.EmployeeTotal);
+
+                // 4) SALAIRE IMPOSABLE
+                BandAt(table, r++, "SALAIRE IMPOSABLE", _m.BaseImposable, false);
+
+                // 5) IRG (alone on its row) + other deductions
+                RowAt(table, r++, "IRG", Money(_m.BaseImposable), "barème", null, _m.Irg);
+                foreach (FicheLineModel l in RetenueLines)
+                    RowAt(table, r++, l.Label, l.BaseText, l.TauxText, null, l.Retenue);
+
+                // 6) TOTAL GAINS | TOTAL RETENUES (two halves, full width)
+                table.Cell().Row(r).Column(1).ColumnSpan(5).BorderTop(1.3f).BorderColor(Navy).PaddingTop(4).Row(row =>
                 {
-                    Td(table.Cell(), line.Label, false, false);
-                    Td(table.Cell(), line.BaseText, true, true);
-                    Td(table.Cell(), line.TauxText, true, true);
-                    Td(table.Cell(), MoneyOrEmpty(line.Gain), true, true);
-                    Td(table.Cell(), MoneyOrEmpty(line.Retenue), true, true);
-                }
-
-                // TOTAL row — bold, navy top rule, sums of the lines above (display only).
-                Tt(table.Cell(), "TOTAL", false, false);
-                Tt(table.Cell(), string.Empty, true, false);
-                Tt(table.Cell(), string.Empty, true, false);
-                Tt(table.Cell(), Money(totalGain), true, true);
-                Tt(table.Cell(), Money(totalRetenue), true, true);
+                    row.RelativeItem().Background(HeadFill).PaddingVertical(6).PaddingHorizontal(10).Row(rr =>
+                    {
+                        rr.RelativeItem().Text("TOTAL GAINS").FontSize(10).Bold().FontColor(Navy);
+                        rr.AutoItem().Text(Money(TotalGains)).FontFamily(Mono).FontSize(10.5f).Bold().FontColor(Ink);
+                    });
+                    row.ConstantItem(10);
+                    row.RelativeItem().Background(HeadFill).PaddingVertical(6).PaddingHorizontal(10).Row(rr =>
+                    {
+                        rr.RelativeItem().Text("TOTAL RETENUES").FontSize(10).Bold().FontColor(Navy);
+                        rr.AutoItem().Text(Money(TotalRetenues)).FontFamily(Mono).FontSize(10.5f).Bold().FontColor(Ink);
+                    });
+                });
             });
         }
 
@@ -206,88 +219,71 @@ namespace OptiPaie.Desktop.Documents
             cell.Text(text).FontSize(8.5f).Bold().FontColor(Navy);
         }
 
-        private static void Td(IContainer c, string text, bool right, bool mono)
+        /// <summary>One data line at row <paramref name="r"/>: Libellé | Base | Taux | Gain | Retenue.
+        /// Label and amount share the SAME row by construction (explicit column indices).</summary>
+        private void RowAt(TableDescriptor table, uint r, string label, string baseText, string tauxText, decimal? gain, decimal? retenue)
         {
-            IContainer cell = c.BorderBottom(0.6f).BorderColor(Divider).PaddingVertical(4).PaddingHorizontal(8);
+            Cell(table.Cell().Row(r).Column(1), label, false, false);
+            Cell(table.Cell().Row(r).Column(2), baseText, true, true);
+            Cell(table.Cell().Row(r).Column(3), tauxText, true, false);
+            Cell(table.Cell().Row(r).Column(4), gain.HasValue ? Money(gain.Value) : string.Empty, true, true);
+            Cell(table.Cell().Row(r).Column(5), retenue.HasValue ? Money(retenue.Value) : string.Empty, true, true);
+        }
+
+        private static void Cell(IContainer c, string text, bool right, bool mono)
+        {
+            IContainer cell = c.BorderBottom(0.6f).BorderColor(Divider).PaddingVertical(3.5f).PaddingHorizontal(8);
             if (right) cell = cell.AlignRight();
             var span = cell.Text(text ?? string.Empty).FontSize(9).FontColor(Ink);
             if (mono) span.FontFamily(Mono);
         }
 
-        private static void Tt(IContainer c, string text, bool right, bool mono)
+        /// <summary>A full-width intermediate-total band spanning every column, at row <paramref name="r"/>.
+        /// SALAIRE BRUT is a filled navy bar; the other two are clearly banded (medium fill + navy
+        /// rules top and bottom) so they never blend with an ordinary line.</summary>
+        private void BandAt(TableDescriptor table, uint r, string label, decimal amount, bool strong)
         {
-            IContainer cell = c.BorderTop(1.2f).BorderColor(Navy).PaddingVertical(5).PaddingHorizontal(8);
-            if (right) cell = cell.AlignRight();
-            var span = cell.Text(text ?? string.Empty).FontSize(9.5f).Bold().FontColor(Ink);
-            if (mono) span.FontFamily(Mono);
-        }
-
-        // -- summary (compact, right-aligned, no grid) -----------------------------
-
-        private void Summary(IContainer c)
-        {
-            c.Row(row =>
+            IContainer cell = table.Cell().Row(r).Column(1).ColumnSpan(5);
+            cell = strong
+                ? cell.Background(Navy)
+                : cell.Background(BandFill).BorderTop(1f).BorderBottom(1f).BorderColor(Navy);
+            cell.PaddingVertical(strong ? 5.5f : 5f).PaddingHorizontal(10).Row(row =>
             {
-                row.RelativeItem(1.15f); // whitespace on the left
-                row.RelativeItem(1f).Column(s =>
-                {
-                    SummaryLine(s, "Salaire brut", _m.SalaireBrut);
-                    SummaryLine(s, "Salaire cotisable", _m.BaseCotisable);
-                    SummaryLine(s, "Salaire imposable", _m.BaseImposable);
-                    SummaryLine(s, "CNAS", _m.CnasEmployee);
-
-                    // CACOBATPH (BTPH sector, opt-in) — two additive lines directly after CNAS,
-                    // on the same base. Only rendered when the company enabled it.
-                    if (_cacobatphOn)
-                    {
-                        SummaryLine(s, "CACOBATPH — Congé Payé (12,21 %)", _cacobatph.CongePaye);
-                        SummaryLine(s, "CACOBATPH — Chômage-Intempéries (0,75 %)", _cacobatph.ChomageEmployer + _cacobatph.ChomageEmployee);
-                    }
-
-                    SummaryLine(s, "Abattement", _m.Abattement);
-                    SummaryLine(s, "IRG", _m.Irg);
-                });
+                row.RelativeItem().AlignMiddle().Text(label).FontSize(strong ? 10.5f : 9.5f).Bold()
+                    .FontColor(strong ? White : Navy);
+                row.AutoItem().AlignMiddle().Text(Money(amount) + " DA").FontFamily(Mono).FontSize(strong ? 11 : 10).Bold()
+                    .FontColor(strong ? White : Navy);
             });
         }
 
-        private static void SummaryLine(ColumnDescriptor col, string label, decimal value)
-        {
-            col.Item().BorderBottom(0.6f).BorderColor(Divider).PaddingVertical(3).Row(row =>
-            {
-                row.RelativeItem().AlignMiddle().Text(label).FontSize(9.5f).FontColor(Muted);
-                row.ConstantItem(120).AlignRight().AlignMiddle()
-                    .Text(Money(value) + " DA").FontFamily(Mono).FontSize(9.5f).FontColor(Ink);
-            });
-        }
-
-        // -- net à payer (dominant navy bar) ---------------------------------------
+        // -- net à payer -----------------------------------------------------------
 
         private void NetBar(IContainer c)
         {
             c.Background(Navy).PaddingVertical(11).PaddingHorizontal(16).Row(row =>
             {
                 row.RelativeItem().AlignMiddle().Text("NET À PAYER").FontSize(14).Bold().FontColor(White);
-                row.AutoItem().AlignMiddle()
-                    .Text(Money(NetToPay) + " DA").FontFamily(Mono).FontSize(18).Bold().FontColor(White);
+                row.AutoItem().AlignMiddle().Text(Money(NetToPay) + " DA").FontFamily(Mono).FontSize(18).Bold().FontColor(White);
             });
         }
-
-        // -- stamp (small, bottom-right) -------------------------------------------
 
         private void Stamp(IContainer c)
         {
             c.Row(row =>
             {
-                row.RelativeItem(2.4f);
-                row.RelativeItem(1f).Border(0.75f).BorderColor(Divider).MinHeight(48).Padding(8)
-                    .Text("Cachet de l'entreprise").FontSize(8).FontColor(Muted);
+                row.RelativeItem(2.2f);
+                row.RelativeItem(1f).AlignCenter().Column(col =>
+                {
+                    col.Item().Height(46);
+                    col.Item().BorderTop(0.75f).BorderColor(Divider).PaddingTop(4).AlignCenter()
+                        .Text("Cachet et signature\nde l'employeur").FontSize(8.5f).FontColor(Muted);
+                });
             });
         }
 
-        // -- text helpers (unchanged formatting) -----------------------------------
+        // -- helpers ---------------------------------------------------------------
 
         private static string Money(decimal v) => v.ToString("N2", Fr);
-        private static string MoneyOrEmpty(decimal? v) => v.HasValue ? v.Value.ToString("N2", Fr) : string.Empty;
         private static string Value(string s) => string.IsNullOrWhiteSpace(s) ? "—" : s;
 
         private string CompanyName()
@@ -319,10 +315,7 @@ namespace OptiPaie.Desktop.Documents
             return (e == null || e.Id <= 0) ? "—" : e.Id.ToString("0000", Fr);
         }
 
-        private string HireDate()
-        {
-            return _m.Employee == null ? "—" : _m.Employee.HireDate.ToString("dd/MM/yyyy", Fr);
-        }
+        private string HireDate() => _m.Employee == null ? "—" : _m.Employee.HireDate.ToString("dd/MM/yyyy", Fr);
 
         private string SituationFamiliale()
         {
@@ -340,16 +333,10 @@ namespace OptiPaie.Desktop.Documents
         private string PeriodLabel()
         {
             if (_m.Month < 1 || _m.Month > 12)
-            {
                 return _m.Month.ToString("00", CultureInfo.InvariantCulture) + "/" + _m.Year;
-            }
 
             string month = Fr.DateTimeFormat.GetMonthName(_m.Month);
-            if (month.Length > 0)
-            {
-                month = char.ToUpper(month[0], Fr) + month.Substring(1);
-            }
-
+            if (month.Length > 0) month = char.ToUpper(month[0], Fr) + month.Substring(1);
             return month + " " + _m.Year;
         }
     }
