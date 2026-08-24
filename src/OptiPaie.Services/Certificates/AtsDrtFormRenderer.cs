@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using OptiPaie.Core.Certificates;
 using SkiaSharp;
+using SkiaSharp.HarfBuzz;
 
 namespace OptiPaie.Services.Certificates
 {
@@ -132,6 +133,24 @@ namespace OptiPaie.Services.Certificates
         public static void RenderProofPng(FormPage page, IDictionary<string, string> values,
             string backgroundImagePath, double offsetXmm, double offsetYmm, int dpi, string outPngPath)
         {
+            RenderProofPng(page, values, backgroundImagePath, offsetXmm, offsetYmm, dpi, outPngPath, new SKColor(210, 0, 0));
+        }
+
+        /// <summary>Print-preview image: the pre-printed form with the values in BLACK ink —
+        /// exactly what the paper looks like after the printer lays the ink over it.</summary>
+        public static void RenderPrintPreviewPng(FormPage page, IDictionary<string, string> values,
+            string backgroundImagePath, double offsetXmm, double offsetYmm, int dpi, string outPngPath)
+        {
+            RenderProofPng(page, values, backgroundImagePath, offsetXmm, offsetYmm, dpi, outPngPath, SKColors.Black);
+        }
+
+        /// <summary>
+        /// Same overlay at an explicit ink colour — pass black to preview exactly what physically
+        /// prints onto the pre-printed form (the ink over the paper), red to make a proof stand out.
+        /// </summary>
+        public static void RenderProofPng(FormPage page, IDictionary<string, string> values,
+            string backgroundImagePath, double offsetXmm, double offsetYmm, int dpi, string outPngPath, SKColor inkColor)
+        {
             double u = dpi / 25.4;
             int wpx = (int)Math.Round(page.WidthMm * u);
             int hpx = (int)Math.Round(page.HeightMm * u);
@@ -148,7 +167,7 @@ namespace OptiPaie.Services.Certificates
                             if (bg != null) canvas.DrawBitmap(bg, new SKRect(0, 0, wpx, hpx));
                         }
                     }
-                    DrawPage(canvas, page, values, u, offsetXmm, offsetYmm, new SKColor(210, 0, 0));
+                    DrawPage(canvas, page, values, u, offsetXmm, offsetYmm, inkColor);
                 }
                 using (var img = SKImage.FromBitmap(bmp))
                 using (var data = img.Encode(SKEncodedImageFormat.Png, 92))
@@ -258,13 +277,86 @@ namespace OptiPaie.Services.Certificates
                     left + (float)(zoneWidthMm * u), baseY + p.TextSize * 0.5f);
                 c.Save();
                 c.ClipRect(zone);
-                c.DrawText(text, x, baseY, p);
+                DrawFieldText(c, text, x, baseY, p, (float)(zoneWidthMm * u));
                 c.Restore();
             }
             else
             {
-                c.DrawText(text, x, baseY, p);
+                DrawFieldText(c, text, x, baseY, p, 0f);
             }
         }
+
+        /// <summary>
+        /// Draws a dotted/rectangle value. Latin/digits go through the plain (fast, proven) path;
+        /// any text containing Arabic is shaped with HarfBuzz so the letters JOIN and read
+        /// right-to-left (plain SkiaSharp draws Arabic detached and reversed). Left-anchored at
+        /// <paramref name="x"/>, like every other field; the clip rect still bounds it to its zone.
+        /// </summary>
+        private static void DrawFieldText(SKCanvas c, string text, float x, float baseY, SKPaint p, float zoneWidthPx)
+        {
+            if (string.IsNullOrEmpty(text) || !ContainsArabic(text))
+            {
+                c.DrawText(text, x, baseY, p);
+                return;
+            }
+
+            // Minimal bidi: split into Arabic (RTL, shaped) and non-Arabic (LTR, e.g. the year
+            // digits) runs, then lay them out RIGHT-TO-LEFT so "جانفي 2025" keeps the Arabic joined
+            // AND the year readable — a single shaped run would reverse the digits to "5202".
+            var runs = SplitDirectionalRuns(text);
+            float gap = p.TextSize * 0.28f; // visual separation between an Arabic run and a digit/latin run
+            using (var shaper = new SKShaper(p.Typeface ?? Font))
+            {
+                var widths = new float[runs.Count];
+                float total = 0f;
+                for (int i = 0; i < runs.Count; i++)
+                {
+                    widths[i] = runs[i].Arabic ? shaper.Shape(runs[i].Text, p).Width : p.MeasureText(runs[i].Text);
+                    total += widths[i];
+                    if (i > 0) total += gap;
+                }
+
+                float penRight = x + total; // left-anchored block; first logical run sits rightmost
+                for (int i = 0; i < runs.Count; i++)
+                {
+                    float runLeft = penRight - widths[i];
+                    if (runs[i].Arabic) c.DrawShapedText(shaper, runs[i].Text, runLeft, baseY, p);
+                    else c.DrawText(runs[i].Text, runLeft, baseY, p);
+                    penRight = runLeft - gap;
+                }
+            }
+        }
+
+        private struct DirRun { public string Text; public bool Arabic; }
+
+        // Split into maximal Arabic / non-Arabic runs, dropping the whitespace that separated them
+        // (an explicit gap is added at layout time so spacing is consistent in either direction).
+        private static System.Collections.Generic.List<DirRun> SplitDirectionalRuns(string s)
+        {
+            var runs = new System.Collections.Generic.List<DirRun>();
+            int i = 0;
+            while (i < s.Length)
+            {
+                if (char.IsWhiteSpace(s[i])) { i++; continue; }
+                bool ar = IsArabicChar(s[i]);
+                int j = i + 1;
+                while (j < s.Length && !char.IsWhiteSpace(s[j]) && IsArabicChar(s[j]) == ar) j++;
+                runs.Add(new DirRun { Text = s.Substring(i, j - i), Arabic = ar });
+                i = j;
+            }
+            return runs;
+        }
+
+        private static bool ContainsArabic(string s)
+        {
+            foreach (char ch in s)
+                if (IsArabicChar(ch)) return true;
+            return false;
+        }
+
+        private static bool IsArabicChar(char ch) =>
+            (ch >= '؀' && ch <= 'ۿ') || (ch >= 'ݐ' && ch <= 'ݿ') ||
+            (ch >= 'ࢠ' && ch <= 'ࣿ') || (ch >= 'ﭐ' && ch <= '﷿') ||
+            (ch >= 'ﹰ' && ch <= '﻿');
     }
 }

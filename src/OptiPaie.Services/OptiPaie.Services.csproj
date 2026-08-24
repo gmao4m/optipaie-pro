@@ -30,6 +30,9 @@
          pre-printed CNAS form. Drawn directly with SkiaSharp (SKDocument=PDF, SKBitmap=PNG
          proof) — no Word/OpenXML text-flow filling. Newtonsoft loads the editable layout JSON. -->
     <PackageReference Include="SkiaSharp" Version="2.88.3" />
+    <!-- HarfBuzz shaping: joins Arabic letters + applies right-to-left order (month labels,
+         motifs, Arabic place names on the CNAS forms). Plain SkiaSharp DrawText can't shape. -->
+    <PackageReference Include="SkiaSharp.HarfBuzz" Version="2.88.3" />
   </ItemGroup>
 
   <!-- Framework assemblies used by the licensing layer:

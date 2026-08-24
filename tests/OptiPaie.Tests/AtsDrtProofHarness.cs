@@ -74,6 +74,64 @@ namespace OptiPaie.Tests
             ["DATEAUJRH2"] = "300925", ["LIEU1"] = "Blida", ["AUJOURDHUI2"] = "30/09/2025"
         };
 
+        // Merge page-1 identity + page-2 table into one dict (RenderPdf uses one dict for all pages).
+        private static Dictionary<string, string> AtsFull()
+        {
+            var v = AtsNormal();
+            foreach (var kv in AtsPage2Normal()) v[kv.Key] = kv.Value;
+            return v;
+        }
+
+        private static Dictionary<string, string> AtsPage2Arabic()
+        {
+            // Algerian Arabic month names — exactly what CertificateService emits when the UI is Arabic.
+            string[] ar = { "جانفي 2025", "فيفري 2025", "مارس 2025", "أفريل 2025", "ماي 2025", "جوان 2025" };
+            var v = new Dictionary<string, string> { ["LIEU"] = "البليدة", ["AUJOURDHUI"] = "23/08/2026" };
+            for (int i = 0; i < 12; i++)
+            {
+                int n = i + 1; bool on = i < 6;
+                v[$"M{n}"] = on ? ar[i] : "";
+                v[$"JT{n}"] = on ? "22" : "/";
+                v[$"MT{n}"] = on ? (i == 0 ? "مرض" : "") : "/";   // "maladie" in Arabic
+                v[$"SS{n}"] = on ? "45000,00 DA" : "/";
+                v[$"PO{n}"] = on ? "4050,00 DA" : "/";
+            }
+            return v;
+        }
+
+        [Test]
+        public void Print_ATS_Arabic_Months()
+        {
+            FormLayoutConfig cfg = AtsDrtFormRenderer.LoadLayout(Layout);
+            FormPage page2 = cfg.Forms["ATS"].Pages[1];
+            string bg2 = Path.Combine(Forms, page2.BackgroundImage);
+            AtsDrtFormRenderer.RenderPrintPreviewPng(page2, AtsPage2Arabic(), bg2, 0, 0, 200, Path.Combine(Forms, "print_ATS_arabic.png"));
+            Assert.Pass();
+        }
+
+        [Test]
+        public void Print_ATS_and_DRT()
+        {
+            FormLayoutConfig cfg = AtsDrtFormRenderer.LoadLayout(Layout);
+            FormDefinition ats = cfg.Forms["ATS"];
+            FormDefinition drt = cfg.Forms["DRT"];
+
+            // 1) The REAL production output: the exact PDFs a client prints (values only, black, no
+            //    background) — printed on top of the blank pre-printed CNAS form.
+            AtsDrtFormRenderer.RenderPdf(ats, AtsFull(), 0, 0, Path.Combine(Forms, "PRINT_ATS.pdf"));
+            AtsDrtFormRenderer.RenderPdf(drt, DrtNotResumed(), 0, 0, Path.Combine(Forms, "PRINT_DRT.pdf"));
+
+            // 2) Black-ink-on-form previews at 200 dpi — what the finished paper looks like.
+            string bg1 = Path.Combine(Forms, ats.Pages[0].BackgroundImage);
+            string bg2 = Path.Combine(Forms, ats.Pages[1].BackgroundImage);
+            string bgD = Path.Combine(Forms, drt.Pages[0].BackgroundImage);
+            AtsDrtFormRenderer.RenderPrintPreviewPng(ats.Pages[0], AtsFull(), bg1, 0, 0, 200, Path.Combine(Forms, "print_ATS_page1.png"));
+            AtsDrtFormRenderer.RenderPrintPreviewPng(ats.Pages[1], AtsFull(), bg2, 0, 0, 200, Path.Combine(Forms, "print_ATS_page2.png"));
+            AtsDrtFormRenderer.RenderPrintPreviewPng(drt.Pages[0], DrtNotResumed(), bgD, 0, 0, 200, Path.Combine(Forms, "print_DRT.png"));
+
+            Assert.That(File.Exists(Path.Combine(Forms, "PRINT_ATS.pdf")) && File.Exists(Path.Combine(Forms, "PRINT_DRT.pdf")), Is.True);
+        }
+
         [Test]
         public void Render_Calibration_Sheet()
         {
