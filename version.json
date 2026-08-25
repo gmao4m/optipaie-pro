@@ -1,6 +1,6 @@
 {
-  "latest_version": "1.31.0",
+  "latest_version": "1.31.1",
   "download_url": "https://github.com/gmao4m/optipaie-pro/releases/latest/download/OptiPaie-PRO-Setup.exe",
-  "release_notes": "تصحيح طباعة استمارات ATS و DRT\nقبول الفاصلة في جميع الحقول الرقمية\nكشف أجر جديد مطابق للمعايير الجزائرية\nتصحيح طباعة الوثائق باللغة العربية",
+  "release_notes": "تصحيح طباعة استمارات ATS و DRT — تُطبع الاستمارة كاملة ومملوءة على ورق أبيض عادي\nتصحيح زر التحديث: يعمل الآن على جميع الأجهزة، مع خيار «التنزيل عبر المتصفح» عند فشل التحديث التلقائي",
   "mandatory": false
 }
