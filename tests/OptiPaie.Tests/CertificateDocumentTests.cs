@@ -101,6 +101,9 @@ namespace OptiPaie.Tests
 
         // ── absolute-coordinate renderer (the mechanism that replaced .docx fill) ──
 
+        /// <summary>The ATS/DRT form images + layout, copied next to the test binaries.</summary>
+        private static string FormsDir() => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "AtsDrtForms");
+
         [Test]
         public void RenderPdf_AllThreeZoneTypes_ProduceAValidPdf()
         {
@@ -110,7 +113,7 @@ namespace OptiPaie.Tests
                 {
                     new FormPage
                     {
-                        WidthMm = 210, HeightMm = 297,
+                        WidthMm = 210, HeightMm = 297, BackgroundImage = "ATS_image1.jpeg",
                         Fields =
                         {
                             new FormField { Name = "NAME", Type = "dotted", XMm = 20, YMm = 30, MaxWidthMm = 120, FontSize = 11 },
@@ -125,7 +128,7 @@ namespace OptiPaie.Tests
             { ["NAME"] = "BENALI Karim", ["BOX"] = "09 102 457 89", ["DATE"] = "120385", ["CHK"] = "X" };
 
             string outPath = Path.Combine(_dir, "render.pdf");
-            AtsDrtFormRenderer.RenderPdf(form, values, 0, 0, outPath);
+            AtsDrtFormRenderer.RenderPdf(form, values, 0, 0, outPath, FormsDir());
 
             Assert.That(File.Exists(outPath), Is.True);
             byte[] head = new byte[5];
@@ -135,21 +138,60 @@ namespace OptiPaie.Tests
         }
 
         [Test]
-        public void PrinterOffset_ShiftsEveryValue_ForPrePrintedCalibration()
+        public void PrinterOffset_ShiftsEveryValue()
         {
             // The same values at two different offsets must yield different PDFs — proving the
-            // global mm offset (printer calibration) actually moves the ink.
+            // global mm offset actually moves the ink.
             var form = new FormDefinition
             {
-                Pages = { new FormPage { WidthMm = 210, HeightMm = 297,
+                Pages = { new FormPage { WidthMm = 210, HeightMm = 297, BackgroundImage = "ATS_image1.jpeg",
                     Fields = { new FormField { Name = "X", Type = "grid", XMm = 25, YMm = 60, PitchMm = 6, Cells = 6 } } } }
             };
             var values = new Dictionary<string, string> { ["X"] = "120385" };
 
             string a = Path.Combine(_dir, "a.pdf"), b = Path.Combine(_dir, "b.pdf");
-            AtsDrtFormRenderer.RenderPdf(form, values, 0, 0, a);
-            AtsDrtFormRenderer.RenderPdf(form, values, 5, 3, b);
+            AtsDrtFormRenderer.RenderPdf(form, values, 0, 0, a, FormsDir());
+            AtsDrtFormRenderer.RenderPdf(form, values, 5, 3, b, FormsDir());
             Assert.That(File.ReadAllBytes(a), Is.Not.EqualTo(File.ReadAllBytes(b)), "offset changes the output");
+        }
+
+        /// <summary>
+        /// NON-REGRESSION: the generated ATS/DRT PDF MUST embed the full-page official form image.
+        /// This guards the "blank page — only the values printed" incident: the client has no
+        /// pre-printed paper, so a values-only PDF is unusable. Fails loudly if the background is gone.
+        /// </summary>
+        [Test]
+        public void GeneratedPdf_EmbedsTheFullFormBackground_ForAtsAndDrt()
+        {
+            string dir = FormsDir();
+            Assert.That(File.Exists(Path.Combine(dir, "form-layout.json")), Is.True, "test forms not copied to output");
+            FormLayoutConfig cfg = AtsDrtFormRenderer.LoadLayout(Path.Combine(dir, "form-layout.json"));
+
+            foreach (string name in new[] { "ATS", "DRT" })
+            {
+                string outPath = Path.Combine(_dir, name + "_full.pdf");
+                AtsDrtFormRenderer.RenderPdf(cfg.Forms[name], new Dictionary<string, string>(), 0, 0, outPath, dir);
+                byte[] bytes = File.ReadAllBytes(outPath);
+
+                // A values-only PDF carries NO raster (a few KB); the full form embeds an image
+                // XObject (SkiaSharp writes "/Image" as its Subtype) and is hundreds of KB.
+                Assert.That(ContainsAscii(bytes, "/Image"), Is.True,
+                    name + " PDF must embed the form background image (regression: values-only on a blank page).");
+                Assert.That(bytes.Length, Is.GreaterThan(40_000),
+                    name + " PDF is too small to contain the official form image.");
+            }
+        }
+
+        private static bool ContainsAscii(byte[] haystack, string needle)
+        {
+            byte[] pat = System.Text.Encoding.ASCII.GetBytes(needle);
+            for (int i = 0; i + pat.Length <= haystack.Length; i++)
+            {
+                int j = 0;
+                while (j < pat.Length && haystack[i + j] == pat[j]) j++;
+                if (j == pat.Length) return true;
+            }
+            return false;
         }
 
         // ── helpers ──────────────────────────────────────────────────────────

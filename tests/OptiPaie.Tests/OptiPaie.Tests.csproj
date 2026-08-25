@@ -22,6 +22,15 @@
     <PackageReference Include="BouncyCastle.Cryptography" Version="2.4.0" />
   </ItemGroup>
 
+  <!-- The ATS/DRT coordinate layout + official form images, copied next to the test binaries so
+       the non-regression test can prove the generated PDF embeds the full-page form background. -->
+  <ItemGroup>
+    <Content Include="..\..\src\OptiPaie.Desktop\Assets\AtsDrtTemplates\form-layout.json" Link="AtsDrtForms\form-layout.json"><CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory></Content>
+    <Content Include="..\..\src\OptiPaie.Desktop\Assets\AtsDrtTemplates\ATS_image1.jpeg" Link="AtsDrtForms\ATS_image1.jpeg"><CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory></Content>
+    <Content Include="..\..\src\OptiPaie.Desktop\Assets\AtsDrtTemplates\ATS_image2.jpeg" Link="AtsDrtForms\ATS_image2.jpeg"><CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory></Content>
+    <Content Include="..\..\src\OptiPaie.Desktop\Assets\AtsDrtTemplates\DRTFR_image1.png" Link="AtsDrtForms\DRTFR_image1.png"><CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory></Content>
+  </ItemGroup>
+
   <ItemGroup>
     <!-- Anonymized DAS reference fixtures for the byte-exact "juge de paix" test. -->
     <None Update="Fixtures\Das\das_sample_detail.txt" CopyToOutputDirectory="PreserveNewest" />

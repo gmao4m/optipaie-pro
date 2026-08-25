@@ -116,18 +116,18 @@ namespace OptiPaie.Tests
             FormDefinition ats = cfg.Forms["ATS"];
             FormDefinition drt = cfg.Forms["DRT"];
 
-            // 1) The REAL production output: the exact PDFs a client prints (values only, black, no
-            //    background) — printed on top of the blank pre-printed CNAS form.
-            AtsDrtFormRenderer.RenderPdf(ats, AtsFull(), 0, 0, Path.Combine(Forms, "PRINT_ATS.pdf"));
-            AtsDrtFormRenderer.RenderPdf(drt, DrtNotResumed(), 0, 0, Path.Combine(Forms, "PRINT_DRT.pdf"));
+            // 1) The REAL production output: the exact PDFs a client prints — the official form image
+            //    full-page as background + the values on top (plain white paper, complete filled form).
+            AtsDrtFormRenderer.RenderPdf(ats, AtsFull(), 0, 0, Path.Combine(Forms, "PRINT_ATS.pdf"), Forms);
+            AtsDrtFormRenderer.RenderPdf(drt, DrtNotResumed(), 0, 0, Path.Combine(Forms, "PRINT_DRT.pdf"), Forms);
 
-            // 2) Black-ink-on-form previews at 200 dpi — what the finished paper looks like.
+            // 2) Faithful 300-dpi image of that same page (form + black values) for visual review.
             string bg1 = Path.Combine(Forms, ats.Pages[0].BackgroundImage);
             string bg2 = Path.Combine(Forms, ats.Pages[1].BackgroundImage);
             string bgD = Path.Combine(Forms, drt.Pages[0].BackgroundImage);
-            AtsDrtFormRenderer.RenderPrintPreviewPng(ats.Pages[0], AtsFull(), bg1, 0, 0, 200, Path.Combine(Forms, "print_ATS_page1.png"));
-            AtsDrtFormRenderer.RenderPrintPreviewPng(ats.Pages[1], AtsFull(), bg2, 0, 0, 200, Path.Combine(Forms, "print_ATS_page2.png"));
-            AtsDrtFormRenderer.RenderPrintPreviewPng(drt.Pages[0], DrtNotResumed(), bgD, 0, 0, 200, Path.Combine(Forms, "print_DRT.png"));
+            AtsDrtFormRenderer.RenderPrintPreviewPng(ats.Pages[0], AtsFull(), bg1, 0, 0, 300, Path.Combine(Forms, "print_ATS_page1.png"));
+            AtsDrtFormRenderer.RenderPrintPreviewPng(ats.Pages[1], AtsFull(), bg2, 0, 0, 300, Path.Combine(Forms, "print_ATS_page2.png"));
+            AtsDrtFormRenderer.RenderPrintPreviewPng(drt.Pages[0], DrtNotResumed(), bgD, 0, 0, 300, Path.Combine(Forms, "print_DRT.png"));
 
             Assert.That(File.Exists(Path.Combine(Forms, "PRINT_ATS.pdf")) && File.Exists(Path.Combine(Forms, "PRINT_DRT.pdf")), Is.True);
         }

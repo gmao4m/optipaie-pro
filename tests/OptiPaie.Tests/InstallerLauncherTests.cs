@@ -17,17 +17,19 @@ namespace OptiPaie.Tests
         {
             string s = InstallerLauncher.BuildUpdateScript(1234, @"C:\Temp\OptiPaie PRO Setup.exe", @"C:\Program Files\OptiPaie PRO\OptiPaie PRO.exe");
 
-            // Waits on the exact PID before doing anything.
-            Assert.That(s, Does.Contain("Get-Process -Id 1234"));
+            // The update helper is a cmd batch, NEVER PowerShell (client GPO blocks PS execution).
+            Assert.That(s, Does.Contain("@echo off"), "the update helper is a cmd batch");
+            Assert.That(s.ToLowerInvariant(), Does.Not.Contain("powershell"), "the update helper must not use PowerShell");
+            Assert.That(s, Does.Contain("PID eq 1234"), "waits on the exact PID before doing anything");
 
-            int wait = s.IndexOf("Get-Process -Id 1234", System.StringComparison.Ordinal);
-            int setup = s.IndexOf("Setup.exe' -Wait", System.StringComparison.Ordinal);
-            int reopen = s.LastIndexOf("Start-Process -FilePath", System.StringComparison.Ordinal);
+            int wait = s.IndexOf("PID eq 1234", System.StringComparison.Ordinal);
+            int setup = s.IndexOf("/wait \"", System.StringComparison.Ordinal);
+            int reopen = s.LastIndexOf("start \"\" \"", System.StringComparison.Ordinal);
 
             Assert.That(wait, Is.GreaterThanOrEqualTo(0));
             Assert.That(setup, Is.GreaterThan(wait), "the installer runs only AFTER the wait-for-exit");
             Assert.That(reopen, Is.GreaterThan(setup), "the app is reopened AFTER the installer");
-            Assert.That(s, Does.Contain("-Wait"), "the installer is launched visibly and waited on");
+            Assert.That(s, Does.Contain("/wait"), "the installer is launched visibly and waited on");
         }
 
         [Test]
@@ -46,10 +48,10 @@ namespace OptiPaie.Tests
         }
 
         [Test]
-        public void Paths_WithApostrophes_AreEscapedForPowerShell()
+        public void UpdatePaths_WithPercent_AreEscapedForCmd()
         {
-            string s = InstallerLauncher.BuildUpdateScript(1, @"C:\it's\setup.exe", @"C:\it's\app.exe");
-            Assert.That(s, Does.Contain("C:\\it''s\\setup.exe"), "single quotes are doubled for a PS single-quoted literal");
+            string s = InstallerLauncher.BuildUpdateScript(1, @"C:\100%\setup.exe", @"C:\100%\app.exe");
+            Assert.That(s, Does.Contain(@"C:\100%%\setup.exe"), "percent is doubled so cmd does not treat it as a variable");
         }
     }
 }

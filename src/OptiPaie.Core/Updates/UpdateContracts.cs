@@ -34,17 +34,23 @@ namespace OptiPaie.Core.Updates
     /// <summary>Outcome of downloading and applying an update.</summary>
     public sealed class UpdateApplyResult
     {
-        private UpdateApplyResult(bool success, string error)
+        private UpdateApplyResult(bool success, string error, string fallbackUrl)
         {
             Success = success;
             Error = error ?? string.Empty;
+            FallbackUrl = fallbackUrl ?? string.Empty;
         }
 
         public bool Success { get; }
         public string Error { get; }
 
-        public static UpdateApplyResult Ok() => new UpdateApplyResult(true, string.Empty);
-        public static UpdateApplyResult Fail(string error) => new UpdateApplyResult(false, error);
+        /// <summary>Direct installer URL to offer the user when the automatic update fails, so they
+        /// can always download it manually in the browser. Empty when unknown.</summary>
+        public string FallbackUrl { get; }
+
+        public static UpdateApplyResult Ok() => new UpdateApplyResult(true, string.Empty, null);
+        public static UpdateApplyResult Fail(string error, string fallbackUrl = null) =>
+            new UpdateApplyResult(false, error, fallbackUrl);
     }
 
     /// <summary>What the release channel reports about the latest available release.</summary>
@@ -75,6 +81,9 @@ namespace OptiPaie.Core.Updates
     {
         /// <summary>True only when the app can actually self-update (installed + feed configured).</summary>
         bool IsSupported { get; }
+
+        /// <summary>Direct installer URL from the latest check — for the manual/browser fallback.</summary>
+        string DownloadUrl { get; }
 
         Task<ReleaseCheckResult> CheckAsync(CancellationToken cancellationToken);
 

@@ -101,13 +101,16 @@ namespace OptiPaie.Services.Updates
             }
             catch (OperationCanceledException)
             {
-                return UpdateApplyResult.Fail("Téléchargement annulé.");
+                return UpdateApplyResult.Fail("Téléchargement annulé.", _channel.DownloadUrl);
             }
             catch (Exception ex)
             {
+                // Never fail silently: log the technical detail and hand back the direct installer
+                // URL so the dialog can offer a manual download that always works.
                 _logger.Error("Update download/apply failed.", ex);
                 return UpdateApplyResult.Fail(
-                    "Le téléchargement de la mise à jour a échoué. Vérifiez votre connexion et réessayez.");
+                    "Le téléchargement automatique a échoué. Cliquez sur « Télécharger dans le navigateur » pour l'installer manuellement.",
+                    _channel.DownloadUrl);
             }
         }
 

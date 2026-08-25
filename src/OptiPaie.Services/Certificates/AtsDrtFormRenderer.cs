@@ -31,9 +31,15 @@ namespace OptiPaie.Services.Certificates
 
         // ── public entry points ────────────────────────────────────────────
 
-        /// <summary>The real, printable overlay: A4 pages, values only (black), at absolute mm.</summary>
+        /// <summary>
+        /// The printable document: each A4 page carries the official CNAS form image FULL-PAGE as
+        /// background, with the values drawn on top (black) at absolute mm. The client prints this on
+        /// plain white paper and gets the complete, filled form — never an overlay onto a pre-printed
+        /// sheet. <paramref name="backgroundDir"/> is the folder holding the form images referenced by
+        /// each page's <see cref="FormPage.BackgroundImage"/>; a missing image throws (never a blank page).
+        /// </summary>
         public static void RenderPdf(FormDefinition form, IDictionary<string, string> values,
-            double offsetXmm, double offsetYmm, string outPdfPath)
+            double offsetXmm, double offsetYmm, string outPdfPath, string backgroundDir)
         {
             using (var stream = new SKFileWStream(outPdfPath))
             {
@@ -47,12 +53,40 @@ namespace OptiPaie.Services.Certificates
                 {
                     foreach (FormPage page in form.Pages)
                     {
-                        SKCanvas canvas = doc.BeginPage((float)(page.WidthMm * PtPerMm), (float)(page.HeightMm * PtPerMm));
+                        float wPt = (float)(page.WidthMm * PtPerMm);
+                        float hPt = (float)(page.HeightMm * PtPerMm);
+                        SKCanvas canvas = doc.BeginPage(wPt, hPt);
+                        DrawBackground(canvas, page, backgroundDir, wPt, hPt);
                         DrawPage(canvas, page, values, PtPerMm, offsetXmm, offsetYmm, SKColors.Black);
                         doc.EndPage();
                     }
                     doc.Close();
                 }
+            }
+        }
+
+        /// <summary>Draws the official form image to fill the whole page (embedded in the PDF at its
+        /// native resolution). Throws if the configured background image is missing — a filled CNAS
+        /// form must NEVER be printed as bare values on a blank page.</summary>
+        private static void DrawBackground(SKCanvas canvas, FormPage page, string backgroundDir, float wPt, float hPt)
+        {
+            if (string.IsNullOrEmpty(page.BackgroundImage))
+                throw new InvalidOperationException("Form page has no BackgroundImage configured.");
+            if (string.IsNullOrEmpty(backgroundDir))
+                throw new InvalidOperationException("No form-image folder provided to RenderPdf.");
+
+            string path = Path.Combine(backgroundDir, page.BackgroundImage);
+            if (!File.Exists(path))
+                throw new FileNotFoundException("Image du formulaire officiel introuvable : " + path);
+
+            using (var data = SKData.Create(path))
+            using (var image = SKImage.FromEncodedData(data))
+            {
+                if (image == null)
+                    throw new InvalidOperationException("Image du formulaire illisible : " + path);
+                // Embed the original encoded image (JPEG stays DCTDecode → sharp, no re-compression)
+                // scaled to fill the page.
+                canvas.DrawImage(image, new SKRect(0, 0, wPt, hPt));
             }
         }
 

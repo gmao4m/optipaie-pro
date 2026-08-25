@@ -37,6 +37,9 @@ namespace OptiPaie.Services.Updates
         /// <summary>Enabled once a GitHub repo is configured (blank in dev = disabled).</summary>
         public bool IsSupported => !string.IsNullOrWhiteSpace(_options.GitHubRepo);
 
+        /// <summary>The installer asset URL from the latest check — for the manual/browser fallback.</summary>
+        public string DownloadUrl => _downloadUrl ?? string.Empty;
+
         public async Task<ReleaseCheckResult> CheckAsync(CancellationToken cancellationToken)
         {
             string current = CurrentVersion();

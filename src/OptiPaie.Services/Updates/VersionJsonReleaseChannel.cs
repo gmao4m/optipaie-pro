@@ -49,6 +49,9 @@ namespace OptiPaie.Services.Updates
         /// <summary>Enabled once a version.json URL is configured (blank in dev = disabled).</summary>
         public bool IsSupported => !string.IsNullOrWhiteSpace(_options.VersionJsonUrl);
 
+        /// <summary>The installer URL parsed from the manifest — for the manual/browser fallback.</summary>
+        public string DownloadUrl => _downloadUrl ?? string.Empty;
+
         public async Task<ReleaseCheckResult> CheckAsync(CancellationToken cancellationToken)
         {
             string current = AppVersion.CurrentProduct();
@@ -181,6 +184,11 @@ namespace OptiPaie.Services.Updates
 
         private static HttpClient CreateClient()
         {
+            // .NET Framework 4.8 defaults to SystemDefault TLS; force TLS 1.2 so the HTTPS download
+            // works on machines whose OS/registry still negotiates only older protocols.
+            try { System.Net.ServicePointManager.SecurityProtocol |= System.Net.SecurityProtocolType.Tls12; }
+            catch { /* older frameworks may not expose Tls12 — the OS default then applies */ }
+
             var client = new HttpClient { Timeout = TimeSpan.FromMinutes(10) };
             client.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "OptiPaiePRO-Updater");
             client.DefaultRequestHeaders.TryAddWithoutValidation("Cache-Control", "no-cache");

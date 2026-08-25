@@ -76,7 +76,7 @@ namespace OptiPaie.Services
             var service = new CertificateService(weekend ?? new WeekendConfig());
             AtsCertificateData data = service.BuildAts(company, employee, stoppage, hasResumedWork, contributions);
             Dictionary<string, string> values = CertificateBookmarkMapper.MapAts(data);
-            AtsDrtFormRenderer.RenderPdf(GetForm("ATS"), values, offsetXmm, offsetYmm, outputPdfPath);
+            AtsDrtFormRenderer.RenderPdf(GetForm("ATS"), values, offsetXmm, offsetYmm, outputPdfPath, FormsDir());
             return outputPdfPath;
         }
 
@@ -87,7 +87,7 @@ namespace OptiPaie.Services
             var service = new CertificateService(weekend ?? new WeekendConfig());
             DrtCertificateData data = service.BuildDrt(company, employee, stoppage, hasResumedWork);
             Dictionary<string, string> values = CertificateBookmarkMapper.MapDrt(data);
-            AtsDrtFormRenderer.RenderPdf(GetForm("DRT"), values, offsetXmm, offsetYmm, outputPdfPath);
+            AtsDrtFormRenderer.RenderPdf(GetForm("DRT"), values, offsetXmm, offsetYmm, outputPdfPath, FormsDir());
             return outputPdfPath;
         }
 
@@ -111,7 +111,11 @@ namespace OptiPaie.Services
         /// The editable coordinate file ships loose next to the exe (Content, PreserveNewest),
         /// exactly like the old templates — resolve it off the app base directory.
         /// </summary>
-        private static string LayoutPath() =>
-            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "AtsDrtTemplates", "form-layout.json");
+        private static string LayoutPath() => Path.Combine(FormsDir(), "form-layout.json");
+
+        /// <summary>Folder shipped next to the exe holding form-layout.json AND the official form
+        /// images (Content, PreserveNewest) drawn full-page as the printed background.</summary>
+        private static string FormsDir() =>
+            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "AtsDrtTemplates");
     }
 }
