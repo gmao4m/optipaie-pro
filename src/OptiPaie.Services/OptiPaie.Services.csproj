@@ -24,6 +24,15 @@
     <PackageReference Include="BouncyCastle.Cryptography" Version="2.4.0" />
   </ItemGroup>
 
+  <!-- IBM Plex Sans Arabic (Latin + Arabic glyphs) embedded so the bilingual leave/attestation
+       documents render the same in the app AND in tests/CI, with no reliance on machine fonts. -->
+  <ItemGroup>
+    <EmbeddedResource Include="Assets\Fonts\IBMPlexSansArabic-Regular.ttf" />
+    <EmbeddedResource Include="Assets\Fonts\IBMPlexSansArabic-Medium.ttf" />
+    <EmbeddedResource Include="Assets\Fonts\IBMPlexSansArabic-SemiBold.ttf" />
+    <EmbeddedResource Include="Assets\Fonts\IBMPlexSansArabic-Bold.ttf" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="QuestPDF" Version="2022.12.1" />
     <!-- ATS/DRT official attestations: print values at ABSOLUTE mm coordinates onto the

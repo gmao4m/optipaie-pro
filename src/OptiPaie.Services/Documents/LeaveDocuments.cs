@@ -7,6 +7,52 @@ using QuestPDF.Infrastructure;
 
 namespace OptiPaie.Services.Documents
 {
+    /// <summary>
+    /// Shared rendering helpers for the bilingual (French + Arabic) leave documents.
+    ///
+    /// QuestPDF 2022.12 has no real Unicode bidi: it picks ONE base direction per paragraph
+    /// (from the first strong character) and reverses the other-direction runs. A paragraph that
+    /// mixes French and a multi-word Arabic run therefore comes out with one side reversed.
+    /// The rule here is simple and robust: never mix a multi-word Arabic run with Latin in the
+    /// SAME text. Titles are split into a French line + a pure-Arabic line, and every field value
+    /// (which may itself be an Arabic name) is a SEPARATE text element that gets its own base
+    /// direction. The label prefix keeps a single Arabic word ("الموظف"), which renders correctly.
+    ///
+    /// The font is the bundled IBM Plex Sans Arabic (registered at app start) — it carries BOTH
+    /// Latin and Arabic glyphs and is embedded in the PDF, so nothing depends on the client's
+    /// installed fonts and no glyph ever falls back to "□"/"????".
+    /// </summary>
+    internal static class LeaveDoc
+    {
+        public const string Font = "IBM Plex Sans Arabic";
+
+        /// <summary>A centred bilingual title as two stacked, single-language lines.</summary>
+        public static void Title(ColumnDescriptor col, string fr, string ar, float size)
+        {
+            col.Item().PaddingTop(6).AlignCenter().Text(fr).FontSize(size).Bold();
+            col.Item().AlignCenter().Text(ar).FontSize(size).Bold();
+        }
+
+        /// <summary>One info line: "label :" (French + single Arabic word) then the value in its
+        /// OWN text element so an Arabic value keeps its correct right-to-left order.</summary>
+        public static void Line(ColumnDescriptor col, string label, string value, float valueSize = 0f)
+        {
+            col.Item().Row(row =>
+            {
+                row.AutoItem().Text(label).SemiBold();
+                var span = row.RelativeItem().PaddingLeft(6).Text(value ?? string.Empty);
+                if (valueSize > 0f) span.FontSize(valueSize);
+            });
+        }
+
+        /// <summary>A right-aligned pair of single-language lines (French then Arabic).</summary>
+        public static void RightPair(ColumnDescriptor col, string fr, string ar)
+        {
+            col.Item().AlignRight().Text(fr);
+            col.Item().AlignRight().Text(ar);
+        }
+    }
+
     /// <summary>Data for a leave decision (قرار عطلة).</summary>
     public sealed class LeaveDecisionModel
     {
@@ -28,29 +74,31 @@ namespace OptiPaie.Services.Documents
 
         public void Compose(IDocumentContainer container)
         {
+            DocumentFonts.EnsureRegistered();
             container.Page(page =>
             {
                 page.Size(PageSizes.A4);
                 page.Margin(36);
-                page.DefaultTextStyle(t => t.FontSize(11));
+                page.DefaultTextStyle(t => t.FontFamily(LeaveDoc.Font).FontSize(11));
 
                 page.Header().Column(col =>
                 {
                     col.Item().Text(_m.CompanyName ?? string.Empty).FontSize(14).SemiBold();
-                    col.Item().PaddingTop(6).AlignCenter().Text("قرار عطلة — Décision de congé").FontSize(16).Bold();
+                    LeaveDoc.Title(col, "Décision de congé", "قرار عطلة", 16);
                 });
 
                 page.Content().PaddingTop(24).Column(col =>
                 {
                     col.Spacing(10);
-                    col.Item().Text(t => { t.Span("Employé / الموظف : ").SemiBold(); t.Span(_m.EmployeeName ?? string.Empty); });
-                    col.Item().Text(t => { t.Span("Type / النوع : ").SemiBold(); t.Span(_m.TypeLabel ?? string.Empty); });
-                    col.Item().Text(t => { t.Span("Paiement / الأجر : ").SemiBold(); t.Span(_m.PaymentLabel ?? string.Empty); });
-                    col.Item().Text(t => { t.Span("Période / الفترة : ").SemiBold(); t.Span(D(_m.StartDate) + "  →  " + D(_m.EndDate)); });
-                    col.Item().Text(t => { t.Span("Jours décomptés / عدد الأيام : ").SemiBold(); t.Span(Num(_m.Days)); });
-                    col.Item().PaddingTop(30).Text("Décision : ACCORDÉE — القرار: مقبول").SemiBold();
+                    LeaveDoc.Line(col, "Employé / الموظف :", _m.EmployeeName);
+                    LeaveDoc.Line(col, "Type / النوع :", _m.TypeLabel);
+                    LeaveDoc.Line(col, "Paiement / الأجر :", _m.PaymentLabel);
+                    LeaveDoc.Line(col, "Période / الفترة :", D(_m.StartDate) + "  →  " + D(_m.EndDate));
+                    LeaveDoc.Line(col, "Jours décomptés / عدد الأيام :", Num(_m.Days));
+                    col.Item().PaddingTop(30).Text("Décision : ACCORDÉE").SemiBold();
+                    col.Item().Text("القرار : مقبول").SemiBold();
                     col.Item().PaddingTop(40).AlignRight().Text("Fait le " + D(_m.DecisionDate));
-                    col.Item().PaddingTop(6).AlignRight().Text("Signature et cachet / التوقيع والختم");
+                    LeaveDoc.RightPair(col, "Signature et cachet", "التوقيع والختم");
                 });
 
                 page.Footer().AlignCenter().Text("OptiPaie PRO");
@@ -81,28 +129,31 @@ namespace OptiPaie.Services.Documents
 
         public void Compose(IDocumentContainer container)
         {
+            DocumentFonts.EnsureRegistered();
             container.Page(page =>
             {
                 page.Size(PageSizes.A4);
                 page.Margin(36);
-                page.DefaultTextStyle(t => t.FontSize(11));
+                page.DefaultTextStyle(t => t.FontFamily(LeaveDoc.Font).FontSize(11));
 
                 page.Header().Column(col =>
                 {
                     col.Item().Text(_m.CompanyName ?? string.Empty).FontSize(14).SemiBold();
-                    col.Item().PaddingTop(6).AlignCenter().Text("شهادة رصيد العطل — Attestation de solde de congé").FontSize(15).Bold();
+                    LeaveDoc.Title(col, "Attestation de solde de congé", "شهادة رصيد العطل", 15);
                 });
 
                 page.Content().PaddingTop(24).Column(col =>
                 {
                     col.Spacing(10);
-                    col.Item().Text(t => { t.Span("Employé / الموظف : ").SemiBold(); t.Span(_m.EmployeeName ?? string.Empty); });
-                    col.Item().Text(t => { t.Span("Année / السنة : ").SemiBold(); t.Span(_m.Year.ToString(CultureInfo.InvariantCulture)); });
-                    col.Item().PaddingTop(10).Text(t => { t.Span("Droit acquis / المكتسب : ").SemiBold(); t.Span(Num(_m.Entitlement) + " jours"); });
-                    col.Item().Text(t => { t.Span("Consommé / المستهلك : ").SemiBold(); t.Span(Num(_m.Taken) + " jours"); });
-                    col.Item().Text(t => { t.Span("Réservé / المحجوز : ").SemiBold(); t.Span(Num(_m.Pending) + " jours"); });
-                    col.Item().Text(t => { t.Span("Disponible / المتاح : ").SemiBold().FontSize(13); t.Span(Num(_m.Available) + " jours").FontSize(13); });
-                    col.Item().PaddingTop(40).AlignRight().Text("Signature et cachet / التوقيع والختم");
+                    LeaveDoc.Line(col, "Employé / الموظف :", _m.EmployeeName);
+                    LeaveDoc.Line(col, "Année / السنة :", _m.Year.ToString(CultureInfo.InvariantCulture));
+                    col.Item().PaddingTop(10);
+                    LeaveDoc.Line(col, "Droit acquis / المكتسب :", Num(_m.Entitlement) + " jours");
+                    LeaveDoc.Line(col, "Consommé / المستهلك :", Num(_m.Taken) + " jours");
+                    LeaveDoc.Line(col, "Réservé / المحجوز :", Num(_m.Pending) + " jours");
+                    LeaveDoc.Line(col, "Disponible / المتاح :", Num(_m.Available) + " jours", 13f);
+                    col.Item().PaddingTop(40);
+                    LeaveDoc.RightPair(col, "Signature et cachet", "التوقيع والختم");
                 });
 
                 page.Footer().AlignCenter().Text("OptiPaie PRO");
@@ -121,30 +172,34 @@ namespace OptiPaie.Services.Documents
 
         public void Compose(IDocumentContainer container)
         {
+            DocumentFonts.EnsureRegistered();
             container.Page(page =>
             {
                 page.Size(PageSizes.A4);
                 page.Margin(36);
-                page.DefaultTextStyle(t => t.FontSize(11));
+                page.DefaultTextStyle(t => t.FontFamily(LeaveDoc.Font).FontSize(11));
 
                 page.Header().Column(col =>
                 {
                     col.Item().Text(_companyName ?? string.Empty).FontSize(14).SemiBold();
-                    col.Item().PaddingTop(6).AlignCenter().Text("تصفية رصيد العطل — Reliquat de congé (solde de tout compte)").FontSize(14).Bold();
+                    LeaveDoc.Title(col, "Reliquat de congé (solde de tout compte)", "تصفية رصيد العطل", 14);
                 });
 
                 page.Content().PaddingTop(24).Column(col =>
                 {
                     col.Spacing(10);
-                    col.Item().Text(t => { t.Span("Employé / الموظف : ").SemiBold(); t.Span(_s.EmployeeName ?? string.Empty); });
-                    col.Item().Text(t => { t.Span("Date de sortie / تاريخ المغادرة : ").SemiBold(); t.Span(D(_s.ExitDate)); });
-                    col.Item().PaddingTop(10).Text(t => { t.Span("Droit acquis (prorata) / المكتسب : ").SemiBold(); t.Span(Num(_s.Acquired) + " jours"); });
-                    col.Item().Text(t => { t.Span("Déjà pris / المستهلك : ").SemiBold(); t.Span(Num(_s.Taken) + " jours"); });
-                    col.Item().Text(t => { t.Span("Jours dus / الأيام المستحقة : ").SemiBold(); t.Span(Num(_s.RemainingDays) + " jours"); });
-                    col.Item().Text(t => { t.Span("Salaire mensuel / الأجر الشهري : ").SemiBold(); t.Span(Num(_s.MonthlySalary)); });
-                    col.Item().Text(t => { t.Span("Taux journalier / الأجر اليومي : ").SemiBold(); t.Span(Num(_s.DailyRate)); });
-                    col.Item().PaddingTop(8).Text(t => { t.Span("Montant du reliquat / مبلغ التصفية : ").SemiBold().FontSize(14); t.Span(Num(_s.Amount)).Bold().FontSize(14); });
-                    col.Item().PaddingTop(40).AlignRight().Text("Signature et cachet / التوقيع والختم");
+                    LeaveDoc.Line(col, "Employé / الموظف :", _s.EmployeeName);
+                    LeaveDoc.Line(col, "Date de sortie / تاريخ المغادرة :", D(_s.ExitDate));
+                    col.Item().PaddingTop(10);
+                    LeaveDoc.Line(col, "Droit acquis (prorata) / المكتسب :", Num(_s.Acquired) + " jours");
+                    LeaveDoc.Line(col, "Déjà pris / المستهلك :", Num(_s.Taken) + " jours");
+                    LeaveDoc.Line(col, "Jours dus / الأيام المستحقة :", Num(_s.RemainingDays) + " jours");
+                    LeaveDoc.Line(col, "Salaire mensuel / الأجر الشهري :", Num(_s.MonthlySalary));
+                    LeaveDoc.Line(col, "Taux journalier / الأجر اليومي :", Num(_s.DailyRate));
+                    col.Item().PaddingTop(8);
+                    LeaveDoc.Line(col, "Montant du reliquat / مبلغ التصفية :", Num(_s.Amount), 14f);
+                    col.Item().PaddingTop(40);
+                    LeaveDoc.RightPair(col, "Signature et cachet", "التوقيع والختم");
                 });
 
                 page.Footer().AlignCenter().Text("OptiPaie PRO");

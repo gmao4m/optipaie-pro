@@ -211,19 +211,28 @@ namespace OptiPaie.Services.Certificates
             }
         }
 
-        /// <summary>One character per cell, each centred on its cell centre. Never a block string.</summary>
+        /// <summary>
+        /// One character per cell, each centred BOTH horizontally and vertically on the exact centre
+        /// point of its square — never positioned by text baseline. Geometry per grid (in the JSON):
+        /// <see cref="FormField.XMm"/> = X centre of the FIRST square, <see cref="FormField.PitchMm"/> =
+        /// centre-to-centre spacing, <see cref="FormField.YMm"/> = Y centre of the squares. So digit i
+        /// is centred on (XMm + i·PitchMm, YMm).
+        /// </summary>
         private static void DrawGrid(SKCanvas c, FormField f, string text, double u, double ox, double oy, SKPaint p)
         {
             string digits = (text ?? string.Empty).Replace(" ", string.Empty);
             int cells = f.Cells > 0 ? f.Cells : digits.Length;
             int n = Math.Min(digits.Length, cells);
-            float baseY = (float)((f.YMm + oy) * u);
+
+            SKFontMetrics m = p.FontMetrics;
+            float cy = (float)((f.YMm + oy) * u);
+            float baseY = cy - (m.Ascent + m.Descent) / 2f; // vertical centre of the glyph sits on cy
             for (int i = 0; i < n; i++)
             {
                 float cx = (float)((f.XMm + i * f.PitchMm + ox) * u);
                 string ch = digits[i].ToString();
                 float w = p.MeasureText(ch);
-                c.DrawText(ch, cx - w / 2f, baseY, p);
+                c.DrawText(ch, cx - w / 2f, baseY, p); // horizontal centre of the glyph sits on cx
             }
         }
 

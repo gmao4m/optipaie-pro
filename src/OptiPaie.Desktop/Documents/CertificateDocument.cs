@@ -32,11 +32,12 @@ namespace OptiPaie.Desktop.Documents
             WorkCertificate certificate = _model.Certificate;
             string fullName = (employee.LastNameFr + " " + employee.FirstNameFr).Trim();
 
+            OptiPaie.Services.Documents.DocumentFonts.EnsureRegistered();
             container.Page(page =>
             {
                 page.Size(PageSizes.A4);
                 page.Margin(40);
-                page.DefaultTextStyle(t => t.FontFamily(PdfFonts.Sans).FontSize(11.5f).LineHeight(1.4f));
+                page.DefaultTextStyle(t => t.FontFamily(PdfFonts.SansArabic).FontSize(11.5f).LineHeight(1.4f));
 
                 page.Header().Column(col =>
                 {
