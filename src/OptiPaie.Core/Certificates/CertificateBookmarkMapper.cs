@@ -26,6 +26,12 @@ namespace OptiPaie.Core.Certificates
                 ["POSTE"] = data.Employee.Position,
                 ["SADRESSE"] = data.Employee.Address,
                 ["DATEN"] = FormatDdMmYy(data.Employee.BirthDate),
+                // The "Né(e) le / تاريخ الإزدياد" line is the one field on AS.08 with a SEPARATE
+                // Arabic fill zone (a mirrored date grid + birthplace on the right). Every other
+                // field shares one zone flanked by bilingual labels. Mirror the birth date/place so
+                // both sides are filled.
+                ["DATENAR"] = FormatDdMmYy(data.Employee.BirthDate),
+                ["NEAAR"] = data.Employee.BirthPlace,
                 ["DATER"] = FormatDdMmYy(data.Employee.HireDate),
 
                 ["DATEAT"] = FormatDdMmYy(data.LastWorkedDate),

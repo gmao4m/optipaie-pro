@@ -32,6 +32,8 @@ namespace OptiPaie.Tests
             ["POSTE"] = "Comptable",
             ["SADRESSE"] = "Cite 200 logements, Bt C, Blida",
             ["DATEN"] = "120385",
+            ["DATENAR"] = "120385",
+            ["NEAAR"] = "Blida",
             ["DATER"] = "010116",
             ["DATEAT"] = "150925",
             ["DATEREPRISE"] = "011025",

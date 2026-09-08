@@ -86,9 +86,10 @@
         <!-- Footer buttons -->
         <Border Grid.Row="2" Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="0,1,0,0" Padding="24,14">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <!-- ALWAYS visible: a guaranteed-working manual path. If the automatic update does
+                     nothing on a locked-down machine, the user still has a one-click browser download. -->
                 <Button Content="التنزيل عبر المتصفح / Télécharger dans le navigateur" Style="{StaticResource SecondaryButton}"
-                        Height="40" Margin="0,0,10,0" Command="{Binding OpenInBrowserCommand}"
-                        Visibility="{Binding HasFallback, Converter={StaticResource BoolToVis}}" />
+                        Height="40" Margin="0,0,10,0" Command="{Binding OpenInBrowserCommand}" />
                 <Button Content="{loc:Loc Upd_Later}" Style="{StaticResource SecondaryButton}" Height="40" Margin="0,0,10,0"
                         Command="{Binding LaterCommand}"
                         Visibility="{Binding CanPostpone, Converter={StaticResource BoolToVis}}" />

@@ -182,7 +182,9 @@ namespace OptiPaie.Desktop.ViewModels
 
             try
             {
-                var document = new CertificateDocument(model);
+                // Bilingual (FR/AR) attestation rendered by the Services document, which is
+                // Arabic-safe (isolated values, embedded font, digit-order fix) and unit-tested.
+                var document = new OptiPaie.Services.Documents.WorkCertificateDocument(model);
                 Document.Create(document.Compose).GeneratePdf(dialog.FileName);
                 try { Process.Start(new ProcessStartInfo(dialog.FileName) { UseShellExecute = true }); }
                 catch (Exception ex) { _services.Logger.Warn("Ouverture PDF impossible : " + ex.Message); }
