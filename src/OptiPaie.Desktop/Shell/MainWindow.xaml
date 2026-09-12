@@ -135,7 +135,7 @@
                     <Border Height="1" Background="{DynamicResource Border}" Margin="6,6" />
                     <Button Command="{Binding SignOutCommand}" Cursor="Hand" Height="42" Margin="0,1" HorizontalContentAlignment="Stretch"
                             Visibility="{Binding CanSignOut, Converter={StaticResource BoolToVis}}"
-                            ToolTip="Se déconnecter et revenir à l'écran de connexion">
+                            ToolTip="{loc:Loc Shell_SignOutTip}">
                         <Button.Template>
                             <ControlTemplate TargetType="Button">
                                 <Border x:Name="b" Background="Transparent" CornerRadius="8" Padding="12,0">
@@ -195,7 +195,7 @@
                         <ComboBox Style="{StaticResource AppComboBox}" ItemsSource="{Binding CompanyContext.Companies}"
                                   SelectedItem="{Binding CompanyContext.Active, Mode=TwoWay}"
                                   MinWidth="230" Height="32" VerticalContentAlignment="Center"
-                                  FontSize="13" FontWeight="SemiBold" ToolTip="Changer d'entreprise (s'applique à tous les modules)">
+                                  FontSize="13" FontWeight="SemiBold" ToolTip="{loc:Loc Shell_ActiveCompanyTip}">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal">
@@ -229,13 +229,13 @@
                         <!-- Users &amp; access management (administrators only) -->
                         <Button Style="{StaticResource SecondaryButton}" Height="30" Padding="12,0" FontSize="12" Margin="0,0,10,0"
                                 VerticalAlignment="Center" Command="{Binding ManageUsersCommand}" Content="{loc:Loc Shell_Users}"
-                                ToolTip="Gérer les utilisateurs et la connexion"
+                                ToolTip="{loc:Loc Shell_UsersTip}"
                                 Visibility="{Binding IsAdmin, Converter={StaticResource BoolToVis}}" />
 
                         <Button Style="{StaticResource SecondaryButton}" Height="30" Padding="12,0" FontSize="12" Margin="0,0,10,0"
                                 VerticalAlignment="Center"
                                 Command="{Binding ToggleThemeCommand}" Content="{Binding ThemeToggleText}"
-                                ToolTip="Basculer entre le thème clair et le thème sombre" />
+                                ToolTip="{loc:Loc Shell_ThemeToggleTip}" />
 
                     <ToggleButton x:Name="BellButton" VerticalAlignment="Center"
                                   Background="Transparent" BorderThickness="0" Cursor="Hand" Padding="10,6">

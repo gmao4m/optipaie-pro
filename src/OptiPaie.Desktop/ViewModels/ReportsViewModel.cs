@@ -217,7 +217,18 @@ namespace OptiPaie.Desktop.ViewModels
         private static string Escape(string v)
         {
             if (string.IsNullOrEmpty(v)) return string.Empty;
-            return v.Replace(';', ' ').Replace('\r', ' ').Replace('\n', ' ');
+            string s = v;
+            // Neutralise CSV/DDE formula injection: a leading '=', '+', '@', or a '-' not followed by a
+            // digit makes Excel/Calc treat the cell as a formula. Prefix an apostrophe so it stays text
+            // (a real negative number like -1500 is left numeric so it can still be summed).
+            char c = s[0];
+            if (c == '=' || c == '+' || c == '@' || (c == '-' && !(s.Length > 1 && char.IsDigit(s[1]))))
+                s = "'" + s;
+            // RFC-4180: quote and double embedded quotes when the value holds the ';' delimiter, a quote
+            // or a line break — preserving ';' verbatim instead of flattening it to a space.
+            if (s.IndexOf(';') >= 0 || s.IndexOf('"') >= 0 || s.IndexOf('\r') >= 0 || s.IndexOf('\n') >= 0)
+                s = "\"" + s.Replace("\"", "\"\"") + "\"";
+            return s;
         }
     }
 }

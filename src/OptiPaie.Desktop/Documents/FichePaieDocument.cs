@@ -186,7 +186,7 @@ namespace OptiPaie.Desktop.Documents
                 BandAt(table, r++, "Salaire soumis à cotisation", _m.BaseCotisable, false);
 
                 // 3) CNAS (base + taux shown) [+ CACOBATPH employee share when enabled]
-                RowAt(table, r++, "Retenue CNAS", Money(_m.BaseCotisable), "9 %", null, _m.CnasEmployee);
+                RowAt(table, r++, "Retenue CNAS", Money(_m.BaseCotisable), (_m.CnasEmployeeRate * 100m).ToString("0.##", Fr) + " %", null, _m.CnasEmployee);
                 if (_cacobatphOn)
                     RowAt(table, r++, "CACOBATPH (part salarié)", Money(_m.BaseCotisable), null, null, _cacobatph.EmployeeTotal);
 

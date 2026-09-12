@@ -29,6 +29,10 @@ namespace OptiPaie.Desktop.Documents
         public decimal SalaireBrut { get; set; }
         public decimal BaseCotisable { get; set; }
         public decimal CnasEmployee { get; set; }
+
+        /// <summary>The CNAS employee rate actually used (fraction, e.g. 0.09) — shown as the fiche's taux
+        /// so « Base × taux » always matches the amount, even if the legal rate is ever configured != 9 %.</summary>
+        public decimal CnasEmployeeRate { get; set; }
         public decimal BaseImposable { get; set; }
         public decimal IrgBrut { get; set; }
         public decimal Abattement { get; set; }

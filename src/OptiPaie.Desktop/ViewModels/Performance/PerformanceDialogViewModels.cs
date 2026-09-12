@@ -333,7 +333,9 @@ namespace OptiPaie.Desktop.ViewModels.Performance
 
         private void Recompute()
         {
-            decimal sum = Criteria.Sum(c => c.WeightValue);
+            // Only NAMED criteria count — SaveTemplate drops unnamed rows before validating the sum,
+            // so the on-screen indicator must use the same set or it contradicts the save result.
+            decimal sum = Criteria.Where(c => !string.IsNullOrWhiteSpace(c.Name)).Sum(c => c.WeightValue);
             WeightSumText = string.Format(L.T("Perf_WeightSum"), sum.ToString("0.#", L.Fr));
             WeightValid = !_weighted || Math.Abs(sum - 100m) <= 0.5m;
         }

@@ -468,13 +468,18 @@ namespace OptiPaie.Desktop.ViewModels.Attendance
             {
                 foreach (MatrixCellViewModel cell in row.Cells)
                 {
-                    switch (cell.Status)
+                    // Weekends are excluded from the denominator (workingDays) — exclude them from the
+                    // numerator too, otherwise a weekend Présent/Retard/Mission pushes the rate past 100 %.
+                    if (!cell.IsWeekend)
                     {
-                        case AttendanceStatus.Present: present++; break;
-                        case AttendanceStatus.Late: late++; present++; break;
-                        case AttendanceStatus.Mission: mission++; present++; break;
-                        case AttendanceStatus.Absent: absent++; break;
-                        case AttendanceStatus.Leave: leave++; break;
+                        switch (cell.Status)
+                        {
+                            case AttendanceStatus.Present: present++; break;
+                            case AttendanceStatus.Late: late++; present++; break;
+                            case AttendanceStatus.Mission: mission++; present++; break;
+                            case AttendanceStatus.Absent: absent++; break;
+                            case AttendanceStatus.Leave: leave++; break;
+                        }
                     }
 
                     if (today > 0 && cell.Day == today)

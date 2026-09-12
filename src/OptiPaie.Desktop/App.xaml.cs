@@ -119,9 +119,10 @@ namespace OptiPaie.Desktop
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    "Erreur d'initialisation de l'application :\r\n\r\n" + ex.Message,
-                    "OptiPaie PRO", MessageBoxButton.OK, MessageBoxImage.Error);
+                // Consistent with the other fatal catches: persist the full technical detail to the
+                // crash log and show the bilingual, log-pointing message — never the raw .NET text.
+                CrashLog.Fatal("Composition/initialisation au démarrage", ex);
+                MessageBox.Show(StartupErrorText(), "OptiPaie PRO", MessageBoxButton.OK, MessageBoxImage.Error);
                 Shutdown(-1);
                 return;
             }

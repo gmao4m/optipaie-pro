@@ -1771,4 +1771,16 @@
   <data name="Ats_InvalidStage" xml:space="preserve"><value>مرحلة غير صالحة.</value></data>
   <data name="Ats_ReasonRequired" xml:space="preserve"><value>السبب إلزامي.</value></data>
   <data name="Ats_CandidateHired" xml:space="preserve"><value>تم توظيف هذا المترشّح — أدِر الموظّف من وحدة الموظفين.</value></data>
+  <data name="Shell_SignOutTip" xml:space="preserve"><value>تسجيل الخروج والعودة إلى شاشة تسجيل الدخول</value></data>
+  <data name="Shell_ActiveCompanyTip" xml:space="preserve"><value>تغيير الشركة (يسري على جميع الوحدات)</value></data>
+  <data name="Shell_UsersTip" xml:space="preserve"><value>إدارة المستخدمين وتسجيل الدخول</value></data>
+  <data name="Shell_ThemeToggleTip" xml:space="preserve"><value>التبديل بين المظهر الفاتح والداكن</value></data>
+  <data name="Holidays_ConfirmDelete" xml:space="preserve"><value>حذف يوم العطلة هذا؟</value></data>
+  <data name="Recruit_Interviewer" xml:space="preserve"><value>القائم بالمقابلة</value></data>
+  <data name="Upd_WindowTitle" xml:space="preserve"><value>تحديث متوفر</value></data>
+  <data name="Upd_OpenInBrowser" xml:space="preserve"><value>التنزيل عبر المتصفح</value></data>
+  <data name="Upd_Downloading" xml:space="preserve"><value>جارٍ تنزيل التحديث…</value></data>
+  <data name="Upd_Installing" xml:space="preserve"><value>جارٍ تثبيت التحديث…</value></data>
+  <data name="Upd_AutoFailed" xml:space="preserve"><value>تعذّر التحديث التلقائي — يُفتح التنزيل عبر المتصفح، ثبّت الملف يدويًا.</value></data>
+  <data name="Upd_OpenLinkManually" xml:space="preserve"><value>افتح هذا الرابط يدويًا للتنزيل:</value></data>
 </root>

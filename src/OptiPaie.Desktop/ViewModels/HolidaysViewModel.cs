@@ -87,6 +87,7 @@ namespace OptiPaie.Desktop.ViewModels
         private void Delete()
         {
             if (_selected == null) return;
+            if (!Dialogs.Confirm(OptiPaie.Desktop.Localization.TranslationSource.Instance["Holidays_ConfirmDelete"])) return;
             _services.Holidays.Delete(_selected.Id);
             Load();
             StatusMessage = "Jour férié supprimé.";

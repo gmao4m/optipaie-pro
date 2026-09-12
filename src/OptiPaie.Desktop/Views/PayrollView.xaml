@@ -154,6 +154,9 @@
                         <StackPanel Style="{StaticResource Stat}"><TextBlock Style="{StaticResource Caption}" Text="CNAS" /><TextBlock FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource Deduction}" Text="{Binding CnasText}" /></StackPanel>
                         <StackPanel Style="{StaticResource Stat}"><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Payroll_Abatement}" /><TextBlock FontWeight="SemiBold" FontSize="13" Text="{Binding AbattementText}" /></StackPanel>
                         <StackPanel Style="{StaticResource Stat}"><TextBlock Style="{StaticResource Caption}" Text="IRG" /><TextBlock FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource Deduction}" Text="{Binding IrgText}" /></StackPanel>
+                        <StackPanel Style="{StaticResource Stat}"><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Totals_Gains}" /><TextBlock FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource Brand}" Text="{Binding TotalGainsText}" /></StackPanel>
+                        <StackPanel Style="{StaticResource Stat}"><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Totals_Retenues}" /><TextBlock FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource Deduction}" Text="{Binding TotalRetenuesText}" /></StackPanel>
+                        <StackPanel Style="{StaticResource Stat}" Visibility="{Binding HasLissage, Converter={StaticResource BoolToVis}}"><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Diagnostic_Lissage}" /><TextBlock FontWeight="SemiBold" FontSize="13" Text="{Binding LissageText}" /></StackPanel>
                     </WrapPanel>
                 </DockPanel>
 

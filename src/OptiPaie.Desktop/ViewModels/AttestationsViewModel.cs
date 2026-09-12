@@ -205,7 +205,7 @@ namespace OptiPaie.Desktop.ViewModels
             catch (Exception ex)
             {
                 _services.Logger.Error("Calibration sheet failed.", ex);
-                SetStatus("Échec de la mire de calage : " + ex.Message, true);
+                SetStatus("Échec de la génération de la mire de calage. تعذّر إنشاء ورقة المعايرة.", true);
             }
         }
 
@@ -322,7 +322,7 @@ namespace OptiPaie.Desktop.ViewModels
             catch (Exception ex)
             {
                 _services.Logger.Error("ATS/DRT generation failed.", ex);
-                SetStatus("Échec de la génération : " + ex.Message, true);
+                SetStatus("Échec de la génération du document. تعذّر إنشاء المستند.", true);
             }
         }
 

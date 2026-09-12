@@ -197,18 +197,17 @@ namespace OptiPaie.Desktop.ViewModels
             }
 
             decimal peak = monthly.Count > 0 ? monthly.Max() : 0m;
-            decimal trough = monthly.Count > 0 ? monthly.Min() : 0m;
             if (peak <= 0m) peak = 1m;
             Brush barBrush = Res("Brand", Color.FromRgb(0x0E, 0x9F, 0x6E));
             for (int i = 0; i < monthly.Count; i++)
             {
-                // Normalise between the period's min and max so a small but real trend is
-                // legible; the exact amount is printed on every bar, so this only scales height.
-                double frac = peak > trough ? (double)((monthly[i] - trough) / (peak - trough)) : 1.0;
+                // Zero-based: bar height is proportional to the absolute masse salariale (0 DA → 0 px),
+                // so a small change reads as a small change rather than a min↔max exaggeration.
+                double frac = (double)(monthly[i] / peak);
                 SalaryTrend.Add(new SalaryBar
                 {
                     MonthLabel = labels[i],
-                    HeightPx = 62.0 + frac * 90.0,
+                    HeightPx = frac * 152.0,
                     AmountText = (monthly[i] / 1000m).ToString("N0", Fr) + " K",
                     Fill = barBrush
                 });

@@ -37,17 +37,16 @@ namespace OptiPaie.Desktop.ViewModels
             {
                 [ModuleKeys.Ats] = new PremiumModuleContent(
                     ModuleKeys.Ats,
-                    "ATS / DRT",
-                    "Générez et imprimez automatiquement les déclarations ATS / DRT à partir de vos données de paie et de vos employés existants.",
+                    "Recrutement",
+                    "Gérez vos offres, vos candidats et votre pipeline de recrutement jusqu'à l'embauche, intégré à vos dossiers employés.",
                     "IconClipboard",
                     new[]
                     {
-                        "Génération automatique des déclarations",
-                        "Impression professionnelle",
-                        "Réutilise les données de paie existantes",
-                        "Fait gagner des heures de travail manuel",
-                        "Réduit les erreurs de déclaration",
-                        "Entièrement intégré à la paie"
+                        "Suivi des candidatures",
+                        "Pipeline de recrutement",
+                        "Entretiens et évaluations",
+                        "Embauche en un clic vers un dossier employé",
+                        "Historique des recrutements"
                     }),
 
                 [ModuleKeys.Attendance] = new PremiumModuleContent(

@@ -82,7 +82,9 @@
                                         <Run Text="{Binding ScheduledDate, StringFormat=dd/MM/yyyy, Mode=OneWay}" />
                                         <Run Text=" · " Foreground="{DynamicResource TextMuted}" />
                                         <Run Text="{Binding Type, Mode=OneWay}" />
+                                        <Run Text=" · " Foreground="{DynamicResource TextMuted}" />
                                         <Run Text="{Binding Result, Mode=OneWay}" Foreground="{DynamicResource TextMuted}" />
+                                        <Run Text="{Binding Interviewer, Mode=OneWay, StringFormat=' — {0}'}" Foreground="{DynamicResource TextMuted}" />
                                     </TextBlock>
                                     <Button Grid.Column="1" Content="✕" Width="24" Height="24" Padding="0" Background="Transparent" BorderThickness="0"
                                             Foreground="{DynamicResource Deduction}" Cursor="Hand"
@@ -103,12 +105,15 @@
                             <ColumnDefinition Width="8" />
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="8" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="8" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <DatePicker Grid.Column="0" Width="120" Height="30" SelectedDate="{Binding InterviewDate}" />
                         <TextBox Grid.Column="2" Style="{StaticResource AppTextBox}" Height="30" ToolTip="{loc:Loc Recruit_InterviewType}" Text="{Binding InterviewType, UpdateSourceTrigger=PropertyChanged}" />
-                        <TextBox Grid.Column="4" Style="{StaticResource AppTextBox}" Height="30" ToolTip="{loc:Loc Recruit_InterviewResult}" Text="{Binding InterviewResult, UpdateSourceTrigger=PropertyChanged}" />
-                        <Button Grid.Column="6" Style="{StaticResource SecondaryButton}" Height="30" Padding="12,0"
+                        <TextBox Grid.Column="4" Style="{StaticResource AppTextBox}" Height="30" ToolTip="{loc:Loc Recruit_Interviewer}" Text="{Binding Interviewer, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBox Grid.Column="6" Style="{StaticResource AppTextBox}" Height="30" ToolTip="{loc:Loc Recruit_InterviewResult}" Text="{Binding InterviewResult, UpdateSourceTrigger=PropertyChanged}" />
+                        <Button Grid.Column="8" Style="{StaticResource SecondaryButton}" Height="30" Padding="12,0"
                                 Content="{loc:Loc Recruit_AddShort}" Command="{Binding AddInterviewCommand}" />
                     </Grid>
 

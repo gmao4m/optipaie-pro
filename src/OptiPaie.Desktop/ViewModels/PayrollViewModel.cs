@@ -323,6 +323,15 @@ namespace OptiPaie.Desktop.ViewModels
             _recomputing = true;
             try
             {
+                // A negative « Base » would be silently ignored by the engine (it falls back to the
+                // stored salary). Surface the rejection instead of computing on a different number.
+                PayrollLineVM baseLine = Lines.FirstOrDefault(l => l.IsBaseSalary);
+                if (baseLine != null && baseLine.Amount < 0m)
+                {
+                    Status = "Le salaire de base ne peut pas être négatif. لا يمكن أن يكون الأجر القاعدي سالبًا.";
+                    return; // keep the previous valid result
+                }
+
                 _lastRequest = BuildRequest();
                 _lastResult = _services.Payroll.Preview(_lastRequest);
 
@@ -557,7 +566,8 @@ namespace OptiPaie.Desktop.ViewModels
             // archive uses (FromPayslip), so live preview and archive are identical.
             FichePaieModel model = _fiche.FromResult(
                 SelectedCompany, SelectedEmployee, SelectedYear, SelectedMonth,
-                _lastResult, _services.Localization.IsRightToLeft, _lastRequest.WorkedDays);
+                _lastResult, _services.Localization.IsRightToLeft, _lastRequest.WorkedDays,
+                _services.ConfigurationService.GetCnasEmployeeRate());
 
             try
             {

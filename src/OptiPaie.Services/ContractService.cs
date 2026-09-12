@@ -386,11 +386,13 @@ namespace OptiPaie.Services
                 if (other.Id == incoming.Id) continue;
                 if (other.Status != ContractStatus.Active) continue;
 
-                // The predecessor of a renewal is "Renewed"; any other active contract is
-                // simply closed as "Expired".
-                other.Status = incoming.PreviousContractId == other.Id
-                    ? ContractStatus.Renewed
-                    : ContractStatus.Expired;
+                // A superseded predecessor is « Renouvelé » (remplacé) when it was still valid — a
+                // renewal, or a contract whose end date has not passed. Only one whose term has ALREADY
+                // elapsed is genuinely « Expiré ». (Audit Vague 4 / IDX 62: a still-valid contract must
+                // not be mislabelled Expiré just because a newer one replaced it.) No new enum / migration.
+                bool isRenewal = incoming.PreviousContractId == other.Id;
+                bool termPassed = other.EndDate.HasValue && other.EndDate.Value.Date < DateTime.Today;
+                other.Status = (isRenewal || !termPassed) ? ContractStatus.Renewed : ContractStatus.Expired;
                 uow.Contracts.Update(other);
             }
         }

@@ -107,7 +107,7 @@
                                     </StackPanel>
                                     <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                                         <TextBlock VerticalAlignment="Center" Margin="0,0,4,0" Foreground="{DynamicResource TextSecondary}" FontSize="12.5"
-                                                   Text="{Binding BaseSalary, StringFormat={}{0:N0} DA}" />
+                                                   Text="{Binding BaseSalary, StringFormat={}{0:N2} DA}" />
                                         <Button Style="{StaticResource RowIconButton}" Content="⋯" ToolTip="{loc:Loc Common_MoreActions}"
                                                 beh:RowActions.SelectRow="True" beh:RowActions.OpenMenuOnClick="True"
                                                 Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ListBox}}">

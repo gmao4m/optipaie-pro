@@ -149,9 +149,12 @@ namespace OptiPaie.Tests
             long second = _service.Save(NewContract(ContractType.Cdi, new DateTime(2026, 1, 1), null, 75000m)).Value;
             _service.Activate(second);
 
-            Assert.That(_service.Get(first).Status, Is.EqualTo(ContractStatus.Expired),
+            // A still-valid active contract replaced by a newer one is "Renouvelé" (remplacé), NOT
+            // "Expiré" — its term has not passed (audit Vague 4 / IDX 62).
+            Assert.That(_service.Get(first).Status, Is.EqualTo(ContractStatus.Renewed),
+                "a superseded-but-not-expired contract is Renouvelé, not Expiré");
+            Assert.That(_service.Get(second).Status, Is.EqualTo(ContractStatus.Active),
                 "only one contract is active at a time");
-            Assert.That(_service.Get(second).Status, Is.EqualTo(ContractStatus.Active));
             Assert.That(Employee().BaseSalary, Is.EqualTo(75000m));
         }
 

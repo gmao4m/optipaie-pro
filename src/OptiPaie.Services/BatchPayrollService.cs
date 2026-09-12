@@ -141,11 +141,17 @@ namespace OptiPaie.Services
                         r.Net = NetOf(generated.Value);
                         r.Message = check.Severity == BatchCheckSeverity.Warning ? check.Reason : string.Empty;
 
-                        // Record the loan recovery exactly as the single-employee Save does,
-                        // and only after the payslip is archived. Idempotent per period.
+                        // Record the loan recovery exactly as the single-employee Save does: credit the
+                        // loan the ENGINE-ROUNDED amount actually withheld on the archived fiche, not the
+                        // theoretical instalment (keeps batch == single; only READS the computed amount).
                         if (_isModuleEnabled(ModuleKeys.Loans))
                         {
-                            _loans.RecordPayrollDeductions(check.EmployeeId, year, month);
+                            Payslip archived = _archive.GetPayslip(generated.Value);
+                            decimal withheld = archived == null ? 0m : archived.Details
+                                .Where(d => d.ElementType == ElementType.Deduction &&
+                                            string.Equals(d.LabelFr, LoanLineLabel, StringComparison.Ordinal))
+                                .Sum(d => d.Amount);
+                            _loans.RecordPayrollDeductions(check.EmployeeId, year, month, withheld);
                         }
                     }
                     else

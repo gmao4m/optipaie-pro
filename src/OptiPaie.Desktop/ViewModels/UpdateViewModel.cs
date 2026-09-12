@@ -18,6 +18,11 @@ namespace OptiPaie.Desktop.ViewModels
         private readonly AppServices _services;
         private readonly AppUpdateCheck _info;
 
+        /// <summary>The manual-download fallback (used when the automatic update cannot run) — declared once.</summary>
+        private const string FallbackInstallerUrl = "https://github.com/gmao4m/optipaie-pro/releases/latest/download/OptiPaie-PRO-Setup.exe";
+
+        private static string L(string key) => OptiPaie.Desktop.Localization.TranslationSource.Instance[key];
+
         private int _progress;
         private bool _isBusy;
         private bool _failed;
@@ -100,7 +105,7 @@ namespace OptiPaie.Desktop.ViewModels
             Failed = false;
             FallbackUrl = string.Empty;
             Progress = 0;
-            StatusMessage = "جارٍ تنزيل التحديث…  Téléchargement de la mise à jour…";
+            StatusMessage = L("Upd_Downloading");
 
             UpdateApplyResult result;
             try
@@ -114,25 +119,22 @@ namespace OptiPaie.Desktop.ViewModels
             {
                 // Belt-and-suspenders: NEVER leave the button doing nothing on an unexpected error.
                 _services.Logger.Error("Update apply threw.", ex);
-                result = UpdateApplyResult.Fail(ex.Message, "https://github.com/gmao4m/optipaie-pro/releases/latest/download/OptiPaie-PRO-Setup.exe");
+                result = UpdateApplyResult.Fail(ex.Message, FallbackInstallerUrl);
             }
 
             // On success the app relaunches into the new version (process exits); if we still get
             // here, surface the outcome — with a working manual fallback so the user is never stuck.
             if (result.Success)
             {
-                StatusMessage = "جارٍ تثبيت التحديث…  Installation de la mise à jour…";
+                StatusMessage = L("Upd_Installing");
                 return;
             }
 
             IsBusy = false;
             Failed = true;
-            FallbackUrl = string.IsNullOrWhiteSpace(result.FallbackUrl)
-                ? "https://github.com/gmao4m/optipaie-pro/releases/latest/download/OptiPaie-PRO-Setup.exe"
-                : result.FallbackUrl;
+            FallbackUrl = string.IsNullOrWhiteSpace(result.FallbackUrl) ? FallbackInstallerUrl : result.FallbackUrl;
             Raise(nameof(HasFallback));
-            StatusMessage = "تعذّر التحديث التلقائي — يُفتح التنزيل عبر المتصفح، ثبّت الملف يدويًا.\n" +
-                            "La mise à jour automatique a échoué — le téléchargement s'ouvre dans le navigateur ; lancez le fichier.";
+            StatusMessage = L("Upd_AutoFailed");
 
             // Never leave the user with "I clicked and nothing happened": if the automatic path fails
             // (download blocked, GPO/AV blocking the launcher…), open the browser download straight
@@ -142,9 +144,7 @@ namespace OptiPaie.Desktop.ViewModels
 
         private void OpenInBrowser()
         {
-            string url = string.IsNullOrWhiteSpace(_fallbackUrl)
-                ? "https://github.com/gmao4m/optipaie-pro/releases/latest/download/OptiPaie-PRO-Setup.exe"
-                : _fallbackUrl;
+            string url = string.IsNullOrWhiteSpace(_fallbackUrl) ? FallbackInstallerUrl : _fallbackUrl;
             try
             {
                 System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(url) { UseShellExecute = true });
@@ -152,7 +152,7 @@ namespace OptiPaie.Desktop.ViewModels
             catch (Exception ex)
             {
                 _services.Logger.Warn("Opening the update URL failed: " + ex.Message);
-                StatusMessage = "افتح هذا الرابط يدويًا للتنزيل :\n" + url;
+                StatusMessage = L("Upd_OpenLinkManually") + "\n" + url;
             }
         }
     }

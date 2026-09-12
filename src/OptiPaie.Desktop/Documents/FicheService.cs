@@ -14,7 +14,7 @@ namespace OptiPaie.Desktop.Documents
     {
         private static readonly CultureInfo Fr = CultureInfo.GetCultureInfo("fr-FR");
 
-        public FichePaieModel FromResult(Company company, Employee employee, int year, int month, PayrollResult result, bool isArabic, decimal workedDays)
+        public FichePaieModel FromResult(Company company, Employee employee, int year, int month, PayrollResult result, bool isArabic, decimal workedDays, decimal cnasEmployeeRate)
         {
             PayrollTotals t = result.Totals;
             var model = new FichePaieModel
@@ -27,6 +27,7 @@ namespace OptiPaie.Desktop.Documents
                 SalaireBrut = t.SalaireBrut,
                 BaseCotisable = t.BaseCotisable,
                 CnasEmployee = t.CnasEmployee,
+                CnasEmployeeRate = cnasEmployeeRate,
                 BaseImposable = t.BaseImposable,
                 IrgBrut = t.IrgBrut,
                 Abattement = t.Abattement,
@@ -67,6 +68,7 @@ namespace OptiPaie.Desktop.Documents
                 SalaireBrut = payslip.SalaireBrut,
                 BaseCotisable = payslip.BaseCotisable,
                 CnasEmployee = payslip.CnasEmployee,
+                CnasEmployeeRate = payslip.CnasEmployeeRateUsed,
                 BaseImposable = payslip.BaseImposable,
                 IrgBrut = payslip.IrgBrut,
                 Abattement = payslip.Abattement,

@@ -155,8 +155,10 @@ namespace OptiPaie.Desktop.ViewModels
 
         private void Persist()
         {
-            _services.Training.SetResult(Summary.ParticipantId,
+            Result r = _services.Training.SetResult(Summary.ParticipantId,
                 _result != null ? _result.Value : TrainingResult.Enrolled, _score, _certificateRef);
+            if (r.IsFailure)
+                Dialogs.Error(OptiPaie.Desktop.Localization.ResultText.Localize(_services.Localization, r.Error, r.ErrorCode));
         }
     }
 

@@ -98,9 +98,11 @@ namespace OptiPaie.Desktop.ViewModels
             {
                 switch (Candidate.Stage)
                 {
-                    case CandidateStage.Applied: return "← " + AtsLabels.Stage(CandidateStage.Screening);
-                    case CandidateStage.Screening: return "← " + AtsLabels.Stage(CandidateStage.Interview);
-                    case CandidateStage.Interview: return "← " + AtsLabels.Stage(CandidateStage.Offer);
+                    // No fixed « ← » glyph: it points the wrong way in LTR for an ADVANCE action and
+                    // would need FlowDirection-aware mirroring. The next-stage name already reads as "next".
+                    case CandidateStage.Applied: return AtsLabels.Stage(CandidateStage.Screening);
+                    case CandidateStage.Screening: return AtsLabels.Stage(CandidateStage.Interview);
+                    case CandidateStage.Interview: return AtsLabels.Stage(CandidateStage.Offer);
                     case CandidateStage.Offer: return L("Recruit_Hire");   // « توظيف »
                     default: return string.Empty;
                 }
@@ -158,7 +160,6 @@ namespace OptiPaie.Desktop.ViewModels
             NewPostingCommand = new RelayCommand(NewPosting);
             NewCandidateCommand = new RelayCommand(NewCandidate, () => _selectedPosting != null);
 
-            OpenPostingCommand = new RelayCommand(p => OpenPosting(p as PostingRowViewModel));
             EditPostingCommand = new RelayCommand(p => EditPosting(p as PostingRowViewModel));
             TogglePostingCommand = new RelayCommand(p => TogglePosting(p as PostingRowViewModel));
             DeletePostingCommand = new RelayCommand(p => DeletePosting(p as PostingRowViewModel));
@@ -195,7 +196,6 @@ namespace OptiPaie.Desktop.ViewModels
         // Two visible buttons only; everything else is a right-click action.
         public ICommand NewPostingCommand { get; }
         public ICommand NewCandidateCommand { get; }
-        public ICommand OpenPostingCommand { get; }
         public ICommand EditPostingCommand { get; }
         public ICommand TogglePostingCommand { get; }
         public ICommand DeletePostingCommand { get; }
@@ -255,11 +255,6 @@ namespace OptiPaie.Desktop.ViewModels
             row = row ?? _selectedPosting;
             if (row == null) return;
             if (ShowPostingEditor(new AtsPostingEditViewModel(_services, _company.Id, _services.Ats.GetPosting(row.Id)))) LoadPostings();
-        }
-
-        private void OpenPosting(PostingRowViewModel row)
-        {
-            if (row != null) SelectedPosting = row;   // a direct click selects + loads candidates
         }
 
         private bool ShowPostingEditor(AtsPostingEditViewModel vm)

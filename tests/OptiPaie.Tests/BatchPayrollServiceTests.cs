@@ -275,6 +275,29 @@ namespace OptiPaie.Tests
         }
 
         [Test]
+        public void Run_CreditsTheLoan_TheArchivedRoundedAmount_NotTheTheoreticalInstalment()
+        {
+            // A >2-decimal instalment forces the engine to round the archived payslip loan line, so the
+            // theoretical instalment and the fiche line differ. The batch must credit the loan schedule
+            // the ARCHIVED (rounded) amount — matching the single-employee path (audit Vague 4 / IDX 70).
+            long id = AddEmployee("BENALI", 60000m);
+            _loans.Save(new Loan { EmployeeId = id, Type = LoanType.Loan, Principal = 90000m, MonthlyInstallment = 15000.559m, StartYear = Year, StartMonth = 1 });
+
+            BatchPayrollResult result = _batch.Run(_companyId, Year, Month);
+            Assert.That(result.Succeeded, Is.EqualTo(1));
+
+            Payslip payslip = _archive.GetPayslip(result.Results[0].PayslipId);
+            decimal archivedLine = payslip.Details
+                .Where(d => d.LabelFr != null && d.LabelFr.Contains("prêt"))
+                .Sum(d => d.Amount);
+            Assert.That(archivedLine, Is.GreaterThan(0m), "the loan line is on the fiche");
+
+            // Credited exactly the archived amount: outstanding == principal − archived line (to the centime).
+            Assert.That(_loans.GetOutstanding(id), Is.EqualTo(90000m - archivedLine),
+                "the loan is credited the archived (fiche) amount, not the raw theoretical instalment");
+        }
+
+        [Test]
         public void Run_IsIdempotent_ReRunningReportsAlreadyPaid_NotADuplicate()
         {
             AddEmployee("BENALI", 60000m);

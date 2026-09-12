@@ -224,8 +224,11 @@ namespace OptiPaie.Desktop.ViewModels
         {
             var interview = new Interview
             {
-                CandidateId = _candidate.Id, ScheduledDate = _interviewDate,
-                Type = _interviewType, Interviewer = _interviewer, Result = _interviewResult
+                CandidateId = _candidate.Id, ScheduledDate = _interviewDate, Type = _interviewType,
+                // Store an absent recruiter as null (not ""), so the list's « — {recruteur} » separator is
+                // skipped for interviews without one (WPF applies StringFormat to "" but not to null).
+                Interviewer = string.IsNullOrWhiteSpace(_interviewer) ? null : _interviewer.Trim(),
+                Result = _interviewResult
             };
             Result<long> r = _services.Ats.SaveInterview(interview);
             if (r.IsFailure) { Fail(r); return; }

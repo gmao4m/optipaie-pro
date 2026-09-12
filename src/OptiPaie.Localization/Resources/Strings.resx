@@ -1771,4 +1771,16 @@
   <data name="Ats_InvalidStage" xml:space="preserve"><value>Étape invalide.</value></data>
   <data name="Ats_ReasonRequired" xml:space="preserve"><value>Le motif est obligatoire.</value></data>
   <data name="Ats_CandidateHired" xml:space="preserve"><value>Ce candidat a été recruté — gérez l'employé depuis le module Employés.</value></data>
+  <data name="Shell_SignOutTip" xml:space="preserve"><value>Se déconnecter et revenir à l'écran de connexion</value></data>
+  <data name="Shell_ActiveCompanyTip" xml:space="preserve"><value>Changer d'entreprise (s'applique à tous les modules)</value></data>
+  <data name="Shell_UsersTip" xml:space="preserve"><value>Gérer les utilisateurs et la connexion</value></data>
+  <data name="Shell_ThemeToggleTip" xml:space="preserve"><value>Basculer entre le thème clair et le thème sombre</value></data>
+  <data name="Holidays_ConfirmDelete" xml:space="preserve"><value>Supprimer ce jour férié ?</value></data>
+  <data name="Recruit_Interviewer" xml:space="preserve"><value>Recruteur</value></data>
+  <data name="Upd_WindowTitle" xml:space="preserve"><value>Mise à jour disponible</value></data>
+  <data name="Upd_OpenInBrowser" xml:space="preserve"><value>Télécharger dans le navigateur</value></data>
+  <data name="Upd_Downloading" xml:space="preserve"><value>Téléchargement de la mise à jour…</value></data>
+  <data name="Upd_Installing" xml:space="preserve"><value>Installation de la mise à jour…</value></data>
+  <data name="Upd_AutoFailed" xml:space="preserve"><value>La mise à jour automatique a échoué — le téléchargement s'ouvre dans le navigateur ; lancez le fichier.</value></data>
+  <data name="Upd_OpenLinkManually" xml:space="preserve"><value>Ouvrez ce lien manuellement pour télécharger :</value></data>
 </root>

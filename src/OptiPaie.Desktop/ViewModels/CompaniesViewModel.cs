@@ -73,6 +73,7 @@ namespace OptiPaie.Desktop.ViewModels
                 string q = _search.Trim().ToLowerInvariant();
                 filtered = _all.Where(c =>
                     (c.NameFr ?? string.Empty).ToLowerInvariant().Contains(q)
+                    || (c.NameAr ?? string.Empty).ToLowerInvariant().Contains(q)
                     || (c.Nif ?? string.Empty).ToLowerInvariant().Contains(q));
             }
 
