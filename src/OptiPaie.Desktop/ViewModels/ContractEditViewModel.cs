@@ -8,6 +8,7 @@ using OptiPaie.Core.Enums;
 using OptiPaie.Core.Primitives;
 using OptiPaie.Desktop.Common;
 using OptiPaie.Desktop.Composition;
+using OptiPaie.Desktop.Localization;
 using OptiPaie.Desktop.Mvvm;
 
 namespace OptiPaie.Desktop.ViewModels
@@ -60,7 +61,7 @@ namespace OptiPaie.Desktop.ViewModels
                 _trialDays = existing.TrialPeriodDays.ToString(CultureInfo.InvariantCulture);
                 _signedDate = existing.SignedDate;
                 _notes = existing.Notes;
-                Title = "Modifier le contrat";
+                Title = TranslationSource.Instance["ContractEdit_TitleEdit"];
             }
             else
             {
@@ -68,7 +69,7 @@ namespace OptiPaie.Desktop.ViewModels
                 _selectedType = FindType(ContractType.Cdi);
                 _startDate = DateTime.Today;
                 _trialDays = "0";
-                Title = "Nouveau contrat";
+                Title = TranslationSource.Instance["Contract_New"];
             }
 
             SaveCommand = new RelayCommand(Save);
@@ -83,6 +84,10 @@ namespace OptiPaie.Desktop.ViewModels
         public ObservableCollection<ContractTypeOption> Types { get; } = new ObservableCollection<ContractTypeOption>();
 
         public bool CanChooseEmployee => _contract.Id == 0;
+
+        /// <summary>Only a new or draft contract may edit its legally-fixed terms; a non-draft opens
+        /// read-only for those (the service persists only reference/signature/notes) — audit IDX 24.</summary>
+        public bool CanEditTerms => _contract.Id == 0 || _contract.Status == ContractStatus.Draft;
 
         public Employee SelectedEmployee { get => _selectedEmployee; set => Set(ref _selectedEmployee, value); }
 
@@ -111,19 +116,19 @@ namespace OptiPaie.Desktop.ViewModels
         {
             if (_selectedEmployee == null)
             {
-                Dialogs.Error("Sélectionnez un employé.");
+                Dialogs.Error(TranslationSource.Instance["Contract_Msg_SelectEmployee"]);
                 return;
             }
 
             if (_selectedType == null)
             {
-                Dialogs.Error("Sélectionnez un type de contrat.");
+                Dialogs.Error(TranslationSource.Instance["Contract_Msg_SelectType"]);
                 return;
             }
 
             if (!OptiPaie.Common.Text.FlexibleNumber.TryParse(_baseSalary, out decimal salary))
             {
-                Dialogs.Error("Salaire de base invalide.");
+                Dialogs.Error(TranslationSource.Instance["Contract_Msg_BaseSalaryInvalid"]);
                 return;
             }
 
@@ -143,7 +148,7 @@ namespace OptiPaie.Desktop.ViewModels
             Result<long> result = _services.Contracts.Save(_contract);
             if (result.IsFailure)
             {
-                Dialogs.Error(result.Error);
+                Dialogs.Error(ResultText.Localize(_services.Localization, result.Error, result.ErrorCode));
                 return;
             }
 
@@ -228,13 +233,13 @@ namespace OptiPaie.Desktop.ViewModels
         {
             if (!OptiPaie.Common.Text.FlexibleNumber.TryParse(_newSalaryText, out decimal salary) || salary <= 0m)
             {
-                Dialogs.Error("Salaire invalide.");
+                Dialogs.Error(TranslationSource.Instance["Contract_Msg_SalaryInvalid"]);
                 return;
             }
 
             if (_isFixedTerm && !_newEnd.HasValue)
             {
-                Dialogs.Error("Un contrat à durée déterminée doit avoir une date de fin.");
+                Dialogs.Error(TranslationSource.Instance["Contract_EndRequired"]);
                 return;
             }
 

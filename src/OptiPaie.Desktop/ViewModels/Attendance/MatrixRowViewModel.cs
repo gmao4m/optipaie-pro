@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using OptiPaie.Core.Entities;
@@ -20,6 +21,8 @@ namespace OptiPaie.Desktop.ViewModels.Attendance
             Name = (employee.LastNameFr + " " + employee.FirstNameFr).Trim();
             Department = string.IsNullOrWhiteSpace(employee.Department) ? "—" : employee.Department;
             Position = string.IsNullOrWhiteSpace(employee.Poste) ? "—" : employee.Poste;
+            HireDate = employee.HireDate;
+            ExitDate = employee.ExitDate;
             Cells = cells;
         }
 
@@ -28,6 +31,10 @@ namespace OptiPaie.Desktop.ViewModels.Attendance
         public string Name { get; }
         public string Department { get; }
         public string Position { get; }
+
+        /// <summary>Employment bounds — the KPI denominator counts only days the employee was employed.</summary>
+        public DateTime HireDate { get; }
+        public DateTime? ExitDate { get; }
 
         /// <summary>Day cells for the selected month (Cells[d-1] is day d).</summary>
         public IReadOnlyList<MatrixCellViewModel> Cells { get; }

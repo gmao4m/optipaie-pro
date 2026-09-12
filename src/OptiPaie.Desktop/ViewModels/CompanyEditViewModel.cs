@@ -7,6 +7,7 @@ using OptiPaie.Core.Entities;
 using OptiPaie.Core.Primitives;
 using OptiPaie.Desktop.Common;
 using OptiPaie.Desktop.Composition;
+using OptiPaie.Desktop.Localization;
 using OptiPaie.Desktop.Mvvm;
 
 namespace OptiPaie.Desktop.ViewModels
@@ -102,7 +103,7 @@ namespace OptiPaie.Desktop.ViewModels
 
         private void RemoveDepartment(DepartmentRowViewModel row)
         {
-            if (!Dialogs.Confirm($"Supprimer le département « {row.Name} » ?"))
+            if (!Dialogs.Confirm(string.Format(TranslationSource.Instance["Company_DepartmentDeleteConfirm"], row.Name)))
             {
                 return;
             }
@@ -116,7 +117,7 @@ namespace OptiPaie.Desktop.ViewModels
             LoadDepartments();
         }
 
-        public string Title => _isNew ? "Nouvelle entreprise" : "Modifier l'entreprise";
+        public string Title => _isNew ? TranslationSource.Instance["Companies_New"] : TranslationSource.Instance["Company_EditTitle"];
 
         /// <summary>Raised so the view refreshes the logo preview after a change.</summary>
         public byte[] Logo
@@ -161,7 +162,7 @@ namespace OptiPaie.Desktop.ViewModels
             var dialog = new OpenFileDialog
             {
                 Filter = "Images|*.png;*.jpg;*.jpeg;*.bmp",
-                Title = "Choisir un logo"
+                Title = TranslationSource.Instance["Company_UploadLogo"]
             };
 
             if (dialog.ShowDialog() == true)
@@ -183,7 +184,7 @@ namespace OptiPaie.Desktop.ViewModels
                 }
                 catch
                 {
-                    Dialogs.Error("Impossible de lire ce fichier image.");
+                    Dialogs.Error(TranslationSource.Instance["Company_LogoReadError"]);
                 }
             }
         }
@@ -194,7 +195,7 @@ namespace OptiPaie.Desktop.ViewModels
         {
             if (string.IsNullOrWhiteSpace(Company.NameFr))
             {
-                Dialogs.Error("Le nom de l'entreprise est obligatoire.");
+                Dialogs.Error(TranslationSource.Instance["Company_NameRequired"]);
                 return;
             }
 

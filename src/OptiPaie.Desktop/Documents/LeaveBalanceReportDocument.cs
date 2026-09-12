@@ -69,7 +69,7 @@ namespace OptiPaie.Desktop.Documents
                         table.Cell().Element(Body).AlignRight().Text(Num(r.Entitlement));
                         table.Cell().Element(Body).AlignRight().Text(Num(r.Taken));
                         table.Cell().Element(Body).AlignRight().Text(Num(r.Pending));
-                        table.Cell().Element(Body).AlignRight().Text(Num(r.Remaining));
+                        table.Cell().Element(Body).AlignRight().Text(Num(r.Available));
                         table.Cell().Element(Body).AlignRight().Text(Num(r.OtherLeaveDays));
                         table.Cell().Element(Body).AlignRight().Text(Num(r.UnpaidDays));
                     }

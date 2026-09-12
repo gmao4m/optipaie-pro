@@ -95,11 +95,14 @@ namespace OptiPaie.Services
                     loan.Status = existing.Status;
                     uow.Loans.Update(loan);
                     ReconcileStatus(uow, loan.Id);
+                    Audit.Record("Loan", loan.Id, AuditAction.Updated, "Prêt modifié");
                     return Result.Ok(loan.Id);
                 }
 
                 loan.Status = LoanStatus.Active;
-                return Result.Ok(uow.Loans.Insert(loan));
+                long newId = uow.Loans.Insert(loan);
+                Audit.Record("Loan", newId, AuditAction.Created, "Prêt créé", null, loan.Principal.ToString(System.Globalization.CultureInfo.InvariantCulture));
+                return Result.Ok(newId);
             }
         }
 
@@ -141,6 +144,7 @@ namespace OptiPaie.Services
 
                     uow.Loans.SoftDelete(id);
                     uow.Commit();
+                    Audit.Record("Loan", id, AuditAction.Deleted, "Prêt supprimé (avec son historique de remboursement)");
                     return Result.Ok();
                 }
                 catch
@@ -250,6 +254,7 @@ namespace OptiPaie.Services
 
                     ReconcileStatus(uow, loanId);
                     uow.Commit();
+                    Audit.Record("Loan", loanId, AuditAction.Updated, "Remboursement manuel ajouté (" + month.ToString("00") + "/" + year + ")", null, amount.ToString(System.Globalization.CultureInfo.InvariantCulture));
                     return Result.Ok();
                 }
                 catch
@@ -276,6 +281,7 @@ namespace OptiPaie.Services
                     uow.Loans.SoftDeleteRepayment(repaymentId);
                     ReconcileStatus(uow, repayment.LoanId);
                     uow.Commit();
+                    Audit.Record("Loan", repayment.LoanId, AuditAction.Updated, "Remboursement supprimé", repayment.Amount.ToString(System.Globalization.CultureInfo.InvariantCulture), null);
                     return Result.Ok();
                 }
                 catch

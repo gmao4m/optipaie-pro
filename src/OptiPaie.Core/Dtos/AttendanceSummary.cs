@@ -34,6 +34,19 @@ namespace OptiPaie.Core.Dtos
 
         /// <summary>Days with a recorded attendance row.</summary>
         public int RecordedDays { get; set; }
+
+        /// <summary>Days actually PAID by payroll — mirrors the engine gate (monthDays − AbsentDays when
+        /// any day was recorded, else the full month). Derived, never stored; reconciles the Synthèse with
+        /// what the payslip pays in the exception-only pointage flow.</summary>
+        public int PaidDays
+        {
+            get
+            {
+                if (Year <= 0 || Month < 1 || Month > 12) return 0;
+                int monthDays = System.DateTime.DaysInMonth(Year, Month);
+                return RecordedDays > 0 ? System.Math.Max(0, monthDays - AbsentDays) : monthDays;
+            }
+        }
     }
 
     /// <summary>A single status-only entry for the fast matrix / bulk operations.</summary>

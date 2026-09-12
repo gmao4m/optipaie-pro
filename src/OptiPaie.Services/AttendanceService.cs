@@ -468,7 +468,7 @@ namespace OptiPaie.Services
                 summary.WorkedHours += r.WorkedHours;
                 summary.OvertimeHours += r.OvertimeHours;
                 summary.LateMinutes += r.LateMinutes;
-                if (r.LateMinutes > 0) summary.LateCount++;
+                if (r.Status == AttendanceStatus.Late) summary.LateCount++; // matrix-painted 'R' days have LateMinutes=0 but Status=Late
 
                 switch (r.Status)
                 {

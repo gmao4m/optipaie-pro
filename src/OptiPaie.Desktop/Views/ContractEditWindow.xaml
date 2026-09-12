@@ -41,16 +41,17 @@
                 <StackPanel Grid.Column="0">
                     <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Common_Type}" />
                     <ComboBox Style="{StaticResource AppComboBox}" Height="32" Margin="0,4,0,0"
-                              ItemsSource="{Binding Types}" SelectedItem="{Binding SelectedType}" DisplayMemberPath="Label" />
+                              ItemsSource="{Binding Types}" SelectedItem="{Binding SelectedType}" DisplayMemberPath="Label"
+                              IsEnabled="{Binding CanEditTerms}" />
                 </StackPanel>
                 <StackPanel Grid.Column="2">
                     <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Employee_BaseSalary}" />
-                    <TextBox Style="{StaticResource AppTextBox}" Margin="0,4,0,0" Text="{Binding BaseSalary, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox Style="{StaticResource AppTextBox}" Margin="0,4,0,0" IsEnabled="{Binding CanEditTerms}" Text="{Binding BaseSalary, UpdateSourceTrigger=PropertyChanged}" />
                 </StackPanel>
             </Grid>
 
             <TextBlock Style="{StaticResource Caption}" Margin="0,12,0,0" Text="{loc:Loc Employee_Poste}" />
-            <TextBox Style="{StaticResource AppTextBox}" Margin="0,4,0,0" Text="{Binding Position, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox Style="{StaticResource AppTextBox}" Margin="0,4,0,0" IsEnabled="{Binding CanEditTerms}" Text="{Binding Position, UpdateSourceTrigger=PropertyChanged}" />
 
             <Grid Margin="0,12,0,0">
                 <Grid.ColumnDefinitions>
@@ -60,11 +61,11 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0">
                     <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Common_StartDate}" />
-                    <DatePicker Height="32" Margin="0,4,0,0" SelectedDate="{Binding StartDate}" />
+                    <DatePicker Height="32" Margin="0,4,0,0" IsEnabled="{Binding CanEditTerms}" SelectedDate="{Binding StartDate}" />
                 </StackPanel>
                 <StackPanel Grid.Column="2" Visibility="{Binding ShowEndDate, Converter={StaticResource BoolVis}}">
                     <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Common_EndDate}" />
-                    <DatePicker Height="32" Margin="0,4,0,0" SelectedDate="{Binding EndDate}" />
+                    <DatePicker Height="32" Margin="0,4,0,0" IsEnabled="{Binding CanEditTerms}" SelectedDate="{Binding EndDate}" />
                 </StackPanel>
             </Grid>
 
@@ -76,7 +77,7 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0">
                     <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc ContractEdit_Probation}" />
-                    <TextBox Style="{StaticResource AppTextBox}" Margin="0,4,0,0" Text="{Binding TrialPeriodDays, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox Style="{StaticResource AppTextBox}" Margin="0,4,0,0" IsEnabled="{Binding CanEditTerms}" Text="{Binding TrialPeriodDays, UpdateSourceTrigger=PropertyChanged}" />
                 </StackPanel>
                 <StackPanel Grid.Column="2">
                     <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Cert_Reference}" />

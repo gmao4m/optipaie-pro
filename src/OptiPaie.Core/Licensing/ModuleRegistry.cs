@@ -86,7 +86,7 @@ namespace OptiPaie.Core.Licensing
                 new ModuleDescriptor(ModuleKeys.Contracts,       "Contrats & renouvellements", "العقود والتجديد",   false, 70),
                 new ModuleDescriptor(ModuleKeys.Training,        "Formation & cours",          "التكوين والدورات",  false, 80),
                 new ModuleDescriptor(ModuleKeys.Assets,          "Biens & équipements",        "الأصول والمعدات",   false, 90),
-                new ModuleDescriptor(ModuleKeys.WorkCertificate, "Attestation de travail",     "شهادة العمل",       false, 100),
+                new ModuleDescriptor(ModuleKeys.WorkCertificate, "Attestations & certificats",  "الشهادات والوثائق", false, 100),
             };
 
             _byKey = _all.ToDictionary(m => m.Key, StringComparer.OrdinalIgnoreCase);

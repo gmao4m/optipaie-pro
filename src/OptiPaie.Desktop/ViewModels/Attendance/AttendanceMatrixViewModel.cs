@@ -468,9 +468,13 @@ namespace OptiPaie.Desktop.ViewModels.Attendance
             {
                 foreach (MatrixCellViewModel cell in row.Cells)
                 {
-                    // Weekends are excluded from the denominator (workingDays) — exclude them from the
-                    // numerator too, otherwise a weekend Présent/Retard/Mission pushes the rate past 100 %.
-                    if (!cell.IsWeekend)
+                    // Count a day in the numerator only when it is BOTH a working day AND inside the
+                    // employment window — the exact filter the denominator uses — so a cell painted on a
+                    // weekend or outside employment (bulk fill has no hire/exit awareness) can never push
+                    // the rate past 100 %.
+                    bool employed = cell.Date.Date >= row.HireDate.Date
+                        && (!row.ExitDate.HasValue || cell.Date.Date <= row.ExitDate.Value.Date);
+                    if (!cell.IsWeekend && employed)
                     {
                         switch (cell.Status)
                         {
@@ -491,7 +495,22 @@ namespace OptiPaie.Desktop.ViewModels.Attendance
                 }
             }
 
-            int possible = workingDays * employees;
+            // Denominator counts only the working days each employee was actually EMPLOYED, so a
+            // mid-month hire/exit no longer deflates the presence rate (numerator already excludes
+            // pre-hire/post-exit days — no cell is painted there).
+            int possible = 0;
+            foreach (MatrixRowViewModel row in _allRows)
+            {
+                for (int d = 1; d <= DayCount; d++)
+                {
+                    var date = new DateTime(_selectedYear, _selectedMonth, d);
+                    if (date.DayOfWeek == DayOfWeek.Friday || date.DayOfWeek == DayOfWeek.Saturday) continue;
+                    if (date.Date < row.HireDate.Date) continue;
+                    if (row.ExitDate.HasValue && date.Date > row.ExitDate.Value.Date) continue;
+                    possible++;
+                }
+            }
+
             KpiEmployees = employees.ToString();
             KpiWorkingDays = workingDays.ToString();
             KpiAttendance = Percent(present, possible);

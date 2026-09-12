@@ -587,6 +587,16 @@ namespace OptiPaie.Desktop.ViewModels
                 return false;
             }
 
+            // A negative base is only parked by the live Recompute (which keeps the last VALID result);
+            // block Save/export too so nothing is archived or printed on a stale base while the grid shows it.
+            PayrollLineVM baseLine = Lines.FirstOrDefault(l => l.IsBaseSalary);
+            if (baseLine != null && baseLine.Amount < 0m)
+            {
+                Status = "Le salaire de base ne peut pas être négatif. لا يمكن أن يكون الأجر القاعدي سالبًا.";
+                Dialogs.Error("Le salaire de base ne peut pas être négatif. لا يمكن أن يكون الأجر القاعدي سالبًا.");
+                return false;
+            }
+
             if (_lastResult == null || !_lastResult.IsSuccess)
             {
                 Recompute();

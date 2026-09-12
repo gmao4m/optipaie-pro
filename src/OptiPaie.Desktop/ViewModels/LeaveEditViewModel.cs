@@ -62,7 +62,7 @@ namespace OptiPaie.Desktop.ViewModels
                 _reason = existing.Reason;
                 _selectedType = SelectExisting(existing);
                 _selectedEmployee = Employees.FirstOrDefaultById(existing.EmployeeId);
-                Title = "Modifier la demande";
+                Title = L("Leave_EditTitle");
             }
             else
             {
@@ -70,7 +70,7 @@ namespace OptiPaie.Desktop.ViewModels
                 _endDate = DateTime.Today;
                 _selectedType = Types.FirstOrDefaultByValue(LeaveType.Annual) ?? Types.FirstOrDefault();
                 _selectedEmployee = Employees.Count > 0 ? Employees[0] : null;
-                Title = "Nouvelle demande de congé";
+                Title = L("Leave_NewTitle");
             }
 
             SubmitCommand = new RelayCommand(() => Persist(false));
@@ -157,7 +157,7 @@ namespace OptiPaie.Desktop.ViewModels
         {
             if (_selectedEmployee == null || _selectedType == null)
             {
-                DaysText = "0 jour(s)";
+                DaysText = L("Leave_ZeroDays");
                 PaymentLabel = DecrementsLabel = BalanceText = AlertText = string.Empty;
                 HasAlert = false;
                 return;
@@ -174,7 +174,7 @@ namespace OptiPaie.Desktop.ViewModels
 
             LeavePreview p = _services.Leave.Preview(probe);
 
-            DaysText = p.Days.ToString("0.##", CultureInfo.InvariantCulture) + " jour(s) décompté(s)";
+            DaysText = string.Format(L("Leave_DaysCounted"), p.Days.ToString("0.##", CultureInfo.InvariantCulture));
             PaymentLabel = L(LeaveTypeResolver.PaymentKey(p.Category));
             DecrementsLabel = L(LeaveTypeResolver.DecrementKey(p.DecrementsBalance));
             BalanceText = p.DecrementsBalance
@@ -192,13 +192,13 @@ namespace OptiPaie.Desktop.ViewModels
         {
             if (_selectedEmployee == null)
             {
-                Dialogs.Error("Sélectionnez un employé.");
+                Dialogs.Error(L("Common_SelectEmployee"));
                 return;
             }
 
             if (_selectedType == null)
             {
-                Dialogs.Error("Sélectionnez un type de congé.");
+                Dialogs.Error(L("Leave_SelectType"));
                 return;
             }
 

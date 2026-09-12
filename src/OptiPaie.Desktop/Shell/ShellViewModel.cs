@@ -443,9 +443,8 @@ namespace OptiPaie.Desktop.Shell
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine("Module activation failed: " + ex);
-                MessageBox.Show(
-                    "Ce module n'a pas pu charger toutes ses données. Il s'affiche partiellement.\r\n\r\n" + ex.Message,
-                    "OptiPaie PRO", MessageBoxButton.OK, MessageBoxImage.Warning);
+                // Clean localized business message on screen; the technical exception goes to the journal.
+                OptiPaie.Desktop.Common.Dialogs.ErrorWithLog(L("Shell_ModulePartialLoad"), ex);
             }
         }
 

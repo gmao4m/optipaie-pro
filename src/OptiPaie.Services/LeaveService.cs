@@ -113,6 +113,9 @@ namespace OptiPaie.Services
                     {
                         return Fail<long>(balance.Error, balance.ErrorCode);
                     }
+
+                    Result once = ValidateOncePerCareer(uow, request, ctx);
+                    if (once.IsFailure) return Fail<long>(once.Error, once.ErrorCode);
                 }
 
                 if (request.Id > 0)
@@ -147,6 +150,9 @@ namespace OptiPaie.Services
 
                 Result balance = ValidateAnnualBalance(uow, request, ctx);
                 if (balance.IsFailure) return Fail(balance.Error, balance.ErrorCode);
+
+                Result once = ValidateOncePerCareer(uow, request, ctx);
+                if (once.IsFailure) return Fail(once.Error, once.ErrorCode);
 
                 request.UpdatedAtUtc = DateTime.UtcNow;
                 uow.Leave.Update(request);
@@ -187,6 +193,9 @@ namespace OptiPaie.Services
 
                 Result approvalBalance = ValidateAnnualBalance(uow, request, ctx);
                 if (approvalBalance.IsFailure) return Fail(approvalBalance.Error, approvalBalance.ErrorCode);
+
+                Result onceApprove = ValidateOncePerCareer(uow, request, ctx);
+                if (onceApprove.IsFailure) return Fail(onceApprove.Error, onceApprove.ErrorCode);
 
                 uow.BeginTransaction();
                 try
@@ -543,6 +552,24 @@ namespace OptiPaie.Services
         }
 
         // ================================================================ internals
+
+        /// <summary>A type flagged OncePerCareer (e.g. le Hadj) can be taken only once — refuse a second
+        /// live request of the same configurable type (best-effort within this database).</summary>
+        private static Result ValidateOncePerCareer(IUnitOfWork uow, LeaveRequest request, Ctx ctx)
+        {
+            if (!request.LeaveTypeId.HasValue || ctx.Types == null) return Result.Ok();
+            if (!ctx.Types.TryGetValue(request.LeaveTypeId.Value, out LeaveTypeDefinition def) || !def.OncePerCareer) return Result.Ok();
+
+            foreach (LeaveRequest other in uow.Leave.GetByEmployee(request.EmployeeId))
+            {
+                if (other.Id == request.Id) continue;
+                if (other.IsDraft) continue;
+                if (other.Status == LeaveStatus.Rejected || other.Status == LeaveStatus.Cancelled) continue;
+                if (other.LeaveTypeId == request.LeaveTypeId)
+                    return Result.Fail("Ce type de congé ne peut être pris qu'une seule fois dans la carrière ; il l'a déjà été.", "Leave_OncePerCareer");
+            }
+            return Result.Ok();
+        }
 
         private static Result Validate(IUnitOfWork uow, LeaveRequest request)
         {

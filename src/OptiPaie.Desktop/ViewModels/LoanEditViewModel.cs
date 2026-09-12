@@ -59,7 +59,7 @@ namespace OptiPaie.Desktop.ViewModels
                 _startYear = existing.StartYear;
                 _startMonth = existing.StartMonth;
                 _reason = existing.Reason;
-                Title = "Modifier le prêt";
+                Title = L("Loan_EditTitle");
             }
             else
             {
@@ -67,7 +67,7 @@ namespace OptiPaie.Desktop.ViewModels
                 _selectedType = FindType(LoanType.Loan);
                 _startYear = DateTime.Today.Year;
                 _startMonth = DateTime.Today.Month;
-                Title = "Nouveau prêt / avance";
+                Title = L("Loan_NewTitle");
             }
 
             SaveCommand = new RelayCommand(Save);
@@ -77,6 +77,8 @@ namespace OptiPaie.Desktop.ViewModels
         }
 
         public Action<bool> RequestClose { get; set; }
+
+        private static string L(string key) => OptiPaie.Desktop.Localization.TranslationSource.Instance[key];
 
         public string Title { get; }
 
@@ -117,8 +119,8 @@ namespace OptiPaie.Desktop.ViewModels
                 && principal > 0m && installment > 0m)
             {
                 int months = (int)Math.Ceiling(principal / installment);
-                ScheduleText = months + " mensualité(s) — dernière : " +
-                    (principal - installment * (months - 1)).ToString("N2", Fr) + " DA";
+                ScheduleText = string.Format(L("Loan_ScheduleText"), months,
+                    (principal - installment * (months - 1)).ToString("N2", Fr));
             }
             else
             {
@@ -130,19 +132,19 @@ namespace OptiPaie.Desktop.ViewModels
         {
             if (_selectedEmployee == null)
             {
-                Dialogs.Error("Sélectionnez un employé.");
+                Dialogs.Error(L("Common_SelectEmployee"));
                 return;
             }
 
             if (!TryDecimal(_principal, out decimal principal))
             {
-                Dialogs.Error("Montant du prêt invalide.");
+                Dialogs.Error(L("Loan_PrincipalInvalidMsg"));
                 return;
             }
 
             if (!TryDecimal(_installment, out decimal installment))
             {
-                Dialogs.Error("Mensualité invalide.");
+                Dialogs.Error(L("Loan_InstallmentInvalidMsg"));
                 return;
             }
 

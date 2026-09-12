@@ -123,12 +123,13 @@ namespace OptiPaie.Desktop.ViewModels
             try
             {
                 var sb = new StringBuilder();
-                sb.AppendLine("Employé;Présents;Absents;Congés;Fériés;Repos;Retards;Minutes de retard;Heures;Heures supp.");
+                sb.AppendLine("Employé;Présents;Jours payés;Absents;Congés;Fériés;Repos;Retards;Minutes de retard;Heures;Heures supp.");
                 foreach (AttendanceSummary r in Rows)
                 {
                     sb.AppendLine(string.Join(";",
                         Escape(r.EmployeeName),
                         r.PresentDays.ToString(CultureInfo.InvariantCulture),
+                        r.PaidDays.ToString(CultureInfo.InvariantCulture),
                         r.AbsentDays.ToString(CultureInfo.InvariantCulture),
                         r.LeaveDays.ToString(CultureInfo.InvariantCulture),
                         r.HolidayDays.ToString(CultureInfo.InvariantCulture),

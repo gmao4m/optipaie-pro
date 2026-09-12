@@ -58,11 +58,13 @@ namespace OptiPaie.Desktop.ViewModels
         public ICommand PrefillCommand { get; }
         public ICommand CloseCommand { get; }
 
+        private static string L(string key) => OptiPaie.Desktop.Localization.TranslationSource.Instance[key];
+
         private void Load()
         {
             Holidays.Clear();
             foreach (Holiday h in _services.Holidays.GetForYear(_companyId, _year)) Holidays.Add(h);
-            StatusMessage = Holidays.Count + " jour(s) férié(s) en " + _year;
+            StatusMessage = string.Format(L("Holidays_CountStatus"), Holidays.Count, _year);
         }
 
         private void Add()
@@ -81,7 +83,7 @@ namespace OptiPaie.Desktop.ViewModels
             NewName = string.Empty;
             if (_newDate.Year != _year) Year = _newDate.Year;
             else Load();
-            StatusMessage = "Jour férié ajouté.";
+            StatusMessage = L("Holidays_AddedMsg");
         }
 
         private void Delete()
@@ -90,14 +92,14 @@ namespace OptiPaie.Desktop.ViewModels
             if (!Dialogs.Confirm(OptiPaie.Desktop.Localization.TranslationSource.Instance["Holidays_ConfirmDelete"])) return;
             _services.Holidays.Delete(_selected.Id);
             Load();
-            StatusMessage = "Jour férié supprimé.";
+            StatusMessage = L("Holidays_DeletedMsg");
         }
 
         private void PrefillCivil()
         {
             int added = _services.Holidays.EnsureCivilForYear(_companyId, _year);
             Load();
-            StatusMessage = added > 0 ? added + " fête(s) civile(s) ajoutée(s)." : "Les fêtes civiles sont déjà présentes.";
+            StatusMessage = added > 0 ? string.Format(L("Holidays_CivilAddedMsg"), added) : L("Holidays_CivilAlreadyPresent");
         }
     }
 }

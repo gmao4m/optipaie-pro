@@ -54,6 +54,28 @@ namespace OptiPaie.Services.Validation
                     "La date de sortie ne peut pas précéder la date de recrutement.", nameof(instance.ExitDate));
             }
 
+            DateTime today = DateTime.Today;
+
+            if (instance.HireDate != default(DateTime) && instance.HireDate.Date > today)
+            {
+                result.AddError(ErrorCodes.EmployeeHireDateInFuture,
+                    "La date de recrutement ne peut pas être dans le futur.", nameof(instance.HireDate));
+            }
+
+            if (instance.BirthDate.HasValue)
+            {
+                if (instance.BirthDate.Value.Date > today)
+                {
+                    result.AddError(ErrorCodes.EmployeeBirthDateInvalid,
+                        "La date de naissance ne peut pas être dans le futur.", nameof(instance.BirthDate));
+                }
+                else if (instance.HireDate != default(DateTime) && instance.BirthDate.Value.Date > instance.HireDate.Date)
+                {
+                    result.AddError(ErrorCodes.EmployeeBirthDateInvalid,
+                        "La date de naissance ne peut pas être postérieure à la date de recrutement.", nameof(instance.BirthDate));
+                }
+            }
+
             return result;
         }
     }

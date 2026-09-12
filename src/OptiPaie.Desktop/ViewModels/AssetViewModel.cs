@@ -182,21 +182,21 @@ namespace OptiPaie.Desktop.ViewModels
             AvailableText = available.ToString();
             AssignedText = assigned.ToString();
             ValueText = totalValue.ToString("N2", Fr);
-            StatusMessage = Assets.Count + " matériel(s) · " + assigned + " attribué(s)";
+            StatusMessage = string.Format(_services.Localization.GetString("Asset_CountStatus"), Assets.Count, assigned);
         }
 
         private void New()
         {
             if (_selectedCompany == null)
             {
-                Dialogs.Info("Sélectionnez d'abord une entreprise.");
+                Dialogs.Info(_services.Localization.GetString("Common_NeedCompany"));
                 return;
             }
 
             if (AssetActions.Create(_services, _selectedCompany.Id))
             {
                 Load();
-                StatusMessage = "Matériel enregistré.";
+                StatusMessage = _services.Localization.GetString("Asset_Toast_Saved");
             }
         }
 
@@ -205,7 +205,7 @@ namespace OptiPaie.Desktop.ViewModels
             if (AssetActions.Edit(_services, _selectedCompany.Id, _selectedAsset.Id))
             {
                 Load();
-                StatusMessage = "Matériel enregistré.";
+                StatusMessage = _services.Localization.GetString("Asset_Toast_Saved");
             }
         }
 
@@ -214,7 +214,7 @@ namespace OptiPaie.Desktop.ViewModels
             if (AssetActions.Assign(_services, _selectedCompany.Id, _selectedAsset.Id))
             {
                 Load();
-                StatusMessage = "Matériel attribué.";
+                StatusMessage = _services.Localization.GetString("Asset_Toast_Assigned");
             }
         }
 
@@ -223,7 +223,7 @@ namespace OptiPaie.Desktop.ViewModels
             if (AssetActions.Return(_services, _selectedAsset.Id))
             {
                 Load();
-                StatusMessage = "Retour enregistré.";
+                StatusMessage = _services.Localization.GetString("Asset_Toast_Returned");
             }
         }
 
@@ -240,16 +240,16 @@ namespace OptiPaie.Desktop.ViewModels
         }
 
         private void SetStatus(AssetStatus status) =>
-            Run(_services.Assets.SetStatus(_selectedAsset.Id, status), "Statut mis à jour.");
+            Run(_services.Assets.SetStatus(_selectedAsset.Id, status), _services.Localization.GetString("Common_StatusUpdated"));
 
         private void Delete()
         {
-            if (!Dialogs.Confirm("Supprimer définitivement ce matériel et son historique ?"))
+            if (!Dialogs.Confirm(_services.Localization.GetString("Asset_ConfirmDelete")))
             {
                 return;
             }
 
-            Run(_services.Assets.Delete(_selectedAsset.Id), "Matériel supprimé.");
+            Run(_services.Assets.Delete(_selectedAsset.Id), _services.Localization.GetString("Asset_Toast_Deleted"));
         }
 
         private void Run(Result result, string success)

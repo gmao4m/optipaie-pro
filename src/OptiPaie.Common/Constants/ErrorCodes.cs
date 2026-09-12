@@ -21,6 +21,8 @@ namespace OptiPaie.Common.Constants
         public const string EmployeeBaseSalaryInvalid = "Employee_BaseSalaryInvalid";
         public const string EmployeeHireDateRequired = "Employee_HireDateRequired";
         public const string EmployeeExitBeforeHire = "Employee_ExitBeforeHire";
+        public const string EmployeeHireDateInFuture = "Employee_HireDateInFuture";
+        public const string EmployeeBirthDateInvalid = "Employee_BirthDateInvalid";
 
         // Payroll element
         public const string ElementNameRequired = "Element_NameRequired";

@@ -30,17 +30,17 @@ namespace OptiPaie.Desktop.ViewModels
 
             Natures = new List<EnumOption>
             {
-                new EnumOption(true, "Gain"),
-                new EnumOption(false, "Retenue")
+                new EnumOption(true, L("ElementType_Gain")),
+                new EnumOption(false, L("ElementType_Deduction"))
             };
 
             ImposableOptions = new List<EnumOption>
             {
-                new EnumOption(100m, "100 % (totalement imposable)"),
-                new EnumOption(50m, "50 %"),
-                new EnumOption(30m, "30 %"),
-                new EnumOption(10m, "10 %"),
-                new EnumOption(0m, "0 % (non imposable)")
+                new EnumOption(100m, L("PayItem_Imposable_100")),
+                new EnumOption(50m, L("PayItem_Imposable_50")),
+                new EnumOption(30m, L("PayItem_Imposable_30")),
+                new EnumOption(10m, L("PayItem_Imposable_10")),
+                new EnumOption(0m, L("PayItem_Imposable_0"))
             };
 
             Libelle = element.NameFr;
@@ -60,7 +60,7 @@ namespace OptiPaie.Desktop.ViewModels
         public List<EnumOption> Natures { get; }
         public List<EnumOption> ImposableOptions { get; }
 
-        public string Title => _isNew ? "Nouvelle rubrique" : "Modifier la rubrique";
+        public string Title => _isNew ? L("Payroll_NewElement") : L("PayItem_Edit");
 
         public string Libelle { get; set; }
         /// <summary>Optional Arabic label; when empty the French label is used on the Arabic payslip.</summary>
@@ -74,11 +74,13 @@ namespace OptiPaie.Desktop.ViewModels
 
         public Action<bool> RequestClose { get; set; }
 
+        private static string L(string key) => OptiPaie.Desktop.Localization.TranslationSource.Instance[key];
+
         private void Save()
         {
             if (string.IsNullOrWhiteSpace(Libelle))
             {
-                Dialogs.Error("Le libellé de la rubrique est obligatoire.");
+                Dialogs.Error(L("PayItem_LabelRequired"));
                 return;
             }
 

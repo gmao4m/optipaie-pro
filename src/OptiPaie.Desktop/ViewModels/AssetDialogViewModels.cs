@@ -149,7 +149,7 @@ namespace OptiPaie.Desktop.ViewModels
         {
             if (!OptiPaie.Common.Text.FlexibleNumber.TryParse(_value, out decimal value))
             {
-                Dialogs.Error("Valeur invalide.");
+                Dialogs.Error(_services.Localization.GetString("Asset_InvalidValue"));
                 return;
             }
 
@@ -347,9 +347,9 @@ namespace OptiPaie.Desktop.ViewModels
             var open = all.Where(a => a.ReturnedDate == null).ToList();
             HolderLine = open.Count == 0
                 ? "—"
-                : (open.Count == 1 ? open[0].EmployeeName : open.Count + " détenteurs");
+                : (open.Count == 1 ? open[0].EmployeeName : string.Format(_services.Localization.GetString("Asset_HolderCount"), open.Count));
 
-            StatusMessage = History.Count + " attribution(s)";
+            StatusMessage = string.Format(_services.Localization.GetString("Asset_AssignmentCount"), History.Count);
             CommandManager.InvalidateRequerySuggested();
         }
 

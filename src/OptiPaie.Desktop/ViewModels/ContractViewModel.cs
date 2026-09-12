@@ -208,22 +208,22 @@ namespace OptiPaie.Desktop.ViewModels
             SelectedContract = Contracts.FirstOrDefault();
             ActiveCountText = active.ToString();
             ExpiringCountText = expiring.ToString();
-            StatusMessage = Contracts.Count + " contrat(s) · " + active + " en vigueur"
-                + (expiring > 0 ? " · " + expiring + " à renouveler sous " + AlertWindowDays + " j" : string.Empty);
+            StatusMessage = string.Format(L("Contract_Status_Line"), Contracts.Count, active)
+                + (expiring > 0 ? string.Format(L("Contract_Status_ToRenew"), expiring, AlertWindowDays) : string.Empty);
         }
 
         private void New()
         {
             if (_selectedCompany == null)
             {
-                Dialogs.Info("Sélectionnez d'abord une entreprise.");
+                Dialogs.Info(L("Contract_Msg_SelectCompany"));
                 return;
             }
 
             IReadOnlyList<Employee> employees = _services.Employees.GetByCompany(_selectedCompany.Id, false);
             if (employees.Count == 0)
             {
-                Dialogs.Info("Aucun employé actif dans cette entreprise.");
+                Dialogs.Info(L("Contract_Msg_NoActiveEmployees"));
                 return;
             }
 
@@ -245,19 +245,18 @@ namespace OptiPaie.Desktop.ViewModels
             if (window.ShowDialog() == true)
             {
                 Load();
-                StatusMessage = "Contrat enregistré.";
+                StatusMessage = L("Contract_Msg_Saved");
             }
         }
 
         private void Activate()
         {
-            if (!Dialogs.Confirm("Activer ce contrat ? Ses termes (salaire, type, poste) seront appliqués à l'employé."))
+            if (!Dialogs.Confirm(L("Contract_Confirm_Activate")))
             {
                 return;
             }
 
-            Run(_services.Contracts.Activate(_selectedContract.Id),
-                "Contrat activé — les termes ont été appliqués à l'employé.");
+            Run(_services.Contracts.Activate(_selectedContract.Id), L("Contract_Msg_Activated"));
         }
 
         private void Terminate()
@@ -273,8 +272,9 @@ namespace OptiPaie.Desktop.ViewModels
             long employeeId = _selectedContract.Summary.EmployeeId;
             string employeeName = _selectedContract.EmployeeName;
 
-            Run(_services.Contracts.Terminate(_selectedContract.Id, vm.EffectiveDate, vm.Reason),
-                "Contrat résilié — la date de sortie de l'employé a été enregistrée.");
+            bool terminated = Run(_services.Contracts.Terminate(_selectedContract.Id, vm.EffectiveDate, vm.Reason),
+                L("Contract_Msg_Terminated"));
+            if (!terminated) return; // a failed termination must NOT pop the exit-clearance box
 
             // Cross-module exit clearance (Contrats → Matériel): list the assets this employee
             // still holds so they are recovered on departure. Reads the real Assets data.
@@ -290,14 +290,14 @@ namespace OptiPaie.Desktop.ViewModels
             }
 
             var fr = CultureInfo.GetCultureInfo("fr-FR");
-            var lines = held.Select(a => "•  " + a.AssetName + "  (attribué le " + a.AssignedDate.ToString("dd/MM/yyyy", fr) + ")");
+            var lines = held.Select(a => string.Format(L("Contract_Clearance_Item"), a.AssetName, a.AssignedDate.ToString("dd/MM/yyyy", fr)));
             string message =
-                "Solde de tout compte — " + employeeName + "\r\n\r\n" +
-                "Cet employé détient encore " + held.Count + " bien(s) de l'entreprise à récupérer :\r\n\r\n" +
+                string.Format(L("Contract_Clearance_Header"), employeeName) + "\r\n\r\n" +
+                string.Format(L("Contract_Clearance_Body"), held.Count) + "\r\n\r\n" +
                 string.Join("\r\n", lines) + "\r\n\r\n" +
-                "Récupérez-les et enregistrez leur retour dans le module « Matériel ».";
+                L("Contract_Clearance_Footer");
 
-            Dialogs.Info(message, "Biens à récupérer");
+            Dialogs.Info(message, L("Contract_Clearance_Title"));
         }
 
         private void Renew()
@@ -315,12 +315,12 @@ namespace OptiPaie.Desktop.ViewModels
 
             if (result.IsFailure)
             {
-                Dialogs.Error(result.Error);
+                Dialogs.Error(OptiPaie.Desktop.Localization.ResultText.Localize(_services.Localization, result.Error, result.ErrorCode));
                 return;
             }
 
             Load();
-            StatusMessage = "Contrat renouvelé — un nouveau contrat en vigueur a été créé.";
+            StatusMessage = L("Contract_Msg_Renewed");
         }
 
         private void ExportPdf()
@@ -358,25 +358,28 @@ namespace OptiPaie.Desktop.ViewModels
 
         private void Delete()
         {
-            if (!Dialogs.Confirm("Supprimer définitivement ce contrat ?"))
+            if (!Dialogs.Confirm(L("Contract_Confirm_Delete")))
             {
                 return;
             }
 
-            Run(_services.Contracts.Delete(_selectedContract.Id), "Contrat supprimé.");
+            Run(_services.Contracts.Delete(_selectedContract.Id), L("Contract_Msg_Deleted"));
         }
 
-        private void Run(Result result, string success)
+        private bool Run(Result result, string success)
         {
             if (result.IsFailure)
             {
-                Dialogs.Error(result.Error);
-                return;
+                Dialogs.Error(OptiPaie.Desktop.Localization.ResultText.Localize(_services.Localization, result.Error, result.ErrorCode));
+                return false;
             }
 
             Load();
             StatusMessage = success;
+            return true;
         }
+
+        private static string L(string key) => OptiPaie.Desktop.Localization.TranslationSource.Instance[key];
 
         private void Open(string path)
         {
@@ -387,7 +390,7 @@ namespace OptiPaie.Desktop.ViewModels
             catch (Exception ex)
             {
                 _services.Logger.Warn("Ouverture du PDF impossible : " + ex.Message);
-                Dialogs.Info("Fichier enregistré :" + Environment.NewLine + path);
+                Dialogs.Info(L("Contract_Msg_FileSaved") + Environment.NewLine + path);
             }
         }
 

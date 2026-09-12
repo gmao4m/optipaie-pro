@@ -136,6 +136,8 @@ namespace OptiPaie.Desktop.ViewModels
         public ICommand CancelCommand { get; }
         public ICommand DeleteCommand { get; }
 
+        private static string L(string key) => OptiPaie.Desktop.Localization.TranslationSource.Instance[key];
+
         public void OnActivated()
         {
             // The active company comes from the single global selector in the header.
@@ -182,21 +184,21 @@ namespace OptiPaie.Desktop.ViewModels
             SelectedLoan = Loans.FirstOrDefault();
             TotalOutstandingText = totalOutstanding.ToString("N2", Fr);
             ActiveCountText = active.ToString();
-            StatusMessage = Loans.Count + " prêt(s) · " + active + " en cours";
+            StatusMessage = string.Format(L("Loan_CountStatus"), Loans.Count, active);
         }
 
         private void New()
         {
             if (_selectedCompany == null)
             {
-                Dialogs.Info("Sélectionnez d'abord une entreprise.");
+                Dialogs.Info(L("Common_SelectCompanyFirst"));
                 return;
             }
 
             IReadOnlyList<Employee> employees = _services.Employees.GetByCompany(_selectedCompany.Id, false);
             if (employees.Count == 0)
             {
-                Dialogs.Info("Aucun employé actif dans cette entreprise.");
+                Dialogs.Info(L("Loan_NoActiveEmployees"));
                 return;
             }
 
@@ -218,7 +220,7 @@ namespace OptiPaie.Desktop.ViewModels
             if (window.ShowDialog() == true)
             {
                 Load();
-                StatusMessage = "Prêt enregistré.";
+                StatusMessage = L("Loan_SavedMsg");
             }
         }
 
@@ -234,27 +236,27 @@ namespace OptiPaie.Desktop.ViewModels
             Load();
         }
 
-        private void Suspend() => Run(_services.Loans.SetStatus(_selectedLoan.Id, LoanStatus.Suspended), "Prêt suspendu.");
-        private void Resume() => Run(_services.Loans.SetStatus(_selectedLoan.Id, LoanStatus.Active), "Prêt réactivé.");
+        private void Suspend() => Run(_services.Loans.SetStatus(_selectedLoan.Id, LoanStatus.Suspended), L("Loan_SuspendedMsg"));
+        private void Resume() => Run(_services.Loans.SetStatus(_selectedLoan.Id, LoanStatus.Active), L("Loan_ResumedMsg"));
 
         private void CancelLoan()
         {
-            if (!Dialogs.Confirm("Annuler ce prêt ? Il ne sera plus déduit des salaires."))
+            if (!Dialogs.Confirm(L("Loan_ConfirmCancel")))
             {
                 return;
             }
 
-            Run(_services.Loans.SetStatus(_selectedLoan.Id, LoanStatus.Cancelled), "Prêt annulé.");
+            Run(_services.Loans.SetStatus(_selectedLoan.Id, LoanStatus.Cancelled), L("Loan_CancelledMsg"));
         }
 
         private void Delete()
         {
-            if (!Dialogs.Confirm("Supprimer définitivement ce prêt et son historique de remboursement ?"))
+            if (!Dialogs.Confirm(L("Loan_ConfirmDelete")))
             {
                 return;
             }
 
-            Run(_services.Loans.Delete(_selectedLoan.Id), "Prêt supprimé.");
+            Run(_services.Loans.Delete(_selectedLoan.Id), L("Loan_DeletedMsg"));
         }
 
         private void Run(Result result, string success)

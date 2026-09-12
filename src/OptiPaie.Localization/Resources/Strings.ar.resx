@@ -404,7 +404,7 @@
   <data name="Shell_Nav_Archive" xml:space="preserve"><value>الأرشيف</value></data>
   <data name="Shell_Nav_Reports" xml:space="preserve"><value>التقارير</value></data>
   <data name="Shell_Nav_Cnas" xml:space="preserve"><value>تصريحات CNAS</value></data>
-  <data name="Shell_Nav_Attestations" xml:space="preserve"><value>شهادات ATS / DRT</value></data>
+  <data name="Shell_Nav_Attestations" xml:space="preserve"><value>شهادات CNAS (ATS/DRT)</value></data>
   <data name="AtsDrt_Title" xml:space="preserve"><value>شهادات CNAS — ATS · DRT</value></data>
   <data name="AtsDrt_Subtitle" xml:space="preserve"><value>أنشئ شهادة العمل والأجر (ATS) وتصريح استئناف العمل (DRT) — تُملأ تلقائيًا من ملف الموظف.</value></data>
   <data name="Cnas_Title" xml:space="preserve"><value>التحقق من جاهزية CNAS</value></data>
@@ -579,7 +579,7 @@
   <data name="Dashboard_Kpi_Headcount" xml:space="preserve"><value>التعداد</value></data>
   <data name="Dashboard_Kpi_Masse" xml:space="preserve"><value>كتلة الأجور (الأساسية)</value></data>
   <data name="Dashboard_Kpi_AvgSalary" xml:space="preserve"><value>متوسط الأجر</value></data>
-  <data name="Dashboard_MasseTrend" xml:space="preserve"><value>تطوّر كتلة الأجور</value></data>
+  <data name="Dashboard_MasseTrend" xml:space="preserve"><value>تطوّر كتلة الأجور (الأساسية)</value></data>
   <data name="Dashboard_Last6Months" xml:space="preserve"><value>آخر 6 أشهر</value></data>
   <data name="Dashboard_DeptDistribution" xml:space="preserve"><value>التوزيع حسب القسم</value></data>
   <data name="Dashboard_Kpi_PresentToday" xml:space="preserve"><value>الحاضرون اليوم</value></data>
@@ -797,7 +797,7 @@
   <data name="Enum_CandidateStage_Rejected" xml:space="preserve"><value>مستبعَد</value></data>
 
   <!-- Certificates module -->
-  <data name="Cert_Title" xml:space="preserve"><value>الشهادات</value></data>
+  <data name="Cert_Title" xml:space="preserve"><value>الشهادات والوثائق</value></data>
   <data name="Cert_Subtitle" xml:space="preserve"><value>تُنشأ الشهادات مباشرة من بطاقة الموظف (المنصب، الأجر، الأقدمية).</value></data>
   <data name="Cert_New" xml:space="preserve"><value>شهادة جديدة</value></data>
   <data name="Cert_Reference" xml:space="preserve"><value>المرجع</value></data>
@@ -1783,4 +1783,132 @@
   <data name="Upd_Installing" xml:space="preserve"><value>جارٍ تثبيت التحديث…</value></data>
   <data name="Upd_AutoFailed" xml:space="preserve"><value>تعذّر التحديث التلقائي — يُفتح التنزيل عبر المتصفح، ثبّت الملف يدويًا.</value></data>
   <data name="Upd_OpenLinkManually" xml:space="preserve"><value>افتح هذا الرابط يدويًا للتنزيل:</value></data>
+  <data name="Shell_ModulePartialLoad" xml:space="preserve"><value>تعذّر على هذه الوحدة تحميل كل بياناتها، وسيتم عرضها جزئيًا.</value></data>
+  <data name="Company_EditTitle" xml:space="preserve"><value>تعديل المؤسسة</value></data>
+  <data name="Company_DepartmentDeleteConfirm" xml:space="preserve"><value>حذف القسم «{0}»؟</value></data>
+  <data name="Company_LogoReadError" xml:space="preserve"><value>تعذّر قراءة ملف الصورة هذا.</value></data>
+  <data name="Company_NameRequired" xml:space="preserve"><value>اسم المؤسسة إلزامي.</value></data>
+  <data name="Companies_DeleteConfirm" xml:space="preserve"><value>هل تريد فعلاً حذف هذه المؤسسة؟</value></data>
+  <data name="Profile_HiredOn" xml:space="preserve"><value>تاريخ التوظيف</value></data>
+  <data name="ContractEdit_TitleEdit" xml:space="preserve"><value>تعديل العقد</value></data>
+  <data name="Contract_Status_Line" xml:space="preserve"><value>{0} عقد · {1} ساري المفعول</value></data>
+  <data name="Contract_Status_ToRenew" xml:space="preserve"><value>· {0} للتجديد خلال {1} يوم</value></data>
+  <data name="Contract_Msg_SelectCompany" xml:space="preserve"><value>اختر مؤسسة أولاً.</value></data>
+  <data name="Contract_Msg_NoActiveEmployees" xml:space="preserve"><value>لا يوجد موظف نشط في هذه المؤسسة.</value></data>
+  <data name="Contract_Msg_Saved" xml:space="preserve"><value>تم حفظ العقد.</value></data>
+  <data name="Contract_Confirm_Activate" xml:space="preserve"><value>تفعيل هذا العقد؟ ستُطبَّق شروطه (الأجر، النوع، المنصب) على الموظف.</value></data>
+  <data name="Contract_Msg_Activated" xml:space="preserve"><value>تم تفعيل العقد — طُبِّقت الشروط على الموظف.</value></data>
+  <data name="Contract_Msg_Terminated" xml:space="preserve"><value>تم فسخ العقد — سُجِّل تاريخ خروج الموظف.</value></data>
+  <data name="Contract_Msg_Renewed" xml:space="preserve"><value>تم تجديد العقد — أُنشئ عقد جديد ساري المفعول.</value></data>
+  <data name="Contract_Confirm_Delete" xml:space="preserve"><value>حذف هذا العقد نهائياً؟</value></data>
+  <data name="Contract_Msg_Deleted" xml:space="preserve"><value>تم حذف العقد.</value></data>
+  <data name="Contract_Msg_FileSaved" xml:space="preserve"><value>تم حفظ الملف:</value></data>
+  <data name="Contract_Clearance_Title" xml:space="preserve"><value>ممتلكات يجب استرجاعها</value></data>
+  <data name="Contract_Clearance_Header" xml:space="preserve"><value>تصفية الحساب — {0}</value></data>
+  <data name="Contract_Clearance_Body" xml:space="preserve"><value>لا يزال هذا الموظف يحتفظ بـ {0} من ممتلكات المؤسسة يجب استرجاعها:</value></data>
+  <data name="Contract_Clearance_Item" xml:space="preserve"><value>•  {0}  (مُسنَد في {1})</value></data>
+  <data name="Contract_Clearance_Footer" xml:space="preserve"><value>استرجعها وسجِّل إرجاعها في وحدة «العتاد».</value></data>
+  <data name="Contract_Msg_SelectEmployee" xml:space="preserve"><value>اختر موظفاً.</value></data>
+  <data name="Contract_Msg_SelectType" xml:space="preserve"><value>اختر نوع العقد.</value></data>
+  <data name="Contract_Msg_BaseSalaryInvalid" xml:space="preserve"><value>الأجر القاعدي غير صالح.</value></data>
+  <data name="Contract_Msg_SalaryInvalid" xml:space="preserve"><value>الأجر غير صالح.</value></data>
+  <data name="Contract_Required" xml:space="preserve"><value>لا يوجد عقد.</value></data>
+  <data name="Contract_EmployeeNotFound" xml:space="preserve"><value>الموظف غير موجود.</value></data>
+  <data name="Contract_NotFound" xml:space="preserve"><value>العقد غير موجود.</value></data>
+  <data name="Contract_SalaryInvalid" xml:space="preserve"><value>يجب أن يكون الأجر القاعدي موجباً.</value></data>
+  <data name="Contract_StartRequired" xml:space="preserve"><value>تاريخ البداية إلزامي.</value></data>
+  <data name="Contract_EndRequired" xml:space="preserve"><value>يجب أن يكون للعقد محدّد المدة تاريخ انتهاء.</value></data>
+  <data name="Contract_EndBeforeStart" xml:space="preserve"><value>يجب أن يكون تاريخ الانتهاء بعد تاريخ البداية.</value></data>
+  <data name="Contract_TrialInvalid" xml:space="preserve"><value>فترة التجربة غير صالحة.</value></data>
+  <data name="Contract_NotActivatable" xml:space="preserve"><value>لا يمكن تفعيل إلا عقد قيد الإعداد.</value></data>
+  <data name="Contract_NotActive" xml:space="preserve"><value>لا يمكن فسخ إلا عقد ساري المفعول.</value></data>
+  <data name="Contract_NotRenewable" xml:space="preserve"><value>لا يمكن تجديد إلا عقد ساري المفعول أو منتهٍ.</value></data>
+  <data name="Contract_ActiveNotDeletable" xml:space="preserve"><value>لا يمكن حذف عقد ساري المفعول — افسخه أولاً.</value></data>
+  <data name="Leave_ListCount" xml:space="preserve"><value>{0} / {1} طلب · {2} قيد الانتظار</value></data>
+  <data name="Leave_SelectRequestForBalance" xml:space="preserve"><value>اختر طلبًا لعرض رصيد الموظف.</value></data>
+  <data name="Leave_BalanceCaption" xml:space="preserve"><value>{0} — الحق السنوي {1} يومًا</value></data>
+  <data name="Leave_SavedMsg" xml:space="preserve"><value>تم حفظ الطلب.</value></data>
+  <data name="Leave_SubmittedMsg" xml:space="preserve"><value>تم إرسال الطلب للبتّ فيه.</value></data>
+  <data name="Leave_ApprovedMsg" xml:space="preserve"><value>تمت الموافقة على العطلة — سُجِّلت الأيام في الحضور.</value></data>
+  <data name="Leave_RejectedMsg" xml:space="preserve"><value>تم رفض الطلب.</value></data>
+  <data name="Leave_ReturnedToDraftMsg" xml:space="preserve"><value>أُعيد الطلب إلى مسودّة.</value></data>
+  <data name="Leave_CancelledMsg" xml:space="preserve"><value>أُلغيت العطلة — أُزيلت الأيام من الحضور.</value></data>
+  <data name="Leave_ConfirmDelete" xml:space="preserve"><value>حذف هذا الطلب نهائيًا؟</value></data>
+  <data name="Leave_DeletedMsg" xml:space="preserve"><value>تم حذف الطلب.</value></data>
+  <data name="Leave_SettingsSavedMsg" xml:space="preserve"><value>تم حفظ الإعدادات.</value></data>
+  <data name="Common_SelectCompanyFirst" xml:space="preserve"><value>اختر مؤسسة أولاً.</value></data>
+  <data name="Common_FileSaved" xml:space="preserve"><value>تم حفظ الملف:</value></data>
+  <data name="Common_SelectEmployee" xml:space="preserve"><value>اختر موظفًا.</value></data>
+  <data name="Leave_EditTitle" xml:space="preserve"><value>تعديل الطلب</value></data>
+  <data name="Leave_NewTitle" xml:space="preserve"><value>طلب عطلة جديد</value></data>
+  <data name="Leave_ZeroDays" xml:space="preserve"><value>0 يوم</value></data>
+  <data name="Leave_DaysCounted" xml:space="preserve"><value>{0} يوم محتسب</value></data>
+  <data name="Leave_SelectType" xml:space="preserve"><value>اختر نوع العطلة.</value></data>
+  <data name="Holidays_CountStatus" xml:space="preserve"><value>{0} يوم عطلة رسمية في {1}</value></data>
+  <data name="Holidays_AddedMsg" xml:space="preserve"><value>تمت إضافة يوم العطلة.</value></data>
+  <data name="Holidays_DeletedMsg" xml:space="preserve"><value>تم حذف يوم العطلة.</value></data>
+  <data name="Holidays_CivilAddedMsg" xml:space="preserve"><value>تمت إضافة {0} عطلة مدنية.</value></data>
+  <data name="Holidays_CivilAlreadyPresent" xml:space="preserve"><value>العطل المدنية موجودة مسبقًا.</value></data>
+  <data name="Leave_DaysAccrued" xml:space="preserve"><value>{0} يوم مكتسب</value></data>
+  <data name="Leave_NoEmployeesMsg" xml:space="preserve"><value>لا يوجد موظف في هذه المؤسسة.</value></data>
+  <data name="LeaveBal_CountStatus" xml:space="preserve"><value>{0} موظف · {1} يوم عطلة متبقٍّ إجمالًا</value></data>
+  <data name="Leave_OncePerCareer" xml:space="preserve"><value>هذا النوع من الإجازة يُمنح مرة واحدة فقط طوال المسار المهني، وقد تم أخذه من قبل.</value></data>
+  <data name="LeaveSet_RegulatoryHeader" xml:space="preserve"><value>القواعد التنظيمية</value></data>
+  <data name="LeaveSet_ExcludeHolidays" xml:space="preserve"><value>عدم احتساب أيام العطل الرسمية ضمن الإجازة</value></data>
+  <data name="LeaveSet_CalendarDayCount" xml:space="preserve"><value>الاحتساب بالأيام التقويمية (بدل أيام العمل)</value></data>
+  <data name="LeaveSet_RefJulyJune" xml:space="preserve"><value>السنة المرجعية من جويلية إلى جوان</value></data>
+  <data name="LeaveSet_AccrualExcludesUnpaid" xml:space="preserve"><value>عدم اكتساب العطلة أثناء عطلة بدون أجر</value></data>
+  <data name="LeaveSet_StrictCnas" xml:space="preserve"><value>معالجة CNAS الصارمة (عطل على حساب الضمان الاجتماعي)</value></data>
+  <data name="LeaveSet_MaternityDays" xml:space="preserve"><value>عطلة الأمومة (أيام)</value></data>
+  <data name="Loan_CountStatus" xml:space="preserve"><value>{0} قرض · {1} قيد السداد</value></data>
+  <data name="Loan_NoActiveEmployees" xml:space="preserve"><value>لا يوجد موظف نشط في هذه المؤسسة.</value></data>
+  <data name="Loan_SavedMsg" xml:space="preserve"><value>تم حفظ القرض.</value></data>
+  <data name="Loan_SuspendedMsg" xml:space="preserve"><value>تم تعليق القرض.</value></data>
+  <data name="Loan_ResumedMsg" xml:space="preserve"><value>تمت إعادة تنشيط القرض.</value></data>
+  <data name="Loan_ConfirmCancel" xml:space="preserve"><value>إلغاء هذا القرض؟ لن يُقتطع بعد الآن من الأجور.</value></data>
+  <data name="Loan_CancelledMsg" xml:space="preserve"><value>تم إلغاء القرض.</value></data>
+  <data name="Loan_ConfirmDelete" xml:space="preserve"><value>حذف هذا القرض وسجل سداده نهائيًا؟</value></data>
+  <data name="Loan_DeletedMsg" xml:space="preserve"><value>تم حذف القرض.</value></data>
+  <data name="Loan_SourceManual" xml:space="preserve"><value>يدوي</value></data>
+  <data name="Loan_SourcePayroll" xml:space="preserve"><value>الأجر</value></data>
+  <data name="Loan_RemainingInstallments" xml:space="preserve"><value>{0} قسط متبقٍّ</value></data>
+  <data name="Loan_AmountInvalid" xml:space="preserve"><value>المبلغ غير صالح.</value></data>
+  <data name="Loan_RepaymentAddedMsg" xml:space="preserve"><value>تمت إضافة السداد.</value></data>
+  <data name="Loan_ConfirmRemoveRepayment" xml:space="preserve"><value>حذف هذا السداد؟</value></data>
+  <data name="Loan_RepaymentRemovedMsg" xml:space="preserve"><value>تم حذف السداد.</value></data>
+  <data name="Loan_EditTitle" xml:space="preserve"><value>تعديل القرض</value></data>
+  <data name="Loan_NewTitle" xml:space="preserve"><value>قرض / تسبيق جديد</value></data>
+  <data name="Loan_ScheduleText" xml:space="preserve"><value>{0} قسط — الأخير: {1} دج</value></data>
+  <data name="Loan_PrincipalInvalidMsg" xml:space="preserve"><value>مبلغ القرض غير صالح.</value></data>
+  <data name="Loan_InstallmentInvalidMsg" xml:space="preserve"><value>القسط الشهري غير صالح.</value></data>
+  <data name="Loan_DetailTitle" xml:space="preserve"><value>تفاصيل القرض</value></data>
+  <data name="Asset_CountStatus" xml:space="preserve"><value>{0} عتاد · {1} مُسنَد</value></data>
+  <data name="Common_NeedCompany" xml:space="preserve"><value>اختر مؤسسة أولاً.</value></data>
+  <data name="Asset_Toast_Saved" xml:space="preserve"><value>تم حفظ العتاد.</value></data>
+  <data name="Asset_Toast_Assigned" xml:space="preserve"><value>تم إسناد العتاد.</value></data>
+  <data name="Asset_Toast_Returned" xml:space="preserve"><value>تم تسجيل الإرجاع.</value></data>
+  <data name="Common_StatusUpdated" xml:space="preserve"><value>تم تحديث الحالة.</value></data>
+  <data name="Asset_ConfirmDelete" xml:space="preserve"><value>حذف هذا العتاد وسجله نهائيًا؟</value></data>
+  <data name="Asset_Toast_Deleted" xml:space="preserve"><value>تم حذف العتاد.</value></data>
+  <data name="Asset_InvalidValue" xml:space="preserve"><value>القيمة غير صالحة.</value></data>
+  <data name="Asset_HolderCount" xml:space="preserve"><value>{0} حائزين</value></data>
+  <data name="Asset_AssignmentCount" xml:space="preserve"><value>{0} إسناد</value></data>
+  <data name="Training_CountStatus" xml:space="preserve"><value>{0} تكوين</value></data>
+  <data name="Training_Toast_Saved" xml:space="preserve"><value>تم حفظ التكوين.</value></data>
+  <data name="Training_ConfirmDelete" xml:space="preserve"><value>حذف هذا التكوين وتسجيلاته نهائيًا؟</value></data>
+  <data name="Training_Toast_Deleted" xml:space="preserve"><value>تم حذف التكوين.</value></data>
+  <data name="Training_Edit" xml:space="preserve"><value>تعديل التكوين</value></data>
+  <data name="Training_InvalidCost" xml:space="preserve"><value>التكلفة غير صالحة.</value></data>
+  <data name="Training_ParticipantCount" xml:space="preserve"><value>{0} مشارك</value></data>
+  <data name="Training_ConfirmRemoveParticipant" xml:space="preserve"><value>إزالة «{0}» من هذا التكوين؟</value></data>
+  <data name="PayItem_Edit" xml:space="preserve"><value>تعديل البند</value></data>
+  <data name="PayItem_Imposable_100" xml:space="preserve"><value>100 ٪ (خاضع كليًا للضريبة)</value></data>
+  <data name="PayItem_Imposable_50" xml:space="preserve"><value>50 ٪</value></data>
+  <data name="PayItem_Imposable_30" xml:space="preserve"><value>30 ٪</value></data>
+  <data name="PayItem_Imposable_10" xml:space="preserve"><value>10 ٪</value></data>
+  <data name="PayItem_Imposable_0" xml:space="preserve"><value>0 ٪ (غير خاضع للضريبة)</value></data>
+  <data name="PayItem_LabelRequired" xml:space="preserve"><value>تسمية البند إلزامية.</value></data>
+  <data name="AttMonth_Title" xml:space="preserve"><value>الملخّص الشهري للحضور</value></data>
+  <data name="AttDetail_Title" xml:space="preserve"><value>سجلّ الحضور</value></data>
+  <data name="AttMonth_PaidDays" xml:space="preserve"><value>الأيام المدفوعة</value></data>
 </root>

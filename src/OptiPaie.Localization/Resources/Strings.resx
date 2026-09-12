@@ -404,7 +404,7 @@
   <data name="Shell_Nav_Archive" xml:space="preserve"><value>Archive</value></data>
   <data name="Shell_Nav_Reports" xml:space="preserve"><value>Rapports</value></data>
   <data name="Shell_Nav_Cnas" xml:space="preserve"><value>Déclarations CNAS</value></data>
-  <data name="Shell_Nav_Attestations" xml:space="preserve"><value>Attestations ATS / DRT</value></data>
+  <data name="Shell_Nav_Attestations" xml:space="preserve"><value>Attestations CNAS (ATS/DRT)</value></data>
   <data name="AtsDrt_Title" xml:space="preserve"><value>Attestations CNAS — ATS · DRT</value></data>
   <data name="AtsDrt_Subtitle" xml:space="preserve"><value>Générez l'attestation de travail et de salaire (ATS) et la déclaration de reprise (DRT) — remplies automatiquement depuis le dossier de l'employé.</value></data>
   <data name="Cnas_Title" xml:space="preserve"><value>Contrôle de préparation CNAS</value></data>
@@ -579,7 +579,7 @@
   <data name="Dashboard_Kpi_Headcount" xml:space="preserve"><value>Effectif</value></data>
   <data name="Dashboard_Kpi_Masse" xml:space="preserve"><value>Masse salariale (base)</value></data>
   <data name="Dashboard_Kpi_AvgSalary" xml:space="preserve"><value>Salaire moyen</value></data>
-  <data name="Dashboard_MasseTrend" xml:space="preserve"><value>Évolution de la masse salariale</value></data>
+  <data name="Dashboard_MasseTrend" xml:space="preserve"><value>Évolution de la masse salariale (base)</value></data>
   <data name="Dashboard_Last6Months" xml:space="preserve"><value>6 derniers mois</value></data>
   <data name="Dashboard_DeptDistribution" xml:space="preserve"><value>Répartition par département</value></data>
   <data name="Dashboard_Kpi_PresentToday" xml:space="preserve"><value>Présents aujourd'hui</value></data>
@@ -797,7 +797,7 @@
   <data name="Enum_CandidateStage_Rejected" xml:space="preserve"><value>Écarté</value></data>
 
   <!-- Certificates module -->
-  <data name="Cert_Title" xml:space="preserve"><value>Attestations</value></data>
+  <data name="Cert_Title" xml:space="preserve"><value>Attestations &amp; certificats</value></data>
   <data name="Cert_Subtitle" xml:space="preserve"><value>Les attestations sont générées en direct à partir de la fiche employé (poste, salaire, ancienneté).</value></data>
   <data name="Cert_New" xml:space="preserve"><value>Nouvelle attestation</value></data>
   <data name="Cert_Reference" xml:space="preserve"><value>Référence</value></data>
@@ -1783,4 +1783,132 @@
   <data name="Upd_Installing" xml:space="preserve"><value>Installation de la mise à jour…</value></data>
   <data name="Upd_AutoFailed" xml:space="preserve"><value>La mise à jour automatique a échoué — le téléchargement s'ouvre dans le navigateur ; lancez le fichier.</value></data>
   <data name="Upd_OpenLinkManually" xml:space="preserve"><value>Ouvrez ce lien manuellement pour télécharger :</value></data>
+  <data name="Shell_ModulePartialLoad" xml:space="preserve"><value>Ce module n'a pas pu charger toutes ses données. Il s'affiche partiellement.</value></data>
+  <data name="Company_EditTitle" xml:space="preserve"><value>Modifier l'entreprise</value></data>
+  <data name="Company_DepartmentDeleteConfirm" xml:space="preserve"><value>Supprimer le département « {0} » ?</value></data>
+  <data name="Company_LogoReadError" xml:space="preserve"><value>Impossible de lire ce fichier image.</value></data>
+  <data name="Company_NameRequired" xml:space="preserve"><value>Le nom de l'entreprise est obligatoire.</value></data>
+  <data name="Companies_DeleteConfirm" xml:space="preserve"><value>Voulez-vous vraiment supprimer cette entreprise ?</value></data>
+  <data name="Profile_HiredOn" xml:space="preserve"><value>Embauché le</value></data>
+  <data name="ContractEdit_TitleEdit" xml:space="preserve"><value>Modifier le contrat</value></data>
+  <data name="Contract_Status_Line" xml:space="preserve"><value>{0} contrat(s) · {1} en vigueur</value></data>
+  <data name="Contract_Status_ToRenew" xml:space="preserve"><value>· {0} à renouveler sous {1} j</value></data>
+  <data name="Contract_Msg_SelectCompany" xml:space="preserve"><value>Sélectionnez d'abord une entreprise.</value></data>
+  <data name="Contract_Msg_NoActiveEmployees" xml:space="preserve"><value>Aucun employé actif dans cette entreprise.</value></data>
+  <data name="Contract_Msg_Saved" xml:space="preserve"><value>Contrat enregistré.</value></data>
+  <data name="Contract_Confirm_Activate" xml:space="preserve"><value>Activer ce contrat ? Ses termes (salaire, type, poste) seront appliqués à l'employé.</value></data>
+  <data name="Contract_Msg_Activated" xml:space="preserve"><value>Contrat activé — les termes ont été appliqués à l'employé.</value></data>
+  <data name="Contract_Msg_Terminated" xml:space="preserve"><value>Contrat résilié — la date de sortie de l'employé a été enregistrée.</value></data>
+  <data name="Contract_Msg_Renewed" xml:space="preserve"><value>Contrat renouvelé — un nouveau contrat en vigueur a été créé.</value></data>
+  <data name="Contract_Confirm_Delete" xml:space="preserve"><value>Supprimer définitivement ce contrat ?</value></data>
+  <data name="Contract_Msg_Deleted" xml:space="preserve"><value>Contrat supprimé.</value></data>
+  <data name="Contract_Msg_FileSaved" xml:space="preserve"><value>Fichier enregistré :</value></data>
+  <data name="Contract_Clearance_Title" xml:space="preserve"><value>Biens à récupérer</value></data>
+  <data name="Contract_Clearance_Header" xml:space="preserve"><value>Solde de tout compte — {0}</value></data>
+  <data name="Contract_Clearance_Body" xml:space="preserve"><value>Cet employé détient encore {0} bien(s) de l'entreprise à récupérer :</value></data>
+  <data name="Contract_Clearance_Item" xml:space="preserve"><value>•  {0}  (attribué le {1})</value></data>
+  <data name="Contract_Clearance_Footer" xml:space="preserve"><value>Récupérez-les et enregistrez leur retour dans le module « Matériel ».</value></data>
+  <data name="Contract_Msg_SelectEmployee" xml:space="preserve"><value>Sélectionnez un employé.</value></data>
+  <data name="Contract_Msg_SelectType" xml:space="preserve"><value>Sélectionnez un type de contrat.</value></data>
+  <data name="Contract_Msg_BaseSalaryInvalid" xml:space="preserve"><value>Salaire de base invalide.</value></data>
+  <data name="Contract_Msg_SalaryInvalid" xml:space="preserve"><value>Salaire invalide.</value></data>
+  <data name="Contract_Required" xml:space="preserve"><value>Aucun contrat.</value></data>
+  <data name="Contract_EmployeeNotFound" xml:space="preserve"><value>Employé introuvable.</value></data>
+  <data name="Contract_NotFound" xml:space="preserve"><value>Contrat introuvable.</value></data>
+  <data name="Contract_SalaryInvalid" xml:space="preserve"><value>Le salaire de base doit être positif.</value></data>
+  <data name="Contract_StartRequired" xml:space="preserve"><value>La date de début est obligatoire.</value></data>
+  <data name="Contract_EndRequired" xml:space="preserve"><value>Un contrat à durée déterminée doit avoir une date de fin.</value></data>
+  <data name="Contract_EndBeforeStart" xml:space="preserve"><value>La date de fin doit suivre la date de début.</value></data>
+  <data name="Contract_TrialInvalid" xml:space="preserve"><value>Période d'essai invalide.</value></data>
+  <data name="Contract_NotActivatable" xml:space="preserve"><value>Seul un contrat en préparation peut être activé.</value></data>
+  <data name="Contract_NotActive" xml:space="preserve"><value>Seul un contrat en vigueur peut être résilié.</value></data>
+  <data name="Contract_NotRenewable" xml:space="preserve"><value>Seul un contrat en vigueur ou expiré peut être renouvelé.</value></data>
+  <data name="Contract_ActiveNotDeletable" xml:space="preserve"><value>Un contrat en vigueur ne peut pas être supprimé — résiliez-le d'abord.</value></data>
+  <data name="Leave_ListCount" xml:space="preserve"><value>{0} / {1} demande(s) · {2} en attente</value></data>
+  <data name="Leave_SelectRequestForBalance" xml:space="preserve"><value>Sélectionnez une demande pour voir le solde de l'employé.</value></data>
+  <data name="Leave_BalanceCaption" xml:space="preserve"><value>{0} — droit annuel {1} jours</value></data>
+  <data name="Leave_SavedMsg" xml:space="preserve"><value>Demande enregistrée.</value></data>
+  <data name="Leave_SubmittedMsg" xml:space="preserve"><value>Demande soumise pour décision.</value></data>
+  <data name="Leave_ApprovedMsg" xml:space="preserve"><value>Congé approuvé — les jours sont enregistrés dans la présence.</value></data>
+  <data name="Leave_RejectedMsg" xml:space="preserve"><value>Demande refusée.</value></data>
+  <data name="Leave_ReturnedToDraftMsg" xml:space="preserve"><value>Demande renvoyée en brouillon.</value></data>
+  <data name="Leave_CancelledMsg" xml:space="preserve"><value>Congé annulé — les jours ont été retirés de la présence.</value></data>
+  <data name="Leave_ConfirmDelete" xml:space="preserve"><value>Supprimer définitivement cette demande ?</value></data>
+  <data name="Leave_DeletedMsg" xml:space="preserve"><value>Demande supprimée.</value></data>
+  <data name="Leave_SettingsSavedMsg" xml:space="preserve"><value>Paramètres enregistrés.</value></data>
+  <data name="Common_SelectCompanyFirst" xml:space="preserve"><value>Sélectionnez d'abord une entreprise.</value></data>
+  <data name="Common_FileSaved" xml:space="preserve"><value>Fichier enregistré :</value></data>
+  <data name="Common_SelectEmployee" xml:space="preserve"><value>Sélectionnez un employé.</value></data>
+  <data name="Leave_EditTitle" xml:space="preserve"><value>Modifier la demande</value></data>
+  <data name="Leave_NewTitle" xml:space="preserve"><value>Nouvelle demande de congé</value></data>
+  <data name="Leave_ZeroDays" xml:space="preserve"><value>0 jour(s)</value></data>
+  <data name="Leave_DaysCounted" xml:space="preserve"><value>{0} jour(s) décompté(s)</value></data>
+  <data name="Leave_SelectType" xml:space="preserve"><value>Sélectionnez un type de congé.</value></data>
+  <data name="Holidays_CountStatus" xml:space="preserve"><value>{0} jour(s) férié(s) en {1}</value></data>
+  <data name="Holidays_AddedMsg" xml:space="preserve"><value>Jour férié ajouté.</value></data>
+  <data name="Holidays_DeletedMsg" xml:space="preserve"><value>Jour férié supprimé.</value></data>
+  <data name="Holidays_CivilAddedMsg" xml:space="preserve"><value>{0} fête(s) civile(s) ajoutée(s).</value></data>
+  <data name="Holidays_CivilAlreadyPresent" xml:space="preserve"><value>Les fêtes civiles sont déjà présentes.</value></data>
+  <data name="Leave_DaysAccrued" xml:space="preserve"><value>{0} jour(s) acquis</value></data>
+  <data name="Leave_NoEmployeesMsg" xml:space="preserve"><value>Aucun employé dans cette entreprise.</value></data>
+  <data name="LeaveBal_CountStatus" xml:space="preserve"><value>{0} employé(s) · {1} jour(s) de congé restants au total</value></data>
+  <data name="Leave_OncePerCareer" xml:space="preserve"><value>Ce type de congé ne peut être pris qu'une seule fois dans la carrière ; il l'a déjà été.</value></data>
+  <data name="LeaveSet_RegulatoryHeader" xml:space="preserve"><value>Règles réglementaires</value></data>
+  <data name="LeaveSet_ExcludeHolidays" xml:space="preserve"><value>Ne pas décompter les jours fériés inclus dans un congé</value></data>
+  <data name="LeaveSet_CalendarDayCount" xml:space="preserve"><value>Décompter en jours calendaires (au lieu des jours ouvrés)</value></data>
+  <data name="LeaveSet_RefJulyJune" xml:space="preserve"><value>Année de référence de juillet à juin</value></data>
+  <data name="LeaveSet_AccrualExcludesUnpaid" xml:space="preserve"><value>Ne pas acquérir de congé pendant un congé sans solde</value></data>
+  <data name="LeaveSet_StrictCnas" xml:space="preserve"><value>Traitement CNAS strict (congés à charge de la sécurité sociale)</value></data>
+  <data name="LeaveSet_MaternityDays" xml:space="preserve"><value>Congé de maternité (jours)</value></data>
+  <data name="Loan_CountStatus" xml:space="preserve"><value>{0} prêt(s) · {1} en cours</value></data>
+  <data name="Loan_NoActiveEmployees" xml:space="preserve"><value>Aucun employé actif dans cette entreprise.</value></data>
+  <data name="Loan_SavedMsg" xml:space="preserve"><value>Prêt enregistré.</value></data>
+  <data name="Loan_SuspendedMsg" xml:space="preserve"><value>Prêt suspendu.</value></data>
+  <data name="Loan_ResumedMsg" xml:space="preserve"><value>Prêt réactivé.</value></data>
+  <data name="Loan_ConfirmCancel" xml:space="preserve"><value>Annuler ce prêt ? Il ne sera plus déduit des salaires.</value></data>
+  <data name="Loan_CancelledMsg" xml:space="preserve"><value>Prêt annulé.</value></data>
+  <data name="Loan_ConfirmDelete" xml:space="preserve"><value>Supprimer définitivement ce prêt et son historique de remboursement ?</value></data>
+  <data name="Loan_DeletedMsg" xml:space="preserve"><value>Prêt supprimé.</value></data>
+  <data name="Loan_SourceManual" xml:space="preserve"><value>Manuel</value></data>
+  <data name="Loan_SourcePayroll" xml:space="preserve"><value>Paie</value></data>
+  <data name="Loan_RemainingInstallments" xml:space="preserve"><value>{0} mensualité(s) restante(s)</value></data>
+  <data name="Loan_AmountInvalid" xml:space="preserve"><value>Montant invalide.</value></data>
+  <data name="Loan_RepaymentAddedMsg" xml:space="preserve"><value>Remboursement ajouté.</value></data>
+  <data name="Loan_ConfirmRemoveRepayment" xml:space="preserve"><value>Supprimer ce remboursement ?</value></data>
+  <data name="Loan_RepaymentRemovedMsg" xml:space="preserve"><value>Remboursement supprimé.</value></data>
+  <data name="Loan_EditTitle" xml:space="preserve"><value>Modifier le prêt</value></data>
+  <data name="Loan_NewTitle" xml:space="preserve"><value>Nouveau prêt / avance</value></data>
+  <data name="Loan_ScheduleText" xml:space="preserve"><value>{0} mensualité(s) — dernière : {1} DA</value></data>
+  <data name="Loan_PrincipalInvalidMsg" xml:space="preserve"><value>Montant du prêt invalide.</value></data>
+  <data name="Loan_InstallmentInvalidMsg" xml:space="preserve"><value>Mensualité invalide.</value></data>
+  <data name="Loan_DetailTitle" xml:space="preserve"><value>Détail du prêt</value></data>
+  <data name="Asset_CountStatus" xml:space="preserve"><value>{0} matériel(s) · {1} attribué(s)</value></data>
+  <data name="Common_NeedCompany" xml:space="preserve"><value>Sélectionnez d'abord une entreprise.</value></data>
+  <data name="Asset_Toast_Saved" xml:space="preserve"><value>Matériel enregistré.</value></data>
+  <data name="Asset_Toast_Assigned" xml:space="preserve"><value>Matériel attribué.</value></data>
+  <data name="Asset_Toast_Returned" xml:space="preserve"><value>Retour enregistré.</value></data>
+  <data name="Common_StatusUpdated" xml:space="preserve"><value>Statut mis à jour.</value></data>
+  <data name="Asset_ConfirmDelete" xml:space="preserve"><value>Supprimer définitivement ce matériel et son historique ?</value></data>
+  <data name="Asset_Toast_Deleted" xml:space="preserve"><value>Matériel supprimé.</value></data>
+  <data name="Asset_InvalidValue" xml:space="preserve"><value>Valeur invalide.</value></data>
+  <data name="Asset_HolderCount" xml:space="preserve"><value>{0} détenteurs</value></data>
+  <data name="Asset_AssignmentCount" xml:space="preserve"><value>{0} attribution(s)</value></data>
+  <data name="Training_CountStatus" xml:space="preserve"><value>{0} formation(s)</value></data>
+  <data name="Training_Toast_Saved" xml:space="preserve"><value>Formation enregistrée.</value></data>
+  <data name="Training_ConfirmDelete" xml:space="preserve"><value>Supprimer définitivement cette formation et ses inscriptions ?</value></data>
+  <data name="Training_Toast_Deleted" xml:space="preserve"><value>Formation supprimée.</value></data>
+  <data name="Training_Edit" xml:space="preserve"><value>Modifier la formation</value></data>
+  <data name="Training_InvalidCost" xml:space="preserve"><value>Coût invalide.</value></data>
+  <data name="Training_ParticipantCount" xml:space="preserve"><value>{0} participant(s)</value></data>
+  <data name="Training_ConfirmRemoveParticipant" xml:space="preserve"><value>Retirer « {0} » de cette formation ?</value></data>
+  <data name="PayItem_Edit" xml:space="preserve"><value>Modifier la rubrique</value></data>
+  <data name="PayItem_Imposable_100" xml:space="preserve"><value>100 % (totalement imposable)</value></data>
+  <data name="PayItem_Imposable_50" xml:space="preserve"><value>50 %</value></data>
+  <data name="PayItem_Imposable_30" xml:space="preserve"><value>30 %</value></data>
+  <data name="PayItem_Imposable_10" xml:space="preserve"><value>10 %</value></data>
+  <data name="PayItem_Imposable_0" xml:space="preserve"><value>0 % (non imposable)</value></data>
+  <data name="PayItem_LabelRequired" xml:space="preserve"><value>Le libellé de la rubrique est obligatoire.</value></data>
+  <data name="AttMonth_Title" xml:space="preserve"><value>Synthèse mensuelle des présences</value></data>
+  <data name="AttDetail_Title" xml:space="preserve"><value>Historique de présence</value></data>
+  <data name="AttMonth_PaidDays" xml:space="preserve"><value>Jours payés</value></data>
 </root>

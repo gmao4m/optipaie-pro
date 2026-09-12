@@ -169,14 +169,14 @@ namespace OptiPaie.Desktop.ViewModels
             SelectedSession = Sessions.FirstOrDefault();
             PlannedText = planned.ToString();
             TotalCostText = totalCost.ToString("N2", Fr);
-            StatusMessage = Sessions.Count + " formation(s)";
+            StatusMessage = string.Format(_services.Localization.GetString("Training_CountStatus"), Sessions.Count);
         }
 
         private void New()
         {
             if (_selectedCompany == null)
             {
-                Dialogs.Info("Sélectionnez d'abord une entreprise.");
+                Dialogs.Info(_services.Localization.GetString("Common_NeedCompany"));
                 return;
             }
 
@@ -197,7 +197,7 @@ namespace OptiPaie.Desktop.ViewModels
             if (window.ShowDialog() == true)
             {
                 Load();
-                StatusMessage = "Formation enregistrée.";
+                StatusMessage = _services.Localization.GetString("Training_Toast_Saved");
             }
         }
 
@@ -214,16 +214,16 @@ namespace OptiPaie.Desktop.ViewModels
         }
 
         private void SetStatus(TrainingStatus status) =>
-            Run(_services.Training.SetStatus(_selectedSession.Id, status), "Statut mis à jour.");
+            Run(_services.Training.SetStatus(_selectedSession.Id, status), _services.Localization.GetString("Common_StatusUpdated"));
 
         private void Delete()
         {
-            if (!Dialogs.Confirm("Supprimer définitivement cette formation et ses inscriptions ?"))
+            if (!Dialogs.Confirm(_services.Localization.GetString("Training_ConfirmDelete")))
             {
                 return;
             }
 
-            Run(_services.Training.Delete(_selectedSession.Id), "Formation supprimée.");
+            Run(_services.Training.Delete(_selectedSession.Id), _services.Localization.GetString("Training_Toast_Deleted"));
         }
 
         private void Run(Result result, string success)

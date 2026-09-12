@@ -44,6 +44,48 @@ namespace OptiPaie.Desktop.Behaviors
             if (row != null) row.IsSelected = true;
         }
 
+        // ---- SelectRowOnRightClick -------------------------------------------
+        // WPF does not select a row on right-click, so a context menu bound to SelectedItem would
+        // act on the previously left-clicked row. Select the row under the cursor on right-button-down
+        // (fires before the menu opens on button-up) so the menu targets the right row.
+
+        public static readonly DependencyProperty SelectRowOnRightClickProperty =
+            DependencyProperty.RegisterAttached("SelectRowOnRightClick", typeof(bool), typeof(RowActions),
+                new PropertyMetadata(false, OnSelectRowOnRightClickChanged));
+
+        public static void SetSelectRowOnRightClick(DependencyObject o, bool v) => o.SetValue(SelectRowOnRightClickProperty, v);
+        public static bool GetSelectRowOnRightClick(DependencyObject o) => (bool)o.GetValue(SelectRowOnRightClickProperty);
+
+        private static void OnSelectRowOnRightClickChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (!(d is UIElement el)) return;
+            if ((bool)e.NewValue) el.PreviewMouseRightButtonDown += RightClickSelectHandler;
+            else el.PreviewMouseRightButtonDown -= RightClickSelectHandler;
+        }
+
+        private static void RightClickSelectHandler(object sender, MouseButtonEventArgs e)
+        {
+            var start = e.OriginalSource as DependencyObject;
+            var row = FindAncestor<DataGridRow>(start);
+            if (row != null)
+            {
+                // Setting the grid's SelectedItem REPLACES the selection (an Extended-mode DataGrid would
+                // otherwise ADD the row, leaving SelectedItem on the previously-selected row and the
+                // context-menu command acting on the wrong record).
+                var grid = FindAncestor<DataGrid>(row);
+                if (grid != null) grid.SelectedItem = row.Item;
+                row.IsSelected = true;
+                return;
+            }
+            var li = FindAncestor<ListBoxItem>(start);
+            if (li != null)
+            {
+                var lb = FindAncestor<ListBox>(li);
+                if (lb != null) lb.SelectedItem = li.DataContext;
+                li.IsSelected = true;
+            }
+        }
+
         // ---- OpenMenuOnClick --------------------------------------------------
 
         public static readonly DependencyProperty OpenMenuOnClickProperty =

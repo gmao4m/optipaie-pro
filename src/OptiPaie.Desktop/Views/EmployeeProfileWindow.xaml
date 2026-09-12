@@ -96,7 +96,7 @@
                             <Run Text="{Binding Poste, Mode=OneWay}" /><Run Text="  ·  " /><Run Text="{Binding Department, Mode=OneWay}" />
                         </TextBlock>
                         <TextBlock Margin="0,3,0,0" Style="{StaticResource Caption}">
-                            <Run Text="Matricule " /><Run Text="{Binding Matricule, Mode=OneWay}" FontFamily="{StaticResource MonoFont}" /><Run Text="   ·   Embauché le " /><Run Text="{Binding HireDateText, Mode=OneWay}" FontFamily="{StaticResource MonoFont}" />
+                            <Run Text="{loc:Loc Payslip_Matricule}" /><Run Text=" " /><Run Text="{Binding Matricule, Mode=OneWay}" FontFamily="{StaticResource MonoFont}" /><Run Text="   ·   " /><Run Text="{loc:Loc Profile_HiredOn}" /><Run Text=" " /><Run Text="{Binding HireDateText, Mode=OneWay}" FontFamily="{StaticResource MonoFont}" />
                         </TextBlock>
                     </StackPanel>
                 </StackPanel>
@@ -226,7 +226,7 @@
                                                 <StackPanel Grid.Column="0">
                                                     <TextBlock Style="{StaticResource RowNum}" HorizontalAlignment="Left" TextAlignment="Left" Text="{Binding OutstandingText}" />
                                                     <TextBlock Style="{StaticResource RowMuted}" FontSize="11">
-                                                        <Run Text="Mensualité " /><Run Text="{Binding InstallmentText, Mode=OneWay}" FontFamily="{StaticResource MonoFont}" /><Run Text="  ·  " /><Run Text="{Binding RemainingText, Mode=OneWay}" FontFamily="{StaticResource MonoFont}" />
+                                                        <Run Text="{loc:Loc Loan_Installment}" /><Run Text=" " /><Run Text="{Binding InstallmentText, Mode=OneWay}" FontFamily="{StaticResource MonoFont}" /><Run Text="  ·  " /><Run Text="{Binding RemainingText, Mode=OneWay}" FontFamily="{StaticResource MonoFont}" />
                                                     </TextBlock>
                                                 </StackPanel>
                                                 <Border Grid.Column="1" Style="{StaticResource StatusPill}"><TextBlock Style="{StaticResource PillText}" Text="{Binding StatusLabel}" /></Border>

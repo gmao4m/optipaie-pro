@@ -132,8 +132,7 @@ namespace OptiPaie.Services.Documents
                 // with the French prose) and pass through FixRtlDigits, per the document invariant.
                 string purpose = string.IsNullOrWhiteSpace(certificate.Purpose) ? "" : certificate.Purpose.Trim();
                 bool purposeArabic = ArabicText.ContainsArabic(purpose);
-                col.Item().PaddingTop(16).Text("La présente attestation est délivrée à l'intéressé(e) pour servir et valoir ce que de droit"
-                    + (purpose.Length > 0 && !purposeArabic ? " " + purpose : "") + ".");
+                col.Item().PaddingTop(16).Text(ClosingFr(certificate.Purpose));
                 if (purpose.Length > 0 && purposeArabic)
                     col.Item().PaddingTop(2).AlignRight().Text(ArabicText.FixRtlDigits(purpose));
                 col.Item().PaddingTop(2).AlignRight().Text("سُلّمت هذه الشهادة للمعني(ة) بالأمر قصد استعمالها عند الحاجة.");
@@ -177,6 +176,19 @@ namespace OptiPaie.Services.Documents
         /// <summary>Renders the free body text of a « document libre », paragraph by paragraph, each in
         /// its own element (bilingual-safe): an Arabic paragraph is right-aligned and digit-corrected,
         /// a Latin one left-aligned. Never mixes a multi-word Arabic run with Latin in one element.</summary>
+        /// <summary>French closing sentence. The generic legal formula is the DEFAULT reason; a
+        /// user-supplied (non-Arabic) purpose REPLACES it — never appended — so the formula can never
+        /// appear twice (audit IDX 49). An Arabic purpose falls back to the formula here and is printed
+        /// on its own RTL line by the caller.</summary>
+        public static string ClosingFr(string purpose)
+        {
+            string p = string.IsNullOrWhiteSpace(purpose) ? "" : purpose.Trim();
+            string reason = (p.Length == 0 || ArabicText.ContainsArabic(p))
+                ? "pour servir et valoir ce que de droit"
+                : p;
+            return "La présente attestation est délivrée à l'intéressé(e) " + reason + ".";
+        }
+
         private static void FreeBody(ColumnDescriptor col, string body)
         {
             string text = (body ?? string.Empty).Replace("\r\n", "\n").Trim();

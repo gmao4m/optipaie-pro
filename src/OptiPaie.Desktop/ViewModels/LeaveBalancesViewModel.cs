@@ -71,9 +71,11 @@ namespace OptiPaie.Desktop.ViewModels
             foreach (LeaveBalance balance in balances) Rows.Add(balance);
 
             StatusMessage = Rows.Count == 0
-                ? "Aucun employé dans cette entreprise."
-                : Rows.Count + " employé(s) · " + Num(Rows.Sum(r => r.Remaining)) + " jour(s) de congé restants au total";
+                ? L("Leave_NoEmployeesMsg")
+                : string.Format(L("LeaveBal_CountStatus"), Rows.Count, Num(Rows.Sum(r => r.Available)));
         }
+
+        private static string L(string key) => OptiPaie.Desktop.Localization.TranslationSource.Instance[key];
 
         private void ExportPdf()
         {
@@ -113,7 +115,7 @@ namespace OptiPaie.Desktop.ViewModels
                     sb.AppendLine(string.Join(";",
                         Escape(r.EmployeeName),
                         Num(r.Entitlement), Num(r.Taken), Num(r.Pending),
-                        Num(r.Remaining), Num(r.OtherLeaveDays), Num(r.UnpaidDays)));
+                        Num(r.Available), Num(r.OtherLeaveDays), Num(r.UnpaidDays)));
                 }
 
                 // UTF-8 with BOM so Excel opens the accents correctly.

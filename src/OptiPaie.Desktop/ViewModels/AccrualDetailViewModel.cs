@@ -35,7 +35,7 @@ namespace OptiPaie.Desktop.ViewModels
 
             var detail = services.Leave.GetAccrualDetail(employeeId, year);
             foreach (AccrualMonth m in detail) Months.Add(new AccrualMonthRow(m));
-            TotalText = detail.Sum(m => m.Accrued).ToString("0.##", CultureInfo.InvariantCulture) + " jour(s) acquis";
+            TotalText = string.Format(L("Leave_DaysAccrued"), detail.Sum(m => m.Accrued).ToString("0.##", CultureInfo.InvariantCulture));
 
             CloseCommand = new RelayCommand(() => RequestClose?.Invoke());
         }
@@ -45,6 +45,8 @@ namespace OptiPaie.Desktop.ViewModels
         public int Year { get; }
         public ObservableCollection<AccrualMonthRow> Months { get; } = new ObservableCollection<AccrualMonthRow>();
         public string TotalText { get; }
+
+        private static string L(string key) => OptiPaie.Desktop.Localization.TranslationSource.Instance[key];
         public ICommand CloseCommand { get; }
     }
 }

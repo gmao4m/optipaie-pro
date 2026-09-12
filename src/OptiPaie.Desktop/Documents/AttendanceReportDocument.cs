@@ -48,6 +48,7 @@ namespace OptiPaie.Desktop.Documents
                     {
                         c.RelativeColumn(4);
                         c.RelativeColumn(1.4f);
+                        c.RelativeColumn(1.5f);
                         c.RelativeColumn(1.4f);
                         c.RelativeColumn(1.4f);
                         c.RelativeColumn(1.4f);
@@ -59,6 +60,7 @@ namespace OptiPaie.Desktop.Documents
                     {
                         h.Cell().Element(Head).Text("Employé");
                         h.Cell().Element(Head).AlignCenter().Text("Présents");
+                        h.Cell().Element(Head).AlignCenter().Text("Jours payés");
                         h.Cell().Element(Head).AlignCenter().Text("Absents");
                         h.Cell().Element(Head).AlignCenter().Text("Congés");
                         h.Cell().Element(Head).AlignCenter().Text("Retards");
@@ -70,6 +72,7 @@ namespace OptiPaie.Desktop.Documents
                     {
                         table.Cell().Element(Body).Text(r.EmployeeName ?? string.Empty);
                         table.Cell().Element(Body).AlignCenter().Text(r.PresentDays.ToString());
+                        table.Cell().Element(Body).AlignCenter().Text(r.PaidDays.ToString());
                         table.Cell().Element(Body).AlignCenter().Text(r.AbsentDays.ToString());
                         table.Cell().Element(Body).AlignCenter().Text(r.LeaveDays.ToString());
                         table.Cell().Element(Body).AlignCenter().Text(r.LateCount.ToString());

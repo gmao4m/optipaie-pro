@@ -105,6 +105,7 @@ namespace OptiPaie.Desktop.ViewModels
             if (Dialogs.ShowCompanyEditor(new CompanyEditViewModel(_services, company, true)))
             {
                 LoadCompanies();
+                _services.CompanyContext.Reload(); // a new company must appear in the header selector
             }
         }
 
@@ -124,6 +125,7 @@ namespace OptiPaie.Desktop.ViewModels
             if (Dialogs.ShowCompanyEditor(new CompanyEditViewModel(_services, full, false)))
             {
                 LoadCompanies();
+                _services.CompanyContext.Reload(); // a rename of the active company must update the header
             }
         }
 
@@ -134,7 +136,7 @@ namespace OptiPaie.Desktop.ViewModels
                 return;
             }
 
-            if (!Dialogs.Confirm("Voulez-vous vraiment supprimer cette entreprise ?"))
+            if (!Dialogs.Confirm(OptiPaie.Desktop.Localization.TranslationSource.Instance["Companies_DeleteConfirm"]))
             {
                 return;
             }

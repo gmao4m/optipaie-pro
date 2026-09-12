@@ -54,7 +54,7 @@
                 <DataGridTextColumn Header="{loc:Loc LeaveBal_AnnualRight}" Binding="{Binding Entitlement, StringFormat=N1}" Width="105" ElementStyle="{StaticResource RightText}" />
                 <DataGridTextColumn Header="{loc:Loc LeaveBal_Taken}" Binding="{Binding Taken, StringFormat=N1}" Width="90" ElementStyle="{StaticResource RightText}" />
                 <DataGridTextColumn Header="{loc:Loc Leave_Pending}" Binding="{Binding Pending, StringFormat=N1}" Width="100" ElementStyle="{StaticResource RightText}" />
-                <DataGridTextColumn Header="{loc:Loc Loan_Remaining}" Binding="{Binding Remaining, StringFormat=N1}" Width="95" ElementStyle="{StaticResource RightText}" />
+                <DataGridTextColumn Header="{loc:Loc Loan_Remaining}" Binding="{Binding Available, StringFormat=N1}" Width="95" ElementStyle="{StaticResource RightText}" />
                 <DataGridTextColumn Header="{loc:Loc LeaveBal_Other}" Binding="{Binding OtherLeaveDays, StringFormat=N1}" Width="115" ElementStyle="{StaticResource RightText}" />
                 <DataGridTextColumn Header="{loc:Loc Leave_Unpaid}" Binding="{Binding UnpaidDays, StringFormat=N1}" Width="105" ElementStyle="{StaticResource RightText}" />
             </DataGrid.Columns>

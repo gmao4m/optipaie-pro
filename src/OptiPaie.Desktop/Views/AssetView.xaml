@@ -77,7 +77,7 @@
             </Border>
         </StackPanel>
 
-        <DataGrid x:Name="AssetsGrid" Grid.Row="2" Margin="0,18,0,0" ItemsSource="{Binding Assets}" SelectedItem="{Binding SelectedAsset}"
+        <DataGrid x:Name="AssetsGrid" Grid.Row="2" Margin="0,18,0,0" ItemsSource="{Binding Assets}" SelectedItem="{Binding SelectedAsset}" beh:RowActions.SelectRowOnRightClick="True"
                   AutoGenerateColumns="False" HeadersVisibility="Column" IsReadOnly="True"
                   CanUserAddRows="False" CanUserResizeRows="False" GridLinesVisibility="All"
                   RowHeight="32" FontFamily="{StaticResource AppFont}" FontSize="12.5" Background="{DynamicResource Surface}"

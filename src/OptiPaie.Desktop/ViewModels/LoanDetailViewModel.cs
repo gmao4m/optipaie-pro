@@ -23,7 +23,7 @@ namespace OptiPaie.Desktop.ViewModels
         public long Id => Repayment.Id;
         public string Period => Repayment.Month.ToString("00", CultureInfo.InvariantCulture) + "/" + Repayment.Year;
         public string AmountText => Repayment.Amount.ToString("N2", CultureInfo.GetCultureInfo("fr-FR"));
-        public string Source => Repayment.IsManual ? "Manuel" : "Paie";
+        public string Source => OptiPaie.Desktop.Localization.TranslationSource.Instance[Repayment.IsManual ? "Loan_SourceManual" : "Loan_SourcePayroll"];
     }
 
     /// <summary>
@@ -64,6 +64,8 @@ namespace OptiPaie.Desktop.ViewModels
         }
 
         public Action RequestClose { get; set; }
+
+        private static string L(string key) => OptiPaie.Desktop.Localization.TranslationSource.Instance[key];
 
         public string EmployeeName { get; }
 
@@ -113,14 +115,14 @@ namespace OptiPaie.Desktop.ViewModels
                 Repayments.Add(new RepaymentRowViewModel(repayment));
             }
 
-            StatusMessage = summary.RemainingInstallments + " mensualité(s) restante(s)";
+            StatusMessage = string.Format(L("Loan_RemainingInstallments"), summary.RemainingInstallments);
         }
 
         private void AddRepayment()
         {
             if (!OptiPaie.Common.Text.FlexibleNumber.TryParse(_manualAmount, out decimal amount))
             {
-                Dialogs.Error("Montant invalide.");
+                Dialogs.Error(L("Loan_AmountInvalid"));
                 return;
             }
 
@@ -133,12 +135,12 @@ namespace OptiPaie.Desktop.ViewModels
 
             ManualAmount = string.Empty;
             Load();
-            StatusMessage = "Remboursement ajouté.";
+            StatusMessage = L("Loan_RepaymentAddedMsg");
         }
 
         private void RemoveRepayment()
         {
-            if (!Dialogs.Confirm("Supprimer ce remboursement ?"))
+            if (!Dialogs.Confirm(L("Loan_ConfirmRemoveRepayment")))
             {
                 return;
             }
@@ -151,7 +153,7 @@ namespace OptiPaie.Desktop.ViewModels
             }
 
             Load();
-            StatusMessage = "Remboursement supprimé.";
+            StatusMessage = L("Loan_RepaymentRemovedMsg");
         }
     }
 }

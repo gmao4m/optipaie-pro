@@ -46,13 +46,13 @@ namespace OptiPaie.Desktop.ViewModels
                 _endDate = existing.EndDate;
                 _cost = existing.Cost.ToString(CultureInfo.InvariantCulture);
                 _notes = existing.Notes;
-                Title = "Modifier la formation";
+                Title = _services.Localization.GetString("Training_Edit");
             }
             else
             {
                 _startDate = DateTime.Today;
                 _cost = "0";
-                Title = "Nouvelle formation";
+                Title = _services.Localization.GetString("Training_New");
             }
 
             SaveCommand = new RelayCommand(Save);
@@ -60,6 +60,8 @@ namespace OptiPaie.Desktop.ViewModels
         }
 
         public Action<bool> RequestClose { get; set; }
+
+        private static string L(string key) => OptiPaie.Desktop.Localization.TranslationSource.Instance[key];
         public string Title { get; }
 
         public string SessionTitle { get => _title; set => Set(ref _title, value); }
@@ -78,7 +80,7 @@ namespace OptiPaie.Desktop.ViewModels
         {
             if (!OptiPaie.Common.Text.FlexibleNumber.TryParse(_cost, out decimal cost))
             {
-                Dialogs.Error("Coût invalide.");
+                Dialogs.Error(_services.Localization.GetString("Training_InvalidCost"));
                 return;
             }
 
@@ -221,14 +223,14 @@ namespace OptiPaie.Desktop.ViewModels
                 Participants.Add(new TrainingParticipantRowViewModel(_services, p, _resultOptions));
             }
 
-            StatusMessage = Participants.Count + " participant(s)";
+            StatusMessage = string.Format(_services.Localization.GetString("Training_ParticipantCount"), Participants.Count);
         }
 
         private void Enroll()
         {
             if (_selectedEmployee == null)
             {
-                Dialogs.Info("Sélectionnez un employé.");
+                Dialogs.Info(_services.Localization.GetString("Common_SelectEmployee"));
                 return;
             }
 
@@ -251,7 +253,7 @@ namespace OptiPaie.Desktop.ViewModels
 
             // Confirm before removing — the row (and its score / certificate reference) is only
             // hidden, not destroyed, but the user should still choose to remove it deliberately.
-            if (!Dialogs.Confirm("Retirer « " + _selectedParticipant.EmployeeName + " » de cette formation ?"))
+            if (!Dialogs.Confirm(string.Format(_services.Localization.GetString("Training_ConfirmRemoveParticipant"), _selectedParticipant.EmployeeName)))
             {
                 return;
             }

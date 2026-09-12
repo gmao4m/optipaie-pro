@@ -361,7 +361,7 @@ namespace OptiPaie.Desktop.ViewModels
             SelectedRequest = Requests.FirstOrDefault();
 
             int pending = _allRows.Count(r => r.IsLivePending);
-            StatusMessage = Requests.Count + " / " + _allRows.Count + " demande(s) · " + pending + " en attente";
+            StatusMessage = string.Format(L("Leave_ListCount"), Requests.Count, _allRows.Count, pending);
             UpdateBalance();
         }
 
@@ -384,7 +384,7 @@ namespace OptiPaie.Desktop.ViewModels
             if (_selectedRequest == null)
             {
                 PendingText = TakenText = AvailableText = UnpaidText = "0";
-                BalanceCaption = "Sélectionnez une demande pour voir le solde de l'employé.";
+                BalanceCaption = L("Leave_SelectRequestForBalance");
                 return;
             }
 
@@ -394,7 +394,7 @@ namespace OptiPaie.Desktop.ViewModels
             TakenText = Num(balance.Taken);
             AvailableText = Num(balance.Available);
             UnpaidText = Num(balance.UnpaidDays);
-            BalanceCaption = _selectedRequest.EmployeeName + " — droit annuel " + Num(balance.Entitlement) + " jours";
+            BalanceCaption = string.Format(L("Leave_BalanceCaption"), _selectedRequest.EmployeeName, Num(balance.Entitlement));
         }
 
         private void RaiseActionFlags()
@@ -443,14 +443,14 @@ namespace OptiPaie.Desktop.ViewModels
             if (window.ShowDialog() == true)
             {
                 Load();
-                StatusMessage = "Demande enregistrée.";
+                StatusMessage = L("Leave_SavedMsg");
             }
         }
 
         private void Submit()
         {
             if (_selectedRequest == null) return;
-            Run(_services.Leave.Submit(_selectedRequest.Id), "Demande soumise pour décision.");
+            Run(_services.Leave.Submit(_selectedRequest.Id), L("Leave_SubmittedMsg"));
         }
 
         private void Approve()
@@ -459,7 +459,7 @@ namespace OptiPaie.Desktop.ViewModels
             if (!Dialogs.Confirm(L("Leave_ConfirmApprove"))) return;
 
             Run(_services.Leave.Approve(_selectedRequest.Id, null),
-                "Congé approuvé — les jours sont enregistrés dans la présence.");
+                L("Leave_ApprovedMsg"));
         }
 
         private void Reject()
@@ -469,7 +469,7 @@ namespace OptiPaie.Desktop.ViewModels
             string motif = Dialogs.Prompt(L("Leave_ActReject"), L("Leave_MotifReject"), null, required: true);
             if (motif == null) return;
 
-            Run(_services.Leave.Reject(_selectedRequest.Id, motif), "Demande refusée.");
+            Run(_services.Leave.Reject(_selectedRequest.Id, motif), L("Leave_RejectedMsg"));
         }
 
         private void ReturnToDraft()
@@ -478,7 +478,7 @@ namespace OptiPaie.Desktop.ViewModels
             string motif = Dialogs.Prompt(L("Leave_ActReturn"), L("Leave_MotifReturn"), null, required: false);
             if (motif == null) return; // cancelled
 
-            Run(_services.Leave.ReturnToDraft(_selectedRequest.Id, motif), "Demande renvoyée en brouillon.");
+            Run(_services.Leave.ReturnToDraft(_selectedRequest.Id, motif), L("Leave_ReturnedToDraftMsg"));
         }
 
         private void CancelRequest()
@@ -488,15 +488,15 @@ namespace OptiPaie.Desktop.ViewModels
             if (motif == null) return;
 
             Run(_services.Leave.Cancel(_selectedRequest.Id, motif),
-                "Congé annulé — les jours ont été retirés de la présence.");
+                L("Leave_CancelledMsg"));
         }
 
         private void Delete()
         {
             if (_selectedRequest == null) return;
-            if (!Dialogs.Confirm("Supprimer définitivement cette demande ?")) return;
+            if (!Dialogs.Confirm(L("Leave_ConfirmDelete"))) return;
 
-            Run(_services.Leave.Delete(_selectedRequest.Id), "Demande supprimée.");
+            Run(_services.Leave.Delete(_selectedRequest.Id), L("Leave_DeletedMsg"));
         }
 
         private void Run(Result result, string success)
@@ -521,7 +521,7 @@ namespace OptiPaie.Desktop.ViewModels
             if (window.ShowDialog() == true)
             {
                 Load();
-                StatusMessage = "Paramètres enregistrés.";
+                StatusMessage = L("Leave_SettingsSavedMsg");
             }
         }
 
@@ -553,7 +553,7 @@ namespace OptiPaie.Desktop.ViewModels
         {
             if (_selectedCompany == null)
             {
-                Dialogs.Info("Sélectionnez d'abord une entreprise.");
+                Dialogs.Info(L("Common_SelectCompanyFirst"));
                 return;
             }
 
@@ -638,7 +638,7 @@ namespace OptiPaie.Desktop.ViewModels
             {
                 generate(dialog.FileName);
                 try { System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(dialog.FileName) { UseShellExecute = true }); }
-                catch { Dialogs.Info("Fichier enregistré :" + Environment.NewLine + dialog.FileName); }
+                catch { Dialogs.Info(L("Common_FileSaved") + Environment.NewLine + dialog.FileName); }
             }
             catch (Exception ex)
             {
