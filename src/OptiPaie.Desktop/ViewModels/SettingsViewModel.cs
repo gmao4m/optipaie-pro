@@ -101,8 +101,10 @@ namespace OptiPaie.Desktop.ViewModels
             decimal rate = _services.ConfigurationService.GetCnasEmployeeRate();
             CnasRateText = (rate * 100m).ToString("0.##", CultureInfo.InvariantCulture) + " %";
 
-            System.Version version = Assembly.GetExecutingAssembly().GetName().Version;
-            VersionText = "OptiPaie PRO  ·  version " + (version != null ? version.ToString(3) : "1.0.0");
+            // The PRODUCT version (AssemblyInformationalVersion, e.g. "1.33.0"), NOT the AssemblyVersion
+            // which is frozen at 1.8.0.0 for binding stability. Same source as the update system, so the
+            // footer and the update dialog always agree — support gets the real installed version.
+            VersionText = "OptiPaie PRO  ·  version " + OptiPaie.Core.Updates.AppVersion.CurrentProduct();
 
             RefreshLicense();
         }

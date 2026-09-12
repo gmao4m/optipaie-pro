@@ -201,7 +201,7 @@ namespace OptiPaie.Desktop.ViewModels
             catch (Exception ex)
             {
                 _services.Logger.Error("Batch payroll run", ex);
-                Dialogs.Error("Le traitement a échoué : " + ex.Message);
+                Dialogs.ErrorWithLog("Le traitement de la paie a échoué. فشلت معالجة الأجور.", ex);
                 IsRunning = false;
                 return;
             }
@@ -242,7 +242,7 @@ namespace OptiPaie.Desktop.ViewModels
                 _company, employee, payslip, _services.Localization.IsRightToLeft, _selectedYear, _selectedMonth);
 
             try { _fiche.Preview(model); }
-            catch (Exception ex) { Dialogs.Error("Impossible d'ouvrir la fiche : " + ex.Message); }
+            catch (Exception ex) { Dialogs.ErrorWithLog("Impossible d'ouvrir la fiche. تعذّر فتح الكشف.", ex); }
         }
 
         // -- batch export -----------------------------------------------------
@@ -282,7 +282,7 @@ namespace OptiPaie.Desktop.ViewModels
             catch (Exception ex)
             {
                 _services.Logger.Error("Batch payslip export", ex);
-                Dialogs.Error("Impossible d'exporter les bulletins : " + ex.Message);
+                Dialogs.ErrorWithLog("Impossible d'exporter les bulletins. تعذّر تصدير الكشوف.", ex);
             }
         }
 

@@ -44,6 +44,9 @@ namespace OptiPaie.Desktop.ViewModels
             };
 
             Libelle = element.NameFr;
+            // Show the Arabic label only when it is a real translation (legacy data copied the French
+            // name into NameAr, so an equal value means "not translated yet").
+            LibelleAr = string.Equals(element.NameAr, element.NameFr, StringComparison.Ordinal) ? string.Empty : element.NameAr;
             IsGain = element.ElementType != ElementType.Deduction;
             Cotisable = element.IsCnasApplicable;
             ImposablePercent = element.IrgPercent.HasValue
@@ -60,6 +63,8 @@ namespace OptiPaie.Desktop.ViewModels
         public string Title => _isNew ? "Nouvelle rubrique" : "Modifier la rubrique";
 
         public string Libelle { get; set; }
+        /// <summary>Optional Arabic label; when empty the French label is used on the Arabic payslip.</summary>
+        public string LibelleAr { get; set; }
         public bool IsGain { get; set; }
         public bool Cotisable { get; set; }
         public decimal ImposablePercent { get; set; }
@@ -79,7 +84,7 @@ namespace OptiPaie.Desktop.ViewModels
 
             string name = Libelle.Trim();
             _element.NameFr = name;
-            _element.NameAr = name;
+            _element.NameAr = string.IsNullOrWhiteSpace(LibelleAr) ? name : LibelleAr.Trim();
             _element.ElementType = IsGain ? ElementType.Gain : ElementType.Deduction;
             _element.IsIncludedInGross = IsGain;
 

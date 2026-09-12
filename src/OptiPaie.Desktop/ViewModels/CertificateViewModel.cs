@@ -192,7 +192,7 @@ namespace OptiPaie.Desktop.ViewModels
             catch (Exception ex)
             {
                 _services.Logger.Error("Export PDF attestation", ex);
-                Dialogs.Error("Impossible de générer le PDF : " + ex.Message);
+                Dialogs.ErrorWithLog("Impossible de générer le PDF. تعذّر إنشاء ملف PDF.", ex);
             }
         }
 

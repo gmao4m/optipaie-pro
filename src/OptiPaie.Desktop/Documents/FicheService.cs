@@ -43,7 +43,7 @@ namespace OptiPaie.Desktop.Documents
                 model.Lines.Add(new FicheLineModel
                 {
                     Code = i.ToString("000", Fr),
-                    Label = isArabic && !string.IsNullOrWhiteSpace(line.LabelAr) ? line.LabelAr : line.LabelFr,
+                    Label = LineLabel(line.LabelFr, line.LabelAr, isArabic),
                     BaseText = BaseText(line.Base, line.Quantity, line.Amount),
                     TauxText = TauxText(line.Rate, line.UnitPrice),
                     Gain = gain ? line.Amount : (decimal?)null,
@@ -82,7 +82,7 @@ namespace OptiPaie.Desktop.Documents
                 model.Lines.Add(new FicheLineModel
                 {
                     Code = i.ToString("000", Fr),
-                    Label = isArabic && !string.IsNullOrWhiteSpace(line.LabelAr) ? line.LabelAr : line.LabelFr,
+                    Label = LineLabel(line.LabelFr, line.LabelAr, isArabic),
                     BaseText = BaseText(line.Base, line.Quantity, line.Amount),
                     TauxText = TauxText(line.Rate, line.UnitPrice),
                     Gain = gain ? line.Amount : (decimal?)null,
@@ -145,6 +145,22 @@ namespace OptiPaie.Desktop.Documents
             }
 
             return 0m;
+        }
+
+        /// <summary>Resolves a payslip line label for the chosen language. Prefers a genuine Arabic
+        /// label; otherwise translates the SYSTEM-generated labels (loan recovery…) so an Arabic
+        /// payslip is not left with a lone French line. User-named rubrics keep their own text.</summary>
+        private static string LineLabel(string labelFr, string labelAr, bool isArabic)
+        {
+            if (!isArabic) return labelFr;
+            string fr = (labelFr ?? string.Empty).Trim();
+            if (!string.IsNullOrWhiteSpace(labelAr) && labelAr.Trim() != fr) return labelAr;
+            switch (fr)
+            {
+                case "Remboursement prêt": return "استرجاع قرض";
+                case "Salaire de base": return "الأجر القاعدي";
+                default: return labelFr;
+            }
         }
 
         private static string BaseText(decimal? @base, decimal? quantity, decimal amount)

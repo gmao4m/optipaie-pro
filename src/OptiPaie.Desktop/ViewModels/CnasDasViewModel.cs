@@ -163,13 +163,13 @@ namespace OptiPaie.Desktop.ViewModels
                 // A value slipped past validation and overflows a fixed-width field (or is non-ASCII).
                 // Never a disk problem — surface it as a data/format issue, not a "write error".
                 _services.Logger.Error("Encodage DAS", ex);
-                Dialogs.Error(L("Cnas_Das_EncodeError") + " " + ex.Message);
+                Dialogs.ErrorWithLog(L("Cnas_Das_EncodeError"), ex);
                 return;
             }
             catch (Exception ex)
             {
                 _services.Logger.Error("Écriture DAS", ex);
-                Dialogs.Error(L("Cnas_Das_WriteError") + " " + ex.Message);
+                Dialogs.ErrorWithLog(L("Cnas_Das_WriteError"), ex);
                 return;
             }
 

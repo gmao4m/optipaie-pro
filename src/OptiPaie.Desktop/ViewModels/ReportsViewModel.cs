@@ -165,7 +165,7 @@ namespace OptiPaie.Desktop.ViewModels
             catch (Exception ex)
             {
                 _services.Logger.Error("Export PDF rapport", ex);
-                Dialogs.Error("Impossible de générer le PDF : " + ex.Message);
+                Dialogs.ErrorWithLog("Impossible de générer le PDF. تعذّر إنشاء ملف PDF.", ex);
             }
         }
 
@@ -189,7 +189,7 @@ namespace OptiPaie.Desktop.ViewModels
             catch (Exception ex)
             {
                 _services.Logger.Error("Export CSV rapport", ex);
-                Dialogs.Error("Impossible de générer le fichier : " + ex.Message);
+                Dialogs.ErrorWithLog("Impossible de générer le fichier. تعذّر إنشاء الملف.", ex);
             }
         }
 

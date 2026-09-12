@@ -168,6 +168,17 @@ namespace OptiPaie.Desktop.ViewModels
             {
                 try
                 {
+                    // Cap the logo size: it is stored as a BLOB in the DB and re-rendered on every
+                    // payslip, so a multi-megabyte photo bloats the base, the backups and the render.
+                    const long maxBytes = 1_000_000; // 1 Mo
+                    long size = new FileInfo(dialog.FileName).Length;
+                    if (size > maxBytes)
+                    {
+                        Dialogs.Error("Ce logo est trop volumineux (" + (size / 1024) + " Ko). Choisissez une image de moins de 1 Mo.\n" +
+                                      "هذا الشعار كبير جدًا. اختر صورة أقل من 1 ميغابايت.");
+                        return;
+                    }
+
                     Logo = File.ReadAllBytes(dialog.FileName);
                 }
                 catch

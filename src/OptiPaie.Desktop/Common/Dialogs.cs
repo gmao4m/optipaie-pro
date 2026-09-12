@@ -7,9 +7,24 @@ namespace OptiPaie.Desktop.Common
     /// <summary>Small helper for modal dialogs and message boxes (kept out of view models).</summary>
     public static class Dialogs
     {
+        /// <summary>Set once at startup so <see cref="ErrorWithLog"/> can write the technical detail
+        /// to the journal instead of showing it to the client.</summary>
+        public static OptiPaie.Common.Logging.ILogger Logger { get; set; }
+
         public static void Error(string message)
         {
             MessageBox.Show(message, "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+
+        /// <summary>
+        /// Shows a clean BUSINESS message to the client and writes the raw technical exception to the
+        /// journal — never the .NET exception text on screen. Use it in every catch that used to do
+        /// <c>Dialogs.Error("…" + ex.Message)</c>.
+        /// </summary>
+        public static void ErrorWithLog(string businessMessage, System.Exception ex)
+        {
+            try { Logger?.Error(businessMessage, ex); } catch { /* logging must never mask the message */ }
+            MessageBox.Show(businessMessage, "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
         public static void Info(string message, string caption = "OptiPaie DZ")
@@ -43,6 +58,7 @@ namespace OptiPaie.Desktop.Common
                 DataContext = vm,
                 Owner = Application.Current.MainWindow
             };
+            App.ApplyFlowDirection(window); // RTL in Arabic, like every other dialog
             vm.RequestClose = ok => window.DialogResult = ok;
             return window.ShowDialog() == true;
         }
@@ -54,6 +70,7 @@ namespace OptiPaie.Desktop.Common
                 DataContext = vm,
                 Owner = Application.Current.MainWindow
             };
+            App.ApplyFlowDirection(window);
             vm.RequestClose = ok => window.DialogResult = ok;
             return window.ShowDialog() == true;
         }
@@ -65,6 +82,7 @@ namespace OptiPaie.Desktop.Common
                 DataContext = vm,
                 Owner = Application.Current.MainWindow
             };
+            App.ApplyFlowDirection(window);
             vm.RequestClose = () => window.Close();
             window.ShowDialog();
         }
@@ -100,6 +118,7 @@ namespace OptiPaie.Desktop.Common
                 DataContext = vm,
                 Owner = Application.Current.MainWindow
             };
+            App.ApplyFlowDirection(window);
             vm.RequestClose = ok => window.DialogResult = ok;
             return window.ShowDialog() == true;
         }

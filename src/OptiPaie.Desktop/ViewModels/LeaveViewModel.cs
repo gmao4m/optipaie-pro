@@ -626,7 +626,7 @@ namespace OptiPaie.Desktop.ViewModels
             catch (Exception ex)
             {
                 _services.Logger?.Error("Impression congé", ex);
-                Dialogs.Error("Impossible de générer le PDF : " + ex.Message);
+                Dialogs.ErrorWithLog("Impossible de générer le PDF. تعذّر إنشاء ملف PDF.", ex);
             }
         }
 

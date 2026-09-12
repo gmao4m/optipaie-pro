@@ -164,7 +164,7 @@ namespace OptiPaie.Desktop.ViewModels
             }
             catch (Exception ex)
             {
-                Dialogs.Error("Impossible de produire la fiche de paie :\r\n" + ex.Message);
+                Dialogs.ErrorWithLog("Impossible de produire la fiche de paie. تعذّر إنشاء كشف الراتب.", ex);
             }
         }
 

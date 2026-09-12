@@ -577,7 +577,7 @@
   <data name="Dashboard_AttendanceMatrix" xml:space="preserve"><value>مصفوفة الحضور</value></data>
   <data name="Dashboard_Leave" xml:space="preserve"><value>العطل</value></data>
   <data name="Dashboard_Kpi_Headcount" xml:space="preserve"><value>التعداد</value></data>
-  <data name="Dashboard_Kpi_Masse" xml:space="preserve"><value>كتلة الأجور</value></data>
+  <data name="Dashboard_Kpi_Masse" xml:space="preserve"><value>كتلة الأجور (الأساسية)</value></data>
   <data name="Dashboard_Kpi_AvgSalary" xml:space="preserve"><value>متوسط الأجر</value></data>
   <data name="Dashboard_MasseTrend" xml:space="preserve"><value>تطوّر كتلة الأجور</value></data>
   <data name="Dashboard_Last6Months" xml:space="preserve"><value>آخر 6 أشهر</value></data>

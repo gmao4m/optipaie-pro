@@ -430,7 +430,7 @@ namespace OptiPaie.Desktop.ViewModels.Performance
             string path = SaveDialog("PDF (*.pdf)|*.pdf", ".pdf");
             if (path == null) return;
             try { QuestPDF.Fluent.Document.Create(doc.Compose).GeneratePdf(path); Dialogs.Info(L.T("Perf_Exported")); }
-            catch (System.Exception ex) { Dialogs.Error(ex.Message); }
+            catch (System.Exception ex) { Dialogs.ErrorWithLog("Impossible d'exporter. تعذّر التصدير.", ex); }
         }
 
         private void ExportCsv()
@@ -438,7 +438,7 @@ namespace OptiPaie.Desktop.ViewModels.Performance
             string path = SaveDialog("CSV (*.csv)|*.csv", ".csv");
             if (path == null) return;
             try { System.IO.File.WriteAllText(path, BuildCsv(), new System.Text.UTF8Encoding(true)); Dialogs.Info(L.T("Perf_Exported")); }
-            catch (System.Exception ex) { Dialogs.Error(ex.Message); }
+            catch (System.Exception ex) { Dialogs.ErrorWithLog("Impossible d'exporter. تعذّر التصدير.", ex); }
         }
 
         private Documents.PerformanceReportModel BuildModel()

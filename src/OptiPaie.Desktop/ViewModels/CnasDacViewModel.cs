@@ -337,7 +337,7 @@ namespace OptiPaie.Desktop.ViewModels
             catch (Exception ex)
             {
                 _services.Logger.Error("Export PDF DAC", ex);
-                Dialogs.Error(L("Cnas_Dac_ExportError") + " " + ex.Message);
+                Dialogs.ErrorWithLog(L("Cnas_Dac_ExportError"), ex);
             }
         }
 

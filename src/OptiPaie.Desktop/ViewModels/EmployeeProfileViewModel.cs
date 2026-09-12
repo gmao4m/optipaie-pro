@@ -413,7 +413,7 @@ namespace OptiPaie.Desktop.ViewModels
                     _services.Localization.IsRightToLeft, row.Year, row.Month);
                 _fiche.Preview(model);
             }
-            catch (Exception ex) { Dialogs.Error("Impossible d'ouvrir le bulletin : " + ex.Message); }
+            catch (Exception ex) { Dialogs.ErrorWithLog("Impossible d'ouvrir le bulletin. تعذّر فتح الكشف.", ex); }
         }
 
         private void Go(string moduleKey)
@@ -444,7 +444,7 @@ namespace OptiPaie.Desktop.ViewModels
             catch (Exception ex)
             {
                 _services.Logger.Error("Export dossier employé", ex);
-                Dialogs.Error("Impossible d'exporter le dossier : " + ex.Message);
+                Dialogs.ErrorWithLog("Impossible d'exporter le dossier. تعذّر تصدير الملف.", ex);
             }
         }
 

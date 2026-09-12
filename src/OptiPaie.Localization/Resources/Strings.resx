@@ -577,7 +577,7 @@
   <data name="Dashboard_AttendanceMatrix" xml:space="preserve"><value>Matrice de présence</value></data>
   <data name="Dashboard_Leave" xml:space="preserve"><value>Congés</value></data>
   <data name="Dashboard_Kpi_Headcount" xml:space="preserve"><value>Effectif</value></data>
-  <data name="Dashboard_Kpi_Masse" xml:space="preserve"><value>Masse salariale</value></data>
+  <data name="Dashboard_Kpi_Masse" xml:space="preserve"><value>Masse salariale (base)</value></data>
   <data name="Dashboard_Kpi_AvgSalary" xml:space="preserve"><value>Salaire moyen</value></data>
   <data name="Dashboard_MasseTrend" xml:space="preserve"><value>Évolution de la masse salariale</value></data>
   <data name="Dashboard_Last6Months" xml:space="preserve"><value>6 derniers mois</value></data>

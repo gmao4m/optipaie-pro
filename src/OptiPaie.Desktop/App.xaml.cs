@@ -84,6 +84,9 @@ namespace OptiPaie.Desktop
             {
                 Services = CompositionRoot.Build();
 
+                // Route technical error detail to the journal (Dialogs.ErrorWithLog) instead of the screen.
+                OptiPaie.Desktop.Common.Dialogs.Logger = Services.Logger;
+
                 string language = Services.Settings.GetLanguage();
                 if (string.IsNullOrWhiteSpace(language))
                 {

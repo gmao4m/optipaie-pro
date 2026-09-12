@@ -31,6 +31,12 @@
             </StackPanel>
 
             <StackPanel Margin="0,0,0,14">
+                <TextBlock Style="{StaticResource Fl}" Text="Libellé (arabe) — optionnel / التسمية بالعربية (اختياري)" />
+                <TextBox Style="{StaticResource AppTextBox}" FlowDirection="RightToLeft"
+                         Text="{Binding LibelleAr, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+
+            <StackPanel Margin="0,0,0,14">
                 <TextBlock Style="{StaticResource Fl}" Text="{loc:Loc Common_Nature}" />
                 <ComboBox Style="{StaticResource AppComboBox}" ItemsSource="{Binding Natures}" SelectedValue="{Binding IsGain}" SelectedValuePath="Value" DisplayMemberPath="Label" />
             </StackPanel>
