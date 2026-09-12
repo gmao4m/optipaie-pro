@@ -247,16 +247,19 @@ namespace OptiPaie.Tests
         }
 
         [Test]
-        public void EnsureDemo_ReplacesLeftoverData_WithTheDemo()
+        public void EnsureDemo_NeverDeletesRealDataEnteredDuringTrial()
         {
-            // Simulate a leftover, non-demo company (e.g. a test "Optirasoft" company).
+            // A prospect deleted/renamed the demo during the trial and entered THEIR OWN company and
+            // employees to evaluate the product. On the next launch (still in trial) EnsureDemo runs
+            // again — it must NEVER wipe that real data (it used to soft-delete every company/employee).
+            long cid;
             using (IUnitOfWork uow = _uowf.Create())
             {
                 uow.BeginTransaction();
-                long cid = uow.Companies.Insert(new Company { NameFr = "Optirasoft", Nif = "111111111111111" });
+                cid = uow.Companies.Insert(new Company { NameFr = "SARL Client Réel", Nif = "111111111111111" });
                 uow.Employees.Insert(new Employee
                 {
-                    CompanyId = cid, LastNameFr = "TEST", FirstNameFr = "User", Gender = Gender.Male,
+                    CompanyId = cid, LastNameFr = "CLIENT", FirstNameFr = "Réel", Gender = Gender.Male,
                     MaritalStatus = MaritalStatus.Single, PaymentMode = PaymentMode.Cash, ContractType = ContractType.Cdi,
                     HireDate = new DateTime(2020, 1, 1), BaseSalary = 50000m, IsActive = true
                 });
@@ -269,13 +272,9 @@ namespace OptiPaie.Tests
             Assert.That(r.IsSuccess, Is.True, r.Error);
 
             IReadOnlyList<Company> companies = _companies.GetAll();
-            Assert.That(companies.Count, Is.EqualTo(1), "the leftover company is hidden; only the demo remains");
-            Assert.That(companies[0].NameFr, Is.EqualTo("SARL Atlas Industrie"));
-
-            // Idempotent once the demo is present.
-            Result<long> again = _seeder.EnsureDemo();
-            Assert.That(again.Value, Is.EqualTo(0L));
-            Assert.That(_companies.GetAll().Count, Is.EqualTo(1));
+            Assert.That(companies.Any(c => c.NameFr == "SARL Client Réel"), Is.True, "the prospect's real company must survive");
+            Assert.That(companies.Any(c => c.NameFr == "SARL Atlas Industrie"), Is.False, "the demo is NOT seeded over real data");
+            Assert.That(_employees.GetByCompany(cid, true).Count, Is.EqualTo(1), "the prospect's employee must survive");
         }
     }
 }

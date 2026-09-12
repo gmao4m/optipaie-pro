@@ -318,10 +318,30 @@ namespace OptiPaie.Services
 
         public Result<decimal> RecordPayrollDeductions(long employeeId, int year, int month)
         {
+            // No explicit amount → each active loan recovers its theoretical instalment (batch path,
+            // where the recovery line is never edited so theoretical == actually withheld).
+            return RecordPayrollDeductions(employeeId, year, month, null);
+        }
+
+        public Result<decimal> RecordPayrollDeductions(long employeeId, int year, int month, decimal actualWithheld)
+        {
+            // Non-nullable public overload: the caller passes the amount actually withheld on the
+            // payslip, which is then distributed across the loans (capped at each outstanding).
+            return RecordPayrollDeductions(employeeId, year, month, (decimal?)actualWithheld);
+        }
+
+        private Result<decimal> RecordPayrollDeductions(long employeeId, int year, int month, decimal? actualWithheld)
+        {
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 int period = Period(year, month);
                 List<Loan> loans = uow.Loans.GetByEmployee(employeeId).ToList();
+
+                // When an explicit withheld amount is given, it is the pot to distribute across the
+                // active loans (in order); each loan takes min(remaining pot, its outstanding). The
+                // loan schedule is therefore credited EXACTLY what the payslip deducted — if the line
+                // was zeroed, nothing is credited; if it was reduced, less is credited.
+                decimal? remaining = actualWithheld.HasValue ? Math.Max(0m, actualWithheld.Value) : (decimal?)null;
 
                 uow.BeginTransaction();
                 try
@@ -343,7 +363,12 @@ namespace OptiPaie.Services
                             continue;
                         }
 
-                        decimal amount = Math.Min(loan.MonthlyInstallment, outstanding);
+                        decimal amount = remaining.HasValue
+                            ? Math.Min(remaining.Value, outstanding)               // exactly what was withheld
+                            : Math.Min(loan.MonthlyInstallment, outstanding);      // theoretical instalment
+
+                        if (amount <= 0m) continue;
+
                         uow.Loans.InsertRepayment(new LoanRepayment
                         {
                             LoanId = loan.Id,
@@ -354,6 +379,7 @@ namespace OptiPaie.Services
                         });
 
                         total += amount;
+                        if (remaining.HasValue) remaining -= amount;
                         SettleIfNeeded(uow, loan, outstanding - amount);
                     }
 

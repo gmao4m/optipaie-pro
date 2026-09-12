@@ -66,6 +66,21 @@ namespace OptiPaie.Services
                     return Result.Fail("Entreprise introuvable.", ErrorCodes.NotFound);
                 }
 
+                // Never make a whole client file disappear. Refuse the deletion while the company
+                // still holds employees (and therefore their payslips, declarations and history);
+                // an employee that has any payslip can't be removed either (see EmployeeService), so
+                // the employee count is the single, honest gate. Message is bilingual FR/AR.
+                int employees = uow.Employees.GetByCompany(id, true).Count();
+                if (employees > 0)
+                {
+                    return Result.Fail(
+                        "Impossible de supprimer cette entreprise : elle contient encore " + employees +
+                        " employé(s) et leur historique (bulletins, déclarations). Supprimez ou déplacez d'abord les employés.\n" +
+                        "لا يمكن حذف هذه المؤسسة: فهي لا تزال تحتوي على " + employees +
+                        " موظّف(ين) وسجلّاتهم (كشوف الأجور، التصريحات). احذف الموظفين أو انقلهم أولاً.",
+                        "Company_HasDependencies");
+                }
+
                 uow.Companies.SoftDelete(id);
                 return Result.Ok();
             }

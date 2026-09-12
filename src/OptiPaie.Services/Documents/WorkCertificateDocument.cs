@@ -93,41 +93,51 @@ namespace OptiPaie.Services.Documents
             if (!string.IsNullOrWhiteSpace(certificate.Reference))
                 col.Item().AlignCenter().PaddingTop(2).Text("Réf. : " + certificate.Reference).FontSize(9).FontColor("#555");
 
-            // ── bilingual intro (fixed text — no inline dynamic value, so nothing to mangle) ──
-            col.Item().PaddingTop(18).Text("Nous soussignés attestons ce qui suit :");
-            col.Item().AlignRight().Text("نشهد نحن الموقّعون أدناه بما يلي :");
-
-            // ── identity card : every value isolated in its own element ──
-            col.Item().PaddingTop(12).Border(0.8f).BorderColor("#bbbbbb").Padding(12).Column(card =>
+            if (certificate.Type == CertificateType.Custom)
             {
-                card.Spacing(7);
-                Field(card, "Nom & prénom", FullName(employee), "الاسم واللقب");
-                if (!string.IsNullOrWhiteSpace(employee.Nss))
-                    Field(card, "N° sécurité sociale", employee.Nss, "رقم الضمان الاجتماعي");
-                Field(card, "Fonction", Poste(employee), "الوظيفة");
-                Field(card, "Date de recrutement", D(employee.HireDate), "تاريخ التوظيف");
+                // Document libre : on imprime le TEXTE saisi par l'utilisateur (obligatoire pour ce
+                // type) — il était auparavant silencieusement ignoré. Bilingue-safe : chaque paragraphe
+                // dans son propre élément, les paragraphes arabes alignés à droite et chiffres corrigés.
+                FreeBody(col, certificate.Body);
+            }
+            else
+            {
+                // ── bilingual intro (fixed text — no inline dynamic value, so nothing to mangle) ──
+                col.Item().PaddingTop(18).Text("Nous soussignés attestons ce qui suit :");
+                col.Item().AlignRight().Text("نشهد نحن الموقّعون أدناه بما يلي :");
 
-                if (certificate.Type == CertificateType.WorkExperience && employee.ExitDate.HasValue)
-                    Field(card, "Date de fin de relation", D(employee.ExitDate.Value), "تاريخ نهاية العلاقة");
+                // ── identity card : every value isolated in its own element ──
+                col.Item().PaddingTop(12).Border(0.8f).BorderColor("#bbbbbb").Padding(12).Column(card =>
+                {
+                    card.Spacing(7);
+                    Field(card, "Nom & prénom", FullName(employee), "الاسم واللقب");
+                    if (!string.IsNullOrWhiteSpace(employee.Nss))
+                        Field(card, "N° sécurité sociale", employee.Nss, "رقم الضمان الاجتماعي");
+                    Field(card, "Fonction", Poste(employee), "الوظيفة");
+                    Field(card, "Date de recrutement", D(employee.HireDate), "تاريخ التوظيف");
 
-                string sfr = SeniorityFr();
-                if (sfr.Length > 0)
-                    Field(card, "Ancienneté", sfr, "الأقدمية");
+                    if (certificate.Type == CertificateType.WorkExperience && employee.ExitDate.HasValue)
+                        Field(card, "Date de fin de relation", D(employee.ExitDate.Value), "تاريخ نهاية العلاقة");
 
-                if (certificate.Type == CertificateType.SalaryCertificate)
-                    Field(card, "Salaire mensuel de base", _model.MonthlySalary.ToString("N2", Fr) + " DA", "الأجر الشهري القاعدي");
-            });
+                    string sfr = SeniorityFr();
+                    if (sfr.Length > 0)
+                        Field(card, "Ancienneté", sfr, "الأقدمية");
 
-            // ── bilingual closing (fixed text) ──
-            // A Latin purpose is fine inline; an Arabic purpose must be its OWN element (never mixed
-            // with the French prose) and pass through FixRtlDigits, per the document invariant.
-            string purpose = string.IsNullOrWhiteSpace(certificate.Purpose) ? "" : certificate.Purpose.Trim();
-            bool purposeArabic = ArabicText.ContainsArabic(purpose);
-            col.Item().PaddingTop(16).Text("La présente attestation est délivrée à l'intéressé(e) pour servir et valoir ce que de droit"
-                + (purpose.Length > 0 && !purposeArabic ? " " + purpose : "") + ".");
-            if (purpose.Length > 0 && purposeArabic)
-                col.Item().PaddingTop(2).AlignRight().Text(ArabicText.FixRtlDigits(purpose));
-            col.Item().PaddingTop(2).AlignRight().Text("سُلّمت هذه الشهادة للمعني(ة) بالأمر قصد استعمالها عند الحاجة.");
+                    if (certificate.Type == CertificateType.SalaryCertificate)
+                        Field(card, "Salaire mensuel de base", _model.MonthlySalary.ToString("N2", Fr) + " DA", "الأجر الشهري القاعدي");
+                });
+
+                // ── bilingual closing (fixed text) ──
+                // A Latin purpose is fine inline; an Arabic purpose must be its OWN element (never mixed
+                // with the French prose) and pass through FixRtlDigits, per the document invariant.
+                string purpose = string.IsNullOrWhiteSpace(certificate.Purpose) ? "" : certificate.Purpose.Trim();
+                bool purposeArabic = ArabicText.ContainsArabic(purpose);
+                col.Item().PaddingTop(16).Text("La présente attestation est délivrée à l'intéressé(e) pour servir et valoir ce que de droit"
+                    + (purpose.Length > 0 && !purposeArabic ? " " + purpose : "") + ".");
+                if (purpose.Length > 0 && purposeArabic)
+                    col.Item().PaddingTop(2).AlignRight().Text(ArabicText.FixRtlDigits(purpose));
+                col.Item().PaddingTop(2).AlignRight().Text("سُلّمت هذه الشهادة للمعني(ة) بالأمر قصد استعمالها عند الحاجة.");
+            }
 
             // ── signature block ──
             col.Item().PaddingTop(34).AlignRight().Column(sig =>
@@ -162,6 +172,26 @@ namespace OptiPaie.Services.Documents
                 });
                 row.ConstantItem(160).AlignRight().Text(arLabel);
             });
+        }
+
+        /// <summary>Renders the free body text of a « document libre », paragraph by paragraph, each in
+        /// its own element (bilingual-safe): an Arabic paragraph is right-aligned and digit-corrected,
+        /// a Latin one left-aligned. Never mixes a multi-word Arabic run with Latin in one element.</summary>
+        private static void FreeBody(ColumnDescriptor col, string body)
+        {
+            string text = (body ?? string.Empty).Replace("\r\n", "\n").Trim();
+            if (text.Length == 0) return;
+
+            col.Item().PaddingTop(18);
+            foreach (string paragraph in text.Split('\n'))
+            {
+                string p = paragraph.Trim();
+                if (p.Length == 0) { col.Item().PaddingTop(6); continue; }
+                if (ArabicText.ContainsArabic(p))
+                    col.Item().PaddingTop(4).AlignRight().Text(ArabicText.FixRtlDigits(p)).LineHeight(1.6f);
+                else
+                    col.Item().PaddingTop(4).Text(p).LineHeight(1.6f);
+            }
         }
 
         // ── helpers ──

@@ -14,7 +14,7 @@ namespace OptiPaie.Desktop.ViewModels.Attendance
     {
         private AttendanceStatus? _status;
 
-        public MatrixCellViewModel(long employeeId, DateTime date, bool isWeekend, bool isFuture, AttendanceStatus? status)
+        public MatrixCellViewModel(long employeeId, DateTime date, bool isWeekend, bool isFuture, AttendanceStatus? status, bool isLeaveLinked = false)
         {
             EmployeeId = employeeId;
             Date = date;
@@ -22,6 +22,7 @@ namespace OptiPaie.Desktop.ViewModels.Attendance
             IsWeekend = isWeekend;
             IsFuture = isFuture;
             _status = status;
+            IsLeaveLinked = isLeaveLinked;
         }
 
         public long EmployeeId { get; }
@@ -31,6 +32,14 @@ namespace OptiPaie.Desktop.ViewModels.Attendance
 
         /// <summary>Future days are read-only (the matrix never records the future).</summary>
         public bool IsFuture { get; }
+
+        /// <summary>
+        /// True when this day was written by the Leave module (an approved leave, marked "[Congé]").
+        /// Such cells are PROTECTED from bulk attendance painting so a synced leave is never silently
+        /// overwritten (which would turn an unpaid leave into a paid day). A deliberate single-cell
+        /// repaint still changes it and detaches it from the leave (the service clears the marker).
+        /// </summary>
+        public bool IsLeaveLinked { get; private set; }
 
         public AttendanceStatus? Status
         {
@@ -58,6 +67,7 @@ namespace OptiPaie.Desktop.ViewModels.Attendance
             }
 
             Status = status;
+            IsLeaveLinked = false; // a deliberate repaint detaches the day from its synced leave
             return true;
         }
 

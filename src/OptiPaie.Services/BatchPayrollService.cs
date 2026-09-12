@@ -60,8 +60,18 @@ namespace OptiPaie.Services
 
         public BatchPayrollPlan Plan(long companyId, int year, int month)
         {
+            DateTime firstOfMonth = new DateTime(year, month, 1);
+            DateTime endOfMonth = firstOfMonth.AddMonths(1).AddDays(-1);
+
             var checks = new List<BatchEmployeeCheck>();
-            foreach (Employee emp in _employees.GetByCompany(companyId, false).OrderBy(e => e.LastNameFr))
+            // Date-aware population: an employee is on this run if they were employed AT ANY POINT in
+            // the month — including a departing employee for their LAST month (exit date within the
+            // month). A résiliation that takes effect on the 30th no longer silently drops the whole
+            // month's salary. Employees who left before the month, or are disabled without an exit
+            // date, are excluded. (Termination itself is unchanged; eligibility is driven by dates.)
+            foreach (Employee emp in _employees.GetByCompany(companyId, true)
+                         .Where(e => EmployedInPeriod(e, firstOfMonth, endOfMonth))
+                         .OrderBy(e => e.LastNameFr))
             {
                 var check = new BatchEmployeeCheck { EmployeeId = emp.Id, EmployeeName = Name(emp) };
 
@@ -70,10 +80,10 @@ namespace OptiPaie.Services
                     check.Severity = BatchCheckSeverity.Blocking;
                     check.Reason = "Salaire de base manquant ou nul";
                 }
-                else if (!_contracts.GetByEmployee(emp.Id).Any(c => c.Status == ContractStatus.Active))
+                else if (!HadContractInPeriod(_contracts.GetByEmployee(emp.Id), firstOfMonth, endOfMonth))
                 {
                     check.Severity = BatchCheckSeverity.Blocking;
-                    check.Reason = "Aucun contrat en vigueur";
+                    check.Reason = "Aucun contrat couvrant ce mois";
                 }
                 else if (_isModuleEnabled(ModuleKeys.Attendance) && !HasAttendance(emp.Id, year, month))
                 {
@@ -270,5 +280,27 @@ namespace OptiPaie.Services
         }
 
         private static string Name(Employee e) => (e.LastNameFr + " " + e.FirstNameFr).Trim();
+
+        /// <summary>True if the employee was employed at any point during [start, end]: hired on or
+        /// before the month end, and either still employed (no exit date, and active) or their exit
+        /// date falls on or after the month start (so their final month is still paid).</summary>
+        private static bool EmployedInPeriod(Employee e, DateTime start, DateTime end)
+        {
+            if (e.HireDate.Date > end) return false;                       // not yet hired this month
+            if (e.ExitDate.HasValue) return e.ExitDate.Value.Date >= start; // paid up to and incl. exit month
+            return e.IsActive;                                             // no exit → only if active
+        }
+
+        /// <summary>True if the employee had a real (non-draft) contract in force at any point during
+        /// [start, end] — including a contract terminated within the month (its end date on/after the
+        /// month start). Drives the batch's "a contract covers this month" gate by dates, not by the
+        /// contract's current stored status.</summary>
+        private static bool HadContractInPeriod(IEnumerable<OptiPaie.Core.Dtos.ContractSummary> contracts, DateTime start, DateTime end)
+        {
+            return contracts.Any(c =>
+                c.Status != ContractStatus.Draft &&
+                c.StartDate.Date <= end &&
+                (!c.EndDate.HasValue || c.EndDate.Value.Date >= start));
+        }
     }
 }

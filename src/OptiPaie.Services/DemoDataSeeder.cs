@@ -91,10 +91,12 @@ namespace OptiPaie.Services
         }
 
         /// <summary>
-        /// Ensures the demo dataset is present for the trial/demo experience. If the demo
-        /// company is missing but the database holds OTHER data (e.g. leftover test companies),
-        /// that data is hidden (soft-deleted) and the Algerian demo is seeded fresh. Only ever
-        /// called in trial mode — a licensed install is never touched.
+        /// Ensures the demo dataset is present for the trial/demo experience — but NEVER at the
+        /// expense of real data. It seeds ONLY when the database is genuinely empty (a fresh demo
+        /// install). The moment the database holds any company — including a prospect's own company
+        /// created during the trial — it does nothing at all. (It used to soft-delete every company
+        /// and employee when the demo company was missing, silently wiping evaluation data; that is
+        /// removed.) Only ever called in trial mode; a licensed install is never touched.
         /// </summary>
         public Result<long> EnsureDemo()
         {
@@ -103,23 +105,8 @@ namespace OptiPaie.Services
                 return Result.Ok(0L);
             }
 
-            try
-            {
-                // Hide any leftover companies/employees so the demo starts from a clean slate.
-                foreach (Company c in _companies.GetAll())
-                {
-                    foreach (Employee e in _employees.GetByCompany(c.Id, true))
-                    {
-                        _employees.Delete(e.Id);
-                    }
-                    _companies.Delete(c.Id);
-                }
-            }
-            catch (Exception ex)
-            {
-                return Result.Fail<long>("Réinitialisation de la démo impossible : " + ex.Message, "Demo_ResetFailed");
-            }
-
+            // Seed() is a no-op unless the database is completely empty, so real data entered during
+            // the trial (the prospect deleted/renamed the demo and added their own company) is safe.
             return Seed();
         }
 

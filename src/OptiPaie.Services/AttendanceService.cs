@@ -370,6 +370,14 @@ namespace OptiPaie.Services
             record.LateMinutes = 0;
             record.OvertimeHours = 0m;
             record.WorkedHours = IsWorked(record.Status) ? settings.StandardHours : 0m;
+
+            // A manual matrix entry OVERRIDES any synced leave for this day: drop the "[Congé]" marker
+            // so the day is detached from the leave. Otherwise a later leave cancellation (which finds
+            // its days by that marker) would delete this manually-set day, and the two would drift.
+            if (record.Notes != null && record.Notes.StartsWith("[Congé]", StringComparison.Ordinal))
+            {
+                record.Notes = null;
+            }
         }
 
         /// <summary>Recomputes the derived values and normalises the status.</summary>

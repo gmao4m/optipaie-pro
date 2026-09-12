@@ -55,6 +55,15 @@ namespace OptiPaie.Core.Interfaces.Services
         /// </summary>
         Result<decimal> RecordPayrollDeductions(long employeeId, int year, int month);
 
+        /// <summary>
+        /// Records the period's recovery from the amount ACTUALLY withheld on the payslip
+        /// (<paramref name="actualWithheld"/>) rather than the theoretical instalment — so the loan
+        /// schedule is credited exactly what the payslip deducted, even when the accountant edited
+        /// (or zeroed) the recovery line. The amount is distributed across the employee's active
+        /// loans in order, each capped at its outstanding balance. Idempotent per period.
+        /// </summary>
+        Result<decimal> RecordPayrollDeductions(long employeeId, int year, int month, decimal actualWithheld);
+
         /// <summary>Amount an employee still owes across every active loan.</summary>
         decimal GetOutstanding(long employeeId);
     }

@@ -52,7 +52,7 @@
                                 <Border Padding="0,6" BorderBrush="{DynamicResource Border}" BorderThickness="0,0,0,1">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" /><ColumnDefinition Width="150" /><ColumnDefinition Width="150" />
+                                            <ColumnDefinition Width="*" /><ColumnDefinition Width="150" /><ColumnDefinition Width="215" />
                                             <ColumnDefinition Width="80" /><ColumnDefinition Width="40" />
                                         </Grid.ColumnDefinitions>
                                         <TextBox Grid.Column="0" Style="{StaticResource AppTextBox}" Height="32" Margin="0,0,6,0"
@@ -64,10 +64,15 @@
                                                   ItemsSource="{Binding ScoreTypeOptions}" DisplayMemberPath="Label" SelectedValuePath="Value"
                                                   SelectedValue="{Binding SelectedScoreType}"
                                                   Visibility="{Binding IsRating, Converter={StaticResource BoolToVis}}" />
-                                        <TextBox Grid.Column="2" Style="{StaticResource AppTextBox}" Height="32" Margin="0,0,6,0"
-                                                 ToolTip="{loc:Loc Perf_KpiTarget}"
-                                                 Text="{Binding TargetText, UpdateSourceTrigger=PropertyChanged}"
-                                                 Visibility="{Binding IsKpi, Converter={StaticResource BoolToVis}}" />
+                                        <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="0,0,6,0"
+                                                    Visibility="{Binding IsKpi, Converter={StaticResource BoolToVis}}">
+                                            <TextBox Style="{StaticResource AppTextBox}" Height="32" Width="74"
+                                                     ToolTip="{loc:Loc Perf_KpiTarget}"
+                                                     Text="{Binding TargetText, UpdateSourceTrigger=PropertyChanged}" />
+                                            <CheckBox Content="↓ moins = mieux" IsChecked="{Binding LowerIsBetter}"
+                                                      VerticalAlignment="Center" Margin="8,0,0,0"
+                                                      ToolTip="Cochez pour un indicateur où une valeur PLUS BASSE est meilleure (absentéisme, retards, coûts, défauts)." />
+                                        </StackPanel>
                                         <TextBox Grid.Column="3" Style="{StaticResource AppTextBox}" Height="32" Margin="0,0,6,0"
                                                  Text="{Binding WeightText, UpdateSourceTrigger=PropertyChanged}"
                                                  Visibility="{Binding DataContext.ShowWeights, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVis}}" />

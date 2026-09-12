@@ -77,6 +77,19 @@ namespace OptiPaie.Services
                     return Result.Fail("Employé introuvable.", ErrorCodes.NotFound);
                 }
 
+                // An employee that has any payslip carries CNAS declaration history: deleting them
+                // (soft-delete hides them from GetByCompany) makes the DAS skip their payslips while
+                // the DAC still counts them, corrupting the annual cross-check. Refuse; the user marks
+                // a departure with an exit date instead (which keeps the payslips declarable).
+                if (uow.Payslips.GetByEmployee(id).Any())
+                {
+                    return Result.Fail(
+                        "Impossible de supprimer cet employé : il possède des bulletins de paie (historique CNAS/DAS). " +
+                        "Renseignez plutôt sa date de sortie.\n" +
+                        "لا يمكن حذف هذا الموظف لأنّ له كشوف أجور (سجلّ CNAS/DAS). ضع تاريخ مغادرته بدلاً من حذفه.",
+                        "Employee_HasPayslips");
+                }
+
                 uow.Employees.SoftDelete(id);
                 Audit.Record("Employee", id, AuditAction.Deleted, "Employé supprimé : " + NameOf(existing));
                 return Result.Ok();

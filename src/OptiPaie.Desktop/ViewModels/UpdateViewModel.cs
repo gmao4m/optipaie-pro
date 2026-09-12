@@ -131,8 +131,13 @@ namespace OptiPaie.Desktop.ViewModels
                 ? "https://github.com/gmao4m/optipaie-pro/releases/latest/download/OptiPaie-PRO-Setup.exe"
                 : result.FallbackUrl;
             Raise(nameof(HasFallback));
-            StatusMessage = "تعذّر التحديث التلقائي. اضغط « التنزيل عبر المتصفح » ثمّ ثبِّت الملف.\n" +
-                            "Échec de la mise à jour automatique. Cliquez sur « Télécharger dans le navigateur » puis lancez le fichier.";
+            StatusMessage = "تعذّر التحديث التلقائي — يُفتح التنزيل عبر المتصفح، ثبّت الملف يدويًا.\n" +
+                            "La mise à jour automatique a échoué — le téléchargement s'ouvre dans le navigateur ; lancez le fichier.";
+
+            // Never leave the user with "I clicked and nothing happened": if the automatic path fails
+            // (download blocked, GPO/AV blocking the launcher…), open the browser download straight
+            // away so a click on « Mettre à jour » ALWAYS results in either an update or the download.
+            OpenInBrowser();
         }
 
         private void OpenInBrowser()

@@ -242,7 +242,25 @@ namespace OptiPaie.Desktop.ViewModels
 
         private void Remove()
         {
-            _services.Training.RemoveParticipant(_selectedParticipant.Id);
+            if (_selectedParticipant == null)
+            {
+                return;
+            }
+
+            // Confirm before removing — the row (and its score / certificate reference) is only
+            // hidden, not destroyed, but the user should still choose to remove it deliberately.
+            if (!Dialogs.Confirm("Retirer « " + _selectedParticipant.EmployeeName + " » de cette formation ?"))
+            {
+                return;
+            }
+
+            Result result = _services.Training.RemoveParticipant(_selectedParticipant.Id);
+            if (result.IsFailure)
+            {
+                Dialogs.Error(result.Error);
+                return;
+            }
+
             Load();
         }
     }

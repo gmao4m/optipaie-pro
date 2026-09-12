@@ -232,7 +232,12 @@ namespace OptiPaie.Services
             {
                 if (!employeesById.TryGetValue(kv.Key, out Employee e))
                 {
-                    continue; // a payslip without a matching current employee — skip defensively
+                    // A payslip whose employee is no longer in the company's current list — only
+                    // possible from LEGACY data (an employee soft-deleted before deletion-with-
+                    // payslips was blocked). Resolve the identity best-effort, but NEVER skip: the
+                    // salary is still counted so the DAS population and annual total match the DAC
+                    // exactly and the cross-check never breaks (DAC and DAS count the same people).
+                    e = _employees.Get(kv.Key) ?? new Employee { Id = kv.Key };
                 }
 
                 var salary = new decimal[4];

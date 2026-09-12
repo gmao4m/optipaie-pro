@@ -128,6 +128,26 @@ namespace OptiPaie.Tests
             Assert.That(ArabicText.ContainsArabic("SARL أطلس"), Is.True);
         }
 
+        // ── B4 : a « document libre » must PRINT the body text (it was silently ignored) ──
+        [Test]
+        public void CustomDocument_PrintsTheBodyText_NotAGenericAttestation()
+        {
+            CertificateRenderModel withBody = ArabicModel(CertificateType.Custom);
+            withBody.Certificate.Body = "Objet : attestation de prise en charge.\nCeci est le corps libre saisi par l'utilisateur.";
+
+            CertificateRenderModel empty = ArabicModel(CertificateType.Custom);
+            empty.Certificate.Body = string.Empty;
+
+            string p1 = Path.Combine(_dir, "custom_body.pdf");
+            string p2 = Path.Combine(_dir, "custom_empty.pdf");
+            Assert.DoesNotThrow(() => Document.Create(new WorkCertificateDocument(withBody).Compose).GeneratePdf(p1));
+            Assert.DoesNotThrow(() => Document.Create(new WorkCertificateDocument(empty).Compose).GeneratePdf(p2));
+
+            byte[] a = File.ReadAllBytes(p1), b = File.ReadAllBytes(p2);
+            Assert.That(a, Is.Not.EqualTo(b), "the free body must change the output — it must be printed, not ignored");
+            Assert.That(a.Length, Is.GreaterThan(b.Length), "the document that carries a body is larger");
+        }
+
         // ── helpers ──
 
         private static byte[] LoadEmbeddedArabicFont()

@@ -504,8 +504,19 @@ namespace OptiPaie.Desktop.ViewModels
             if (!_services.LicenseGate.IsEnabled(ModuleKeys.Loans)) return string.Empty;
             if (!Lines.Any(l => l.IsLoan)) return string.Empty;
 
+            // Credit the loan schedule EXACTLY what the payslip deducted for loan recovery — the loan
+            // line as it appears on the fiche (the engine result), not the theoretical instalment. If
+            // the accountant edited or zeroed the line, the loan follows. Falls back to the worksheet
+            // amount if the engine result is momentarily unavailable.
+            decimal withheld = _lastResult != null
+                ? _lastResult.Lines
+                    .Where(l => l.ElementType == ElementType.Deduction &&
+                                string.Equals(l.LabelFr, "Remboursement prêt", StringComparison.Ordinal))
+                    .Sum(l => l.Amount)
+                : Lines.Where(l => l.IsLoan).Sum(l => l.Amount);
+
             Result<decimal> recorded =
-                _services.Loans.RecordPayrollDeductions(SelectedEmployee.Id, SelectedYear, SelectedMonth);
+                _services.Loans.RecordPayrollDeductions(SelectedEmployee.Id, SelectedYear, SelectedMonth, withheld);
 
             if (recorded.IsFailure || recorded.Value <= 0m) return string.Empty;
 

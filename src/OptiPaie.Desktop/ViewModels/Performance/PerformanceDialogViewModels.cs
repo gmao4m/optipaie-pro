@@ -407,6 +407,19 @@ namespace OptiPaie.Desktop.ViewModels.Performance
             set { _c.KpiTarget = OptiPaie.Common.Text.FlexibleNumber.TryParse(value, out decimal v) ? v : (decimal?)null; }
         }
 
+        /// <summary>
+        /// KPI direction, editable in the template editor. Checked = a LOWER value is better
+        /// (absenteeism, lateness, cost, defects); unchecked (default) = a higher value is better.
+        /// Maps to <see cref="EvalCriterion.HigherIsBetter"/>, which was previously stuck on true so
+        /// a "lower is better" KPI scored a bad result as 100/100 "Excellent". ScoreKpi already
+        /// honours both directions — only this control was missing.
+        /// </summary>
+        public bool LowerIsBetter
+        {
+            get => !_c.HigherIsBetter;
+            set { _c.HigherIsBetter = !value; Raise(nameof(LowerIsBetter)); }
+        }
+
         public EvalCriterion ToEntity() => _c;
     }
 

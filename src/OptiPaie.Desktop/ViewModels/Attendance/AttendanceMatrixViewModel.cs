@@ -217,7 +217,7 @@ namespace OptiPaie.Desktop.ViewModels.Attendance
 
                 IReadOnlyList<Employee> employees = _services.Employees.GetByCompany(_selectedCompany.Id, false);
                 var records = _services.Attendance.GetCompanyMonth(_selectedCompany.Id, _selectedYear, _selectedMonth);
-                var byKey = records.ToDictionary(r => (r.EmployeeId, r.WorkDate.Day), r => r.Status);
+                var byKey = records.ToDictionary(r => (r.EmployeeId, r.WorkDate.Day));
                 DateTime today = DateTime.Today;
 
                 foreach (Employee employee in employees)
@@ -230,8 +230,16 @@ namespace OptiPaie.Desktop.ViewModels.Attendance
                         var date = new DateTime(_selectedYear, _selectedMonth, day);
                         bool weekend = date.DayOfWeek == DayOfWeek.Friday || date.DayOfWeek == DayOfWeek.Saturday;
                         bool future = date > today;
-                        AttendanceStatus? status = byKey.TryGetValue((employee.Id, day), out AttendanceStatus s) ? s : (AttendanceStatus?)null;
-                        cells.Add(new MatrixCellViewModel(employee.Id, date, weekend, future, status));
+                        AttendanceStatus? status = null;
+                        bool leaveLinked = false;
+                        if (byKey.TryGetValue((employee.Id, day), out OptiPaie.Core.Entities.AttendanceRecord rec))
+                        {
+                            status = rec.Status;
+                            // "[Congé]" marks a day synced from an approved leave (paid → Leave,
+                            // unpaid/strict-CNAS → Absent). Such cells are protected from bulk paint.
+                            leaveLinked = rec.Notes != null && rec.Notes.StartsWith("[Congé]", StringComparison.Ordinal);
+                        }
+                        cells.Add(new MatrixCellViewModel(employee.Id, date, weekend, future, status, leaveLinked));
                     }
 
                     _allRows.Add(new MatrixRowViewModel(employee, cells));
@@ -320,16 +328,20 @@ namespace OptiPaie.Desktop.ViewModels.Attendance
             if (SelectedBrush == null || !TryDay(parameter, out int day)) return;
 
             var entries = new List<AttendanceDayStatus>();
+            int protectedLeave = 0;
             foreach (MatrixRowViewModel row in Rows)
             {
                 MatrixCellViewModel cell = row.Cells[day - 1];
+                if (cell.IsLeaveLinked) { protectedLeave++; continue; } // never overwrite a synced leave in bulk
                 if (cell.Paint(SelectedBrush.Status))
                 {
                     entries.Add(new AttendanceDayStatus(cell.EmployeeId, cell.Date, SelectedBrush.Status));
                 }
             }
 
-            Persist(entries, "Jour " + day + " : " + AttendanceAppearance.Label(SelectedBrush.Status) + " (" + entries.Count + ")");
+            string note = "Jour " + day + " : " + AttendanceAppearance.Label(SelectedBrush.Status) + " (" + entries.Count + ")";
+            if (protectedLeave > 0) note += " — " + protectedLeave + " congé(s) protégé(s)";
+            Persist(entries, note);
         }
 
         private void ApplyMonthToSelection()
@@ -343,11 +355,13 @@ namespace OptiPaie.Desktop.ViewModels.Attendance
             }
 
             var entries = new List<AttendanceDayStatus>();
+            int protectedLeave = 0;
             foreach (MatrixRowViewModel row in selected)
             {
                 foreach (MatrixCellViewModel cell in row.Cells)
                 {
                     if (cell.IsFuture || cell.IsWeekend) continue; // fill working days only
+                    if (cell.IsLeaveLinked) { protectedLeave++; continue; } // never overwrite a synced leave in bulk
                     if (cell.Paint(SelectedBrush.Status))
                     {
                         entries.Add(new AttendanceDayStatus(cell.EmployeeId, cell.Date, SelectedBrush.Status));
@@ -355,8 +369,11 @@ namespace OptiPaie.Desktop.ViewModels.Attendance
                 }
             }
 
-            Persist(entries, selected.Count + " employé(s) · " + AttendanceAppearance.Label(SelectedBrush.Status) +
-                             " appliqué au mois (" + entries.Count + " jours)");
+            string note = selected.Count + " employé(s) · " + AttendanceAppearance.Label(SelectedBrush.Status) +
+                          " appliqué au mois (" + entries.Count + " jours)";
+            if (protectedLeave > 0)
+                note += " — " + protectedLeave + " jour(s) de congé protégé(s) (annulez le congé dans le module Congés)";
+            Persist(entries, note);
         }
 
         private void Persist(List<AttendanceDayStatus> entries, string message)

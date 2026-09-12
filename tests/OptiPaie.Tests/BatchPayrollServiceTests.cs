@@ -142,6 +142,30 @@ namespace OptiPaie.Tests
             Assert.That(a.NetSalaire, Is.EqualTo(b.NetSalaire), who + " net");
         }
 
+        // ── C1 : an employee who leaves mid/end of month is still paid for that month, then excluded ──
+        [Test]
+        public void DepartingEmployee_IsStillPaidForTheirExitMonth_ThenExcludedAfter()
+        {
+            long id = AddEmployee("PARTANT", 50000m);
+            long contractId = _contracts.GetByEmployee(id).First().ContractId;
+
+            // Résiliation effective at the end of the run month — the classic "leaves on the 28th".
+            Result term = _contracts.Terminate(contractId, new DateTime(Year, Month, 28), "Fin de contrat");
+            Assert.That(term.IsSuccess, Is.True, term.Error);
+
+            // The exit month STILL includes them, and is not blocked for "no contract".
+            BatchPayrollPlan exitMonth = _batch.Plan(_companyId, Year, Month);
+            BatchEmployeeCheck row = exitMonth.Employees.FirstOrDefault(e => e.EmployeeId == id);
+            Assert.That(row, Is.Not.Null, "the departing employee must appear in the exit-month payroll");
+            Assert.That(row.Severity, Is.Not.EqualTo(BatchCheckSeverity.Blocking), "and must not be blocked");
+
+            // The following month excludes them (they were gone).
+            int ny = Month == 12 ? Year + 1 : Year;
+            int nm = Month == 12 ? 1 : Month + 1;
+            BatchPayrollPlan nextMonth = _batch.Plan(_companyId, ny, nm);
+            Assert.That(nextMonth.Employees.Any(e => e.EmployeeId == id), Is.False, "after the exit month they are excluded");
+        }
+
         [Test]
         public void Batch_ProducesIdenticalFigures_ToTheSingleEmployeePath()
         {

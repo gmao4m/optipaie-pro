@@ -189,7 +189,17 @@ namespace OptiPaie.Services
         {
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
-                uow.Training.DeleteParticipant(participantId);
+                // REVERSIBLE removal: soft-delete (IsDeleted=1) instead of a physical DELETE, so a
+                // participant's score / certificate reference is never destroyed by a mis-click. The
+                // row is simply hidden from every participant query (all filter IsDeleted = 0).
+                TrainingParticipant participant = uow.Training.GetParticipantById(participantId);
+                if (participant == null)
+                {
+                    return Result.Fail("Participant introuvable.", "Training_ParticipantNotFound");
+                }
+
+                participant.IsDeleted = true;
+                uow.Training.UpdateParticipant(participant);
                 return Result.Ok();
             }
         }

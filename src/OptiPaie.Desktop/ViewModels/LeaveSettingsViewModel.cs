@@ -20,19 +20,35 @@ namespace OptiPaie.Desktop.ViewModels
     public sealed class LeaveSettingsViewModel : ObservableObject
     {
         private readonly ILeaveService _service;
+        private readonly LeaveSettings _settings;
 
         private string _daysPerMonth;
         private string _annualCap;
         private bool _excludeRestDays;
+        private bool _excludeHolidays;
+        private bool _calendarDayCount;
+        private bool _referenceJulyToJune;
+        private bool _accrualExcludesUnpaid;
+        private bool _strictCnasTreatment;
+        private string _maternityDays;
 
         public LeaveSettingsViewModel(ILeaveService service)
         {
             _service = service;
 
-            LeaveSettings current = service.GetSettings();
+            // Keep the loaded settings and mutate THEM on save, so the six regulatory options are
+            // never silently reset to their defaults by a save that only knew about a few fields.
+            _settings = service.GetSettings();
+            LeaveSettings current = _settings;
             _daysPerMonth = current.DaysPerMonth.ToString("0.##", CultureInfo.InvariantCulture);
             _annualCap = current.AnnualCap.ToString("0.##", CultureInfo.InvariantCulture);
             _excludeRestDays = current.ExcludeRestDays;
+            _excludeHolidays = current.ExcludeHolidays;
+            _calendarDayCount = current.CalendarDayCount;
+            _referenceJulyToJune = current.ReferenceJulyToJune;
+            _accrualExcludesUnpaid = current.AccrualExcludesUnpaid;
+            _strictCnasTreatment = current.StrictCnasTreatment;
+            _maternityDays = current.MaternityDays.ToString("0.##", CultureInfo.InvariantCulture);
 
             var fr = CultureInfo.GetCultureInfo("fr-FR");
             // Working week starts Sunday in Algeria; list the days in that order.
@@ -58,6 +74,19 @@ namespace OptiPaie.Desktop.ViewModels
         public string AnnualCap { get => _annualCap; set => Set(ref _annualCap, value); }
         public bool ExcludeRestDays { get => _excludeRestDays; set => Set(ref _excludeRestDays, value); }
 
+        /// <summary>Un jour férié légal tombant dans une période de congé n'est pas décompté.</summary>
+        public bool ExcludeHolidays { get => _excludeHolidays; set => Set(ref _excludeHolidays, value); }
+        /// <summary>Décompter les congés en jours calendaires (au lieu des jours ouvrés).</summary>
+        public bool CalendarDayCount { get => _calendarDayCount; set => Set(ref _calendarDayCount, value); }
+        /// <summary>Année de référence des congés de juillet à juin (au lieu de l'année civile).</summary>
+        public bool ReferenceJulyToJune { get => _referenceJulyToJune; set => Set(ref _referenceJulyToJune, value); }
+        /// <summary>Ne pas acquérir de droit à congé pendant les congés sans solde.</summary>
+        public bool AccrualExcludesUnpaid { get => _accrualExcludesUnpaid; set => Set(ref _accrualExcludesUnpaid, value); }
+        /// <summary>Traitement CNAS strict des congés à charge de la sécurité sociale.</summary>
+        public bool StrictCnasTreatment { get => _strictCnasTreatment; set => Set(ref _strictCnasTreatment, value); }
+        /// <summary>Durée du congé de maternité, en jours (paramètre informatif).</summary>
+        public string MaternityDays { get => _maternityDays; set => Set(ref _maternityDays, value); }
+
         /// <summary>The company's weekly rest days (a checkbox per day; default Friday + Saturday).</summary>
         public ObservableCollection<WeekendDayToggle> WeekendDays { get; } = new ObservableCollection<WeekendDayToggle>();
 
@@ -78,15 +107,28 @@ namespace OptiPaie.Desktop.ViewModels
                 return;
             }
 
+            if (!OptiPaie.Common.Text.FlexibleNumber.TryParse(_maternityDays, out decimal maternity) || maternity < 0m)
+            {
+                Dialogs.Error("Durée du congé de maternité invalide.");
+                return;
+            }
+
             var weekend = new HashSet<DayOfWeek>(WeekendDays.Where(d => d.IsOff).Select(d => d.Day));
 
-            Result result = _service.SaveSettings(new LeaveSettings
-            {
-                DaysPerMonth = perMonth,
-                AnnualCap = cap,
-                ExcludeRestDays = _excludeRestDays,
-                WeekendDays = weekend
-            });
+            // Mutate the loaded settings — every field is written, including the six regulatory
+            // options, so a save never resets an option the screen didn't previously expose.
+            _settings.DaysPerMonth = perMonth;
+            _settings.AnnualCap = cap;
+            _settings.ExcludeRestDays = _excludeRestDays;
+            _settings.WeekendDays = weekend;
+            _settings.ExcludeHolidays = _excludeHolidays;
+            _settings.CalendarDayCount = _calendarDayCount;
+            _settings.ReferenceJulyToJune = _referenceJulyToJune;
+            _settings.AccrualExcludesUnpaid = _accrualExcludesUnpaid;
+            _settings.StrictCnasTreatment = _strictCnasTreatment;
+            _settings.MaternityDays = maternity;
+
+            Result result = _service.SaveSettings(_settings);
 
             if (result.IsFailure)
             {
