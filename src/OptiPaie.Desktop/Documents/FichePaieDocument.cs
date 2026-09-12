@@ -177,8 +177,12 @@ namespace OptiPaie.Desktop.Documents
                 foreach (FicheLineModel l in GainLines)
                     RowAt(table, r++, l.Label, l.BaseText, l.TauxText, l.Gain, null);
 
-                // 2) SALAIRE BRUT + salaire soumis à cotisation
-                BandAt(table, r++, "SALAIRE BRUT", TotalGains, true);
+                // 2) SALAIRE BRUT + salaire soumis à cotisation.
+                // SALAIRE BRUT is the ENGINE's gross, taken straight from the result — NOT recomposed
+                // from the displayed lines. (The lines are the engine's own, so their sum equals it;
+                // reading the engine value directly keeps the headline gross exact even if a display
+                // line were ever off, and the TOTAL GAINS row below stays the verifiable line sum.)
+                BandAt(table, r++, "SALAIRE BRUT", _m.SalaireBrut, true);
                 BandAt(table, r++, "Salaire soumis à cotisation", _m.BaseCotisable, false);
 
                 // 3) CNAS (base + taux shown) [+ CACOBATPH employee share when enabled]

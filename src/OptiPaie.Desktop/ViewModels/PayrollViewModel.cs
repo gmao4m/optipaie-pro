@@ -333,12 +333,42 @@ namespace OptiPaie.Desktop.ViewModels
                     return;
                 }
 
+                // Reflect the engine's exact per-line amounts back into the worksheet display, so
+                // the grid, the totals and the fiche all show the SAME (prorated) figures. Display
+                // only — the engine inputs (raw Base×Taux) are untouched.
+                ApplyEngineAmountsToLines(_lastResult);
                 UpdateTotals(_lastResult.Totals);
                 Status = "Calcul à jour";
             }
             finally
             {
                 _recomputing = false;
+            }
+        }
+
+        /// <summary>
+        /// Copies each engine-computed line amount back onto its worksheet line, so an absence-prorated
+        /// base (and any percentage element computed on that prorated base) is shown exactly as the
+        /// engine calculated it — never the raw, un-prorated Base×Taux. Manual and fixed-amount lines
+        /// are not prorated, so their display already equals the engine amount and is left untouched.
+        /// </summary>
+        private void ApplyEngineAmountsToLines(PayrollResult result)
+        {
+            foreach (PayrollLineVM line in Lines)
+            {
+                decimal? engine = null;
+                if (line.IsBaseSalary)
+                {
+                    engine = result.Lines
+                        .FirstOrDefault(l => l.ElementId == null && l.DisplayOrder == 0 && l.ElementType == ElementType.Gain)
+                        ?.Amount;
+                }
+                else if (!line.IsManual && line.ElementId > 0)
+                {
+                    engine = result.Lines.FirstOrDefault(l => l.ElementId == line.ElementId)?.Amount;
+                }
+
+                line.SetEngineAmount(engine);
             }
         }
 
@@ -407,15 +437,13 @@ namespace OptiPaie.Desktop.ViewModels
         {
             _totals = totals;
 
-            decimal gains = 0m, deductions = 0m;
-            foreach (PayrollLineVM line in Lines)
-            {
-                if (line.Gain.HasValue) gains += line.Gain.Value;
-                if (line.Retenue.HasValue) deductions += line.Retenue.Value;
-            }
-
-            _totalGains = gains;
-            _totalRetenues = deductions + totals.CnasEmployee + totals.Irg;
+            // TOTAL GAINS / TOTAL RETENUES come straight from the engine — never re-summed from the
+            // editable worksheet (which carries the full, un-prorated base). By construction the
+            // engine's gross IS the sum of its gain lines, and total deductions = gross − net, so the
+            // on-screen NET is exactly TOTAL GAINS − TOTAL RETENUES and equals the fiche, the archived
+            // bulletin and the CNAS base, to the centime.
+            _totalGains = totals.SalaireBrut;
+            _totalRetenues = totals.SalaireBrut - totals.NetSalaire;
 
             _lissage = 0m;
             if (_lastResult != null)
@@ -510,39 +538,15 @@ namespace OptiPaie.Desktop.ViewModels
                 return;
             }
 
-            // Build the model straight from the worksheet so N/Base and Taux on the
-            // fiche always match what the accountant sees (never blank); the statutory
-            // totals come from the engine result.
-            PayrollTotals t = _lastResult.Totals;
-            var model = new FichePaieModel
-            {
-                Company = SelectedCompany,
-                Employee = SelectedEmployee,
-                Year = SelectedYear,
-                Month = SelectedMonth,
-                IsArabic = _services.Localization.IsRightToLeft,
-                SalaireBrut = t.SalaireBrut,
-                BaseCotisable = t.BaseCotisable,
-                CnasEmployee = t.CnasEmployee,
-                BaseImposable = t.BaseImposable,
-                IrgBrut = t.IrgBrut,
-                Abattement = t.Abattement,
-                Irg = t.Irg,
-                NetSalaire = t.NetSalaire,
-                WorkedDays = _lastRequest.WorkedDays
-            };
-
-            foreach (PayrollLineVM line in Lines)
-            {
-                model.Lines.Add(new FicheLineModel
-                {
-                    Label = line.Rubrique,
-                    BaseText = line.BaseValue.ToString("N2", Fr),
-                    TauxText = string.IsNullOrWhiteSpace(line.Taux) ? string.Empty : line.Taux.Trim(),
-                    Gain = line.IsGain ? line.Amount : (decimal?)null,
-                    Retenue = line.IsGain ? (decimal?)null : line.Amount
-                });
-            }
+            // Build the fiche from the ENGINE RESULT — the exact prorated per-line amounts the engine
+            // computed — never from the editable worksheet lines (which carry the FULL, un-prorated
+            // base). The fiche therefore no longer recomposes SALAIRE BRUT from the displayed lines:
+            // its brut and net are the engine's, so the printed net equals the on-screen net, the
+            // archived bulletin and the CNAS base, to the centime. This is the SAME builder the
+            // archive uses (FromPayslip), so live preview and archive are identical.
+            FichePaieModel model = _fiche.FromResult(
+                SelectedCompany, SelectedEmployee, SelectedYear, SelectedMonth,
+                _lastResult, _services.Localization.IsRightToLeft, _lastRequest.WorkedDays);
 
             try
             {
