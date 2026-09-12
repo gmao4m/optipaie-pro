@@ -203,6 +203,31 @@ namespace OptiPaie.Services
             }
         }
 
+        /// <summary>
+        /// Erases a day for one employee — the "gomme" of the matrix. Soft-deletes the record so a
+        /// mispaint can be corrected (non-destructive). Idempotent when there is nothing to erase. A day
+        /// synced from an approved leave is refused: it must be undone from the Leave module so the two
+        /// never drift apart.
+        /// </summary>
+        public Result ClearDay(long employeeId, DateTime workDate)
+        {
+            using (IUnitOfWork uow = _unitOfWorkFactory.Create())
+            {
+                AttendanceRecord rec = uow.Attendance.GetByEmployeeAndDate(employeeId, workDate.Date);
+                if (rec == null) return Result.Ok(); // nothing recorded that day — nothing to erase
+
+                if (rec.Notes != null && rec.Notes.StartsWith("[Congé]", StringComparison.Ordinal))
+                {
+                    return Result.Fail(
+                        "Ce jour provient d'un congé approuvé — annulez-le dans le module Congés. / هذا اليوم مرتبط بعطلة معتمدة — ألغِها من وحدة العطل.",
+                        "Attendance_LeaveLinkedClear");
+                }
+
+                uow.Attendance.SoftDelete(rec.Id);
+                return Result.Ok();
+            }
+        }
+
         public AttendanceRecord Get(long employeeId, DateTime workDate)
         {
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())

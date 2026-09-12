@@ -130,6 +130,9 @@ namespace OptiPaie.Services
                         Notes = notes
                     });
 
+                    // A shared asset stays "Assigned" while any holder remains (see ReturnFrom, which
+                    // frees it only when the last holder returns). The UI must still allow ADDING another
+                    // holder to a shared+assigned asset — that gate lives in the view model, not here.
                     asset.Status = AssetStatus.Assigned;
                     uow.Assets.Update(asset);
 
@@ -338,7 +341,8 @@ namespace OptiPaie.Services
                 Category = asset.Category,
                 Status = asset.Status,
                 SerialNumber = asset.SerialNumber,
-                PurchaseValue = asset.PurchaseValue
+                PurchaseValue = asset.PurchaseValue,
+                IsShared = asset.IsShared
             };
 
             AssetAssignment open = uow.Assets.GetOpenAssignment(asset.Id);

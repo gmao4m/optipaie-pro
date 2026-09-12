@@ -1041,6 +1041,7 @@
   <data name="Att_St_Leave" xml:space="preserve"><value>Congé payé</value></data>
   <data name="Att_St_Holiday" xml:space="preserve"><value>Jour férié</value></data>
   <data name="Att_St_Rest" xml:space="preserve"><value>Repos / week-end</value></data>
+  <data name="Att_Erase" xml:space="preserve"><value>Effacer</value></data>
   <data name="Att_Col_Department" xml:space="preserve"><value>Département</value></data>
   <data name="Att_ApplyMonth" xml:space="preserve"><value>Remplir le mois (employés cochés)</value></data>
   <data name="Att_SelectAll" xml:space="preserve"><value>Tout cocher</value></data>

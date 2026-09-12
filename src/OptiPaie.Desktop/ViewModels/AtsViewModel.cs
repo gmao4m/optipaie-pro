@@ -165,9 +165,11 @@ namespace OptiPaie.Desktop.ViewModels
 
             OpenCandidateCommand = new RelayCommand(p => OpenCandidate(p as CandidateRowViewModel));
             NextStepCommand = new RelayCommand(p => NextStep(p as CandidateRowViewModel));
-            BackStepCommand = new RelayCommand(p => BackStep(p as CandidateRowViewModel));
-            RejectCommand = new RelayCommand(p => Close(p as CandidateRowViewModel, withdrawal: false));
-            DesistCommand = new RelayCommand(p => Close(p as CandidateRowViewModel, withdrawal: true));
+            // Stage-dependent actions: expose CanExecute so the context-menu items are greyed out
+            // when they do not apply, instead of firing and silently doing nothing (audit: "actions muettes").
+            BackStepCommand = new RelayCommand(p => BackStep(p as CandidateRowViewModel), p => Candidate(p)?.CanBack == true);
+            RejectCommand = new RelayCommand(p => Close(p as CandidateRowViewModel, withdrawal: false), p => Candidate(p)?.IsClosed == false);
+            DesistCommand = new RelayCommand(p => Close(p as CandidateRowViewModel, withdrawal: true), p => Candidate(p)?.IsClosed == false);
             DeleteCandidateCommand = new RelayCommand(p => DeleteCandidate(p as CandidateRowViewModel));
         }
 
@@ -384,6 +386,9 @@ namespace OptiPaie.Desktop.ViewModels
             _services.Logger.Warn("Recrutement: " + errorCode + " — " + error);   // no silent failure
             Dialogs.Error(message);
         }
+
+        /// <summary>Resolves the candidate a command targets — the passed row, else the selected one.</summary>
+        private CandidateRowViewModel Candidate(object parameter) => (parameter as CandidateRowViewModel) ?? _selectedCandidate;
 
         private static string L(string key) => TranslationSource.Instance[key];
     }

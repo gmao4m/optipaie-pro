@@ -37,6 +37,10 @@ namespace OptiPaie.Desktop.ViewModels
         public bool IsAvailable => Summary.Status == AssetStatus.Available;
         public bool IsAssigned => Summary.Status == AssetStatus.Assigned;
 
+        /// <summary>Can a (further) holder be assigned? Any available asset, plus a SHARED asset that is
+        /// already assigned — a pool asset takes several concurrent holders. Never when under repair/retired.</summary>
+        public bool CanAssign => IsAvailable || (Summary.IsShared && IsAssigned);
+
         /// <summary>Semantic colour bucket for the status pill (shared with the other lists).</summary>
         public string StatusKind
         {
@@ -107,7 +111,7 @@ namespace OptiPaie.Desktop.ViewModels
 
             NewCommand = new RelayCommand(New);
             EditCommand = new RelayCommand(Edit, () => _selectedAsset != null);
-            AssignCommand = new RelayCommand(Assign, () => _selectedAsset != null && _selectedAsset.IsAvailable);
+            AssignCommand = new RelayCommand(Assign, () => _selectedAsset != null && _selectedAsset.CanAssign);
             ReturnCommand = new RelayCommand(Return, () => _selectedAsset != null && _selectedAsset.IsAssigned);
             HistoryCommand = new RelayCommand(OpenHistory, () => _selectedAsset != null);
             RepairCommand = new RelayCommand(() => SetStatus(AssetStatus.UnderRepair), () => _selectedAsset != null && _selectedAsset.IsAvailable);

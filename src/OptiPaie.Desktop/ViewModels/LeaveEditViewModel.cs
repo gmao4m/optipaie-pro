@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Linq;
 using System.Windows.Input;
 using OptiPaie.Core.Dtos;
 using OptiPaie.Core.Entities;
@@ -43,14 +44,23 @@ namespace OptiPaie.Desktop.ViewModels
             _request = existing ?? new LeaveRequest();
 
             foreach (Employee employee in employees) Employees.Add(employee);
-            foreach (LeaveType type in Enum.GetValues(typeof(LeaveType))) Types.Add(new LeaveTypeOption(type));
+
+            // Offer the configurable catalogue (annuel, maladie CNAS, maternité, événements familiaux,
+            // Hadj une fois par carrière…) so the demande actually carries a LeaveTypeId — the enum-only
+            // list is kept solely as a fallback for a database with no configured types.
+            bool rtl = _services.Localization.IsRightToLeft;
+            long companyId = _services.CompanyContext.Active?.Id ?? 0;
+            foreach (LeaveTypeDefinition def in _services.Leave.GetTypes(companyId).OrderBy(d => d.SortOrder).ThenBy(d => d.Id))
+                Types.Add(new LeaveTypeOption(def, rtl));
+            if (Types.Count == 0)
+                foreach (LeaveType type in Enum.GetValues(typeof(LeaveType))) Types.Add(new LeaveTypeOption(type));
 
             if (existing != null)
             {
                 _startDate = existing.StartDate;
                 _endDate = existing.EndDate;
                 _reason = existing.Reason;
-                _selectedType = Types.FirstOrDefaultByValue(existing.Type);
+                _selectedType = SelectExisting(existing);
                 _selectedEmployee = Employees.FirstOrDefaultById(existing.EmployeeId);
                 Title = "Modifier la demande";
             }
@@ -58,7 +68,7 @@ namespace OptiPaie.Desktop.ViewModels
             {
                 _startDate = DateTime.Today;
                 _endDate = DateTime.Today;
-                _selectedType = Types.FirstOrDefaultByValue(LeaveType.Annual);
+                _selectedType = Types.FirstOrDefaultByValue(LeaveType.Annual) ?? Types.FirstOrDefault();
                 _selectedEmployee = Employees.Count > 0 ? Employees[0] : null;
                 Title = "Nouvelle demande de congé";
             }
@@ -132,6 +142,17 @@ namespace OptiPaie.Desktop.ViewModels
         public ICommand SaveDraftCommand { get; }
         public ICommand CancelCommand { get; }
 
+        /// <summary>Reselects the type of an existing request — by its configurable id when set, else the legacy enum.</summary>
+        private LeaveTypeOption SelectExisting(LeaveRequest existing)
+        {
+            if (existing.LeaveTypeId.HasValue)
+            {
+                LeaveTypeOption byId = Types.FirstOrDefault(o => o.DefinitionId == existing.LeaveTypeId.Value);
+                if (byId != null) return byId;
+            }
+            return Types.FirstOrDefaultByValue(existing.Type) ?? Types.FirstOrDefault();
+        }
+
         private void RecomputePreview()
         {
             if (_selectedEmployee == null || _selectedType == null)
@@ -146,7 +167,7 @@ namespace OptiPaie.Desktop.ViewModels
             {
                 EmployeeId = _selectedEmployee.Id,
                 Type = _selectedType.Value,
-                LeaveTypeId = _request.LeaveTypeId,
+                LeaveTypeId = _selectedType.DefinitionId,   // preview the SELECTED type, not the stale one
                 StartDate = _startDate,
                 EndDate = _endDate
             };
@@ -183,6 +204,7 @@ namespace OptiPaie.Desktop.ViewModels
 
             _request.EmployeeId = _selectedEmployee.Id;
             _request.Type = _selectedType.Value;
+            _request.LeaveTypeId = _selectedType.DefinitionId;   // record the configurable type chosen
             _request.StartDate = _startDate;
             _request.EndDate = _endDate;
             _request.Reason = _reason;

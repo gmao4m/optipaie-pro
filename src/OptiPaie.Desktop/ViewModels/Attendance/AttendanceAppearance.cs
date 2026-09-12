@@ -29,6 +29,7 @@ namespace OptiPaie.Desktop.ViewModels.Attendance
         public static readonly Brush WeekendFill   = Frozen(0xCF, 0xD8, 0xDC); // gray
         public static readonly Brush EmptyFill     = Frozen(0xFF, 0xFF, 0xFF); // white
         public static readonly Brush FutureFill    = Frozen(0xF4, 0xF6, 0xF8); // very light
+        public static readonly Brush EraserFill    = Frozen(0xEC, 0xEF, 0xF1); // neutral — the eraser brush
 
         // Dark ink for a letter sitting on a light status pastel (correct in both themes).
         public static readonly Brush StatusInk = Frozen(0x18, 0x2B, 0x26);

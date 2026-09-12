@@ -14,6 +14,10 @@ namespace OptiPaie.Core.Dtos
         public string SerialNumber { get; set; }
         public decimal PurchaseValue { get; set; }
 
+        /// <summary>True for a shared asset (several concurrent holders) — it can take a further holder
+        /// even while already assigned, so the UI's « Attribuer » must stay enabled for it.</summary>
+        public bool IsShared { get; set; }
+
         /// <summary>Employee currently holding the asset, or null.</summary>
         public long? HolderId { get; set; }
 

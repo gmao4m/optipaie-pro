@@ -462,6 +462,9 @@ namespace OptiPaie.Services
                 Evaluation existing = uow.Performance.GetEvaluation(evaluation.Id);
                 if (existing == null) return Result.Fail("Évaluation introuvable.", "Performance_EvaluationNotFound");
 
+                Result closed = CheckPeriodOpen(uow, existing.PeriodId);
+                if (closed.IsFailure) return closed;
+
                 foreach (EvaluationScore line in lines)
                     line.NormalizedScore = ComputeLineScore(line);
                 evaluation.TotalScore = ComputeTotal(lines, evaluation.WeightingMode);
@@ -491,7 +494,17 @@ namespace OptiPaie.Services
             {
                 Evaluation ev = uow.Performance.GetEvaluation(evaluationId);
                 if (ev == null) return Result.Fail("Évaluation introuvable.", "Performance_EvaluationNotFound");
+
+                Result closed = CheckPeriodOpen(uow, ev.PeriodId);
+                if (closed.IsFailure) return closed;
+
                 var lines = uow.Performance.GetScores(evaluationId).ToList();
+                // "Scored" means a rating line has a RawValue OR a KPI line has an actual value — KPI
+                // criteria never use RawValue (see ComputeLineScore), so a fully-scored KPI evaluation
+                // must not be rejected as empty.
+                if (!lines.Any(l => l.RawValue.HasValue || l.KpiActual.HasValue))
+                    return Result.Fail("Notez au moins un critère avant de terminer l'évaluation. قيّم معيارًا واحدًا على الأقل قبل الإنهاء.", "Performance_EvaluationEmpty");
+
                 ev.TotalScore = ComputeTotal(lines, ev.WeightingMode);
                 ev.Status = EvaluationStatus.Done;
                 ev.EvaluatedDate = DateTime.Today;
@@ -506,6 +519,8 @@ namespace OptiPaie.Services
             {
                 Evaluation ev = uow.Performance.GetEvaluation(evaluationId);
                 if (ev == null) return Result.Fail("Évaluation introuvable.", "Performance_EvaluationNotFound");
+                Result closed = CheckPeriodOpen(uow, ev.PeriodId);
+                if (closed.IsFailure) return closed;
                 ev.Status = EvaluationStatus.Pending;
                 uow.Performance.UpdateEvaluation(ev);
                 return Result.Ok();
@@ -518,9 +533,21 @@ namespace OptiPaie.Services
             {
                 Evaluation ev = uow.Performance.GetEvaluation(evaluationId);
                 if (ev == null) return Result.Fail("Évaluation introuvable.", "Performance_EvaluationNotFound");
+                Result closed = CheckPeriodOpen(uow, ev.PeriodId);
+                if (closed.IsFailure) return closed;
                 uow.Performance.SoftDeleteEvaluation(evaluationId);
                 return Result.Ok();
             }
+        }
+
+        /// <summary>Guards every evaluation mutation: a CLOSED period is read-only, so its results
+        /// (notes, ranking) are truly frozen once clôturée — not just blocked for new evaluations.</summary>
+        private static Result CheckPeriodOpen(IUnitOfWork uow, long periodId)
+        {
+            EvalPeriod p = uow.Performance.GetPeriod(periodId);
+            if (p != null && p.Status == PeriodStatus.Closed)
+                return Result.Fail("La période d'évaluation est clôturée : ses résultats sont figés. فترة التقييم مقفلة، نتائجها ثابتة.", "Performance_PeriodClosed");
+            return Result.Ok();
         }
 
         // ----- scoring helpers (pure) ----------------------------------------

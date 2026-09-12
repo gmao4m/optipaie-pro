@@ -138,10 +138,12 @@ namespace OptiPaie.Desktop.ViewModels
                 return;
             }
 
-            IReadOnlyList<Employee> employees = _services.Employees.GetByCompany(_selectedCompany.Id, false);
+            // Include inactive employees: a « certificat de travail » (fin de relation) is issued
+            // precisely FOR someone who has left, so the departed employee must remain selectable.
+            IReadOnlyList<Employee> employees = _services.Employees.GetByCompany(_selectedCompany.Id, true);
             if (employees.Count == 0)
             {
-                Dialogs.Info("Aucun employé actif dans cette entreprise.");
+                Dialogs.Info("Aucun employé dans cette entreprise.");
                 return;
             }
 
@@ -150,7 +152,8 @@ namespace OptiPaie.Desktop.ViewModels
 
         private void Edit()
         {
-            IReadOnlyList<Employee> employees = _services.Employees.GetByCompany(_selectedCompany.Id, false);
+            // Include inactive: the certificate's own employee may already have left the company.
+            IReadOnlyList<Employee> employees = _services.Employees.GetByCompany(_selectedCompany.Id, true);
             ShowEditor(new CertificateEditViewModel(_services, employees, _services.Certificates.Get(_selectedCertificate.Id)));
         }
 

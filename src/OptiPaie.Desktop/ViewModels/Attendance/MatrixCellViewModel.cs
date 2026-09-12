@@ -71,6 +71,19 @@ namespace OptiPaie.Desktop.ViewModels.Attendance
             return true;
         }
 
+        /// <summary>Erases the status in-memory (the board removes the record). Returns true if it changed.
+        /// A leave-linked day is protected upstream, so this is only ever reached for a normal cell.</summary>
+        public bool Clear()
+        {
+            if (IsFuture || !_status.HasValue)
+            {
+                return false;
+            }
+
+            Status = null;
+            return true;
+        }
+
         public Brush Background => AttendanceAppearance.Background(_status, IsWeekend, IsFuture);
         public string Letter => AttendanceAppearance.Letter(_status, IsWeekend);
         public Brush Ink => AttendanceAppearance.Ink(_status);

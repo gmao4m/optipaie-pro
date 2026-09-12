@@ -426,6 +426,7 @@ namespace OptiPaie.Desktop.ViewModels.Performance
 
         private void ExportPdf()
         {
+            if (IsExportEmpty()) { Dialogs.Info(L.T("Perf_NoData")); return; }
             var doc = new Documents.PerformanceReportDocument(BuildModel());
             string path = SaveDialog("PDF (*.pdf)|*.pdf", ".pdf");
             if (path == null) return;
@@ -435,25 +436,59 @@ namespace OptiPaie.Desktop.ViewModels.Performance
 
         private void ExportCsv()
         {
+            if (IsExportEmpty()) { Dialogs.Info(L.T("Perf_NoData")); return; }
             string path = SaveDialog("CSV (*.csv)|*.csv", ".csv");
             if (path == null) return;
             try { System.IO.File.WriteAllText(path, BuildCsv(), new System.Text.UTF8Encoding(true)); Dialogs.Info(L.T("Perf_Exported")); }
             catch (System.Exception ex) { Dialogs.ErrorWithLog("Impossible d'exporter. تعذّر التصدير.", ex); }
         }
 
-        private Documents.PerformanceReportModel BuildModel()
+        /// <summary>True when there is nothing worth exporting in the current mode — avoids writing a blank file.</summary>
+        private bool IsExportEmpty()
+            => _mode == 2 ? (_employee == null || !_employee.HasData) : TopRows.Count == 0;
+
+        // The report columns/rows depend on the mode: the general and department modes rank employees,
+        // while the employee mode has no ranking — it must export that employee's own criterion scores
+        // (strengths + points to improve), otherwise the file comes out with headers only (audit #44).
+        private string[] Columns()
+            => _mode == 2
+                ? new[] { L.T("Perf_Criterion"), L.T("Perf_Score"), L.T("Perf_Rating") }
+                : new[] { "#", L.T("Perf_Col_Employee"), L.T("Perf_Col_Dept"), L.T("Perf_Score"), L.T("Perf_Rating") };
+
+        private List<string[]> Rows()
         {
             var rows = new List<string[]>();
-            foreach (var r in TopRows) rows.Add(new[] { r.Rank.ToString(), r.EmployeeName, r.Department ?? string.Empty, r.ScoreText, r.BandLabel });
+            if (_mode == 2)
+            {
+                // Strengths are the top-3 scores and weaknesses the bottom-3, so they OVERLAP when the
+                // employee has ≤5 criteria. Dedup by criterion name — list each once (as a strength if it
+                // is among the top) — otherwise a small grid prints every criterion twice.
+                string strong = L.T("Perf_Strengths"), weak = L.T("Perf_Weaknesses");
+                var listed = new HashSet<string>();
+                foreach (var s in StrengthRows)
+                    if (listed.Add(s.Name)) rows.Add(new[] { s.Name, s.Score.ToString("0.#", L.Fr), strong });
+                foreach (var w in WeaknessRows)
+                    if (listed.Add(w.Name)) rows.Add(new[] { w.Name, w.Score.ToString("0.#", L.Fr), weak });
+            }
+            else
+            {
+                foreach (var r in TopRows) rows.Add(new[] { r.Rank.ToString(), r.EmployeeName, r.Department ?? string.Empty, r.ScoreText, r.BandLabel });
+            }
+            return rows;
+        }
+
+        private Documents.PerformanceReportModel BuildModel()
+        {
             return new Documents.PerformanceReportModel
             {
                 Title = Headline,
                 Subtitle = Subline,
                 CompanyName = _services.CompanyContext.Active == null ? string.Empty : _services.CompanyContext.Active.NameFr,
-                AverageText = CompanyAvgText,
-                BestText = BestText,
-                Columns = new[] { "#", L.T("Perf_Col_Employee"), L.T("Perf_Col_Dept"), L.T("Perf_Score"), L.T("Perf_Rating") },
-                Rows = rows
+                // In employee mode the "average/best" band carries the employee's own score + rating.
+                AverageText = _mode == 2 ? EmpScoreText : CompanyAvgText,
+                BestText = _mode == 2 ? EmpBandText : BestText,
+                Columns = Columns(),
+                Rows = Rows()
             };
         }
 
@@ -461,9 +496,11 @@ namespace OptiPaie.Desktop.ViewModels.Performance
         {
             var sb = new System.Text.StringBuilder();
             sb.AppendLine(Headline);
-            sb.AppendLine("#;" + L.T("Perf_Col_Employee") + ";" + L.T("Perf_Col_Dept") + ";" + L.T("Perf_Score") + ";" + L.T("Perf_Rating"));
-            foreach (var r in TopRows)
-                sb.AppendLine(r.Rank + ";" + r.EmployeeName + ";" + (r.Department ?? "") + ";" + r.ScoreText + ";" + r.BandLabel);
+            if (!string.IsNullOrWhiteSpace(Subline)) sb.AppendLine(Subline);
+            if (_mode == 2) sb.AppendLine(L.T("Perf_Score") + ";" + EmpScoreText + ";" + EmpBandText);
+            sb.AppendLine(string.Join(";", Columns()));
+            foreach (var row in Rows())
+                sb.AppendLine(string.Join(";", row));
             return sb.ToString();
         }
 

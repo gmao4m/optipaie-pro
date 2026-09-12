@@ -126,8 +126,25 @@ namespace OptiPaie.Desktop.ViewModels
     /// <summary>A leave type with its localized label (for combo boxes).</summary>
     public sealed class LeaveTypeOption
     {
+        /// <summary>Legacy enum-only option (fallback when no configurable type exists).</summary>
         public LeaveTypeOption(LeaveType value) { Value = value; Label = LeaveLabels.Type(value); }
+
+        /// <summary>A configurable type from the catalogue — carries its id so the request records it.</summary>
+        public LeaveTypeOption(LeaveTypeDefinition def, bool rtl)
+        {
+            Value = def.BaseType;          // keeps the legacy Type column (1..5) satisfied
+            DefinitionId = def.Id;
+            string ar = def.LabelAr, fr = def.LabelFr;
+            string label = rtl ? (string.IsNullOrWhiteSpace(ar) ? fr : ar)
+                               : (string.IsNullOrWhiteSpace(fr) ? ar : fr);
+            Label = string.IsNullOrWhiteSpace(label) ? LeaveLabels.Type(def.BaseType) : label;
+        }
+
         public LeaveType Value { get; }
+
+        /// <summary>Id of the configurable type, or null for a legacy enum option.</summary>
+        public long? DefinitionId { get; }
+
         public string Label { get; }
     }
 

@@ -280,6 +280,7 @@ namespace OptiPaie.Desktop.ViewModels
         private string _serialNumber = "—";
         private bool _isAvailable;
         private bool _isAssigned;
+        private bool _isShared;
 
         public AssetHistoryViewModel(AppServices services, long companyId, long assetId)
         {
@@ -287,7 +288,10 @@ namespace OptiPaie.Desktop.ViewModels
             _companyId = companyId;
             _assetId = assetId;
 
-            AssignCommand = new RelayCommand(() => Act(AssetActions.Assign(_services, _companyId, _assetId)), () => _isAvailable);
+            // A shared (pool) asset can take a further holder even while assigned; only an available
+            // exclusive asset otherwise. Never under repair/retired.
+            AssignCommand = new RelayCommand(() => Act(AssetActions.Assign(_services, _companyId, _assetId)),
+                () => _isAvailable || (_isShared && _isAssigned));
             ReturnCommand = new RelayCommand(() => Act(AssetActions.Return(_services, _assetId)), () => _isAssigned);
             EditCommand = new RelayCommand(() => Act(AssetActions.Edit(_services, _companyId, _assetId)));
             CloseCommand = new RelayCommand(() => RequestClose?.Invoke());
@@ -333,6 +337,7 @@ namespace OptiPaie.Desktop.ViewModels
                 SerialNumber = string.IsNullOrWhiteSpace(summary.SerialNumber) ? "—" : summary.SerialNumber;
                 IsAvailable = summary.Status == AssetStatus.Available;
                 IsAssigned = summary.Status == AssetStatus.Assigned;
+                _isShared = summary.IsShared;
             }
 
             History.Clear();

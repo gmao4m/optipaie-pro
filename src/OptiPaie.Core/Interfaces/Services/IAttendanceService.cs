@@ -42,6 +42,10 @@ namespace OptiPaie.Core.Interfaces.Services
         /// <summary>Removes a record (soft delete).</summary>
         Result Delete(long id);
 
+        /// <summary>Erases one employee's day (the matrix "gomme") — soft-deletes the record; idempotent;
+        /// refuses a day synced from an approved leave.</summary>
+        Result ClearDay(long employeeId, DateTime workDate);
+
         /// <summary>The record of one employee on one day, or null.</summary>
         AttendanceRecord Get(long employeeId, DateTime workDate);
 

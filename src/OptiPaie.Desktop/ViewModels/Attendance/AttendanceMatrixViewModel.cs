@@ -57,7 +57,8 @@ namespace OptiPaie.Desktop.ViewModels.Attendance
             {
                 Palette.Add(new StatusBrushViewModel(s));
             }
-            _selectedBrush = Palette.FirstOrDefault(b => b.Status == AttendanceStatus.Present);
+            Palette.Add(StatusBrushViewModel.Eraser()); // the "gomme" — clears a mispainted cell
+            _selectedBrush = Palette.FirstOrDefault(b => b.Status == AttendanceStatus.Present && !b.IsEraser);
             if (_selectedBrush != null) _selectedBrush.IsSelected = true;
 
             StatusFilters.Add(new StatusFilterOption("Tous les statuts", null));
@@ -310,6 +311,12 @@ namespace OptiPaie.Desktop.ViewModels.Attendance
                 return;
             }
 
+            if (SelectedBrush.IsEraser)
+            {
+                EraseCells(new[] { cell }, "Cellule");
+                return;
+            }
+
             if (cell.Paint(SelectedBrush.Status))
             {
                 Result result = _services.Attendance.SetDayStatus(cell.EmployeeId, cell.Date, SelectedBrush.Status);
@@ -323,9 +330,44 @@ namespace OptiPaie.Desktop.ViewModels.Attendance
             }
         }
 
+        /// <summary>Erases a set of cells (the "gomme"): removes each day's record, protecting synced leaves.</summary>
+        private void EraseCells(IReadOnlyList<MatrixCellViewModel> cells, string context)
+        {
+            int erased = 0, protectedLeave = 0;
+            foreach (MatrixCellViewModel cell in cells)
+            {
+                if (cell.IsFuture) continue;
+                if (cell.IsLeaveLinked) { protectedLeave++; continue; } // a synced leave is undone from the Leave module
+                if (!cell.Status.HasValue) continue;                    // already empty
+
+                Result result = _services.Attendance.ClearDay(cell.EmployeeId, cell.Date);
+                if (result.IsFailure)
+                {
+                    Dialogs.Error(result.Error);
+                    Load(); // resync the grid with the store
+                    return;
+                }
+
+                cell.Clear();
+                erased++;
+            }
+
+            RecomputeKpis();
+            if (erased == 0 && protectedLeave == 0) { StatusMessage = "Aucune modification."; return; }
+            string note = context + " : " + erased + " effacé(s)";
+            if (protectedLeave > 0) note += " — " + protectedLeave + " congé(s) protégé(s) (annulez le congé dans le module Congés)";
+            StatusMessage = note;
+        }
+
         private void PaintDay(object parameter)
         {
             if (SelectedBrush == null || !TryDay(parameter, out int day)) return;
+
+            if (SelectedBrush.IsEraser)
+            {
+                EraseCells(Rows.Select(r => r.Cells[day - 1]).ToList(), "Jour " + day);
+                return;
+            }
 
             var entries = new List<AttendanceDayStatus>();
             int protectedLeave = 0;
@@ -351,6 +393,12 @@ namespace OptiPaie.Desktop.ViewModels.Attendance
             if (selected.Count == 0)
             {
                 StatusMessage = "Cochez d'abord des employés pour l'action groupée.";
+                return;
+            }
+
+            if (SelectedBrush.IsEraser)
+            {
+                EraseCells(selected.SelectMany(r => r.Cells).ToList(), selected.Count + " employé(s) · mois");
                 return;
             }
 
