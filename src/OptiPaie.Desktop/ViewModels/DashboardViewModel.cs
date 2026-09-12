@@ -37,6 +37,7 @@ namespace OptiPaie.Desktop.ViewModels
         {
             _services = services;
             _navigate = navigate;
+            Workforce = new WorkforceViewModel(services);
 
             RefreshCommand = new RelayCommand(Load);
             OpenCommand = new RelayCommand(p => Open(p as string));
@@ -79,6 +80,9 @@ namespace OptiPaie.Desktop.ViewModels
         public ObservableCollection<DeptSlice> DeptSlices { get; } = new ObservableCollection<DeptSlice>();
 
         public bool HasChartData => DeptSlices.Count > 0;
+
+        /// <summary>The workforce (effectif) analytics section shown at the top of the board.</summary>
+        public WorkforceViewModel Workforce { get; }
 
         public string ApprovalsHeader { get => _approvalsHeader; private set => Set(ref _approvalsHeader, value); }
         public string DeadlinesHeader { get => _deadlinesHeader; private set => Set(ref _deadlinesHeader, value); }
@@ -154,6 +158,7 @@ namespace OptiPaie.Desktop.ViewModels
             Raise(nameof(HasActivity));
 
             BuildSalaryWidgets();
+            Workforce.Load();
         }
 
         /// <summary>

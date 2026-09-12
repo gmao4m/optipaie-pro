@@ -1,3 +1,4 @@
+using System;
 using OptiPaie.Core.Dtos;
 
 namespace OptiPaie.Core.Interfaces.Services
@@ -14,5 +15,12 @@ namespace OptiPaie.Core.Interfaces.Services
         /// total. <paramref name="expiryWindowDays"/> is the horizon for "expiring soon".
         /// </summary>
         DashboardSnapshot Build(long companyId, int expiryWindowDays = 30);
+
+        /// <summary>
+        /// Workforce (effectif) analytics for ONE company (<paramref name="companyId"/> MANDATORY, throws
+        /// for &lt;= 0). State figures are at today; entries/exits/turnover span
+        /// [<paramref name="periodStart"/>, <paramref name="periodEnd"/>]. Read-only; never touches payroll.
+        /// </summary>
+        WorkforceAnalytics BuildWorkforce(long companyId, DateTime periodStart, DateTime periodEnd);
     }
 }

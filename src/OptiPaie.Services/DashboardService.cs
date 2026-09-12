@@ -173,6 +173,164 @@ namespace OptiPaie.Services
             return snapshot;
         }
 
+        // ---------------------------------------------------------------- workforce analytics
+
+        private static readonly string[] AgeBandOrder = { "Workforce_Age_U25", "Workforce_Age_2534", "Workforce_Age_3544", "Workforce_Age_4554", "Workforce_Age_55P" };
+        private static readonly string[] SeniorityBandOrder = { "Workforce_Sen_U1", "Workforce_Sen_1_3", "Workforce_Sen_3_5", "Workforce_Sen_5_10", "Workforce_Sen_10P" };
+
+        public WorkforceAnalytics BuildWorkforce(long companyId, DateTime periodStart, DateTime periodEnd)
+        {
+            if (companyId <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(companyId),
+                    "Une société active est obligatoire pour le tableau de bord (jamais « toutes »).");
+            }
+
+            DateTime today = DateTime.Today;
+            DateTime start = periodStart.Date;
+            DateTime end = periodEnd.Date;
+
+            // State distributions read the CURRENT effectif (active only); the flow figures read the
+            // full roster incl. leavers so a departure in the period is counted. Read-only, no engine.
+            IReadOnlyList<Employee> active = _employees.GetByCompany(companyId, false);
+            IReadOnlyList<Employee> roster = _employees.GetByCompany(companyId, true);
+
+            var wa = new WorkforceAnalytics { AsOf = today, PeriodStart = start, PeriodEnd = end };
+
+            wa.Headcount = active.Count;
+            wa.HeadcountIds = active.Select(e => e.Id).ToList();
+
+            var withAge = active.Where(e => e.BirthDate.HasValue).ToList();
+            wa.AgeTotalCount = active.Count;
+            wa.AgeKnownCount = withAge.Count;
+            wa.AverageAge = withAge.Count > 0
+                ? (decimal?)Math.Round((decimal)withAge.Average(e => AgeAt(e.BirthDate.Value, today)), 1)
+                : null;
+
+            var entries = roster.Where(e => e.HireDate.Date >= start && e.HireDate.Date <= end).ToList();
+            var exits = roster.Where(e => e.ExitDate.HasValue && e.ExitDate.Value.Date >= start && e.ExitDate.Value.Date <= end).ToList();
+            wa.Entries = entries.Count; wa.EntryIds = entries.Select(e => e.Id).ToList();
+            wa.Exits = exits.Count; wa.ExitIds = exits.Select(e => e.Id).ToList();
+            wa.HeadcountStart = roster.Count(e => EmployedOn(e, start));
+            wa.HeadcountEnd = roster.Count(e => EmployedOn(e, end));
+            wa.AverageHeadcount = (wa.HeadcountStart + wa.HeadcountEnd) / 2m;
+            wa.TurnoverRate = wa.AverageHeadcount > 0m ? Math.Round(wa.Exits / wa.AverageHeadcount * 100m, 1) : 0m;
+
+            wa.ByContract = KeyedDistribution(active, e => "Enum_ContractType_" + e.ContractType);
+            wa.ByMaritalStatus = KeyedDistribution(active, e => "Enum_MaritalStatus_" + e.MaritalStatus);
+            wa.ByGender = KeyedDistribution(active, e => "Enum_Gender_" + e.Gender);
+            wa.ByCategory = FreeTextDistribution(active, e => e.Category);
+            wa.ByDepartment = FreeTextDistribution(active, e => e.Department);
+            wa.ByPoste = FreeTextDistribution(active, e => e.Poste);
+            wa.ByAgeBand = BandDistribution(active, AgeBandOrder, e => e.BirthDate.HasValue ? AgeBandKey(AgeAt(e.BirthDate.Value, today)) : null);
+            wa.BySeniority = BandDistribution(active, SeniorityBandOrder, e => SeniorityBandKey(SeniorityYears(e.HireDate, today)));
+
+            return wa;
+        }
+
+        private static int AgeAt(DateTime birth, DateTime on)
+        {
+            int age = on.Year - birth.Year;
+            if (birth.Date > on.AddYears(-age)) age--;
+            return age < 0 ? 0 : age;
+        }
+
+        private static bool EmployedOn(Employee e, DateTime d)
+            => e.HireDate.Date <= d && (!e.ExitDate.HasValue || e.ExitDate.Value.Date >= d);
+
+        private static double SeniorityYears(DateTime hire, DateTime on)
+            => on.Date <= hire.Date ? 0 : (on.Date - hire.Date).TotalDays / 365.25;
+
+        private static string AgeBandKey(int age)
+        {
+            if (age < 25) return "Workforce_Age_U25";
+            if (age < 35) return "Workforce_Age_2534";
+            if (age < 45) return "Workforce_Age_3544";
+            if (age < 55) return "Workforce_Age_4554";
+            return "Workforce_Age_55P";
+        }
+
+        private static string SeniorityBandKey(double years)
+        {
+            if (years < 1) return "Workforce_Sen_U1";
+            if (years < 3) return "Workforce_Sen_1_3";
+            if (years < 5) return "Workforce_Sen_3_5";
+            if (years < 10) return "Workforce_Sen_5_10";
+            return "Workforce_Sen_10P";
+        }
+
+        /// <summary>Distribution over a controlled key (enum) — every employee maps to a key, no unknown.</summary>
+        private static WorkforceDistribution KeyedDistribution(IReadOnlyList<Employee> emps, Func<Employee, string> key)
+        {
+            var buckets = emps.GroupBy(key)
+                .Select(g => new WorkforceBucket { LabelKey = g.Key, Count = g.Count(), EmployeeIds = g.Select(e => e.Id).ToList() })
+                .OrderByDescending(b => b.Count).ToList();
+            return new WorkforceDistribution { Buckets = buckets, Total = emps.Count, UnknownCount = 0, Unreliable = false };
+        }
+
+        /// <summary>Distribution over a free-text field — grouped case-insensitively and trimmed so
+        /// « Cadre » and « cadre » count together; a blank value goes to the « non renseigné » bucket.</summary>
+        private static WorkforceDistribution FreeTextDistribution(IReadOnlyList<Employee> emps, Func<Employee, string> field)
+        {
+            var buckets = emps.Where(e => !string.IsNullOrWhiteSpace(field(e)))
+                .GroupBy(e => field(e).Trim().ToLowerInvariant())
+                .Select(g => new WorkforceBucket
+                {
+                    Label = g.Select(e => field(e).Trim()).First(),
+                    Count = g.Count(),
+                    EmployeeIds = g.Select(e => e.Id).ToList()
+                })
+                .OrderByDescending(b => b.Count).ToList();
+
+            var unknown = emps.Where(e => string.IsNullOrWhiteSpace(field(e))).ToList();
+            if (unknown.Count > 0)
+            {
+                buckets.Add(new WorkforceBucket
+                {
+                    LabelKey = "Workforce_Unknown", Count = unknown.Count,
+                    EmployeeIds = unknown.Select(e => e.Id).ToList(), IsUnknown = true
+                });
+            }
+
+            return new WorkforceDistribution
+            {
+                Buckets = buckets, Total = emps.Count, UnknownCount = unknown.Count,
+                Unreliable = unknown.Count > emps.Count / 2
+            };
+        }
+
+        /// <summary>Distribution over ordered bands (age, seniority); a null band goes to « non renseigné ».
+        /// Bands keep their natural order (young→old), not count order.</summary>
+        private static WorkforceDistribution BandDistribution(IReadOnlyList<Employee> emps, string[] orderedKeys, Func<Employee, string> bandKey)
+        {
+            var byKey = emps.Where(e => bandKey(e) != null)
+                .GroupBy(bandKey)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            var buckets = new List<WorkforceBucket>();
+            foreach (string k in orderedKeys)
+            {
+                if (byKey.TryGetValue(k, out var list) && list.Count > 0)
+                    buckets.Add(new WorkforceBucket { LabelKey = k, Count = list.Count, EmployeeIds = list.Select(e => e.Id).ToList() });
+            }
+
+            var unknown = emps.Where(e => bandKey(e) == null).ToList();
+            if (unknown.Count > 0)
+            {
+                buckets.Add(new WorkforceBucket
+                {
+                    LabelKey = "Workforce_Unknown", Count = unknown.Count,
+                    EmployeeIds = unknown.Select(e => e.Id).ToList(), IsUnknown = true
+                });
+            }
+
+            return new WorkforceDistribution
+            {
+                Buckets = buckets, Total = emps.Count, UnknownCount = unknown.Count,
+                Unreliable = unknown.Count > emps.Count / 2
+            };
+        }
+
         private static string Countdown(int days)
         {
             if (days < 0) return "en retard de " + (-days) + " j";

@@ -1911,4 +1911,46 @@
   <data name="AttMonth_Title" xml:space="preserve"><value>الملخّص الشهري للحضور</value></data>
   <data name="AttDetail_Title" xml:space="preserve"><value>سجلّ الحضور</value></data>
   <data name="AttMonth_PaidDays" xml:space="preserve"><value>الأيام المدفوعة</value></data>
+  <data name="Workforce_Section" xml:space="preserve"><value>التعداد</value></data>
+  <data name="Workforce_Headcount" xml:space="preserve"><value>التعداد الكلّي</value></data>
+  <data name="Workforce_AverageAge" xml:space="preserve"><value>متوسّط العمر</value></data>
+  <data name="Workforce_AgeYears" xml:space="preserve"><value>{0} سنة</value></data>
+  <data name="Workforce_AgeKnownNote" xml:space="preserve"><value>على {0}/{1} ممّن تُعرف تواريخ ميلادهم</value></data>
+  <data name="Workforce_Entries" xml:space="preserve"><value>التوظيفات</value></data>
+  <data name="Workforce_Exits" xml:space="preserve"><value>المغادرات</value></data>
+  <data name="Workforce_Turnover" xml:space="preserve"><value>معدّل الدوران</value></data>
+  <data name="Workforce_TurnoverRaw" xml:space="preserve"><value>{0} مغادرة / {1} موظف في المتوسّط</value></data>
+  <data name="Workforce_TurnoverTooltip" xml:space="preserve"><value>معدّل الدوران = (المغادرات خلال الفترة ÷ متوسّط التعداد) × 100. متوسّط التعداد = (تعداد البداية + تعداد النهاية) ÷ 2.</value></data>
+  <data name="Workforce_Distribution" xml:space="preserve"><value>توزيع التعداد</value></data>
+  <data name="Workforce_Structure" xml:space="preserve"><value>بنية التعداد</value></data>
+  <data name="Workforce_ByDepartment" xml:space="preserve"><value>التعداد حسب القسم</value></data>
+  <data name="Workforce_ByPoste" xml:space="preserve"><value>التعداد حسب المنصب</value></data>
+  <data name="Workforce_Axis_Contract" xml:space="preserve"><value>نوع العقد</value></data>
+  <data name="Workforce_Axis_Category" xml:space="preserve"><value>الفئة المهنية</value></data>
+  <data name="Workforce_Axis_Marital" xml:space="preserve"><value>الحالة العائلية</value></data>
+  <data name="Workforce_Axis_Gender" xml:space="preserve"><value>الجنس</value></data>
+  <data name="Workforce_Axis_Age" xml:space="preserve"><value>الفئة العمرية</value></data>
+  <data name="Workforce_Axis_Seniority" xml:space="preserve"><value>الأقدمية</value></data>
+  <data name="Workforce_Unknown" xml:space="preserve"><value>غير محدّد</value></data>
+  <data name="Workforce_Unreliable" xml:space="preserve"><value>أكثر من نصف الموظفين غير محدّدين على هذا المحور — التوزيع غير موثوق.</value></data>
+  <data name="Workforce_AsOf" xml:space="preserve"><value>التوزيعات محتسبة بتاريخ {0}</value></data>
+  <data name="Workforce_Period_Month" xml:space="preserve"><value>هذا الشهر</value></data>
+  <data name="Workforce_Period_Quarter" xml:space="preserve"><value>هذا الفصل</value></data>
+  <data name="Workforce_Period_Year" xml:space="preserve"><value>هذه السنة</value></data>
+  <data name="Workforce_PeriodLabel" xml:space="preserve"><value>الفترة: {0} ← {1}</value></data>
+  <data name="Workforce_Col_Label" xml:space="preserve"><value>الفئة</value></data>
+  <data name="Workforce_Col_Count" xml:space="preserve"><value>العدد</value></data>
+  <data name="Workforce_Col_Pct" xml:space="preserve"><value>النسبة</value></data>
+  <data name="Workforce_Col_Seniority" xml:space="preserve"><value>الأقدمية</value></data>
+  <data name="Workforce_List_Empty" xml:space="preserve"><value>لا يوجد موظف في هذا التحديد.</value></data>
+  <data name="Workforce_Age_U25" xml:space="preserve"><value>أقل من 25 سنة</value></data>
+  <data name="Workforce_Age_2534" xml:space="preserve"><value>25–34 سنة</value></data>
+  <data name="Workforce_Age_3544" xml:space="preserve"><value>35–44 سنة</value></data>
+  <data name="Workforce_Age_4554" xml:space="preserve"><value>45–54 سنة</value></data>
+  <data name="Workforce_Age_55P" xml:space="preserve"><value>55 سنة فأكثر</value></data>
+  <data name="Workforce_Sen_U1" xml:space="preserve"><value>أقل من سنة</value></data>
+  <data name="Workforce_Sen_1_3" xml:space="preserve"><value>1–3 سنوات</value></data>
+  <data name="Workforce_Sen_3_5" xml:space="preserve"><value>3–5 سنوات</value></data>
+  <data name="Workforce_Sen_5_10" xml:space="preserve"><value>5–10 سنوات</value></data>
+  <data name="Workforce_Sen_10P" xml:space="preserve"><value>10 سنوات فأكثر</value></data>
 </root>
