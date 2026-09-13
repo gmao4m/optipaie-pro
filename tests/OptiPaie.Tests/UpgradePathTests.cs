@@ -70,15 +70,19 @@ namespace OptiPaie.Tests
                 applied = new MigrationRunner(connection).Run();
             }
 
-            // 3. Exactly the two pending migrations (0033, 0034) applied — cleanly, no throw.
-            Assert.That(applied, Is.EqualTo(2), "expected exactly 0033 + 0034 to apply on a v32 database");
-            Assert.That(AppliedVersions(), Does.Contain(33).And.Contain(34));
+            // 3. Exactly the pending migrations (0033, 0034, 0035) applied — cleanly, no throw.
+            Assert.That(applied, Is.EqualTo(3), "expected exactly 0033 + 0034 + 0035 to apply on a v32 database");
+            Assert.That(AppliedVersions(), Does.Contain(33).And.Contain(34).And.Contain(35));
 
             // 4. The new schema is present.
             Assert.That(ColumnExists("JobPostings", "ContractType"), Is.True, "0033 did not add JobPostings.ContractType");
             Assert.That(ColumnExists("Candidates", "ClosureType"), Is.True, "0033 did not add Candidates.ClosureType");
             Assert.That(ColumnExists("AuditLog", "CompanyId"), Is.True, "0034 did not add AuditLog.CompanyId");
             Assert.That(TableExists("Interviews"), Is.True, "0033 did not create the Interviews table");
+            // 0035 seeds ONE global « Congé de récupération » row into the existing LeaveTypes catalogue,
+            // additively, without disturbing the populated pre-update database.
+            Assert.That(Convert.ToInt64(Scalar("SELECT COUNT(*) FROM LeaveTypes WHERE Code = 'RECOVERY' AND CompanyId IS NULL;"), CultureInfo.InvariantCulture),
+                Is.EqualTo(1L), "0035 did not seed the global Congé de récupération type exactly once");
 
             // 5. No data loss: every pre-update row survives untouched, and the new nullable column
             //    is NULL for rows written before the update (never back-filled with a guessed value).

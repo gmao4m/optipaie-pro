@@ -91,5 +91,21 @@ namespace OptiPaie.Tests
             Assert.That(all.Any(t => t.Code == "PILGRIMAGE" && t.OncePerCareer), Is.True, "pèlerinage : une fois dans la carrière");
             Assert.That(all.Count(t => t.BaseType == LeaveType.Special), Is.GreaterThanOrEqualTo(6), "6 événements familiaux + pèlerinage");
         }
+
+        [Test]
+        public void RecoveryType_IsSeededGlobally_PaidAndDoesNotDecrementAnnualBalance()
+        {
+            // Migration 0035 adds « Congé de récupération » to the global catalogue, offered
+            // at entry like the paid family-event types (manual grant, no annual-balance impact).
+            LeaveTypeDefinition recovery = _leave.GetTypes(_companyId).SingleOrDefault(t => t.Code == "RECOVERY");
+            Assert.That(recovery, Is.Not.Null, "le type Congé de récupération est proposé à la saisie");
+            Assert.That(recovery.CompanyId, Is.Null, "type global : visible pour toutes les sociétés");
+            Assert.That(recovery.LabelFr, Is.EqualTo("Congé de récupération"));
+            Assert.That(recovery.LabelAr, Is.EqualTo("عطلة الاسترجاع"));
+            Assert.That(recovery.BaseType, Is.EqualTo(LeaveType.Special), "BaseType 5 garde le CHECK (Type IN 1..5) satisfait");
+            Assert.That(recovery.PaymentCategory, Is.EqualTo(PaymentCategory.EmployerPaid), "payé par l'employeur");
+            Assert.That(recovery.DecrementsAnnualBalance, Is.False, "ne consomme jamais le solde annuel");
+            Assert.That(recovery.OncePerCareer, Is.False);
+        }
     }
 }
