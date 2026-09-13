@@ -59,6 +59,12 @@
                     <ListBox Grid.Row="1" ItemsSource="{Binding Postings}" SelectedItem="{Binding SelectedPosting}"
                              Background="Transparent" BorderThickness="0" HorizontalContentAlignment="Stretch"
                              ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                        <!-- Double-click a posting to edit it — same gesture as every other list
+                             (Employés, Contrats, Congés…). Single click still selects it and loads
+                             its candidates; EditPosting falls back to the selected posting. -->
+                        <ListBox.InputBindings>
+                            <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding EditPostingCommand}" />
+                        </ListBox.InputBindings>
                         <ListBox.ItemContainerStyle>
                             <Style TargetType="ListBoxItem">
                                 <Setter Property="Padding" Value="0" />

@@ -123,6 +123,17 @@ namespace OptiPaie.Tests
         }
 
         [Test]
+        public void Accrual_TruncatesToCap_WhenEarnedStrictlyExceedsIt()
+        {
+            // Guard the cap on the STRICTLY-above case (the default 2,5×12 lands exactly on 30):
+            // a configured rate of 3 j/mois would earn 36 — it must be truncated to the 30-day plafond.
+            SetFlags(s => s.DaysPerMonth = 3m);
+
+            LeaveBalance b = _leave.GetBalance(_employeeId, Year);
+            Assert.That(b.Entitlement, Is.EqualTo(30m), "36 j acquis (3 × 12) plafonnés à 30");
+        }
+
+        [Test]
         public void Accrual_ExcludesUnpaidDominatedMonths_WhenEnabled()
         {
             SetFlags(s => s.AccrualExcludesUnpaid = true);
