@@ -125,6 +125,7 @@ namespace OptiPaie.Services
             // ── attendance today (one query, counted in memory — bounded by headcount) ──
             foreach (AttendanceRecord a in _attendance.GetCompanyDay(companyId, today))
             {
+                o.AttendanceRecordedToday = true;
                 switch (a.Status)
                 {
                     case AttendanceStatus.Present:

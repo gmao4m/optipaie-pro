@@ -4,39 +4,41 @@
              xmlns:loc="clr-namespace:OptiPaie.Desktop.Localization"
              xmlns:views="clr-namespace:OptiPaie.Desktop.Views">
     <UserControl.Resources>
-        <!-- Hero KPI card — visually dominant; equal size in a 5-up row. -->
+        <!-- Hero KPI card — compact; the VALUE is the dominant element. -->
         <Style x:Key="HeroCard" TargetType="Border">
             <Setter Property="Background" Value="{DynamicResource Surface}" />
             <Setter Property="BorderBrush" Value="{DynamicResource Border}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="CornerRadius" Value="14" />
-            <Setter Property="Padding" Value="18,16" />
+            <Setter Property="Padding" Value="16,13" />
             <Setter Property="Margin" Value="0,0,14,0" />
+            <Setter Property="Cursor" Value="Hand" />
             <Setter Property="Effect">
                 <Setter.Value>
-                    <DropShadowEffect Color="{DynamicResource ShadowColor}" BlurRadius="18" ShadowDepth="2" Direction="270" Opacity="0.08" RenderingBias="Quality" />
+                    <DropShadowEffect Color="{DynamicResource ShadowColor}" BlurRadius="16" ShadowDepth="2" Direction="270" Opacity="0.07" RenderingBias="Quality" />
                 </Setter.Value>
             </Setter>
         </Style>
         <Style x:Key="HeroIcon" TargetType="Border">
-            <Setter Property="Width" Value="40" />
-            <Setter Property="Height" Value="40" />
-            <Setter Property="CornerRadius" Value="20" />
-            <Setter Property="HorizontalAlignment" Value="Left" />
+            <Setter Property="Width" Value="34" />
+            <Setter Property="Height" Value="34" />
+            <Setter Property="CornerRadius" Value="17" />
+            <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
         <Style x:Key="HeroValue" TargetType="TextBlock">
             <Setter Property="FontFamily" Value="{StaticResource MonoFont}" />
-            <Setter Property="FontSize" Value="27" />
+            <Setter Property="FontSize" Value="31" />
             <Setter Property="FontWeight" Value="SemiBold" />
-            <Setter Property="Margin" Value="0,10,0,0" />
+            <Setter Property="Margin" Value="0,3,0,0" />
             <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
         </Style>
-        <!-- Secondary indicator chip — calm, smaller than the hero. -->
+        <!-- Secondary indicator chip — calm, clickable to its module. -->
         <Style x:Key="StatChip" TargetType="Border">
             <Setter Property="Background" Value="{DynamicResource SurfaceMuted}" />
             <Setter Property="CornerRadius" Value="10" />
             <Setter Property="Padding" Value="13,10" />
             <Setter Property="Margin" Value="0,0,10,10" />
+            <Setter Property="Cursor" Value="Hand" />
         </Style>
         <Style x:Key="StatChipValue" TargetType="TextBlock">
             <Setter Property="FontFamily" Value="{StaticResource MonoFont}" />
@@ -58,29 +60,33 @@
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <!-- ============ Header ============ -->
+            <!-- ============ Header: title + all actions (paie + quick actions) ============ -->
             <Grid Grid.Row="0">
                 <StackPanel HorizontalAlignment="Left">
                     <TextBlock Style="{StaticResource H1}" Text="{Binding Greeting}" />
                     <TextBlock Style="{StaticResource Caption}" Margin="0,5,0,0" Text="{Binding DateLabel}" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
+                    <Button Style="{StaticResource SecondaryButton}" Content="{loc:Loc Employees_New}" Command="{Binding NewEmployeeCommand}" />
+                    <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="{loc:Loc Dashboard_AttendanceMatrix}" Command="{Binding AttendanceCommand}" />
+                    <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="{loc:Loc Dashboard_Leave}" Command="{Binding LeaveCommand}" />
+                    <Border Width="1" Margin="10,4" Background="{DynamicResource Border}" />
                     <Button Style="{StaticResource SecondaryButton}" Content="{loc:Loc Common_Refresh}" Command="{Binding RefreshCommand}" />
                     <Button Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Content="{loc:Loc Dashboard_NewPayroll}" Command="{Binding NewPayrollCommand}" />
                 </StackPanel>
             </Grid>
 
-            <!-- ============ Body (skeleton / no-company / content) ============ -->
+            <!-- ============ Body ============ -->
             <Grid Grid.Row="1" Margin="0,22,0,0">
 
-                <!-- Loading skeleton (shown while the first build runs off-thread — never a freeze) -->
+                <!-- Loading skeleton -->
                 <StackPanel Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
                     <UniformGrid Rows="1" Columns="5">
-                        <Border Style="{StaticResource Skeleton}" Height="96" Margin="0,0,14,0" />
-                        <Border Style="{StaticResource Skeleton}" Height="96" Margin="0,0,14,0" />
-                        <Border Style="{StaticResource Skeleton}" Height="96" Margin="0,0,14,0" />
-                        <Border Style="{StaticResource Skeleton}" Height="96" Margin="0,0,14,0" />
-                        <Border Style="{StaticResource Skeleton}" Height="96" />
+                        <Border Style="{StaticResource Skeleton}" Height="80" Margin="0,0,14,0" />
+                        <Border Style="{StaticResource Skeleton}" Height="80" Margin="0,0,14,0" />
+                        <Border Style="{StaticResource Skeleton}" Height="80" Margin="0,0,14,0" />
+                        <Border Style="{StaticResource Skeleton}" Height="80" Margin="0,0,14,0" />
+                        <Border Style="{StaticResource Skeleton}" Height="80" />
                     </UniformGrid>
                     <Grid Margin="0,16,0,0">
                         <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="16" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
@@ -99,54 +105,87 @@
                 <!-- ============ Content ============ -->
                 <StackPanel Visibility="{Binding IsContentVisible, Converter={StaticResource BoolToVis}}">
 
-                    <!-- Hero: the five figures a manager checks first -->
+                    <!-- Period control (top-level: it governs the flow figures for the whole screen) -->
+                    <Border Background="{DynamicResource SurfaceMuted}" CornerRadius="10" Padding="14,9" Margin="0,0,0,16">
+                        <Grid>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                <TextBlock Text="{loc:Loc Dashboard_Period}" Style="{StaticResource Caption}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                <ComboBox Style="{StaticResource AppComboBox}" Width="150" Height="30"
+                                          ItemsSource="{Binding Periods}" SelectedItem="{Binding SelectedPeriod}" DisplayMemberPath="Label" />
+                            </StackPanel>
+                            <TextBlock Text="{loc:Loc Dashboard_PeriodScope}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                       FontSize="11.5" Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap" MaxWidth="620" TextAlignment="Right" />
+                        </Grid>
+                    </Border>
+
+                    <!-- Hero: the five figures a manager checks first (each drills through) -->
                     <UniformGrid Rows="1" Columns="5">
-                        <!-- Masse salariale -->
+                        <!-- Masse salariale → paie -->
                         <Border Style="{StaticResource HeroCard}">
-                            <StackPanel>
-                                <Border Style="{StaticResource HeroIcon}" Background="{DynamicResource BrandSoft}">
-                                    <Path Width="19" Height="19" Stretch="Uniform" Fill="{DynamicResource BrandText}" Data="{StaticResource IconWallet}" /></Border>
-                                <TextBlock Style="{StaticResource Caption}" Margin="0,12,0,0" TextWrapping="Wrap" Text="{loc:Loc Dashboard_Kpi_Masse}" />
-                                <TextBlock Style="{StaticResource HeroValue}" FontSize="21" Text="{Binding MasseSalariale}" />
-                            </StackPanel>
+                            <Border.InputBindings><MouseBinding MouseAction="LeftClick" Command="{Binding OpenCommand}" CommandParameter="payroll" /></Border.InputBindings>
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                <Border Grid.Column="0" Style="{StaticResource HeroIcon}" Background="{DynamicResource BrandSoft}">
+                                    <Path Width="17" Height="17" Stretch="Uniform" Fill="{DynamicResource BrandText}" Data="{StaticResource IconWallet}" /></Border>
+                                <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock Style="{StaticResource Caption}" TextWrapping="Wrap" Text="{loc:Loc Dashboard_Kpi_Masse}" />
+                                    <TextBlock Style="{StaticResource HeroValue}" FontSize="22" Text="{Binding MasseSalariale}" />
+                                </StackPanel>
+                            </Grid>
                         </Border>
-                        <!-- Effectif -->
+                        <!-- Effectif → nominative employee list -->
                         <Border Style="{StaticResource HeroCard}">
-                            <StackPanel>
-                                <Border Style="{StaticResource HeroIcon}" Background="{DynamicResource BrandSoft}">
-                                    <Path Width="19" Height="19" Stretch="Uniform" Fill="{DynamicResource BrandText}" Data="{StaticResource IconUsers}" /></Border>
-                                <TextBlock Style="{StaticResource Caption}" Margin="0,12,0,0" TextWrapping="Wrap" Text="{loc:Loc Dashboard_Kpi_Headcount}" />
-                                <TextBlock Style="{StaticResource HeroValue}" Text="{Binding Employees}" />
-                            </StackPanel>
+                            <Border.InputBindings><MouseBinding MouseAction="LeftClick" Command="{Binding OpenHeadcountCommand}" /></Border.InputBindings>
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                <Border Grid.Column="0" Style="{StaticResource HeroIcon}" Background="{DynamicResource BrandSoft}">
+                                    <Path Width="17" Height="17" Stretch="Uniform" Fill="{DynamicResource BrandText}" Data="{StaticResource IconUsers}" /></Border>
+                                <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock Style="{StaticResource Caption}" TextWrapping="Wrap" Text="{loc:Loc Dashboard_Kpi_Headcount}" />
+                                    <TextBlock Style="{StaticResource HeroValue}" Text="{Binding Employees}" />
+                                </StackPanel>
+                            </Grid>
                         </Border>
-                        <!-- Présents aujourd'hui -->
+                        <!-- Présents aujourd'hui → présence (+ explainer when 0) -->
                         <Border Style="{StaticResource HeroCard}">
-                            <StackPanel>
-                                <Border Style="{StaticResource HeroIcon}" Background="{DynamicResource StatusSuccessSoft}">
-                                    <Path Width="19" Height="19" Stretch="Uniform" Fill="{DynamicResource StatusSuccessText}" Data="{StaticResource IconCheck}" /></Border>
-                                <TextBlock Style="{StaticResource Caption}" Margin="0,12,0,0" TextWrapping="Wrap" Text="{loc:Loc Dashboard_Kpi_PresentToday}" />
-                                <TextBlock Style="{StaticResource HeroValue}" Foreground="{DynamicResource StatusSuccessText}" Text="{Binding PresentToday}" />
-                            </StackPanel>
+                            <Border.InputBindings><MouseBinding MouseAction="LeftClick" Command="{Binding OpenCommand}" CommandParameter="attendance" /></Border.InputBindings>
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                <Border Grid.Column="0" Style="{StaticResource HeroIcon}" Background="{DynamicResource StatusSuccessSoft}" VerticalAlignment="Top">
+                                    <Path Width="17" Height="17" Stretch="Uniform" Fill="{DynamicResource StatusSuccessText}" Data="{StaticResource IconCheck}" /></Border>
+                                <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock Style="{StaticResource Caption}" TextWrapping="Wrap" Text="{loc:Loc Dashboard_Kpi_PresentToday}" />
+                                    <TextBlock Style="{StaticResource HeroValue}" Foreground="{DynamicResource StatusSuccessText}" Text="{Binding PresentToday}" />
+                                    <TextBlock Style="{StaticResource Caption}" FontSize="10.5" TextWrapping="Wrap" Margin="0,2,0,0"
+                                               Text="{Binding PresentSubtext}" Visibility="{Binding HasPresentSubtext, Converter={StaticResource BoolToVis}}" />
+                                </StackPanel>
+                            </Grid>
                         </Border>
-                        <!-- À traiter (warning) -->
-                        <Border Style="{StaticResource HeroCard}" Cursor="Hand">
+                        <!-- À traiter → congés -->
+                        <Border Style="{StaticResource HeroCard}">
                             <Border.InputBindings><MouseBinding MouseAction="LeftClick" Command="{Binding OpenCommand}" CommandParameter="leave" /></Border.InputBindings>
-                            <StackPanel>
-                                <Border Style="{StaticResource HeroIcon}" Background="{DynamicResource StatusPendingSoft}">
-                                    <Path Width="19" Height="19" Stretch="Uniform" Fill="{DynamicResource StatusPendingText}" Data="{StaticResource IconClock}" /></Border>
-                                <TextBlock Style="{StaticResource Caption}" Margin="0,12,0,0" TextWrapping="Wrap" Text="{loc:Loc Dashboard_Approvals}" />
-                                <TextBlock Style="{StaticResource HeroValue}" Foreground="{DynamicResource StatusPendingText}" Text="{Binding PendingCount}" />
-                            </StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                <Border Grid.Column="0" Style="{StaticResource HeroIcon}" Background="{DynamicResource StatusPendingSoft}">
+                                    <Path Width="17" Height="17" Stretch="Uniform" Fill="{DynamicResource StatusPendingText}" Data="{StaticResource IconClock}" /></Border>
+                                <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock Style="{StaticResource Caption}" TextWrapping="Wrap" Text="{loc:Loc Dashboard_Approvals}" />
+                                    <TextBlock Style="{StaticResource HeroValue}" Foreground="{DynamicResource StatusPendingText}" Text="{Binding PendingCount}" />
+                                </StackPanel>
+                            </Grid>
                         </Border>
-                        <!-- Échéances (warning) -->
-                        <Border Style="{StaticResource HeroCard}" Margin="0" Cursor="Hand">
+                        <!-- Échéances → contrats -->
+                        <Border Style="{StaticResource HeroCard}" Margin="0">
                             <Border.InputBindings><MouseBinding MouseAction="LeftClick" Command="{Binding OpenCommand}" CommandParameter="contracts" /></Border.InputBindings>
-                            <StackPanel>
-                                <Border Style="{StaticResource HeroIcon}" Background="{DynamicResource StatusPendingSoft}">
-                                    <Path Width="19" Height="19" Stretch="Uniform" Fill="{DynamicResource StatusPendingText}" Data="{StaticResource IconCalendar}" /></Border>
-                                <TextBlock Style="{StaticResource Caption}" Margin="0,12,0,0" TextWrapping="Wrap" Text="{loc:Loc Dashboard_Deadlines}" />
-                                <TextBlock Style="{StaticResource HeroValue}" Foreground="{DynamicResource StatusPendingText}" Text="{Binding DeadlineCount}" />
-                            </StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                <Border Grid.Column="0" Style="{StaticResource HeroIcon}" Background="{DynamicResource StatusPendingSoft}">
+                                    <Path Width="17" Height="17" Stretch="Uniform" Fill="{DynamicResource StatusPendingText}" Data="{StaticResource IconCalendar}" /></Border>
+                                <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock Style="{StaticResource Caption}" TextWrapping="Wrap" Text="{loc:Loc Dashboard_Deadlines}" />
+                                    <TextBlock Style="{StaticResource HeroValue}" Foreground="{DynamicResource StatusPendingText}" Text="{Binding DeadlineCount}" />
+                                </StackPanel>
+                            </Grid>
                         </Border>
                     </UniformGrid>
 
@@ -215,19 +254,15 @@
                         </Border>
                     </Grid>
 
-                    <!-- Effectif analytics (one panel, each dimension shown once) -->
+                    <!-- Effectif analytics (each dimension shown once) -->
                     <Border Style="{StaticResource Card}" Padding="18,16" Margin="0,16,0,0">
                         <StackPanel>
-                            <Grid>
-                                <TextBlock Style="{StaticResource H2}" FontSize="15" VerticalAlignment="Center" Text="{loc:Loc Workforce_Section}" />
-                                <ComboBox Style="{StaticResource AppComboBox}" HorizontalAlignment="Right" Width="150" Height="32"
-                                          ItemsSource="{Binding Periods}" SelectedItem="{Binding SelectedPeriod}" DisplayMemberPath="Label" />
-                            </Grid>
+                            <TextBlock Style="{StaticResource H2}" FontSize="15" Text="{loc:Loc Workforce_Section}" />
                             <views:WorkforceSection DataContext="{Binding Workforce}" Margin="0,16,0,0" />
                         </StackPanel>
                     </Border>
 
-                    <!-- Payroll trend + secondary indicators -->
+                    <!-- Payroll trend + grouped secondary indicators -->
                     <Grid Margin="0,16,0,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" MinWidth="300" />
@@ -235,13 +270,11 @@
                             <ColumnDefinition Width="1.35*" />
                         </Grid.ColumnDefinitions>
 
-                        <!-- Masse salariale trend: a revealing scale, or an honest "stable" -->
+                        <!-- Masse salariale trend: line + a caption that describes the whole window -->
                         <Border Grid.Column="0" Style="{StaticResource Card}" Padding="18,16">
                             <StackPanel>
                                 <TextBlock Style="{StaticResource H2}" FontSize="15" Text="{loc:Loc Dashboard_MasseTrend}" />
                                 <TextBlock Style="{StaticResource Caption}" Margin="0,2,0,0" Text="{loc:Loc Dashboard_Last6Months}" />
-                                <!-- Keep the time axis left→right even in Arabic (oldest→newest), so the
-                                     trend line never reads as a false decline under RTL mirroring. -->
                                 <Polyline Points="{Binding MasseTrendPoints}" Stretch="Fill" Height="52" Margin="0,16,0,4"
                                           FlowDirection="LeftToRight"
                                           Stroke="{DynamicResource Brand}" StrokeThickness="1.6"
@@ -253,51 +286,64 @@
                             </StackPanel>
                         </Border>
 
-                        <!-- Autres indicateurs: calm secondary grid -->
+                        <!-- Secondary indicators in NAMED groups -->
                         <Border Grid.Column="2" Style="{StaticResource Card}" Padding="18,16">
                             <StackPanel>
-                                <TextBlock Style="{StaticResource H2}" FontSize="15" Text="{loc:Loc Dashboard_MoreIndicators}" Margin="0,0,0,14" />
+                                <!-- Finances -->
+                                <TextBlock Style="{StaticResource SectionTitle}" Margin="0,0,0,10" Text="{loc:Loc Dashboard_Group_Finance}" />
                                 <UniformGrid Columns="3">
-                                    <Border Style="{StaticResource StatChip}"><StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_AvgSalary}" /><TextBlock Style="{StaticResource StatChipValue}" Foreground="{DynamicResource Salary}" Text="{Binding SalaireMoyen}" /></StackPanel></Border>
-                                    <Border Style="{StaticResource StatChip}"><StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_ActiveContracts}" /><TextBlock Style="{StaticResource StatChipValue}" Text="{Binding ActiveContracts}" /></StackPanel></Border>
-                                    <Border Style="{StaticResource StatChip}"><StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_LoanOutstanding}" /><TextBlock Style="{StaticResource StatChipValue}" Foreground="{DynamicResource Deduction}" Text="{Binding LoanOutstanding}" /></StackPanel></Border>
-                                    <Border Style="{StaticResource StatChip}"><StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_OnLeave}" /><TextBlock Style="{StaticResource StatChipValue}" Text="{Binding OnLeave}" /></StackPanel></Border>
-                                    <Border Style="{StaticResource StatChip}"><StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_OnMission}" /><TextBlock Style="{StaticResource StatChipValue}" Text="{Binding OnMission}" /></StackPanel></Border>
-                                    <Border Style="{StaticResource StatChip}"><StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_TrainingUpcoming}" /><TextBlock Style="{StaticResource StatChipValue}" Text="{Binding TrainingUpcoming}" /></StackPanel></Border>
-                                    <Border Style="{StaticResource StatChip}" Cursor="Hand"><Border.InputBindings><MouseBinding MouseAction="LeftClick" Command="{Binding OpenCommand}" CommandParameter="ats" /></Border.InputBindings><StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_OpenPostings}" /><TextBlock Style="{StaticResource StatChipValue}" Text="{Binding OpenPostings}" /></StackPanel></Border>
-                                    <Border Style="{StaticResource StatChip}" Cursor="Hand"><Border.InputBindings><MouseBinding MouseAction="LeftClick" Command="{Binding OpenCommand}" CommandParameter="ats" /></Border.InputBindings><StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_Candidates}" /><TextBlock Style="{StaticResource StatChipValue}" Text="{Binding Candidates}" /></StackPanel></Border>
-                                    <Border Style="{StaticResource StatChip}" Margin="0,0,0,10"><StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_AssetsAssigned}" /><TextBlock Style="{StaticResource StatChipValue}" Text="{Binding AssetsAssigned}" /></StackPanel></Border>
+                                    <Border Style="{StaticResource StatChip}"><Border.InputBindings><MouseBinding MouseAction="LeftClick" Command="{Binding OpenCommand}" CommandParameter="payroll" /></Border.InputBindings><StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_AvgSalary}" /><TextBlock Style="{StaticResource StatChipValue}" Foreground="{DynamicResource Salary}" Text="{Binding SalaireMoyen}" /></StackPanel></Border>
+                                    <Border Style="{StaticResource StatChip}"><Border.InputBindings><MouseBinding MouseAction="LeftClick" Command="{Binding OpenCommand}" CommandParameter="loans" /></Border.InputBindings><StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_LoanOutstanding}" /><TextBlock Style="{StaticResource StatChipValue}" Foreground="{DynamicResource Deduction}" Text="{Binding LoanOutstanding}" /></StackPanel></Border>
+                                    <Border Background="Transparent" />
+                                </UniformGrid>
+                                <!-- Contrats & effectif -->
+                                <TextBlock Style="{StaticResource SectionTitle}" Margin="0,6,0,10" Text="{loc:Loc Dashboard_Group_Contracts}" />
+                                <UniformGrid Columns="3">
+                                    <Border Style="{StaticResource StatChip}"><Border.InputBindings><MouseBinding MouseAction="LeftClick" Command="{Binding OpenCommand}" CommandParameter="contracts" /></Border.InputBindings><StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_ActiveContracts}" /><TextBlock Style="{StaticResource StatChipValue}" Text="{Binding ActiveContracts}" /></StackPanel></Border>
+                                    <Border Style="{StaticResource StatChip}"><Border.InputBindings><MouseBinding MouseAction="LeftClick" Command="{Binding OpenCommand}" CommandParameter="leave" /></Border.InputBindings><StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_OnLeave}" /><TextBlock Style="{StaticResource StatChipValue}" Text="{Binding OnLeave}" /></StackPanel></Border>
+                                    <Border Style="{StaticResource StatChip}"><Border.InputBindings><MouseBinding MouseAction="LeftClick" Command="{Binding OpenCommand}" CommandParameter="attendance" /></Border.InputBindings><StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_OnMission}" /><TextBlock Style="{StaticResource StatChipValue}" Text="{Binding OnMission}" /></StackPanel></Border>
+                                </UniformGrid>
+                                <!-- Recrutement & biens -->
+                                <TextBlock Style="{StaticResource SectionTitle}" Margin="0,6,0,10" Text="{loc:Loc Dashboard_Group_Recruitment}" />
+                                <UniformGrid Columns="4">
+                                    <Border Style="{StaticResource StatChip}"><Border.InputBindings><MouseBinding MouseAction="LeftClick" Command="{Binding OpenCommand}" CommandParameter="ats" /></Border.InputBindings><StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_OpenPostings}" /><TextBlock Style="{StaticResource StatChipValue}" Text="{Binding OpenPostings}" /></StackPanel></Border>
+                                    <Border Style="{StaticResource StatChip}"><Border.InputBindings><MouseBinding MouseAction="LeftClick" Command="{Binding OpenCommand}" CommandParameter="ats" /></Border.InputBindings><StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_Candidates}" /><TextBlock Style="{StaticResource StatChipValue}" Text="{Binding Candidates}" /></StackPanel></Border>
+                                    <Border Style="{StaticResource StatChip}"><Border.InputBindings><MouseBinding MouseAction="LeftClick" Command="{Binding OpenCommand}" CommandParameter="assets" /></Border.InputBindings><StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_AssetsAssigned}" /><TextBlock Style="{StaticResource StatChipValue}" Text="{Binding AssetsAssigned}" /></StackPanel></Border>
+                                    <Border Style="{StaticResource StatChip}" Margin="0,0,0,10"><Border.InputBindings><MouseBinding MouseAction="LeftClick" Command="{Binding OpenCommand}" CommandParameter="training" /></Border.InputBindings><StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_TrainingUpcoming}" /><TextBlock Style="{StaticResource StatChipValue}" Text="{Binding TrainingUpcoming}" /></StackPanel></Border>
                                 </UniformGrid>
                             </StackPanel>
                         </Border>
                     </Grid>
 
-                    <!-- Activity journal (audit trail) -->
-                    <Border Style="{StaticResource Card}" Padding="0" Margin="0,16,0,0">
+                    <!-- Activity journal (hidden entirely when there is nothing to show) -->
+                    <Border Style="{StaticResource Card}" Padding="0" Margin="0,16,0,0"
+                            Visibility="{Binding HasActivity, Converter={StaticResource BoolToVis}}">
                         <StackPanel>
                             <TextBlock Style="{StaticResource H2}" FontSize="15" Text="{loc:Loc Dashboard_ActivityLog}" Margin="16,14,16,8" />
-                            <ItemsControl ItemsSource="{Binding RecentActivity}" Margin="14,0,14,12">
+                            <ItemsControl ItemsSource="{Binding RecentActivity}" Margin="16,0,16,12">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Grid Margin="0,3">
-                                            <TextBlock Text="{Binding Text}" FontSize="12.5" HorizontalAlignment="Left" VerticalAlignment="Center" />
-                                            <TextBlock Text="{Binding Detail}" FontSize="11.5" Foreground="{DynamicResource TextSecondary}"
-                                                       HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                        <Grid Height="26">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="{Binding Text}" FontSize="12.5" VerticalAlignment="Center"
+                                                       TextTrimming="CharacterEllipsis" />
+                                            <Border Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="8,0,0,0"
+                                                    Background="{DynamicResource SurfaceMuted}" CornerRadius="8" Padding="6,1"
+                                                    Visibility="{Binding CountText, Converter={StaticResource NonEmptyToVis}}">
+                                                <TextBlock Text="{Binding CountText}" FontSize="10.5" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondary}" />
+                                            </Border>
+                                            <TextBlock Grid.Column="2" Text="{Binding Detail}" FontSize="11.5" Foreground="{DynamicResource TextSecondary}"
+                                                       VerticalAlignment="Center" HorizontalAlignment="Right" />
                                         </Grid>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
-                            <TextBlock Text="{loc:Loc Dashboard_NoActivity}" Foreground="{DynamicResource TextMuted}"
-                                       Margin="16,0,0,14" Visibility="{Binding HasActivity, Converter={StaticResource InverseBoolToVis}}" />
                         </StackPanel>
                     </Border>
-
-                    <!-- Quick actions -->
-                    <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
-                        <Button Style="{StaticResource SecondaryButton}" Content="{loc:Loc Employees_New}" Command="{Binding NewEmployeeCommand}" />
-                        <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="{loc:Loc Dashboard_AttendanceMatrix}" Command="{Binding AttendanceCommand}" />
-                        <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="{loc:Loc Dashboard_Leave}" Command="{Binding LeaveCommand}" />
-                    </StackPanel>
                 </StackPanel>
             </Grid>
         </Grid>

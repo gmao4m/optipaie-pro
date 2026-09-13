@@ -106,7 +106,14 @@
                             </ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Path Data="{Binding PathData}" Fill="{Binding Fill}" Stroke="{DynamicResource Surface}" StrokeThickness="2" />
+                                    <Path Data="{Binding PathData}" Fill="{Binding Fill}" Stroke="{DynamicResource Surface}" StrokeThickness="2"
+                                          Cursor="Hand" ToolTip="{loc:Loc Common_Open}">
+                                        <Path.InputBindings>
+                                            <MouseBinding MouseAction="LeftClick"
+                                                          Command="{Binding DataContext.OpenDeptCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                          CommandParameter="{Binding}" />
+                                        </Path.InputBindings>
+                                    </Path>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>

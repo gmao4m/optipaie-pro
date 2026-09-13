@@ -31,6 +31,10 @@ namespace OptiPaie.Core.Dtos
         public int PresentToday { get; set; }
         public int OnLeaveToday { get; set; }
         public int OnMissionToday { get; set; }
+
+        /// <summary>True when at least one attendance record exists for today — so the UI can tell a
+        /// real "0 present" (a day off / nobody in) from "no attendance entered yet".</summary>
+        public bool AttendanceRecordedToday { get; set; }
         public int OpenPostings { get; set; }
         public int Candidates { get; set; }
         public int AssetsAssigned { get; set; }

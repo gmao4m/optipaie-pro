@@ -1969,4 +1969,12 @@
   <data name="Dashboard_Loading" xml:space="preserve"><value>Chargement du tableau de bord…</value></data>
   <data name="Dashboard_NoCompany" xml:space="preserve"><value>Sélectionnez une société pour afficher le tableau de bord.</value></data>
   <data name="Dashboard_Overview" xml:space="preserve"><value>Vue d'ensemble</value></data>
+  <!-- Dashboard second pass: présence explainer, honest trend, period scope, indicator groups -->
+  <data name="Dashboard_NoAttendanceToday" xml:space="preserve"><value>Aucune présence saisie aujourd'hui</value></data>
+  <data name="Dashboard_MasseOver6Months" xml:space="preserve"><value>sur 6 mois</value></data>
+  <data name="Dashboard_Period" xml:space="preserve"><value>Période</value></data>
+  <data name="Dashboard_PeriodScope" xml:space="preserve"><value>Filtre les entrées, sorties et rotation. Les autres chiffres sont arrêtés à ce jour.</value></data>
+  <data name="Dashboard_Group_Finance" xml:space="preserve"><value>Finances</value></data>
+  <data name="Dashboard_Group_Contracts" xml:space="preserve"><value>Contrats &amp; effectif</value></data>
+  <data name="Dashboard_Group_Recruitment" xml:space="preserve"><value>Recrutement &amp; biens</value></data>
 </root>

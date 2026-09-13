@@ -1969,4 +1969,12 @@
   <data name="Dashboard_Loading" xml:space="preserve"><value>جارٍ تحميل لوحة القيادة…</value></data>
   <data name="Dashboard_NoCompany" xml:space="preserve"><value>اختر شركة لعرض لوحة القيادة.</value></data>
   <data name="Dashboard_Overview" xml:space="preserve"><value>نظرة عامة</value></data>
+  <!-- Dashboard second pass: présence explainer, honest trend, period scope, indicator groups -->
+  <data name="Dashboard_NoAttendanceToday" xml:space="preserve"><value>لم تُسجَّل أيّ حضور اليوم</value></data>
+  <data name="Dashboard_MasseOver6Months" xml:space="preserve"><value>خلال 6 أشهر</value></data>
+  <data name="Dashboard_Period" xml:space="preserve"><value>الفترة</value></data>
+  <data name="Dashboard_PeriodScope" xml:space="preserve"><value>تُصفّي التوظيفات والمغادرات ومعدّل الدوران. بقيّة الأرقام محتسَبة بتاريخ اليوم.</value></data>
+  <data name="Dashboard_Group_Finance" xml:space="preserve"><value>المالية</value></data>
+  <data name="Dashboard_Group_Contracts" xml:space="preserve"><value>العقود والتعداد</value></data>
+  <data name="Dashboard_Group_Recruitment" xml:space="preserve"><value>التوظيف والأصول</value></data>
 </root>
