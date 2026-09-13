@@ -282,6 +282,7 @@ namespace OptiPaie.Tests
 
             public JobPosting GetPostingById(long id) => _inner.GetPostingById(id);
             public IEnumerable<JobPosting> GetPostingsByCompany(long companyId) => _inner.GetPostingsByCompany(companyId);
+            public OptiPaie.Core.Dtos.RecruitmentCounts GetRecruitmentCounts(long companyId) => _inner.GetRecruitmentCounts(companyId);
             public long InsertPosting(JobPosting posting) => _inner.InsertPosting(posting);
             public void SoftDeletePosting(long id) => _inner.SoftDeletePosting(id);
             public Candidate GetCandidateById(long id) => _inner.GetCandidateById(id);

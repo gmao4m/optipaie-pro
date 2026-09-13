@@ -1953,4 +1953,20 @@
   <data name="Workforce_Sen_3_5" xml:space="preserve"><value>3–5 سنوات</value></data>
   <data name="Workforce_Sen_5_10" xml:space="preserve"><value>5–10 سنوات</value></data>
   <data name="Workforce_Sen_10P" xml:space="preserve"><value>10 سنوات فأكثر</value></data>
+  <!-- Dashboard redesign: currency, localized approval/deadline text, trend, states -->
+  <data name="Common_CurrencyDa" xml:space="preserve"><value>دج</value></data>
+  <data name="Dashboard_Deadline_ContractEnd" xml:space="preserve"><value>نهاية العقد — {0}</value></data>
+  <data name="Dashboard_Deadline_OnDate" xml:space="preserve"><value>بتاريخ {0}</value></data>
+  <data name="Dashboard_Countdown_Today" xml:space="preserve"><value>اليوم</value></data>
+  <data name="Dashboard_Countdown_InDays" xml:space="preserve"><value>خلال {0} يوم</value></data>
+  <data name="Dashboard_Approval_Leave" xml:space="preserve"><value>عطلة بانتظار الموافقة — {0}</value></data>
+  <data name="Dashboard_Approval_Interview" xml:space="preserve"><value>مقابلة للبرمجة — {0}</value></data>
+  <data name="Dashboard_Approval_Candidate" xml:space="preserve"><value>مترشّح قيد التوظيف</value></data>
+  <data name="Dashboard_MasseStable" xml:space="preserve"><value>مستقرّة على 6 أشهر</value></data>
+  <data name="Dashboard_VsPrevMonth" xml:space="preserve"><value>مقارنةً بالشهر السابق</value></data>
+  <data name="Dashboard_MasseRange" xml:space="preserve"><value>الأدنى–الأقصى: {0} – {1}</value></data>
+  <data name="Dashboard_MoreIndicators" xml:space="preserve"><value>مؤشرات أخرى</value></data>
+  <data name="Dashboard_Loading" xml:space="preserve"><value>جارٍ تحميل لوحة القيادة…</value></data>
+  <data name="Dashboard_NoCompany" xml:space="preserve"><value>اختر شركة لعرض لوحة القيادة.</value></data>
+  <data name="Dashboard_Overview" xml:space="preserve"><value>نظرة عامة</value></data>
 </root>

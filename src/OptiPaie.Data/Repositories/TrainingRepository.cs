@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Dapper;
 using OptiPaie.Core.Entities;
+using OptiPaie.Core.Enums;
 using OptiPaie.Core.Interfaces.Repositories;
 using OptiPaie.Data.Context;
 
@@ -30,6 +31,14 @@ namespace OptiPaie.Data.Repositories
                 "SELECT * FROM TrainingSessions WHERE CompanyId = @companyId AND IsDeleted = 0 " +
                 "ORDER BY StartDate DESC, Id DESC;",
                 new { companyId }, Transaction);
+        }
+
+        public int CountUpcoming(long companyId)
+        {
+            return Connection.ExecuteScalar<int>(
+                "SELECT COUNT(*) FROM TrainingSessions " +
+                "WHERE CompanyId = @companyId AND IsDeleted = 0 AND Status IN (@planned, @ongoing);",
+                new { companyId, planned = (int)TrainingStatus.Planned, ongoing = (int)TrainingStatus.Ongoing }, Transaction);
         }
 
         public long Insert(TrainingSession session)

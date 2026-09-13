@@ -14,6 +14,9 @@ namespace OptiPaie.Core.Interfaces.Repositories
         /// <summary>Sessions of a company, most recent first.</summary>
         IEnumerable<TrainingSession> GetByCompany(long companyId);
 
+        /// <summary>Number of upcoming (planned or ongoing) sessions of a company, in one COUNT query.</summary>
+        int CountUpcoming(long companyId);
+
         long Insert(TrainingSession session);
 
         void Update(TrainingSession session);

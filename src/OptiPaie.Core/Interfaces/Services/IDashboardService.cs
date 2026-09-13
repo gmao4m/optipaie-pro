@@ -17,6 +17,15 @@ namespace OptiPaie.Core.Interfaces.Services
         DashboardSnapshot Build(long companyId, int expiryWindowDays = 30);
 
         /// <summary>
+        /// The complete dashboard payload for ONE company in a single call (<paramref name="companyId"/>
+        /// MANDATORY, throws for &lt;= 0): payroll mass + trend, every module KPI, the workforce
+        /// analytics and the approval/deadline queues. Computed from one employee load plus SQL
+        /// aggregates (no N+1); designed to run off the UI thread. Flow figures span
+        /// [<paramref name="periodStart"/>, <paramref name="periodEnd"/>]; state figures are at today.
+        /// </summary>
+        DashboardOverview BuildOverview(long companyId, DateTime periodStart, DateTime periodEnd, int expiryWindowDays = 30);
+
+        /// <summary>
         /// Workforce (effectif) analytics for ONE company (<paramref name="companyId"/> MANDATORY, throws
         /// for &lt;= 0). State figures are at today; entries/exits/turnover span
         /// [<paramref name="periodStart"/>, <paramref name="periodEnd"/>]. Read-only; never touches payroll.

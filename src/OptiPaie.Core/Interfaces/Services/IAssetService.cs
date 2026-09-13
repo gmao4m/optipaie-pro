@@ -42,6 +42,9 @@ namespace OptiPaie.Core.Interfaces.Services
         /// <summary>Assets of a company with their current holders.</summary>
         IReadOnlyList<AssetSummary> GetByCompany(long companyId);
 
+        /// <summary>Number of currently-assigned assets of a company, in one COUNT query (dashboard).</summary>
+        int CountAssigned(long companyId);
+
         /// <summary>Assignment history of one asset.</summary>
         IReadOnlyList<AssetAssignmentSummary> GetHistory(long assetId);
 

@@ -3,21 +3,23 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
-using System.Windows;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Media;
 using OptiPaie.Core.Dtos;
-using OptiPaie.Core.Entities;
+using OptiPaie.Desktop.Common;
 using OptiPaie.Desktop.Composition;
 using OptiPaie.Desktop.Mvvm;
 
 namespace OptiPaie.Desktop.ViewModels
 {
     /// <summary>
-    /// The executive dashboard: a role-agnostic company-wide overview aggregated from
-    /// every HR module — KPIs, a single "à traiter" (approvals) queue and an upcoming
-    /// deadlines widget — with one-click navigation to the relevant module. Read-only;
-    /// it never touches payroll.
+    /// The executive dashboard: a role-agnostic, company-scoped overview built in ONE off-thread
+    /// call (<see cref="Core.Interfaces.Services.IDashboardService.BuildOverview"/>) so the UI never
+    /// freezes. It leads with a few headline figures and the two things a manager can act on
+    /// (approvals + deadlines), then the workforce analytics and payroll trend, then a calm strip of
+    /// secondary indicators. Read-only; it never touches payroll. Every displayed string is localized,
+    /// so the whole screen switches fully between French and Arabic.
     /// </summary>
     public sealed class DashboardViewModel : ObservableObject, IActivable
     {
@@ -25,13 +27,17 @@ namespace OptiPaie.Desktop.ViewModels
 
         private readonly AppServices _services;
         private readonly Action<string> _navigate;
+        private readonly Dictionary<string, CacheEntry> _cache = new Dictionary<string, CacheEntry>();
 
-        private string _employees = "0", _activeContracts = "0", _expiring = "0", _pendingLeave = "0";
-        private string _activeLoans = "0", _loanOutstanding = "0", _presentToday = "0", _onLeave = "0", _onMission = "0";
-        private string _openPostings = "0", _candidates = "0", _assetsAssigned = "0", _trainingUpcoming = "0", _companies = "0";
-        private string _masseSalariale = "0", _salaireMoyen = "0";
+        private bool _isLoading, _hasData, _noCompany;
+        private PeriodOption _period;
         private string _dateLabel = string.Empty;
-        private string _approvalsHeader = "À traiter", _deadlinesHeader = "Échéances à venir";
+        private string _masse = "—", _employees = "—", _presentToday = "—", _pendingCount = "0", _deadlineCount = "0";
+        private string _salaireMoyen = "—", _activeContracts = "0", _onLeave = "0", _onMission = "0", _loanOutstanding = "0";
+        private string _openPostings = "0", _candidates = "0", _assetsAssigned = "0", _trainingUpcoming = "0";
+        private string _approvalsHeader = string.Empty, _deadlinesHeader = string.Empty;
+        private string _masseTrendCaption = string.Empty, _masseRangeText = string.Empty;
+        private PointCollection _masseTrendPoints = new PointCollection();
 
         public DashboardViewModel(AppServices services, Action<string> navigate)
         {
@@ -39,7 +45,12 @@ namespace OptiPaie.Desktop.ViewModels
             _navigate = navigate;
             Workforce = new WorkforceViewModel(services);
 
-            RefreshCommand = new RelayCommand(Load);
+            Periods.Add(new PeriodOption("month", L("Workforce_Period_Month")));
+            Periods.Add(new PeriodOption("quarter", L("Workforce_Period_Quarter")));
+            Periods.Add(new PeriodOption("year", L("Workforce_Period_Year")));
+            _period = Periods[0];
+
+            RefreshCommand = new RelayCommand(() => Reload(useCache: false));
             OpenCommand = new RelayCommand(p => Open(p as string));
             NewPayrollCommand = new RelayCommand(() => _navigate("payroll"));
             NewEmployeeCommand = new RelayCommand(() => _navigate("employees"));
@@ -47,52 +58,59 @@ namespace OptiPaie.Desktop.ViewModels
             LeaveCommand = new RelayCommand(() => _navigate("leave"));
         }
 
+        // ── header ──
         public string Greeting => _services.Localization.GetString("Shell_Nav_Dashboard");
         public string DateLabel { get => _dateLabel; private set => Set(ref _dateLabel, value); }
 
-        private string L(string key) => _services.Localization.GetString(key);
+        // ── loading / empty state ──
+        public bool IsLoading { get => _isLoading; private set { if (Set(ref _isLoading, value)) Raise(nameof(IsContentVisible)); } }
+        public bool NoCompany { get => _noCompany; private set { if (Set(ref _noCompany, value)) Raise(nameof(IsContentVisible)); } }
+        public bool IsContentVisible => !_isLoading && !_noCompany;
 
-        public string Companies { get => _companies; private set => Set(ref _companies, value); }
+        // ── period ──
+        public ObservableCollection<PeriodOption> Periods { get; } = new ObservableCollection<PeriodOption>();
+        public PeriodOption SelectedPeriod
+        {
+            get => _period;
+            set { if (Set(ref _period, value) && value != null && _hasData) Reload(useCache: true); }
+        }
+
+        // ── hero KPIs ──
+        public string MasseSalariale { get => _masse; private set => Set(ref _masse, value); }
         public string Employees { get => _employees; private set => Set(ref _employees, value); }
-        public string ActiveContracts { get => _activeContracts; private set => Set(ref _activeContracts, value); }
-        public string Expiring { get => _expiring; private set => Set(ref _expiring, value); }
-        public string PendingLeave { get => _pendingLeave; private set => Set(ref _pendingLeave, value); }
-        public string ActiveLoans { get => _activeLoans; private set => Set(ref _activeLoans, value); }
-        public string LoanOutstanding { get => _loanOutstanding; private set => Set(ref _loanOutstanding, value); }
         public string PresentToday { get => _presentToday; private set => Set(ref _presentToday, value); }
+        public string PendingCount { get => _pendingCount; private set => Set(ref _pendingCount, value); }
+        public string DeadlineCount { get => _deadlineCount; private set => Set(ref _deadlineCount, value); }
+
+        // ── secondary indicators ──
+        public string SalaireMoyen { get => _salaireMoyen; private set => Set(ref _salaireMoyen, value); }
+        public string ActiveContracts { get => _activeContracts; private set => Set(ref _activeContracts, value); }
         public string OnLeave { get => _onLeave; private set => Set(ref _onLeave, value); }
         public string OnMission { get => _onMission; private set => Set(ref _onMission, value); }
+        public string LoanOutstanding { get => _loanOutstanding; private set => Set(ref _loanOutstanding, value); }
         public string OpenPostings { get => _openPostings; private set => Set(ref _openPostings, value); }
         public string Candidates { get => _candidates; private set => Set(ref _candidates, value); }
         public string AssetsAssigned { get => _assetsAssigned; private set => Set(ref _assetsAssigned, value); }
         public string TrainingUpcoming { get => _trainingUpcoming; private set => Set(ref _trainingUpcoming, value); }
 
-        /// <summary>Total monthly base-salary mass (masse salariale) of the active company.</summary>
-        public string MasseSalariale { get => _masseSalariale; private set => Set(ref _masseSalariale, value); }
+        // ── payroll trend ──
+        public PointCollection MasseTrendPoints { get => _masseTrendPoints; private set => Set(ref _masseTrendPoints, value); }
+        public string MasseTrendCaption { get => _masseTrendCaption; private set => Set(ref _masseTrendCaption, value); }
+        public string MasseRangeText { get => _masseRangeText; private set => Set(ref _masseRangeText, value); }
 
-        /// <summary>Average base salary across the active company's employees.</summary>
-        public string SalaireMoyen { get => _salaireMoyen; private set => Set(ref _salaireMoyen, value); }
-
-        /// <summary>Masse salariale over the last 6 months (bar chart).</summary>
-        public ObservableCollection<SalaryBar> SalaryTrend { get; } = new ObservableCollection<SalaryBar>();
-
-        /// <summary>Employee distribution by department (donut chart + legend).</summary>
-        public ObservableCollection<DeptSlice> DeptSlices { get; } = new ObservableCollection<DeptSlice>();
-
-        public bool HasChartData => DeptSlices.Count > 0;
-
-        /// <summary>The workforce (effectif) analytics section shown at the top of the board.</summary>
+        // ── workforce analytics panel ──
         public WorkforceViewModel Workforce { get; }
 
+        // ── action queues ──
         public string ApprovalsHeader { get => _approvalsHeader; private set => Set(ref _approvalsHeader, value); }
         public string DeadlinesHeader { get => _deadlinesHeader; private set => Set(ref _deadlinesHeader, value); }
-
-        public ObservableCollection<ApprovalItem> Approvals { get; } = new ObservableCollection<ApprovalItem>();
-        public ObservableCollection<DeadlineItem> Deadlines { get; } = new ObservableCollection<DeadlineItem>();
-        public ObservableCollection<ActivityLine> RecentActivity { get; } = new ObservableCollection<ActivityLine>();
-
+        public ObservableCollection<QueueRow> Approvals { get; } = new ObservableCollection<QueueRow>();
+        public ObservableCollection<QueueRow> Deadlines { get; } = new ObservableCollection<QueueRow>();
         public bool HasApprovals => Approvals.Count > 0;
         public bool HasDeadlines => Deadlines.Count > 0;
+
+        // ── activity journal ──
+        public ObservableCollection<ActivityLine> RecentActivity { get; } = new ObservableCollection<ActivityLine>();
         public bool HasActivity => RecentActivity.Count > 0;
 
         public ICommand RefreshCommand { get; }
@@ -102,45 +120,124 @@ namespace OptiPaie.Desktop.ViewModels
         public ICommand AttendanceCommand { get; }
         public ICommand LeaveCommand { get; }
 
-        public void OnActivated() => Load();
+        public void OnActivated() => Reload(useCache: true);
 
-        private void Load()
+        /// <summary>
+        /// Builds and applies the overview SYNCHRONOUSLY on the calling thread. Production always uses
+        /// the off-thread <see cref="OnActivated"/> path; this exists only for headless rendering and
+        /// tests, where there is no dispatcher loop to marshal an async continuation back onto.
+        /// </summary>
+        public void LoadSynchronouslyForRender()
+        {
+            Raise(nameof(Greeting));
+            DateLabel = Capitalize(DateTime.Now.ToString("dddd d MMMM yyyy", _services.Localization.CurrentCulture));
+
+            long companyId = _services.CompanyContext.ActiveId;
+            if (companyId <= 0) { NoCompany = true; IsLoading = false; return; }
+            NoCompany = false;
+
+            DateTime today = DateTime.Today;
+            DashboardOverview ov = _services.Dashboard.BuildOverview(companyId, PeriodStart(_period?.Key, today), today, 30);
+            var activity = _services.Audit.GetRecentForCompany(companyId, 12).ToList();
+            ApplyOverview(ov, activity);
+            IsLoading = false;
+            _hasData = true;
+        }
+
+        private async void Reload(bool useCache)
         {
             Raise(nameof(Greeting));
             CultureInfo culture = _services.Localization.CurrentCulture;
             DateLabel = Capitalize(DateTime.Now.ToString("dddd d MMMM yyyy", culture));
 
-            // The dashboard is strictly scoped to the active company (never all companies).
             long companyId = _services.CompanyContext.ActiveId;
             if (companyId <= 0)
             {
-                // No active company yet — show nothing rather than a cross-company or zero total.
+                NoCompany = true;
+                IsLoading = false;
                 return;
             }
+            NoCompany = false;
 
-            DashboardSnapshot s = _services.Dashboard.Build(companyId, 30);
+            DateTime today = DateTime.Today;
+            DateTime start = PeriodStart(_period?.Key, today);
+            string key = companyId + "|" + (_period?.Key ?? "month");
 
-            Employees = s.Employees.ToString();
-            ActiveContracts = s.ActiveContracts.ToString();
-            Expiring = s.ContractsExpiringSoon.ToString();
-            PendingLeave = s.PendingLeave.ToString();
-            ActiveLoans = s.ActiveLoans.ToString();
-            LoanOutstanding = s.LoanOutstanding.ToString("N0", Fr);
-            PresentToday = s.PresentToday.ToString();
-            OnLeave = s.OnLeaveToday.ToString();
-            OnMission = s.OnMissionToday.ToString();
-            OpenPostings = s.OpenPostings.ToString();
-            Candidates = s.Candidates.ToString();
-            AssetsAssigned = s.AssetsAssigned.ToString();
-            TrainingUpcoming = s.TrainingUpcoming.ToString();
+            // Show a cached snapshot instantly (no freeze, no skeleton) then refresh in the background;
+            // otherwise show the skeleton while the first build runs.
+            if (useCache && _cache.TryGetValue(key, out CacheEntry cached))
+            {
+                ApplyOverview(cached.Overview, cached.Activity);
+                IsLoading = false;
+            }
+            else if (!_hasData)
+            {
+                IsLoading = true;
+            }
 
+            try
+            {
+                CacheEntry fresh = await Task.Run(() =>
+                {
+                    DashboardOverview ov = _services.Dashboard.BuildOverview(companyId, start, today, 30);
+                    var activity = _services.Audit.GetRecentForCompany(companyId, 12).ToList();
+                    return new CacheEntry { Overview = ov, Activity = activity };
+                }).ConfigureAwait(true);
+
+                _cache[key] = fresh;
+                ApplyOverview(fresh.Overview, fresh.Activity);
+                _hasData = true;
+            }
+            catch (Exception ex)
+            {
+                // Never let the dashboard take the app down: log and leave the last good content.
+                CrashLog.Fatal("DashboardViewModel.Reload", ex);
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        private void ApplyOverview(DashboardOverview o, IReadOnlyList<Core.Entities.AuditEntry> activity)
+        {
+            // Hero.
+            MasseSalariale = FormatDa(o.MasseSalariale);
+            Employees = o.Workforce.Headcount.ToString(Fr);
+            PresentToday = o.PresentToday.ToString(Fr);
+            PendingCount = o.Approvals.Count.ToString(Fr);
+            DeadlineCount = o.Deadlines.Count.ToString(Fr);
+
+            // Secondary indicators.
+            SalaireMoyen = FormatDa(o.SalaireMoyen);
+            ActiveContracts = o.ActiveContracts.ToString(Fr);
+            OnLeave = o.OnLeaveToday.ToString(Fr);
+            OnMission = o.OnMissionToday.ToString(Fr);
+            LoanOutstanding = FormatDa(o.LoanOutstanding);
+            OpenPostings = o.OpenPostings.ToString(Fr);
+            Candidates = o.Candidates.ToString(Fr);
+            AssetsAssigned = o.AssetsAssigned.ToString(Fr);
+            TrainingUpcoming = o.TrainingUpcoming.ToString(Fr);
+
+            // Payroll trend (revealing scale + honest "stable" when flat).
+            BuildTrend(o.MasseTrend);
+
+            // Workforce analytics panel.
+            Workforce.Apply(o.Workforce);
+
+            // Approvals + deadlines (localized here — the DTOs are language-neutral).
             Approvals.Clear();
-            foreach (ApprovalItem a in s.Approvals) Approvals.Add(a);
+            foreach (ApprovalItem a in o.Approvals) Approvals.Add(BuildApproval(a));
             Deadlines.Clear();
-            foreach (DeadlineItem d in s.Deadlines) Deadlines.Add(d);
+            foreach (DeadlineItem d in o.Deadlines) Deadlines.Add(BuildDeadline(d));
+            ApprovalsHeader = L("Dashboard_Approvals") + (Approvals.Count > 0 ? " (" + Approvals.Count + ")" : string.Empty);
+            DeadlinesHeader = L("Dashboard_Deadlines") + (Deadlines.Count > 0 ? " (" + Deadlines.Count + ")" : string.Empty);
+            Raise(nameof(HasApprovals));
+            Raise(nameof(HasDeadlines));
 
+            // Activity journal.
             RecentActivity.Clear();
-            foreach (Core.Entities.AuditEntry e in _services.Audit.GetRecentForCompany(companyId, 12))
+            foreach (Core.Entities.AuditEntry e in activity ?? new List<Core.Entities.AuditEntry>())
             {
                 RecentActivity.Add(new ActivityLine
                 {
@@ -150,140 +247,76 @@ namespace OptiPaie.Desktop.ViewModels
                              (string.IsNullOrWhiteSpace(e.Actor) ? string.Empty : " · " + e.Actor)
                 });
             }
-
-            ApprovalsHeader = L("Dashboard_Approvals") + (Approvals.Count > 0 ? " (" + Approvals.Count + ")" : string.Empty);
-            DeadlinesHeader = L("Dashboard_Deadlines") + (Deadlines.Count > 0 ? " (" + Deadlines.Count + ")" : string.Empty);
-            Raise(nameof(HasApprovals));
-            Raise(nameof(HasDeadlines));
             Raise(nameof(HasActivity));
-
-            BuildSalaryWidgets();
-            Workforce.Load();
         }
 
-        /// <summary>
-        /// Computes the payroll KPIs and the two charts (masse salariale trend + department
-        /// distribution) for the active company. Read-only aggregation of base salaries — it
-        /// never runs the payroll engine.
-        /// </summary>
-        private void BuildSalaryWidgets()
+        private QueueRow BuildApproval(ApprovalItem a)
         {
-            SalaryTrend.Clear();
-            DeptSlices.Clear();
-
-            long companyId = _services.CompanyContext.ActiveId;
-            if (companyId <= 0)
+            string name = string.IsNullOrWhiteSpace(a.EmployeeName) ? "—" : a.EmployeeName;
+            if (a.Kind == "recruitment")
             {
-                MasseSalariale = SalaireMoyen = "0";
-                Raise(nameof(HasChartData));
-                return;
-            }
-
-            IReadOnlyList<Employee> active = _services.Employees.GetByCompany(companyId, false);
-            decimal masse = active.Sum(e => e.BaseSalary);
-            MasseSalariale = FormatDa(masse);
-            SalaireMoyen = FormatDa(active.Count > 0 ? Math.Round(masse / active.Count) : 0m);
-
-            // Masse salariale over the last 6 months, reconstructed from hire/exit dates (the
-            // roster including leavers, so a month reflects who was actually employed then).
-            IReadOnlyList<Employee> roster = _services.Employees.GetByCompany(companyId, true);
-            CultureInfo culture = _services.Localization.CurrentCulture;
-            DateTime firstThisMonth = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
-            var monthly = new List<decimal>();
-            var labels = new List<string>();
-            for (int i = 5; i >= 0; i--)
-            {
-                DateTime start = firstThisMonth.AddMonths(-i);
-                DateTime end = start.AddMonths(1).AddDays(-1);
-                decimal amt = roster.Where(e => e.HireDate.Date <= end && (e.ExitDate == null || e.ExitDate.Value.Date >= start))
-                                    .Sum(e => e.BaseSalary);
-                monthly.Add(amt);
-                labels.Add(Capitalize(start.ToString("MMM", culture)));
-            }
-
-            decimal peak = monthly.Count > 0 ? monthly.Max() : 0m;
-            if (peak <= 0m) peak = 1m;
-            Brush barBrush = Res("Brand", Color.FromRgb(0x0E, 0x9F, 0x6E));
-            for (int i = 0; i < monthly.Count; i++)
-            {
-                // Zero-based: bar height is proportional to the absolute masse salariale (0 DA → 0 px),
-                // so a small change reads as a small change rather than a min↔max exaggeration.
-                double frac = (double)(monthly[i] / peak);
-                SalaryTrend.Add(new SalaryBar
+                return new QueueRow
                 {
-                    MonthLabel = labels[i],
-                    HeightPx = frac * 152.0,
-                    AmountText = (monthly[i] / 1000m).ToString("N0", Fr) + " K",
-                    Fill = barBrush
-                });
+                    Title = string.Format(L("Dashboard_Approval_Interview"), name),
+                    Detail = L("Dashboard_Approval_Candidate"),
+                    ModuleKey = a.ModuleKey
+                };
             }
-
-            // Department distribution donut (largest slice first).
-            var groups = active
-                .GroupBy(e => string.IsNullOrWhiteSpace(e.Department) ? "—" : e.Department.Trim())
-                .Select(g => new { Name = g.Key, Count = g.Count() })
-                .OrderByDescending(g => g.Count)
-                .ToList();
-
-            int total = groups.Sum(g => g.Count);
-            Brush[] palette =
+            string detail = a.StartDate.HasValue && a.EndDate.HasValue
+                ? a.StartDate.Value.ToString("dd/MM/yyyy", Fr) + " → " + a.EndDate.Value.ToString("dd/MM/yyyy", Fr)
+                : string.Empty;
+            return new QueueRow
             {
-                Res("Brand", Color.FromRgb(0x0E, 0x9F, 0x6E)),
-                Res("Accent", Color.FromRgb(0xE3, 0xB3, 0x41)),
-                Res("Salary", Color.FromRgb(0x0E, 0x9F, 0x6E)),
-                Res("Warning", Color.FromRgb(0xC0, 0x8A, 0x2E)),
-                Res("Employer", Color.FromRgb(0x6C, 0x87, 0xEC)),
-                Res("Deduction", Color.FromRgb(0xE5, 0x48, 0x4D))
+                Title = string.Format(L("Dashboard_Approval_Leave"), name),
+                Detail = detail,
+                ModuleKey = a.ModuleKey
             };
+        }
 
-            double angle = -90.0; // start at 12 o'clock
-            int ci = 0;
-            foreach (var g in groups)
+        private QueueRow BuildDeadline(DeadlineItem d)
+        {
+            string name = string.IsNullOrWhiteSpace(d.EmployeeName) ? "—" : d.EmployeeName;
+            string countdown = d.DaysLeft == 0
+                ? L("Dashboard_Countdown_Today")
+                : string.Format(L("Dashboard_Countdown_InDays"), d.DaysLeft);
+            return new QueueRow
             {
-                double frac = total > 0 ? (double)g.Count / total : 0.0;
-                double sweep = frac * 360.0;
-                if (sweep >= 359.9) sweep = 359.9; // a single full ring can't be one arc
-                DeptSlices.Add(new DeptSlice
-                {
-                    Name = g.Name,
-                    Count = g.Count,
-                    CountText = g.Count.ToString(),
-                    PercentText = Math.Round(frac * 100).ToString("0", Fr) + "%",
-                    Fill = palette[ci % palette.Length],
-                    PathData = DonutArc(96, 96, 84, 52, angle, angle + sweep)
-                });
-                angle += sweep;
-                ci++;
+                Title = string.Format(L("Dashboard_Deadline_ContractEnd"), name),
+                Detail = string.Format(L("Dashboard_Deadline_OnDate"), d.Date.ToString("dd/MM/yyyy", Fr)) + "  ·  " + countdown,
+                ModuleKey = d.ModuleKey
+            };
+        }
+
+        private void BuildTrend(IReadOnlyList<MonthlyMass> trend)
+        {
+            var pts = new PointCollection();
+            if (trend == null || trend.Count == 0) { MasseTrendPoints = pts; MasseTrendCaption = string.Empty; MasseRangeText = string.Empty; return; }
+
+            List<decimal> vals = trend.Select(m => m.Amount).ToList();
+            decimal min = vals.Min(), max = vals.Max(), cur = vals.Last(), prev = vals.Count > 1 ? vals[vals.Count - 2] : cur;
+            double range = (double)(max - min);
+
+            const double w = 100.0, h = 30.0, pad = 3.0;
+            for (int i = 0; i < vals.Count; i++)
+            {
+                double x = vals.Count > 1 ? i / (double)(vals.Count - 1) * w : w / 2;
+                double y = range <= 0 ? h / 2 : (h - pad) - (double)(vals[i] - min) / range * (h - 2 * pad);
+                pts.Add(new System.Windows.Point(x, y));
             }
+            MasseTrendPoints = pts;
 
-            Raise(nameof(HasChartData));
-        }
-
-        private string FormatDa(decimal amount) => amount.ToString("N0", Fr) + " DA";
-
-        /// <summary>Resolves a themed brush by resource key, falling back to a fixed colour headlessly.</summary>
-        private static Brush Res(string key, Color fallback)
-        {
-            Brush b = Application.Current != null ? Application.Current.TryFindResource(key) as Brush : null;
-            if (b != null) return b;
-            var solid = new SolidColorBrush(fallback);
-            solid.Freeze();
-            return solid;
-        }
-
-        /// <summary>Builds the SVG-style path for one donut ring segment (angles in degrees, clockwise from top).</summary>
-        private static string DonutArc(double cx, double cy, double outerR, double innerR, double a0, double a1)
-        {
-            CultureInfo ci = CultureInfo.InvariantCulture;
-            double r0 = a0 * Math.PI / 180.0, r1 = a1 * Math.PI / 180.0;
-            double ox0 = cx + outerR * Math.Cos(r0), oy0 = cy + outerR * Math.Sin(r0);
-            double ox1 = cx + outerR * Math.Cos(r1), oy1 = cy + outerR * Math.Sin(r1);
-            double ix1 = cx + innerR * Math.Cos(r1), iy1 = cy + innerR * Math.Sin(r1);
-            double ix0 = cx + innerR * Math.Cos(r0), iy0 = cy + innerR * Math.Sin(r0);
-            int large = (a1 - a0) > 180.0 ? 1 : 0;
-            return string.Format(ci,
-                "M {0:0.##},{1:0.##} A {2:0.##},{2:0.##} 0 {3} 1 {4:0.##},{5:0.##} L {6:0.##},{7:0.##} A {8:0.##},{8:0.##} 0 {3} 0 {9:0.##},{10:0.##} Z",
-                ox0, oy0, outerR, large, ox1, oy1, ix1, iy1, innerR, ix0, iy0);
+            double variation = max > 0 ? (double)((max - min) / max) : 0.0;
+            if (variation < 0.01)
+            {
+                MasseTrendCaption = L("Dashboard_MasseStable");
+            }
+            else
+            {
+                decimal delta = prev > 0 ? Math.Round((cur - prev) / prev * 100m, 1) : 0m;
+                string arrow = delta > 0 ? "▲" : delta < 0 ? "▼" : "";
+                MasseTrendCaption = (arrow + " " + Math.Abs(delta).ToString("0.#", Fr) + " % " + L("Dashboard_VsPrevMonth")).Trim();
+            }
+            MasseRangeText = string.Format(L("Dashboard_MasseRange"), FormatDa(min), FormatDa(max));
         }
 
         private void Open(string moduleKey)
@@ -291,10 +324,36 @@ namespace OptiPaie.Desktop.ViewModels
             if (!string.IsNullOrWhiteSpace(moduleKey)) _navigate(moduleKey);
         }
 
-        private static string Capitalize(string s)
+        private string FormatDa(decimal amount) => amount.ToString("N0", Fr) + " " + L("Common_CurrencyDa");
+        private string L(string key) => _services.Localization.GetString(key);
+
+        private static DateTime PeriodStart(string key, DateTime today)
         {
-            return string.IsNullOrEmpty(s) ? s : char.ToUpper(s[0], Fr) + s.Substring(1);
+            switch (key)
+            {
+                case "year": return new DateTime(today.Year, 1, 1);
+                case "quarter":
+                    int q = (today.Month - 1) / 3;
+                    return new DateTime(today.Year, q * 3 + 1, 1);
+                default: return new DateTime(today.Year, today.Month, 1);
+            }
         }
+
+        private static string Capitalize(string s) => string.IsNullOrEmpty(s) ? s : char.ToUpper(s[0], Fr) + s.Substring(1);
+
+        private sealed class CacheEntry
+        {
+            public DashboardOverview Overview { get; set; }
+            public IReadOnlyList<Core.Entities.AuditEntry> Activity { get; set; }
+        }
+    }
+
+    /// <summary>One localized, clickable row in the approvals or deadlines queue.</summary>
+    public sealed class QueueRow
+    {
+        public string Title { get; set; }
+        public string Detail { get; set; }
+        public string ModuleKey { get; set; }
     }
 
     /// <summary>One line of the dashboard activity journal (from the audit trail).</summary>
@@ -304,23 +363,11 @@ namespace OptiPaie.Desktop.ViewModels
         public string Detail { get; set; }
     }
 
-    /// <summary>One bar of the masse-salariale trend chart.</summary>
-    public sealed class SalaryBar
+    /// <summary>A period choice for the flow figures (entries/exits/turnover).</summary>
+    public sealed class PeriodOption
     {
-        public string MonthLabel { get; set; }
-        public double HeightPx { get; set; }
-        public string AmountText { get; set; }
-        public Brush Fill { get; set; }
-    }
-
-    /// <summary>One department segment of the distribution donut (+ its legend row).</summary>
-    public sealed class DeptSlice
-    {
-        public string Name { get; set; }
-        public int Count { get; set; }
-        public string CountText { get; set; }
-        public string PercentText { get; set; }
-        public string PathData { get; set; }
-        public Brush Fill { get; set; }
+        public PeriodOption(string key, string label) { Key = key; Label = label; }
+        public string Key { get; }
+        public string Label { get; }
     }
 }

@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using Dapper;
+using OptiPaie.Core.Dtos;
 using OptiPaie.Core.Entities;
+using OptiPaie.Core.Enums;
 using OptiPaie.Core.Interfaces.Repositories;
 using OptiPaie.Data.Context;
 
@@ -41,6 +43,42 @@ namespace OptiPaie.Data.Repositories
                 "WHERE e.CompanyId = @companyId AND e.IsDeleted = 0 AND l.IsDeleted = 0 " +
                 "ORDER BY l.Status, e.LastNameFr, e.FirstNameFr, l.Id DESC;",
                 new { companyId }, Transaction);
+        }
+
+        public LoanPortfolio GetActivePortfolio(long companyId)
+        {
+            // ONE flat query: every active loan of the company joined to its (non-deleted)
+            // repayments. Money is stored as invariant TEXT, so a SQL SUM would be REAL-lossy —
+            // we fold the exact decimals in memory instead (Principal − Σrepayments, clamped at 0,
+            // exactly like LoanService.Summarise). Still a single round-trip, no per-loan query.
+            const string sql =
+                "SELECT l.Id AS LoanId, l.Principal AS Principal, r.Amount AS Repayment " +
+                "FROM Loans l " +
+                "INNER JOIN Employees e ON e.Id = l.EmployeeId " +
+                "LEFT JOIN LoanRepayments r ON r.LoanId = l.Id AND r.IsDeleted = 0 " +
+                "WHERE e.CompanyId = @companyId AND e.IsDeleted = 0 AND l.IsDeleted = 0 AND l.Status = @active;";
+
+            var byLoan = new Dictionary<long, decimal[]>(); // [0] principal, [1] repaid
+            foreach (LoanRow row in Connection.Query<LoanRow>(sql, new { companyId, active = (int)LoanStatus.Active }, Transaction))
+            {
+                if (!byLoan.TryGetValue(row.LoanId, out decimal[] acc))
+                {
+                    acc = new[] { row.Principal, 0m };
+                    byLoan[row.LoanId] = acc;
+                }
+                acc[1] += row.Repayment ?? 0m;
+            }
+
+            decimal outstanding = 0m;
+            foreach (decimal[] acc in byLoan.Values) outstanding += Math.Max(0m, acc[0] - acc[1]);
+            return new LoanPortfolio { ActiveCount = byLoan.Count, TotalOutstanding = outstanding };
+        }
+
+        private sealed class LoanRow
+        {
+            public long LoanId { get; set; }
+            public decimal Principal { get; set; }
+            public decimal? Repayment { get; set; }
         }
 
         public long Insert(Loan loan)

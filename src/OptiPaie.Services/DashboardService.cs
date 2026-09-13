@@ -12,15 +12,15 @@ using OptiPaie.Core.Licensing;
 namespace OptiPaie.Services
 {
     /// <summary>
-    /// Executive dashboard aggregation. Reads every HR module through its own service —
-    /// no direct SQL, no writes, and never any contact with the payroll engine — and
-    /// rolls a company-wide snapshot: KPIs, upcoming deadlines and a single approvals
-    /// queue. Iterating the companies is cheap for a desktop install.
+    /// Executive dashboard aggregation. Reads every HR module — never the payroll engine, never a
+    /// write — and rolls a company-wide overview: payroll mass, module KPIs, workforce analytics and
+    /// the approval/deadline queues. The load path (<see cref="BuildOverview"/>) reads the employee
+    /// roster ONCE and uses single SQL aggregates for the module counts (no N+1), so it stays cheap
+    /// as the company grows and can run off the UI thread. Everything it returns is language-neutral;
+    /// the view-model formats and localizes.
     /// </summary>
     public sealed class DashboardService : IDashboardService
     {
-        private static readonly CultureInfo Fr = CultureInfo.GetCultureInfo("fr-FR");
-
         private readonly ICompanyService _companies;
         private readonly IEmployeeService _employees;
         private readonly IContractService _contracts;
@@ -53,124 +53,169 @@ namespace OptiPaie.Services
             _training = Guard.AgainstNull(training, nameof(training));
         }
 
+        // ------------------------------------------------------------------ snapshot (compat)
+
+        /// <summary>
+        /// Legacy company snapshot. Delegates to <see cref="BuildOverview"/> (single computation
+        /// path, so the counts never drift) and projects the overlapping fields.
+        /// </summary>
         public DashboardSnapshot Build(long companyId, int expiryWindowDays = 30)
         {
-            // A valid active company is MANDATORY — the dashboard is strictly single-company,
-            // never an all-companies total (that would leak one client's data into another's).
-            if (companyId <= 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(companyId),
-                    "Une société active est obligatoire pour le tableau de bord (jamais « toutes »).");
-            }
-
-            var snapshot = new DashboardSnapshot();
             DateTime today = DateTime.Today;
-            int year = today.Year;
+            DashboardOverview o = BuildOverview(companyId, new DateTime(today.Year, today.Month, 1), today, expiryWindowDays);
 
-            // Employee names (for approval/deadline labels) — from the shared record.
-            var names = _employees.GetByCompany(companyId)
-                .ToDictionary(e => e.Id, e => (e.LastNameFr + " " + e.FirstNameFr).Trim());
-
-            snapshot.Employees = _employees.GetByCompany(companyId, false).Count;
-
-            // Contracts.
-            foreach (ContractSummary c in _contracts.GetByCompany(companyId))
+            return new DashboardSnapshot
             {
-                if (c.Status == ContractStatus.Active) snapshot.ActiveContracts++;
-            }
+                Employees = o.Workforce.Headcount,
+                ActiveContracts = o.ActiveContracts,
+                ContractsExpiringSoon = o.ContractsExpiringSoon,
+                PendingLeave = o.PendingLeave,
+                ActiveLoans = o.ActiveLoans,
+                LoanOutstanding = o.LoanOutstanding,
+                PresentToday = o.PresentToday,
+                OnLeaveToday = o.OnLeaveToday,
+                OnMissionToday = o.OnMissionToday,
+                OpenPostings = o.OpenPostings,
+                Candidates = o.Candidates,
+                AssetsAssigned = o.AssetsAssigned,
+                TrainingUpcoming = o.TrainingUpcoming,
+                Deadlines = o.Deadlines.ToList(),
+                Approvals = o.Approvals.ToList()
+            };
+        }
 
-            foreach (ContractSummary c in _contracts.GetExpiring(companyId, expiryWindowDays))
-            {
-                snapshot.ContractsExpiringSoon++;
-                snapshot.Deadlines.Add(new DeadlineItem
-                {
-                    Kind = "contract",
-                    Title = "Fin de contrat — " + (c.EmployeeName ?? "—"),
-                    Detail = "Le " + (c.EndDate.HasValue ? c.EndDate.Value.ToString("dd/MM/yyyy", Fr) : "—") +
-                             (c.DaysUntilExpiry.HasValue ? " (" + Countdown(c.DaysUntilExpiry.Value) + ")" : string.Empty),
-                    Date = c.EndDate ?? today,
-                    DaysLeft = c.DaysUntilExpiry ?? 0,
-                    ModuleKey = ModuleKeys.Contracts
-                });
-            }
+        // ------------------------------------------------------------------ consolidated overview
 
-            // Leave — pending approvals.
-            foreach (LeaveRequest l in _leave.GetByCompanyYear(companyId, year))
-            {
-                if (l.Status != LeaveStatus.Pending) continue;
-                snapshot.PendingLeave++;
-                names.TryGetValue(l.EmployeeId, out string name);
-                snapshot.Approvals.Add(new ApprovalItem
-                {
-                    Kind = "leave",
-                    Title = "Congé à approuver — " + (name ?? "—"),
-                    Detail = l.StartDate.ToString("dd/MM/yyyy", Fr) + " → " + l.EndDate.ToString("dd/MM/yyyy", Fr),
-                    ModuleKey = ModuleKeys.Leave
-                });
-            }
+        public DashboardOverview BuildOverview(long companyId, DateTime periodStart, DateTime periodEnd, int expiryWindowDays = 30)
+        {
+            RequireCompany(companyId);
 
-            // Loans.
-            foreach (LoanSummary loan in _loans.GetByCompany(companyId))
-            {
-                if (loan.Status != LoanStatus.Active) continue;
-                snapshot.ActiveLoans++;
-                snapshot.LoanOutstanding += loan.Outstanding;
-            }
+            DateTime today = DateTime.Today;
+            DateTime start = periodStart.Date;
+            DateTime end = periodEnd.Date;
 
-            // Attendance — today's live snapshot.
+            // ── ONE employee read: the full roster (incl. leavers). "Active" is derived in memory,
+            //    so the whole board — headcount, masse, distributions, trend — costs a single query.
+            IReadOnlyList<Employee> roster = _employees.GetByCompany(companyId, true);
+            List<Employee> active = roster.Where(e => e.IsActive).ToList();
+
+            var o = new DashboardOverview { AsOf = today, PeriodStart = start, PeriodEnd = end };
+
+            // ── payroll (base salary only — never the engine) ──
+            decimal masse = active.Sum(e => e.BaseSalary);
+            o.MasseSalariale = masse;
+            o.SalaireMoyen = active.Count > 0 ? Math.Round(masse / active.Count) : 0m;
+            o.MasseTrend = BuildMasseTrend(roster, today);
+
+            // ── workforce analytics (from the already-loaded lists) ──
+            o.Workforce = BuildWorkforceCore(active, roster, start, end, today);
+
+            // ── module KPIs via single SQL aggregates (no N+1) ──
+            LoanPortfolio loans = _loans.GetActivePortfolio(companyId);
+            o.ActiveLoans = loans.ActiveCount;
+            o.LoanOutstanding = loans.TotalOutstanding;
+
+            RecruitmentCounts rec = _ats.GetRecruitmentCounts(companyId);
+            o.OpenPostings = rec.OpenPostings;
+            o.Candidates = rec.Candidates;
+
+            o.AssetsAssigned = _assets.CountAssigned(companyId);
+            o.TrainingUpcoming = _training.CountUpcoming(companyId);
+
+            // ── attendance today (one query, counted in memory — bounded by headcount) ──
             foreach (AttendanceRecord a in _attendance.GetCompanyDay(companyId, today))
             {
                 switch (a.Status)
                 {
                     case AttendanceStatus.Present:
                     case AttendanceStatus.Late:
-                        snapshot.PresentToday++;
+                        o.PresentToday++;
                         break;
                     case AttendanceStatus.Mission:
-                        snapshot.PresentToday++;
-                        snapshot.OnMissionToday++;
+                        o.PresentToday++;
+                        o.OnMissionToday++;
                         break;
                     case AttendanceStatus.Leave:
-                        snapshot.OnLeaveToday++;
+                        o.OnLeaveToday++;
                         break;
                 }
             }
 
-            // Recruitment.
-            foreach (JobPostingSummary p in _ats.GetPostingsByCompany(companyId))
+            // ── contracts: active count + upcoming expiries (fixed window, never overdue) ──
+            var deadlines = new List<DeadlineItem>();
+            int activeContracts = 0;
+            foreach (ContractSummary c in _contracts.GetByCompany(companyId))
             {
-                if (p.Status == JobStatus.Open) snapshot.OpenPostings++;
-                snapshot.Candidates += p.CandidateCount;
-            }
+                if (c.Status == ContractStatus.Active) activeContracts++;
 
-            // Candidates awaiting an interview → "À traiter".
+                if (c.Status == ContractStatus.Active && c.EndDate.HasValue && c.DaysUntilExpiry.HasValue
+                    && c.DaysUntilExpiry.Value >= 0 && c.DaysUntilExpiry.Value <= expiryWindowDays)
+                {
+                    deadlines.Add(new DeadlineItem
+                    {
+                        Kind = "contract",
+                        EmployeeName = c.EmployeeName,
+                        Date = c.EndDate.Value,
+                        DaysLeft = c.DaysUntilExpiry.Value,
+                        ModuleKey = ModuleKeys.Contracts
+                    });
+                }
+            }
+            o.ActiveContracts = activeContracts;
+            o.ContractsExpiringSoon = deadlines.Count;
+            o.Deadlines = deadlines.OrderBy(d => d.Date).Take(20).ToList();
+
+            // ── approvals: pending leave + interviews to schedule ──
+            var names = roster.ToDictionary(e => e.Id, e => (e.LastNameFr + " " + e.FirstNameFr).Trim());
+            var approvals = new List<ApprovalItem>();
+            int pendingLeave = 0;
+            foreach (LeaveRequest l in _leave.GetByCompanyYear(companyId, today.Year))
+            {
+                if (l.Status != LeaveStatus.Pending) continue;
+                pendingLeave++;
+                names.TryGetValue(l.EmployeeId, out string name);
+                approvals.Add(new ApprovalItem
+                {
+                    Kind = "leave",
+                    EmployeeName = name,
+                    StartDate = l.StartDate,
+                    EndDate = l.EndDate,
+                    ModuleKey = ModuleKeys.Leave
+                });
+            }
+            o.PendingLeave = pendingLeave;
+
             foreach (Candidate cand in _ats.GetCandidatesByCompany(companyId))
             {
                 if (cand.Stage != CandidateStage.Interview) continue;
-                snapshot.Approvals.Add(new ApprovalItem
+                approvals.Add(new ApprovalItem
                 {
                     Kind = "recruitment",
-                    Title = "Entretien à planifier — " + (cand.LastName + " " + cand.FirstName).Trim(),
-                    Detail = "Candidat en cours de recrutement",
+                    EmployeeName = (cand.LastName + " " + cand.FirstName).Trim(),
                     ModuleKey = ModuleKeys.Ats
                 });
             }
+            o.Approvals = approvals.Take(20).ToList();
 
-            // Assets.
-            foreach (AssetSummary asset in _assets.GetByCompany(companyId))
+            return o;
+        }
+
+        /// <summary>Base-salary mass over the last 6 months (oldest first), reconstructed from the
+        /// roster (incl. leavers) so each month reflects who was actually employed then.</summary>
+        private static IReadOnlyList<MonthlyMass> BuildMasseTrend(IReadOnlyList<Employee> roster, DateTime today)
+        {
+            DateTime firstThisMonth = new DateTime(today.Year, today.Month, 1);
+            var trend = new List<MonthlyMass>();
+            for (int i = 5; i >= 0; i--)
             {
-                if (asset.Status == AssetStatus.Assigned) snapshot.AssetsAssigned++;
+                DateTime start = firstThisMonth.AddMonths(-i);
+                DateTime end = start.AddMonths(1).AddDays(-1);
+                decimal amt = roster
+                    .Where(e => e.HireDate.Date <= end && (e.ExitDate == null || e.ExitDate.Value.Date >= start))
+                    .Sum(e => e.BaseSalary);
+                trend.Add(new MonthlyMass { Year = start.Year, Month = start.Month, Amount = amt });
             }
-
-            // Training.
-            foreach (TrainingSummary t in _training.GetByCompany(companyId))
-            {
-                if (t.Status == TrainingStatus.Planned || t.Status == TrainingStatus.Ongoing) snapshot.TrainingUpcoming++;
-            }
-
-            snapshot.Deadlines = snapshot.Deadlines.OrderBy(d => d.Date).Take(20).ToList();
-            snapshot.Approvals = snapshot.Approvals.Take(20).ToList();
-            return snapshot;
+            return trend;
         }
 
         // ---------------------------------------------------------------- workforce analytics
@@ -180,21 +225,20 @@ namespace OptiPaie.Services
 
         public WorkforceAnalytics BuildWorkforce(long companyId, DateTime periodStart, DateTime periodEnd)
         {
-            if (companyId <= 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(companyId),
-                    "Une société active est obligatoire pour le tableau de bord (jamais « toutes »).");
-            }
+            RequireCompany(companyId);
 
             DateTime today = DateTime.Today;
-            DateTime start = periodStart.Date;
-            DateTime end = periodEnd.Date;
-
-            // State distributions read the CURRENT effectif (active only); the flow figures read the
-            // full roster incl. leavers so a departure in the period is counted. Read-only, no engine.
-            IReadOnlyList<Employee> active = _employees.GetByCompany(companyId, false);
             IReadOnlyList<Employee> roster = _employees.GetByCompany(companyId, true);
+            List<Employee> active = roster.Where(e => e.IsActive).ToList();
+            return BuildWorkforceCore(active, roster, periodStart.Date, periodEnd.Date, today);
+        }
 
+        /// <summary>The workforce computation, over pre-loaded lists so the overview never re-queries
+        /// employees. State distributions read <paramref name="active"/>; flow figures read the full
+        /// <paramref name="roster"/> so a departure in the period is counted.</summary>
+        private static WorkforceAnalytics BuildWorkforceCore(
+            IReadOnlyList<Employee> active, IReadOnlyList<Employee> roster, DateTime start, DateTime end, DateTime today)
+        {
             var wa = new WorkforceAnalytics { AsOf = today, PeriodStart = start, PeriodEnd = end };
 
             wa.Headcount = active.Count;
@@ -226,6 +270,15 @@ namespace OptiPaie.Services
             wa.BySeniority = BandDistribution(active, SeniorityBandOrder, e => SeniorityBandKey(SeniorityYears(e.HireDate, today)));
 
             return wa;
+        }
+
+        private void RequireCompany(long companyId)
+        {
+            if (companyId <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(companyId),
+                    "Une société active est obligatoire pour le tableau de bord (jamais « toutes »).");
+            }
         }
 
         private static int AgeAt(DateTime birth, DateTime on)
@@ -329,13 +382,6 @@ namespace OptiPaie.Services
                 Buckets = buckets, Total = emps.Count, UnknownCount = unknown.Count,
                 Unreliable = unknown.Count > emps.Count / 2
             };
-        }
-
-        private static string Countdown(int days)
-        {
-            if (days < 0) return "en retard de " + (-days) + " j";
-            if (days == 0) return "aujourd'hui";
-            return "dans " + days + " j";
         }
     }
 }

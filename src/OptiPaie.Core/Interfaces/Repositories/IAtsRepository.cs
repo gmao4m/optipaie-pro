@@ -13,6 +13,12 @@ namespace OptiPaie.Core.Interfaces.Repositories
 
         IEnumerable<JobPosting> GetPostingsByCompany(long companyId);
 
+        /// <summary>
+        /// Open-posting count and total candidate count for a company in one aggregate pass
+        /// (no per-posting candidate query) — the dashboard recruitment figures.
+        /// </summary>
+        Dtos.RecruitmentCounts GetRecruitmentCounts(long companyId);
+
         long InsertPosting(JobPosting posting);
 
         void UpdatePosting(JobPosting posting);

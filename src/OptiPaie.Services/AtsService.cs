@@ -137,6 +137,15 @@ namespace OptiPaie.Services
             }
         }
 
+        public RecruitmentCounts GetRecruitmentCounts(long companyId)
+        {
+            RequireCompany(companyId);
+            using (IUnitOfWork uow = _unitOfWorkFactory.Create())
+            {
+                return uow.Ats.GetRecruitmentCounts(companyId);
+            }
+        }
+
         // -- candidates --------------------------------------------------------
 
         public Result<long> SaveCandidate(Candidate candidate)

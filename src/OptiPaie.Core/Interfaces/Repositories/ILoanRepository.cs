@@ -17,6 +17,13 @@ namespace OptiPaie.Core.Interfaces.Repositories
         /// <summary>Loans of a whole company.</summary>
         IEnumerable<Loan> GetByCompany(long companyId);
 
+        /// <summary>
+        /// Active-loan count and total outstanding for a company in ONE aggregate query
+        /// (COUNT + SUM of Principal − repayments, each balance clamped at zero) — the dashboard
+        /// figure without loading every loan and its repayments.
+        /// </summary>
+        Dtos.LoanPortfolio GetActivePortfolio(long companyId);
+
         long Insert(Loan loan);
 
         void Update(Loan loan);

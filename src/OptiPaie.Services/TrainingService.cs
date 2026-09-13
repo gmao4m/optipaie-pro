@@ -129,6 +129,14 @@ namespace OptiPaie.Services
             }
         }
 
+        public int CountUpcoming(long companyId)
+        {
+            using (IUnitOfWork uow = _unitOfWorkFactory.Create())
+            {
+                return uow.Training.CountUpcoming(companyId);
+            }
+        }
+
         // -- participants ------------------------------------------------------
 
         public Result Enroll(long sessionId, long employeeId)

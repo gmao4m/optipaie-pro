@@ -14,6 +14,9 @@ namespace OptiPaie.Core.Interfaces.Repositories
         /// <summary>Assets of a company.</summary>
         IEnumerable<Asset> GetByCompany(long companyId);
 
+        /// <summary>Number of currently-assigned assets of a company, in one COUNT query.</summary>
+        int CountAssigned(long companyId);
+
         long Insert(Asset asset);
 
         void Update(Asset asset);

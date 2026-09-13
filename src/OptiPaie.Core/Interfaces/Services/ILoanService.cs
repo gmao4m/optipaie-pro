@@ -31,6 +31,10 @@ namespace OptiPaie.Core.Interfaces.Services
         /// <summary>Loans of a whole company with their derived positions.</summary>
         IReadOnlyList<LoanSummary> GetByCompany(long companyId);
 
+        /// <summary>Active-loan count and total outstanding of a company, in one aggregate query
+        /// (for the dashboard — no per-loan repayment lookups).</summary>
+        LoanPortfolio GetActivePortfolio(long companyId);
+
         /// <summary>Recorded and manual repayments of one loan, oldest first.</summary>
         IReadOnlyList<LoanRepayment> GetRepayments(long loanId);
 

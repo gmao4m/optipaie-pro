@@ -299,6 +299,14 @@ namespace OptiPaie.Services
             }
         }
 
+        public int CountAssigned(long companyId)
+        {
+            using (IUnitOfWork uow = _unitOfWorkFactory.Create())
+            {
+                return uow.Assets.CountAssigned(companyId);
+            }
+        }
+
         public IReadOnlyList<AssetAssignmentSummary> GetHistory(long assetId)
         {
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())

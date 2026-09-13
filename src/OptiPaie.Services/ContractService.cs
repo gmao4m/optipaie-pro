@@ -371,7 +371,11 @@ namespace OptiPaie.Services
         {
             return GetByCompany(companyId)
                 .Where(s => s.Status == ContractStatus.Active && s.EndDate.HasValue
-                            && s.DaysUntilExpiry.HasValue && s.DaysUntilExpiry.Value <= withinDays)
+                            && s.DaysUntilExpiry.HasValue
+                            && s.DaysUntilExpiry.Value >= 0            // NOT already elapsed (an
+                                                                      // 18-month-overdue contract is
+                                                                      // not an "upcoming" deadline)
+                            && s.DaysUntilExpiry.Value <= withinDays)  // within the look-ahead window
                 .OrderBy(s => s.DaysUntilExpiry)
                 .ToList();
         }

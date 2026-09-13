@@ -4,43 +4,61 @@
              xmlns:loc="clr-namespace:OptiPaie.Desktop.Localization"
              xmlns:views="clr-namespace:OptiPaie.Desktop.Views">
     <UserControl.Resources>
-        <Style x:Key="Kpi" TargetType="Border">
+        <!-- Hero KPI card — visually dominant; equal size in a 5-up row. -->
+        <Style x:Key="HeroCard" TargetType="Border">
             <Setter Property="Background" Value="{DynamicResource Surface}" />
             <Setter Property="BorderBrush" Value="{DynamicResource Border}" />
             <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="CornerRadius" Value="12" />
-            <Setter Property="Padding" Value="16,14" />
-            <Setter Property="Margin" Value="0,0,12,12" />
-            <Setter Property="Width" Value="208" />
+            <Setter Property="CornerRadius" Value="14" />
+            <Setter Property="Padding" Value="18,16" />
+            <Setter Property="Margin" Value="0,0,14,0" />
             <Setter Property="Effect">
                 <Setter.Value>
-                    <DropShadowEffect Color="{DynamicResource ShadowColor}" BlurRadius="16" ShadowDepth="2" Direction="270" Opacity="0.07" RenderingBias="Quality" />
+                    <DropShadowEffect Color="{DynamicResource ShadowColor}" BlurRadius="18" ShadowDepth="2" Direction="270" Opacity="0.08" RenderingBias="Quality" />
                 </Setter.Value>
             </Setter>
         </Style>
-        <!-- KpiValue is now the shared global style (Theme/Typography.xaml) -->
-        <!-- soft-tinted accent circle for each KPI -->
-        <Style x:Key="KpiIcon" TargetType="Border">
-            <Setter Property="Width" Value="38" />
-            <Setter Property="Height" Value="38" />
-            <Setter Property="CornerRadius" Value="19" />
-            <Setter Property="VerticalAlignment" Value="Top" />
+        <Style x:Key="HeroIcon" TargetType="Border">
+            <Setter Property="Width" Value="40" />
+            <Setter Property="Height" Value="40" />
+            <Setter Property="CornerRadius" Value="20" />
+            <Setter Property="HorizontalAlignment" Value="Left" />
+        </Style>
+        <Style x:Key="HeroValue" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource MonoFont}" />
+            <Setter Property="FontSize" Value="27" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Margin" Value="0,10,0,0" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+        </Style>
+        <!-- Secondary indicator chip — calm, smaller than the hero. -->
+        <Style x:Key="StatChip" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource SurfaceMuted}" />
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="Padding" Value="13,10" />
+            <Setter Property="Margin" Value="0,0,10,10" />
+        </Style>
+        <Style x:Key="StatChipValue" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource MonoFont}" />
+            <Setter Property="FontSize" Value="17" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Margin" Value="0,3,0,0" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+        </Style>
+        <Style x:Key="Skeleton" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource SurfaceMuted}" />
+            <Setter Property="CornerRadius" Value="12" />
         </Style>
     </UserControl.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-        <Grid Margin="24,20">
+        <Grid Margin="28,22">
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <!-- Header -->
+            <!-- ============ Header ============ -->
             <Grid Grid.Row="0">
                 <StackPanel HorizontalAlignment="Left">
                     <TextBlock Style="{StaticResource H1}" Text="{Binding Greeting}" />
@@ -52,340 +70,236 @@
                 </StackPanel>
             </Grid>
 
-            <!-- Effectif (RH) — the new workforce view leads the board; the operational widgets stay below. -->
-            <views:WorkforceSection Grid.Row="1" DataContext="{Binding Workforce}" Margin="0,22,0,0" />
+            <!-- ============ Body (skeleton / no-company / content) ============ -->
+            <Grid Grid.Row="1" Margin="0,22,0,0">
 
-            <!-- KPI cards — each with a soft-tinted accent circle + icon so the board feels alive. -->
-            <WrapPanel Grid.Row="2" Orientation="Horizontal" Margin="0,22,0,0">
-                <!-- Payroll headline: masse salariale + salaire moyen (lead the board). -->
-                <Border Style="{StaticResource Kpi}" Width="238">
-                    <Grid>
-                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Style="{StaticResource KpiIcon}" Background="{DynamicResource BrandSoft}">
-                            <Path Width="18" Height="18" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="{DynamicResource BrandText}" Data="{StaticResource IconWallet}" /></Border>
-                        <StackPanel Grid.Column="1" Margin="12,0,0,0">
-                            <TextBlock Style="{StaticResource Caption}" TextWrapping="Wrap" Text="{loc:Loc Dashboard_Kpi_Masse}" />
-                            <TextBlock Style="{StaticResource KpiValue}" FontSize="17" Text="{Binding MasseSalariale}" /></StackPanel>
+                <!-- Loading skeleton (shown while the first build runs off-thread — never a freeze) -->
+                <StackPanel Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
+                    <UniformGrid Rows="1" Columns="5">
+                        <Border Style="{StaticResource Skeleton}" Height="96" Margin="0,0,14,0" />
+                        <Border Style="{StaticResource Skeleton}" Height="96" Margin="0,0,14,0" />
+                        <Border Style="{StaticResource Skeleton}" Height="96" Margin="0,0,14,0" />
+                        <Border Style="{StaticResource Skeleton}" Height="96" Margin="0,0,14,0" />
+                        <Border Style="{StaticResource Skeleton}" Height="96" />
+                    </UniformGrid>
+                    <Grid Margin="0,16,0,0">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="16" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Style="{StaticResource Skeleton}" Height="150" />
+                        <Border Grid.Column="2" Style="{StaticResource Skeleton}" Height="150" />
                     </Grid>
-                </Border>
-                <Border Style="{StaticResource Kpi}" Width="238">
-                    <Grid>
-                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Style="{StaticResource KpiIcon}" Background="{DynamicResource StatusSuccessSoft}">
-                            <Path Width="18" Height="18" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="{DynamicResource StatusSuccessText}" Data="{StaticResource IconWallet}" /></Border>
-                        <StackPanel Grid.Column="1" Margin="12,0,0,0">
-                            <TextBlock Style="{StaticResource Caption}" TextWrapping="Wrap" Text="{loc:Loc Dashboard_Kpi_AvgSalary}" />
-                            <TextBlock Style="{StaticResource KpiValue}" FontSize="17" Foreground="{DynamicResource Salary}" Text="{Binding SalaireMoyen}" /></StackPanel>
-                    </Grid>
-                </Border>
-                <Border Style="{StaticResource Kpi}">
-                    <Grid>
-                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Style="{StaticResource KpiIcon}" Background="{DynamicResource BrandSoft}">
-                            <Path Width="18" Height="18" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="{DynamicResource BrandText}" Data="{StaticResource IconUsers}" /></Border>
-                        <StackPanel Grid.Column="1" Margin="12,0,0,0">
-                            <TextBlock Style="{StaticResource Caption}" TextWrapping="Wrap" Text="{loc:Loc Dashboard_Kpi_Headcount}" />
-                            <TextBlock Style="{StaticResource KpiValue}" Text="{Binding Employees}" /></StackPanel>
-                    </Grid>
-                </Border>
-                <Border Style="{StaticResource Kpi}">
-                    <Grid>
-                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Style="{StaticResource KpiIcon}" Background="{DynamicResource StatusSuccessSoft}">
-                            <Path Width="18" Height="18" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="{DynamicResource StatusSuccessText}" Data="{StaticResource IconCheck}" /></Border>
-                        <StackPanel Grid.Column="1" Margin="12,0,0,0">
-                            <TextBlock Style="{StaticResource Caption}" TextWrapping="Wrap" Text="{loc:Loc Dashboard_Kpi_PresentToday}" />
-                            <TextBlock Style="{StaticResource KpiValue}" Foreground="{DynamicResource Salary}" Text="{Binding PresentToday}" /></StackPanel>
-                    </Grid>
-                </Border>
-                <Border Style="{StaticResource Kpi}">
-                    <Grid>
-                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Style="{StaticResource KpiIcon}" Background="{DynamicResource AccentSoft}">
-                            <Path Width="18" Height="18" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="{DynamicResource Accent}" Data="{StaticResource IconPlane}" /></Border>
-                        <StackPanel Grid.Column="1" Margin="12,0,0,0">
-                            <TextBlock Style="{StaticResource Caption}" TextWrapping="Wrap" Text="{loc:Loc Dashboard_Kpi_OnLeave}" />
-                            <TextBlock Style="{StaticResource KpiValue}" Foreground="{DynamicResource TextPrimary}" Text="{Binding OnLeave}" /></StackPanel>
-                    </Grid>
-                </Border>
-                <Border Style="{StaticResource Kpi}">
-                    <Grid>
-                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Style="{StaticResource KpiIcon}" Background="{DynamicResource AccentSoft}">
-                            <Path Width="18" Height="18" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="{DynamicResource Accent}" Data="{StaticResource IconGlobe}" /></Border>
-                        <StackPanel Grid.Column="1" Margin="12,0,0,0">
-                            <TextBlock Style="{StaticResource Caption}" TextWrapping="Wrap" Text="{loc:Loc Dashboard_Kpi_OnMission}" />
-                            <TextBlock Style="{StaticResource KpiValue}" Foreground="{DynamicResource TextPrimary}" Text="{Binding OnMission}" /></StackPanel>
-                    </Grid>
-                </Border>
-                <Border Style="{StaticResource Kpi}">
-                    <Grid>
-                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Style="{StaticResource KpiIcon}" Background="{DynamicResource BrandSoft}">
-                            <Path Width="18" Height="18" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="{DynamicResource BrandText}" Data="{StaticResource IconFileCheck}" /></Border>
-                        <StackPanel Grid.Column="1" Margin="12,0,0,0">
-                            <TextBlock Style="{StaticResource Caption}" TextWrapping="Wrap" Text="{loc:Loc Dashboard_Kpi_ActiveContracts}" />
-                            <TextBlock Style="{StaticResource KpiValue}" Text="{Binding ActiveContracts}" /></StackPanel>
-                    </Grid>
-                </Border>
-                <Border Style="{StaticResource Kpi}">
-                    <Grid>
-                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Style="{StaticResource KpiIcon}" Background="{DynamicResource StatusPendingSoft}">
-                            <Path Width="18" Height="18" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="{DynamicResource StatusPendingText}" Data="{StaticResource IconClock}" /></Border>
-                        <StackPanel Grid.Column="1" Margin="12,0,0,0">
-                            <TextBlock Style="{StaticResource Caption}" TextWrapping="Wrap" Text="{loc:Loc Dashboard_Kpi_ExpiringContracts}" />
-                            <TextBlock Style="{StaticResource KpiValue}" Foreground="{DynamicResource Warning}" Text="{Binding Expiring}" /></StackPanel>
-                    </Grid>
-                </Border>
-                <Border Style="{StaticResource Kpi}">
-                    <Grid>
-                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Style="{StaticResource KpiIcon}" Background="{DynamicResource StatusPendingSoft}">
-                            <Path Width="18" Height="18" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="{DynamicResource StatusPendingText}" Data="{StaticResource IconCalendar}" /></Border>
-                        <StackPanel Grid.Column="1" Margin="12,0,0,0">
-                            <TextBlock Style="{StaticResource Caption}" TextWrapping="Wrap" Text="{loc:Loc Dashboard_Kpi_PendingLeave}" />
-                            <TextBlock Style="{StaticResource KpiValue}" Foreground="{DynamicResource Warning}" Text="{Binding PendingLeave}" /></StackPanel>
-                    </Grid>
-                </Border>
-                <Border Style="{StaticResource Kpi}">
-                    <Grid>
-                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Style="{StaticResource KpiIcon}" Background="{DynamicResource StatusDangerSoft}">
-                            <Path Width="18" Height="18" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="{DynamicResource StatusDangerText}" Data="{StaticResource IconWallet}" /></Border>
-                        <StackPanel Grid.Column="1" Margin="12,0,0,0">
-                            <TextBlock Style="{StaticResource Caption}" TextWrapping="Wrap" Text="{loc:Loc Dashboard_Kpi_LoanOutstanding}" />
-                            <TextBlock Style="{StaticResource KpiValue}" Foreground="{DynamicResource Deduction}" Text="{Binding LoanOutstanding}" /></StackPanel>
-                    </Grid>
-                </Border>
-                <Border Style="{StaticResource Kpi}" Cursor="Hand">
-                    <Border.InputBindings>
-                        <MouseBinding MouseAction="LeftClick" Command="{Binding OpenCommand}" CommandParameter="ats" />
-                    </Border.InputBindings>
-                    <Grid>
-                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Style="{StaticResource KpiIcon}" Background="{DynamicResource BrandSoft}">
-                            <Path Width="18" Height="18" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="{DynamicResource BrandText}" Data="{StaticResource IconClipboard}" /></Border>
-                        <StackPanel Grid.Column="1" Margin="12,0,0,0">
-                            <TextBlock Style="{StaticResource Caption}" TextWrapping="Wrap" Text="{loc:Loc Dashboard_Kpi_OpenPostings}" />
-                            <TextBlock Style="{StaticResource KpiValue}" Text="{Binding OpenPostings}" /></StackPanel>
-                    </Grid>
-                </Border>
-                <Border Style="{StaticResource Kpi}" Cursor="Hand">
-                    <Border.InputBindings>
-                        <MouseBinding MouseAction="LeftClick" Command="{Binding OpenCommand}" CommandParameter="ats" />
-                    </Border.InputBindings>
-                    <Grid>
-                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Style="{StaticResource KpiIcon}" Background="{DynamicResource AccentSoft}">
-                            <Path Width="18" Height="18" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="{DynamicResource Accent}" Data="{StaticResource IconUserPlus}" /></Border>
-                        <StackPanel Grid.Column="1" Margin="12,0,0,0">
-                            <TextBlock Style="{StaticResource Caption}" TextWrapping="Wrap" Text="{loc:Loc Dashboard_Kpi_Candidates}" />
-                            <TextBlock Style="{StaticResource KpiValue}" Text="{Binding Candidates}" /></StackPanel>
-                    </Grid>
-                </Border>
-                <Border Style="{StaticResource Kpi}">
-                    <Grid>
-                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Style="{StaticResource KpiIcon}" Background="{DynamicResource BrandSoft}">
-                            <Path Width="18" Height="18" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="{DynamicResource BrandText}" Data="{StaticResource IconLaptop}" /></Border>
-                        <StackPanel Grid.Column="1" Margin="12,0,0,0">
-                            <TextBlock Style="{StaticResource Caption}" TextWrapping="Wrap" Text="{loc:Loc Dashboard_Kpi_AssetsAssigned}" />
-                            <TextBlock Style="{StaticResource KpiValue}" Text="{Binding AssetsAssigned}" /></StackPanel>
-                    </Grid>
-                </Border>
-                <Border Style="{StaticResource Kpi}">
-                    <Grid>
-                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Style="{StaticResource KpiIcon}" Background="{DynamicResource StatusSuccessSoft}">
-                            <Path Width="18" Height="18" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="{DynamicResource StatusSuccessText}" Data="{StaticResource IconSchool}" /></Border>
-                        <StackPanel Grid.Column="1" Margin="12,0,0,0">
-                            <TextBlock Style="{StaticResource Caption}" TextWrapping="Wrap" Text="{loc:Loc Dashboard_Kpi_TrainingUpcoming}" />
-                            <TextBlock Style="{StaticResource KpiValue}" Text="{Binding TrainingUpcoming}" /></StackPanel>
-                    </Grid>
-                </Border>
-            </WrapPanel>
+                    <Border Style="{StaticResource Skeleton}" Height="230" Margin="0,16,0,0" />
+                </StackPanel>
 
-            <!-- Charts: masse salariale over months + employee distribution by department -->
-            <Grid Grid.Row="3" Margin="0,6,0,0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="16" />
-                    <ColumnDefinition Width="Auto" MinWidth="332" />
-                </Grid.ColumnDefinitions>
-
-                <!-- Masse salariale trend (bar chart) -->
-                <Border Grid.Column="0" Style="{StaticResource Card}" Padding="18,16">
-                    <StackPanel>
-                        <TextBlock Style="{StaticResource H2}" FontSize="15" Text="{loc:Loc Dashboard_MasseTrend}" />
-                        <TextBlock Style="{StaticResource Caption}" Margin="0,2,0,0" Text="{loc:Loc Dashboard_Last6Months}" />
-                        <ItemsControl ItemsSource="{Binding SalaryTrend}" Margin="0,16,0,2" Height="206">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate><UniformGrid Rows="1" /></ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Grid Margin="7,0">
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="*" />
-                                            <RowDefinition Height="Auto" />
-                                            <RowDefinition Height="Auto" />
-                                        </Grid.RowDefinitions>
-                                        <TextBlock Grid.Row="0" Text="{Binding AmountText}" FontSize="10.5" FontFamily="{StaticResource MonoFont}"
-                                                   Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,4" />
-                                        <Border Grid.Row="1" Height="{Binding HeightPx}" Background="{Binding Fill}" CornerRadius="6,6,0,0" VerticalAlignment="Bottom" />
-                                        <TextBlock Grid.Row="2" Text="{Binding MonthLabel}" FontSize="11" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center" Margin="0,7,0,0" />
-                                    </Grid>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </StackPanel>
+                <!-- No active company -->
+                <Border Visibility="{Binding NoCompany, Converter={StaticResource BoolToVis}}" Style="{StaticResource Card}" Padding="28" MinHeight="160">
+                    <TextBlock Text="{loc:Loc Dashboard_NoCompany}" Foreground="{DynamicResource TextSecondary}" FontSize="14"
+                               HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" />
                 </Border>
 
-                <!-- Department distribution (donut + legend) -->
-                <Border Grid.Column="2" Style="{StaticResource Card}" Padding="18,16">
-                    <StackPanel>
-                        <TextBlock Style="{StaticResource H2}" FontSize="15" Text="{loc:Loc Dashboard_DeptDistribution}" />
-                        <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
-                            <Grid Width="192" Height="192" VerticalAlignment="Center">
-                                <ItemsControl ItemsSource="{Binding DeptSlices}">
-                                    <ItemsControl.ItemsPanel>
-                                        <ItemsPanelTemplate><Grid /></ItemsPanelTemplate>
-                                    </ItemsControl.ItemsPanel>
+                <!-- ============ Content ============ -->
+                <StackPanel Visibility="{Binding IsContentVisible, Converter={StaticResource BoolToVis}}">
+
+                    <!-- Hero: the five figures a manager checks first -->
+                    <UniformGrid Rows="1" Columns="5">
+                        <!-- Masse salariale -->
+                        <Border Style="{StaticResource HeroCard}">
+                            <StackPanel>
+                                <Border Style="{StaticResource HeroIcon}" Background="{DynamicResource BrandSoft}">
+                                    <Path Width="19" Height="19" Stretch="Uniform" Fill="{DynamicResource BrandText}" Data="{StaticResource IconWallet}" /></Border>
+                                <TextBlock Style="{StaticResource Caption}" Margin="0,12,0,0" TextWrapping="Wrap" Text="{loc:Loc Dashboard_Kpi_Masse}" />
+                                <TextBlock Style="{StaticResource HeroValue}" FontSize="21" Text="{Binding MasseSalariale}" />
+                            </StackPanel>
+                        </Border>
+                        <!-- Effectif -->
+                        <Border Style="{StaticResource HeroCard}">
+                            <StackPanel>
+                                <Border Style="{StaticResource HeroIcon}" Background="{DynamicResource BrandSoft}">
+                                    <Path Width="19" Height="19" Stretch="Uniform" Fill="{DynamicResource BrandText}" Data="{StaticResource IconUsers}" /></Border>
+                                <TextBlock Style="{StaticResource Caption}" Margin="0,12,0,0" TextWrapping="Wrap" Text="{loc:Loc Dashboard_Kpi_Headcount}" />
+                                <TextBlock Style="{StaticResource HeroValue}" Text="{Binding Employees}" />
+                            </StackPanel>
+                        </Border>
+                        <!-- Présents aujourd'hui -->
+                        <Border Style="{StaticResource HeroCard}">
+                            <StackPanel>
+                                <Border Style="{StaticResource HeroIcon}" Background="{DynamicResource StatusSuccessSoft}">
+                                    <Path Width="19" Height="19" Stretch="Uniform" Fill="{DynamicResource StatusSuccessText}" Data="{StaticResource IconCheck}" /></Border>
+                                <TextBlock Style="{StaticResource Caption}" Margin="0,12,0,0" TextWrapping="Wrap" Text="{loc:Loc Dashboard_Kpi_PresentToday}" />
+                                <TextBlock Style="{StaticResource HeroValue}" Foreground="{DynamicResource StatusSuccessText}" Text="{Binding PresentToday}" />
+                            </StackPanel>
+                        </Border>
+                        <!-- À traiter (warning) -->
+                        <Border Style="{StaticResource HeroCard}" Cursor="Hand">
+                            <Border.InputBindings><MouseBinding MouseAction="LeftClick" Command="{Binding OpenCommand}" CommandParameter="leave" /></Border.InputBindings>
+                            <StackPanel>
+                                <Border Style="{StaticResource HeroIcon}" Background="{DynamicResource StatusPendingSoft}">
+                                    <Path Width="19" Height="19" Stretch="Uniform" Fill="{DynamicResource StatusPendingText}" Data="{StaticResource IconClock}" /></Border>
+                                <TextBlock Style="{StaticResource Caption}" Margin="0,12,0,0" TextWrapping="Wrap" Text="{loc:Loc Dashboard_Approvals}" />
+                                <TextBlock Style="{StaticResource HeroValue}" Foreground="{DynamicResource StatusPendingText}" Text="{Binding PendingCount}" />
+                            </StackPanel>
+                        </Border>
+                        <!-- Échéances (warning) -->
+                        <Border Style="{StaticResource HeroCard}" Margin="0" Cursor="Hand">
+                            <Border.InputBindings><MouseBinding MouseAction="LeftClick" Command="{Binding OpenCommand}" CommandParameter="contracts" /></Border.InputBindings>
+                            <StackPanel>
+                                <Border Style="{StaticResource HeroIcon}" Background="{DynamicResource StatusPendingSoft}">
+                                    <Path Width="19" Height="19" Stretch="Uniform" Fill="{DynamicResource StatusPendingText}" Data="{StaticResource IconCalendar}" /></Border>
+                                <TextBlock Style="{StaticResource Caption}" Margin="0,12,0,0" TextWrapping="Wrap" Text="{loc:Loc Dashboard_Deadlines}" />
+                                <TextBlock Style="{StaticResource HeroValue}" Foreground="{DynamicResource StatusPendingText}" Text="{Binding DeadlineCount}" />
+                            </StackPanel>
+                        </Border>
+                    </UniformGrid>
+
+                    <!-- Action band: the only things on this screen the user can act on -->
+                    <Grid Margin="0,20,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Column="0" Style="{StaticResource Card}" Padding="0" MinHeight="150">
+                            <Grid>
+                                <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" Style="{StaticResource H2}" FontSize="15" Text="{Binding ApprovalsHeader}" Margin="16,14,16,6" />
+                                <ItemsControl Grid.Row="1" ItemsSource="{Binding Approvals}" Margin="8,0,8,10">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <Path Data="{Binding PathData}" Fill="{Binding Fill}" Stroke="{DynamicResource Surface}" StrokeThickness="2" />
+                                            <Button HorizontalContentAlignment="Stretch" Cursor="Hand" BorderThickness="0" Background="Transparent"
+                                                    Command="{Binding DataContext.OpenCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                    CommandParameter="{Binding ModuleKey}">
+                                                <Border Background="{DynamicResource SurfaceMuted}" CornerRadius="8" Padding="12,9" Margin="0,3">
+                                                    <Grid>
+                                                        <StackPanel HorizontalAlignment="Left">
+                                                            <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="12.5" />
+                                                            <TextBlock Text="{Binding Detail}" Foreground="{DynamicResource TextSecondary}" FontSize="11.5" Margin="0,2,0,0" />
+                                                        </StackPanel>
+                                                        <TextBlock Text="{loc:Loc Dashboard_Process}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                                   Foreground="{DynamicResource BrandText}" FontWeight="SemiBold" FontSize="12" />
+                                                    </Grid>
+                                                </Border>
+                                            </Button>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
-                                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                                    <TextBlock Text="{Binding Employees}" FontFamily="{StaticResource MonoFont}" FontSize="27" FontWeight="SemiBold"
-                                               HorizontalAlignment="Center" Foreground="{DynamicResource TextPrimary}" />
-                                    <TextBlock Text="{loc:Loc Dashboard_Kpi_Headcount}" FontSize="10.5" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center" />
-                                </StackPanel>
+                                <TextBlock Grid.Row="1" Text="{loc:Loc Dashboard_NoApprovals}" Foreground="{DynamicResource TextMuted}"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,20"
+                                           Visibility="{Binding HasApprovals, Converter={StaticResource InverseBoolToVis}}" />
                             </Grid>
-                            <ItemsControl ItemsSource="{Binding DeptSlices}" VerticalAlignment="Center" Margin="20,0,0,0">
+                        </Border>
+
+                        <Border Grid.Column="2" Style="{StaticResource Card}" Padding="0" MinHeight="150">
+                            <Grid>
+                                <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" Style="{StaticResource H2}" FontSize="15" Text="{Binding DeadlinesHeader}" Margin="16,14,16,6" />
+                                <ItemsControl Grid.Row="1" ItemsSource="{Binding Deadlines}" Margin="8,0,8,10">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Button HorizontalContentAlignment="Stretch" Cursor="Hand" BorderThickness="0" Background="Transparent"
+                                                    Command="{Binding DataContext.OpenCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                    CommandParameter="{Binding ModuleKey}">
+                                                <Border Background="{DynamicResource StatusPendingSoft}" CornerRadius="8" Padding="12,9" Margin="0,3">
+                                                    <StackPanel>
+                                                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="12.5" Foreground="{DynamicResource TextPrimary}" />
+                                                        <TextBlock Text="{Binding Detail}" Foreground="{DynamicResource StatusPendingText}" FontSize="11.5" Margin="0,2,0,0" />
+                                                    </StackPanel>
+                                                </Border>
+                                            </Button>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <TextBlock Grid.Row="1" Text="{loc:Loc Dashboard_NoDeadlines}" Foreground="{DynamicResource TextMuted}"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,20"
+                                           Visibility="{Binding HasDeadlines, Converter={StaticResource InverseBoolToVis}}" />
+                            </Grid>
+                        </Border>
+                    </Grid>
+
+                    <!-- Effectif analytics (one panel, each dimension shown once) -->
+                    <Border Style="{StaticResource Card}" Padding="18,16" Margin="0,16,0,0">
+                        <StackPanel>
+                            <Grid>
+                                <TextBlock Style="{StaticResource H2}" FontSize="15" VerticalAlignment="Center" Text="{loc:Loc Workforce_Section}" />
+                                <ComboBox Style="{StaticResource AppComboBox}" HorizontalAlignment="Right" Width="150" Height="32"
+                                          ItemsSource="{Binding Periods}" SelectedItem="{Binding SelectedPeriod}" DisplayMemberPath="Label" />
+                            </Grid>
+                            <views:WorkforceSection DataContext="{Binding Workforce}" Margin="0,16,0,0" />
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Payroll trend + secondary indicators -->
+                    <Grid Margin="0,16,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" MinWidth="300" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="1.35*" />
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Masse salariale trend: a revealing scale, or an honest "stable" -->
+                        <Border Grid.Column="0" Style="{StaticResource Card}" Padding="18,16">
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource H2}" FontSize="15" Text="{loc:Loc Dashboard_MasseTrend}" />
+                                <TextBlock Style="{StaticResource Caption}" Margin="0,2,0,0" Text="{loc:Loc Dashboard_Last6Months}" />
+                                <!-- Keep the time axis left→right even in Arabic (oldest→newest), so the
+                                     trend line never reads as a false decline under RTL mirroring. -->
+                                <Polyline Points="{Binding MasseTrendPoints}" Stretch="Fill" Height="52" Margin="0,16,0,4"
+                                          FlowDirection="LeftToRight"
+                                          Stroke="{DynamicResource Brand}" StrokeThickness="1.6"
+                                          StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
+                                <TextBlock Text="{Binding MasseTrendCaption}" FontSize="12.5" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextSecondary}" Margin="0,8,0,0" />
+                                <TextBlock Text="{Binding MasseRangeText}" Style="{StaticResource Caption}" FontFamily="{StaticResource MonoFont}"
+                                           FontSize="11" Margin="0,3,0,0" />
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Autres indicateurs: calm secondary grid -->
+                        <Border Grid.Column="2" Style="{StaticResource Card}" Padding="18,16">
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource H2}" FontSize="15" Text="{loc:Loc Dashboard_MoreIndicators}" Margin="0,0,0,14" />
+                                <UniformGrid Columns="3">
+                                    <Border Style="{StaticResource StatChip}"><StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_AvgSalary}" /><TextBlock Style="{StaticResource StatChipValue}" Foreground="{DynamicResource Salary}" Text="{Binding SalaireMoyen}" /></StackPanel></Border>
+                                    <Border Style="{StaticResource StatChip}"><StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_ActiveContracts}" /><TextBlock Style="{StaticResource StatChipValue}" Text="{Binding ActiveContracts}" /></StackPanel></Border>
+                                    <Border Style="{StaticResource StatChip}"><StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_LoanOutstanding}" /><TextBlock Style="{StaticResource StatChipValue}" Foreground="{DynamicResource Deduction}" Text="{Binding LoanOutstanding}" /></StackPanel></Border>
+                                    <Border Style="{StaticResource StatChip}"><StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_OnLeave}" /><TextBlock Style="{StaticResource StatChipValue}" Text="{Binding OnLeave}" /></StackPanel></Border>
+                                    <Border Style="{StaticResource StatChip}"><StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_OnMission}" /><TextBlock Style="{StaticResource StatChipValue}" Text="{Binding OnMission}" /></StackPanel></Border>
+                                    <Border Style="{StaticResource StatChip}"><StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_TrainingUpcoming}" /><TextBlock Style="{StaticResource StatChipValue}" Text="{Binding TrainingUpcoming}" /></StackPanel></Border>
+                                    <Border Style="{StaticResource StatChip}" Cursor="Hand"><Border.InputBindings><MouseBinding MouseAction="LeftClick" Command="{Binding OpenCommand}" CommandParameter="ats" /></Border.InputBindings><StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_OpenPostings}" /><TextBlock Style="{StaticResource StatChipValue}" Text="{Binding OpenPostings}" /></StackPanel></Border>
+                                    <Border Style="{StaticResource StatChip}" Cursor="Hand"><Border.InputBindings><MouseBinding MouseAction="LeftClick" Command="{Binding OpenCommand}" CommandParameter="ats" /></Border.InputBindings><StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_Candidates}" /><TextBlock Style="{StaticResource StatChipValue}" Text="{Binding Candidates}" /></StackPanel></Border>
+                                    <Border Style="{StaticResource StatChip}" Margin="0,0,0,10"><StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_AssetsAssigned}" /><TextBlock Style="{StaticResource StatChipValue}" Text="{Binding AssetsAssigned}" /></StackPanel></Border>
+                                </UniformGrid>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <!-- Activity journal (audit trail) -->
+                    <Border Style="{StaticResource Card}" Padding="0" Margin="0,16,0,0">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource H2}" FontSize="15" Text="{loc:Loc Dashboard_ActivityLog}" Margin="16,14,16,8" />
+                            <ItemsControl ItemsSource="{Binding RecentActivity}" Margin="14,0,14,12">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Grid Margin="0,5" MinWidth="150">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto" />
-                                                <ColumnDefinition Width="*" />
-                                                <ColumnDefinition Width="Auto" />
-                                            </Grid.ColumnDefinitions>
-                                            <Border Grid.Column="0" Width="11" Height="11" CornerRadius="3" Background="{Binding Fill}" VerticalAlignment="Center" />
-                                            <TextBlock Grid.Column="1" Text="{Binding Name}" Margin="8,0,0,0" FontSize="12.5" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimary}" />
-                                            <TextBlock Grid.Column="2" Margin="12,0,0,0" VerticalAlignment="Center" FontSize="12" Foreground="{DynamicResource TextSecondary}">
-                                                <Run Text="{Binding CountText, Mode=OneWay}" /><Run Text="  ·  " /><Run Text="{Binding PercentText, Mode=OneWay}" />
-                                            </TextBlock>
+                                        <Grid Margin="0,3">
+                                            <TextBlock Text="{Binding Text}" FontSize="12.5" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                                            <TextBlock Text="{Binding Detail}" FontSize="11.5" Foreground="{DynamicResource TextSecondary}"
+                                                       HorizontalAlignment="Right" VerticalAlignment="Center" />
                                         </Grid>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
+                            <TextBlock Text="{loc:Loc Dashboard_NoActivity}" Foreground="{DynamicResource TextMuted}"
+                                       Margin="16,0,0,14" Visibility="{Binding HasActivity, Converter={StaticResource InverseBoolToVis}}" />
                         </StackPanel>
+                    </Border>
+
+                    <!-- Quick actions -->
+                    <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
+                        <Button Style="{StaticResource SecondaryButton}" Content="{loc:Loc Employees_New}" Command="{Binding NewEmployeeCommand}" />
+                        <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="{loc:Loc Dashboard_AttendanceMatrix}" Command="{Binding AttendanceCommand}" />
+                        <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="{loc:Loc Dashboard_Leave}" Command="{Binding LeaveCommand}" />
                     </StackPanel>
-                </Border>
-            </Grid>
-
-            <!-- Approvals + deadlines -->
-            <Grid Grid.Row="4" Margin="0,16,0,0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="16" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-
-                <!-- Approvals queue -->
-                <Border Grid.Column="0" Style="{StaticResource Card}" Padding="0">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="*" />
-                        </Grid.RowDefinitions>
-                        <TextBlock Grid.Row="0" Style="{StaticResource H2}" FontSize="15" Text="{Binding ApprovalsHeader}" Margin="16,14,16,8" />
-                        <ItemsControl Grid.Row="1" ItemsSource="{Binding Approvals}" Margin="8,0,8,10">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Button HorizontalContentAlignment="Stretch" Cursor="Hand" BorderThickness="0" Background="Transparent"
-                                            Command="{Binding DataContext.OpenCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                            CommandParameter="{Binding ModuleKey}">
-                                        <Border Background="{DynamicResource SurfaceMuted}" CornerRadius="8" Padding="12,9" Margin="0,2">
-                                            <Grid>
-                                                <StackPanel HorizontalAlignment="Left">
-                                                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="12.5" />
-                                                    <TextBlock Text="{Binding Detail}" Foreground="{DynamicResource TextSecondary}" FontSize="11.5" Margin="0,2,0,0" />
-                                                </StackPanel>
-                                                <TextBlock Text="{loc:Loc Dashboard_Process}" HorizontalAlignment="Right" VerticalAlignment="Center"
-                                                           Foreground="{DynamicResource BrandText}" FontWeight="SemiBold" FontSize="12" />
-                                            </Grid>
-                                        </Border>
-                                    </Button>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                        <TextBlock Grid.Row="1" Text="{loc:Loc Dashboard_NoApprovals}" Foreground="{DynamicResource TextMuted}"
-                                   HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,20"
-                                   Visibility="{Binding HasApprovals, Converter={StaticResource InverseBoolToVis}}" />
-                    </Grid>
-                </Border>
-
-                <!-- Deadlines -->
-                <Border Grid.Column="2" Style="{StaticResource Card}" Padding="0">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="*" />
-                        </Grid.RowDefinitions>
-                        <TextBlock Grid.Row="0" Style="{StaticResource H2}" FontSize="15" Text="{Binding DeadlinesHeader}" Margin="16,14,16,8" />
-                        <ItemsControl Grid.Row="1" ItemsSource="{Binding Deadlines}" Margin="8,0,8,10">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Button HorizontalContentAlignment="Stretch" Cursor="Hand" BorderThickness="0" Background="Transparent"
-                                            Command="{Binding DataContext.OpenCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                            CommandParameter="{Binding ModuleKey}">
-                                        <Border Background="{DynamicResource SurfaceMuted}" CornerRadius="8" Padding="12,9" Margin="0,2">
-                                            <StackPanel>
-                                                <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="12.5" />
-                                                <TextBlock Text="{Binding Detail}" Foreground="{DynamicResource TextSecondary}" FontSize="11.5" Margin="0,2,0,0" />
-                                            </StackPanel>
-                                        </Border>
-                                    </Button>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                        <TextBlock Grid.Row="1" Text="{loc:Loc Dashboard_NoDeadlines}" Foreground="{DynamicResource TextMuted}"
-                                   HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,20"
-                                   Visibility="{Binding HasDeadlines, Converter={StaticResource InverseBoolToVis}}" />
-                    </Grid>
-                </Border>
-            </Grid>
-
-            <!-- Activity journal (audit trail) -->
-            <Border Grid.Row="5" Style="{StaticResource Card}" Padding="0" Margin="0,16,0,0">
-                <StackPanel>
-                    <TextBlock Style="{StaticResource H2}" FontSize="15" Text="{loc:Loc Dashboard_ActivityLog}" Margin="16,14,16,8" />
-                    <ItemsControl ItemsSource="{Binding RecentActivity}" Margin="14,0,14,12">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Grid Margin="0,3">
-                                    <TextBlock Text="{Binding Text}" FontSize="12.5" HorizontalAlignment="Left" VerticalAlignment="Center" />
-                                    <TextBlock Text="{Binding Detail}" FontSize="11.5" Foreground="{DynamicResource TextSecondary}"
-                                               HorizontalAlignment="Right" VerticalAlignment="Center" />
-                                </Grid>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                    <TextBlock Text="{loc:Loc Dashboard_NoActivity}" Foreground="{DynamicResource TextMuted}"
-                               Margin="16,0,0,14" Visibility="{Binding HasActivity, Converter={StaticResource InverseBoolToVis}}" />
                 </StackPanel>
-            </Border>
-
-            <!-- Quick actions -->
-            <StackPanel Grid.Row="6" Orientation="Horizontal" Margin="0,16,0,0">
-                <Button Style="{StaticResource SecondaryButton}" Content="{loc:Loc Employees_New}" Command="{Binding NewEmployeeCommand}" />
-                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="{loc:Loc Dashboard_AttendanceMatrix}" Command="{Binding AttendanceCommand}" />
-                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Content="{loc:Loc Dashboard_Leave}" Command="{Binding LeaveCommand}" />
-            </StackPanel>
+            </Grid>
         </Grid>
     </ScrollViewer>
 </UserControl>

@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using Dapper;
+using OptiPaie.Core.Dtos;
 using OptiPaie.Core.Entities;
+using OptiPaie.Core.Enums;
 using OptiPaie.Core.Interfaces.Repositories;
 using OptiPaie.Data.Context;
 
@@ -29,6 +31,19 @@ namespace OptiPaie.Data.Repositories
                 "SELECT * FROM JobPostings WHERE CompanyId = @companyId AND IsDeleted = 0 " +
                 "ORDER BY Status, OpenDate DESC, Id DESC;",
                 new { companyId }, Transaction);
+        }
+
+        public RecruitmentCounts GetRecruitmentCounts(long companyId)
+        {
+            const string sql =
+                "SELECT " +
+                " (SELECT COUNT(*) FROM JobPostings " +
+                "    WHERE CompanyId = @companyId AND IsDeleted = 0 AND Status = @open) AS OpenPostings, " +
+                " (SELECT COUNT(c.Id) FROM Candidates c " +
+                "    INNER JOIN JobPostings p ON p.Id = c.PostingId " +
+                "    WHERE p.CompanyId = @companyId AND c.IsDeleted = 0 AND p.IsDeleted = 0) AS Candidates;";
+            return Connection.QuerySingle<RecruitmentCounts>(
+                sql, new { companyId, open = (int)JobStatus.Open }, Transaction);
         }
 
         public long InsertPosting(JobPosting posting)

@@ -24,6 +24,10 @@ namespace OptiPaie.Core.Interfaces.Services
 
         IReadOnlyList<JobPostingSummary> GetPostingsByCompany(long companyId);
 
+        /// <summary>Open-posting and candidate counts of a company, in one aggregate query (dashboard —
+        /// no per-posting candidate lookups).</summary>
+        RecruitmentCounts GetRecruitmentCounts(long companyId);
+
         // -- candidates --------------------------------------------------------
 
         Result<long> SaveCandidate(Candidate candidate);

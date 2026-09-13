@@ -17,6 +17,22 @@ namespace OptiPaie.Data.Context
     {
         private readonly string _connectionString;
 
+        // ── Diagnostics seam (inert in production) ─────────────────────────────────────────
+        // Used only to profile data-access cost (e.g. the dashboard load). ConnectionsOpened is
+        // a single Interlocked increment per open — negligible. Statement counting is opt-in
+        // (Profile == true) and attaches a Trace handler that fires once per executed SQL
+        // statement, so it is off unless a benchmark explicitly turns it on.
+        public static long ConnectionsOpened;
+        public static long StatementsExecuted;
+        public static bool Profile;
+
+        /// <summary>Zeroes the profiling counters (call before a measured operation).</summary>
+        public static void ResetProfile()
+        {
+            System.Threading.Interlocked.Exchange(ref ConnectionsOpened, 0);
+            System.Threading.Interlocked.Exchange(ref StatementsExecuted, 0);
+        }
+
         /// <summary>The connection string built for the database file.</summary>
         public string ConnectionString => _connectionString;
 
@@ -60,6 +76,12 @@ namespace OptiPaie.Data.Context
             {
                 pragma.CommandText = "PRAGMA foreign_keys = ON; PRAGMA temp_store = MEMORY;";
                 pragma.ExecuteNonQuery();
+            }
+
+            System.Threading.Interlocked.Increment(ref ConnectionsOpened);
+            if (Profile)
+            {
+                connection.Trace += (s, e) => System.Threading.Interlocked.Increment(ref StatementsExecuted);
             }
 
             return connection;

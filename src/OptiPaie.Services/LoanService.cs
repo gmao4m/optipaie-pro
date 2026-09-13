@@ -200,6 +200,14 @@ namespace OptiPaie.Services
             }
         }
 
+        public LoanPortfolio GetActivePortfolio(long companyId)
+        {
+            using (IUnitOfWork uow = _unitOfWorkFactory.Create())
+            {
+                return uow.Loans.GetActivePortfolio(companyId);
+            }
+        }
+
         public IReadOnlyList<LoanRepayment> GetRepayments(long loanId)
         {
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())

@@ -186,11 +186,12 @@ namespace OptiPaie.Tests
 
             Assert.That(s.Deadlines.Count, Is.EqualTo(1));
             Assert.That(s.Deadlines[0].Kind, Is.EqualTo("contract"));
-            Assert.That(s.Deadlines[0].Title, Does.Contain("BENALI"));
+            Assert.That(s.Deadlines[0].EmployeeName, Does.Contain("BENALI"));
+            Assert.That(s.Deadlines[0].DaysLeft, Is.GreaterThanOrEqualTo(0), "an upcoming deadline is never overdue");
 
             Assert.That(s.Approvals.Count, Is.EqualTo(1));
             Assert.That(s.Approvals[0].Kind, Is.EqualTo("leave"));
-            Assert.That(s.Approvals[0].Title, Does.Contain("BENALI"), "the approval carries the shared employee name");
+            Assert.That(s.Approvals[0].EmployeeName, Does.Contain("BENALI"), "the approval carries the shared employee name");
         }
 
         [Test]

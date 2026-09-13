@@ -25,6 +25,9 @@ namespace OptiPaie.Core.Interfaces.Services
         /// <summary>Sessions of a company with participant counts.</summary>
         IReadOnlyList<TrainingSummary> GetByCompany(long companyId);
 
+        /// <summary>Number of upcoming (planned or ongoing) sessions of a company, in one COUNT query (dashboard).</summary>
+        int CountUpcoming(long companyId);
+
         // -- participants ------------------------------------------------------
 
         /// <summary>Enrols an employee in a session.</summary>

@@ -1953,4 +1953,20 @@
   <data name="Workforce_Sen_3_5" xml:space="preserve"><value>3–5 ans</value></data>
   <data name="Workforce_Sen_5_10" xml:space="preserve"><value>5–10 ans</value></data>
   <data name="Workforce_Sen_10P" xml:space="preserve"><value>10 ans et +</value></data>
+  <!-- Dashboard redesign: currency, localized approval/deadline text, trend, states -->
+  <data name="Common_CurrencyDa" xml:space="preserve"><value>DA</value></data>
+  <data name="Dashboard_Deadline_ContractEnd" xml:space="preserve"><value>Fin de contrat — {0}</value></data>
+  <data name="Dashboard_Deadline_OnDate" xml:space="preserve"><value>Le {0}</value></data>
+  <data name="Dashboard_Countdown_Today" xml:space="preserve"><value>aujourd'hui</value></data>
+  <data name="Dashboard_Countdown_InDays" xml:space="preserve"><value>dans {0} j</value></data>
+  <data name="Dashboard_Approval_Leave" xml:space="preserve"><value>Congé à approuver — {0}</value></data>
+  <data name="Dashboard_Approval_Interview" xml:space="preserve"><value>Entretien à planifier — {0}</value></data>
+  <data name="Dashboard_Approval_Candidate" xml:space="preserve"><value>Candidat en cours de recrutement</value></data>
+  <data name="Dashboard_MasseStable" xml:space="preserve"><value>Stable sur 6 mois</value></data>
+  <data name="Dashboard_VsPrevMonth" xml:space="preserve"><value>vs mois précédent</value></data>
+  <data name="Dashboard_MasseRange" xml:space="preserve"><value>Min–max : {0} – {1}</value></data>
+  <data name="Dashboard_MoreIndicators" xml:space="preserve"><value>Autres indicateurs</value></data>
+  <data name="Dashboard_Loading" xml:space="preserve"><value>Chargement du tableau de bord…</value></data>
+  <data name="Dashboard_NoCompany" xml:space="preserve"><value>Sélectionnez une société pour afficher le tableau de bord.</value></data>
+  <data name="Dashboard_Overview" xml:space="preserve"><value>Vue d'ensemble</value></data>
 </root>

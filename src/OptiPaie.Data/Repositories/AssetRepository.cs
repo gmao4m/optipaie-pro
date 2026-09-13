@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Dapper;
 using OptiPaie.Core.Entities;
+using OptiPaie.Core.Enums;
 using OptiPaie.Core.Interfaces.Repositories;
 using OptiPaie.Data.Context;
 
@@ -29,6 +30,13 @@ namespace OptiPaie.Data.Repositories
                 "SELECT * FROM Assets WHERE CompanyId = @companyId AND IsDeleted = 0 " +
                 "ORDER BY Status, Category, Name;",
                 new { companyId }, Transaction);
+        }
+
+        public int CountAssigned(long companyId)
+        {
+            return Connection.ExecuteScalar<int>(
+                "SELECT COUNT(*) FROM Assets WHERE CompanyId = @companyId AND IsDeleted = 0 AND Status = @assigned;",
+                new { companyId, assigned = (int)AssetStatus.Assigned }, Transaction);
         }
 
         public long Insert(Asset asset)
