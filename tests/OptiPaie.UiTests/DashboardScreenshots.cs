@@ -43,9 +43,6 @@ namespace OptiPaie.UiTests
                 var app = new App();
                 typeof(App).GetMethod("InitializeComponent", BindingFlags.Public | BindingFlags.Instance)?.Invoke(app, null);
             }
-            // In a test host GetEntryAssembly() is null, so pack://application:,,,/ URIs (used by the
-            // dark-theme swap) can't resolve — pin the resource assembly to the Desktop app.
-            Application.ResourceAssembly = typeof(App).Assembly;
             Bc("app+resources ready");
             SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(Dispatcher.CurrentDispatcher));
 

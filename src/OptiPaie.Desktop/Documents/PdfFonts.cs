@@ -32,6 +32,14 @@ namespace OptiPaie.Desktop.Documents
 
         private static bool _registered;
 
+        // FULLY-QUALIFIED pack base naming the owning assembly explicitly. A RELATIVE resource URI
+        // (the old "/Assets/Fonts/x.ttf") resolves via Application.GetResourceStream against the
+        // ENTRY assembly, which is null outside a normal .exe launch (test host / designer) and
+        // throws "Assembly.GetEntryAssembly() returns null". Naming the assembly removes that
+        // dependency, so the bundled faces load in the app and under any host.
+        private static readonly string PackBase =
+            "pack://application:,,,/" + typeof(PdfFonts).Assembly.GetName().Name + ";component/Assets/Fonts/";
+
         public static void Register()
         {
             if (_registered)
@@ -42,11 +50,20 @@ namespace OptiPaie.Desktop.Documents
             _registered = true;
             foreach (string file in Files)
             {
-                var uri = new Uri("/Assets/Fonts/" + file + ".ttf", UriKind.Relative);
-                StreamResourceInfo info = Application.GetResourceStream(uri);
-                if (info != null && info.Stream != null)
+                // Fonts are for PDF rendering, not for opening the app — a single failed face must
+                // never crash startup; QuestPDF simply falls back for that face.
+                try
                 {
-                    FontManager.RegisterFont(info.Stream);
+                    var uri = new Uri(PackBase + file + ".ttf", UriKind.Absolute);
+                    StreamResourceInfo info = Application.GetResourceStream(uri);
+                    if (info != null && info.Stream != null)
+                    {
+                        FontManager.RegisterFont(info.Stream);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Common.CrashLog.Fatal("PdfFonts.Register(" + file + ")", ex);
                 }
             }
         }

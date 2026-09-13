@@ -10,7 +10,14 @@ namespace OptiPaie.Desktop.Composition
     /// </summary>
     public static class ThemeManager
     {
-        private const string DarkUri = "pack://application:,,,/Theme/Colors.Dark.xaml";
+        // FULLY-QUALIFIED pack URI that names the owning assembly explicitly (built from the real
+        // assembly name, so it survives a rename). The short "pack://application:,,,/Theme/..." form
+        // resolves against the ENTRY assembly, which is null outside a normal .exe launch (a test
+        // host, a designer, a detached context) — there it throws
+        // "Assembly.GetEntryAssembly() returns null". Naming the assembly removes that dependency
+        // entirely, so the dark palette loads identically in the app and under any host.
+        private static readonly string DarkUri =
+            "pack://application:,,,/" + typeof(ThemeManager).Assembly.GetName().Name + ";component/Theme/Colors.Dark.xaml";
         private static ResourceDictionary _dark;
 
         /// <summary>True when the dark theme is currently applied.</summary>
@@ -25,23 +32,33 @@ namespace OptiPaie.Desktop.Composition
                 return;
             }
 
-            if (dark)
+            try
             {
-                if (_dark == null)
+                if (dark)
                 {
-                    _dark = new ResourceDictionary { Source = new Uri(DarkUri, UriKind.Absolute) };
+                    if (_dark == null)
+                    {
+                        _dark = new ResourceDictionary { Source = new Uri(DarkUri, UriKind.Absolute) };
+                    }
+                    if (!app.Resources.MergedDictionaries.Contains(_dark))
+                    {
+                        app.Resources.MergedDictionaries.Add(_dark);
+                    }
                 }
-                if (!app.Resources.MergedDictionaries.Contains(_dark))
+                else if (_dark != null)
                 {
-                    app.Resources.MergedDictionaries.Add(_dark);
+                    app.Resources.MergedDictionaries.Remove(_dark);
                 }
-            }
-            else if (_dark != null)
-            {
-                app.Resources.MergedDictionaries.Remove(_dark);
-            }
 
-            IsDark = dark;
+                IsDark = dark;
+            }
+            catch (Exception ex)
+            {
+                // The dark palette is a PREFERENCE, not a requirement: a resource-load failure must
+                // never take down startup. Fall back to the light theme and record why.
+                Common.CrashLog.Fatal("ThemeManager.Apply(dark=" + dark + ")", ex);
+                IsDark = false;
+            }
         }
 
         /// <summary>Flips between light and dark. Returns the new state.</summary>

@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Markup;
 using NUnit.Framework;
 using OptiPaie.Desktop;
+using OptiPaie.Desktop.Composition;
 
 namespace OptiPaie.UiTests
 {
@@ -75,6 +76,33 @@ namespace OptiPaie.UiTests
             Assert.That(resourceFailures, Is.Empty,
                 "Unresolved {StaticResource} / XAML render failures:" + Environment.NewLine + "  " +
                 string.Join(Environment.NewLine + "  ", resourceFailures));
+        }
+
+        /// <summary>
+        /// Regression for the "Assembly.GetEntryAssembly() returns null" startup error: applying the
+        /// dark palette must resolve its pack URI even here, where there is no entry assembly (a test
+        /// host). It throws with the old short "pack://application:,,,/Theme/..." URI and succeeds
+        /// with the assembly-qualified one. We deliberately do NOT set Application.ResourceAssembly —
+        /// the product must not depend on it. This also makes the smoke suite actually EXERCISE
+        /// resource loading rather than pass while it is silently broken in this context.
+        /// </summary>
+        [Test]
+        public void DarkTheme_PackUri_ResolvesWithoutAnEntryAssembly()
+        {
+            TestContext.WriteLine("Assembly.GetEntryAssembly() = " + (Assembly.GetEntryAssembly()?.GetName().Name ?? "<null>"));
+            TestContext.WriteLine("Application.ResourceAssembly = " + (Application.ResourceAssembly?.GetName().Name ?? "<null>"));
+            try
+            {
+                ThemeManager.Apply(true);
+                Assert.That(ThemeManager.IsDark, Is.True,
+                    "the dark palette did not load — the assembly-qualified pack URI must resolve with no entry assembly");
+                Assert.That(Application.Current.TryFindResource("Canvas"), Is.Not.Null,
+                    "dark theme resources are not resolvable after applying the dark palette");
+            }
+            finally
+            {
+                ThemeManager.Apply(false);
+            }
         }
 
         private static bool HasResourceFailure(Exception ex)
