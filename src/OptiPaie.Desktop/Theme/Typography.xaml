@@ -90,4 +90,23 @@
         <Setter Property="TextOptions.TextFormattingMode" Value="Ideal" />
     </Style>
 
+    <!-- Shared KPI headline (dashboard + workforce section). Promoted to the global theme so a
+         UserControl embedded in a view (e.g. WorkforceSection) can resolve it — a view-local copy
+         is invisible to a child UserControl, which caused the 1.38.0 startup crash. -->
+    <Style x:Key="KpiValue" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource MonoFont}" />
+        <Setter Property="FontSize" Value="23" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Margin" Value="0,2,0,0" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+    </Style>
+
+    <!-- Shared small section label. Same promotion rationale as KpiValue. -->
+    <Style x:Key="SectionTitle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
+        <Setter Property="Margin" Value="0,0,0,14" />
+    </Style>
+
 </ResourceDictionary>

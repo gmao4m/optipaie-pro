@@ -114,6 +114,17 @@ jobs:
           dotnet test tests/OptiPaie.Tests/OptiPaie.Tests.csproj -c Debug --nologo
           if ($LASTEXITCODE -ne 0) { Write-Host "::error::Tests failed — refusing to publish."; exit 1 }
 
+      # A missing {StaticResource} key compiles clean and passes every headless service test —
+      # it only throws when the XAML is INSTANTIATED (the 1.38.0 startup outage). This test
+      # constructs every top-level Window/UserControl with the real theme loaded and fails on any
+      # XamlParseException / ResourceReferenceKeyNotFound. Blocking, on every release.
+      - name: "Run WPF render smoke test (BLOCKING — catches unresolved {StaticResource})"
+        if: steps.gate.outputs.go == 'true'
+        shell: pwsh
+        run: |
+          dotnet test tests/OptiPaie.UiTests/OptiPaie.UiTests.csproj -c Debug --nologo
+          if ($LASTEXITCODE -ne 0) { Write-Host "::error::Render smoke test failed — a view has an unresolved resource; refusing to publish."; exit 1 }
+
       - name: Install WiX v5 CLI + extensions
         if: steps.gate.outputs.go == 'true'
         shell: pwsh

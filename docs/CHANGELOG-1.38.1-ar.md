@@ -1,0 +1,39 @@
+# الإصدار 1.38.1 — إصلاح عاجل لتوقّف التطبيق عند الإقلاع
+
+يعالج هذا الإصدار خللاً ظهر بعد التحديث إلى 1.38.0: كان التطبيق يُظهر عند الإقلاع رسالة خطأ تقني («...ولم يُغلق البرنامج») مع عدم عرض الشاشة الأولى بشكل صحيح. هذا التحديث يُصلح المشكلة، ويعود الإقلاع سليمًا.
+
+## ما الذي تغيّر
+- **إصلاح التوقّف عند الإقلاع**: لوحة القيادة (الشاشة الأولى) تُعرض الآن بشكل صحيح. كان السبب نمطَ عرضٍ داخليًّا غير متاح لكل الشاشات، وقد جُعل مشتركًا على مستوى التطبيق.
+- **حماية إضافية عند العرض**: إذا تعذّر عرض إحدى الوحدات، يظهر الآن **إطار بديل برسالة واضحة** بدل شاشة فارغة أو مكسورة، ويبقى التطبيق مفتوحًا.
+- **رسالة خطأ أوضح**: عند حدوث خطأ غير متوقّع، تُبيّن النافذة الآن **نوع الخطأ ونصّه** مع زرّ **«نسخ التفاصيل»** ومسار السجلّ — لتسهيل الدعم.
+
+## بدون أي تغيير آخر
+- **لا تغيير في المظهر**: لم تتبدّل هيئة أي شاشة (وُحِّدت الأنماط دون تغيير أي حجم أو لون معروض).
+- **محرّك الأجور لم يُمَسّ**، ولا أي هجرة لقاعدة البيانات؛ قواعد بياناتكم الحالية تُحدَّث تلقائيًا دون فقدان.
+- إصلاح فقط — لا ميزات جديدة في هذا الإصدار.
+
+## للتحقّق
+- أُضيف اختبار آليّ يفتح **كل نافذة وكل شاشة** في التطبيق ويتأكّد من عرضها دون خطأ، حتى لا تتكرّر هذه المشكلة.
+
+تذكير: إذا كان زرّ التحديث لا يعمل لديكم، ثبّتوا هذا الإصدار يدويًا مرّة واحدة عبر الرابط المباشر؛ بعدها تعمل التحديثات تلقائيًا.
+
+---
+
+# Version 1.38.1 — Correctif urgent : blocage au démarrage
+
+Cette version corrige une anomalie apparue après la mise à jour vers 1.38.0 : au démarrage, l'application affichait un message d'erreur technique (« ...l'application reste ouverte ») et le premier écran ne s'affichait pas correctement. Ce correctif rétablit un démarrage normal.
+
+## Ce qui change
+- **Correction du blocage au démarrage** : le tableau de bord (premier écran) s'affiche de nouveau correctement. La cause était un style d'affichage interne qui n'était pas accessible à tous les écrans ; il est désormais partagé au niveau de l'application.
+- **Protection supplémentaire à l'affichage** : si un module ne peut pas s'afficher, un **encadré de remplacement avec un message clair** apparaît au lieu d'un écran blanc ou cassé, et l'application reste ouverte.
+- **Message d'erreur plus clair** : en cas d'erreur inattendue, la fenêtre indique désormais **le type et le texte de l'erreur**, avec un bouton **« Copier les détails »** et le chemin du journal — pour faciliter le support.
+
+## Sans aucun autre changement
+- **Aucun changement d'apparence** : l'aspect des écrans est inchangé (styles unifiés sans modifier une seule taille ni couleur affichée).
+- **Moteur de paie non touché**, aucune migration de base ; vos bases existantes sont mises à jour automatiquement, sans perte.
+- Correctif uniquement — aucune nouvelle fonctionnalité dans cette version.
+
+## Vérification
+- Un test automatique ouvre désormais **chaque fenêtre et chaque écran** de l'application et vérifie qu'ils s'affichent sans erreur, pour que ce problème ne se reproduise pas.
+
+Rappel : si le bouton de mise à jour ne fonctionne pas chez vous, installez cette version manuellement une fois via le lien direct ; les mises à jour automatiques fonctionneront ensuite.

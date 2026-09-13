@@ -54,20 +54,13 @@ namespace OptiPaie.Desktop.Common
             {
                 app.DispatcherUnhandledException += (s, e) =>
                 {
-                    Fatal("Application.DispatcherUnhandledException", e.Exception);
-
-                    // Show the user a clear message and KEEP the process alive — a UI-thread
-                    // exception must never silently close the app (e.g. on the login path).
-                    try
-                    {
-                        MessageBox.Show(
-                            "حدث خطأ تقني ولم يُغلق البرنامج. تم تسجيل التفاصيل في:\n" + Directory +
-                            "\n\nUne erreur technique est survenue ; l'application reste ouverte.\n" +
-                            "Détails enregistrés dans le dossier ci-dessus.",
-                            "OptiPaie PRO", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    }
-                    catch { /* showing the dialog must never itself crash the handler */ }
-
+                    // Log the FULL dump, then show it — the real exception type + message + a copy
+                    // button — and KEEP the process alive. A UI-thread exception must never silently
+                    // close the app, and the dialog must tell the customer (and us) what actually failed.
+                    string details = Describe("Application.DispatcherUnhandledException", e.Exception);
+                    Write("crash.log", details);
+                    Breadcrumb("FATAL logged from Application.DispatcherUnhandledException");
+                    CrashDialog.Show(e.Exception, Directory, details);
                     e.Handled = true;
                 };
             }
@@ -83,6 +76,13 @@ namespace OptiPaie.Desktop.Common
 
         /// <summary>Full exception dump (type · message · stack, all inner exceptions).</summary>
         public static void Fatal(string source, Exception ex)
+        {
+            Write("crash.log", Describe(source, ex));
+            Breadcrumb("FATAL logged from " + source);
+        }
+
+        /// <summary>Formats the full exception dump — reused by the crash log and the copy-to-clipboard dialog.</summary>
+        internal static string Describe(string source, Exception ex)
         {
             var sb = new StringBuilder();
             sb.AppendLine();
@@ -101,8 +101,7 @@ namespace OptiPaie.Desktop.Common
                     sb.AppendLine("  ---");
                 }
             }
-            Write("crash.log", sb.ToString());
-            Breadcrumb("FATAL logged from " + source);
+            return sb.ToString();
         }
 
         private static void Write(string file, string text)

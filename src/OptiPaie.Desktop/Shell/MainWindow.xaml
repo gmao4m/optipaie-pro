@@ -4,6 +4,7 @@
         xmlns:vm="clr-namespace:OptiPaie.Desktop.ViewModels"
         xmlns:vma="clr-namespace:OptiPaie.Desktop.ViewModels.Attendance"
         xmlns:views="clr-namespace:OptiPaie.Desktop.Views"
+        xmlns:ctl="clr-namespace:OptiPaie.Desktop.Controls"
         xmlns:loc="clr-namespace:OptiPaie.Desktop.Localization"
         Title="OptiPaie PRO" Height="820" Width="1280"
         MinWidth="1120" MinHeight="720"
@@ -310,7 +311,8 @@
                 </Grid>
             </Border>
 
-            <ContentControl Grid.Row="1" Content="{Binding Current}" />
+            <!-- SafeModuleHost: a broken module view falls back to a placeholder, never a dead window. -->
+            <ctl:SafeModuleHost Grid.Row="1" Content="{Binding Current}" />
         </Grid>
     </Grid>
 </Window>

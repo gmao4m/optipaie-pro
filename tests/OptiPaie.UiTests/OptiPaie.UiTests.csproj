@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    OptiPaie.UiTests — WPF render smoke tests.
+    Closes the gap behind the 1.38.0 startup outage: an unresolved {StaticResource} key compiles
+    clean and every headless service test still passes, because nothing ever INSTANTIATES the XAML.
+    This project references the Desktop assembly and, on an STA thread with the real theme
+    dictionaries loaded, constructs every top-level Window and UserControl (InitializeComponent),
+    asserting no XamlParseException / ResourceReferenceKeyNotFoundException.
+  -->
+
+  <PropertyGroup>
+    <RootNamespace>OptiPaie.UiTests</RootNamespace>
+    <AssemblyName>OptiPaie.UiTests</AssemblyName>
+    <IsPackable>false</IsPackable>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.10.0" />
+    <PackageReference Include="NUnit" Version="3.14.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\OptiPaie.Desktop\OptiPaie.Desktop.csproj" />
+  </ItemGroup>
+
+</Project>

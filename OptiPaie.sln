@@ -29,6 +29,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OptiPaie.Desktop", "src\Opt
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OptiPaie.Admin", "src\OptiPaie.Admin\OptiPaie.Admin.csproj", "{C0000001-0000-0000-0000-000000000011}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OptiPaie.UiTests", "tests\OptiPaie.UiTests\OptiPaie.UiTests.csproj", "{82405E74-D37A-42F4-A110-8E681E8FD266}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -79,6 +81,10 @@ Global
 		{C0000001-0000-0000-0000-000000000011}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C0000001-0000-0000-0000-000000000011}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C0000001-0000-0000-0000-000000000011}.Release|Any CPU.Build.0 = Release|Any CPU
+		{82405E74-D37A-42F4-A110-8E681E8FD266}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{82405E74-D37A-42F4-A110-8E681E8FD266}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{82405E74-D37A-42F4-A110-8E681E8FD266}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{82405E74-D37A-42F4-A110-8E681E8FD266}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -95,5 +101,6 @@ Global
 		{C0000001-0000-0000-0000-000000000009} = {AAAA0001-0000-0000-0000-000000000002}
 		{C0000001-0000-0000-0000-000000000010} = {AAAA0001-0000-0000-0000-000000000001}
 		{C0000001-0000-0000-0000-000000000011} = {AAAA0001-0000-0000-0000-000000000001}
+		{82405E74-D37A-42F4-A110-8E681E8FD266} = {AAAA0001-0000-0000-0000-000000000002}
 	EndGlobalSection
 EndGlobal

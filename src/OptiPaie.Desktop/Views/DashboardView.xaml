@@ -18,13 +18,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        <Style x:Key="KpiValue" TargetType="TextBlock">
-            <Setter Property="FontFamily" Value="{StaticResource MonoFont}" />
-            <Setter Property="FontSize" Value="23" />
-            <Setter Property="FontWeight" Value="SemiBold" />
-            <Setter Property="Margin" Value="0,2,0,0" />
-            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
-        </Style>
+        <!-- KpiValue is now the shared global style (Theme/Typography.xaml) -->
         <!-- soft-tinted accent circle for each KPI -->
         <Style x:Key="KpiIcon" TargetType="Border">
             <Setter Property="Width" Value="38" />
