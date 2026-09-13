@@ -34,6 +34,7 @@ namespace OptiPaie.Services
         private const string KeyRefJulyJune = "Leave.ReferenceJulyToJune";
         private const string KeyAccrualExclUnpaid = "Leave.AccrualExcludesUnpaid";
         private const string KeyStrictCnas = "Leave.StrictCnasTreatment";
+        private const string KeyFirstMonthRule = "Leave.FirstMonthRuleArt44";
 
         /// <summary>Marks the attendance rows this module owns, so it only removes its own.</summary>
         private const string AttendanceMarker = "[Congé]";
@@ -490,6 +491,7 @@ namespace OptiPaie.Services
                 uow.AppSettings.Upsert(Scoped(KeyRefJulyJune, companyId), settings.ReferenceJulyToJune ? "1" : "0");
                 uow.AppSettings.Upsert(Scoped(KeyAccrualExclUnpaid, companyId), settings.AccrualExcludesUnpaid ? "1" : "0");
                 uow.AppSettings.Upsert(Scoped(KeyStrictCnas, companyId), settings.StrictCnasTreatment ? "1" : "0");
+                uow.AppSettings.Upsert(Scoped(KeyFirstMonthRule, companyId), settings.FirstMonthRuleArt44 ? "1" : "0");
 
                 return Result.Ok();
             }
@@ -720,7 +722,7 @@ namespace OptiPaie.Services
                 return sum > s.AnnualCap ? s.AnnualCap : sum;
             }
 
-            // Historical formula (unchanged): months of presence in the reference window × 2,5, capped.
+            // Historical formula (default): months of presence in the reference window × 2,5, capped.
             DateTime windowStart = s.ReferenceJulyToJune ? new DateTime(year - 1, 7, 1) : FirstOfYear(year);
             DateTime windowEnd = s.ReferenceJulyToJune ? new DateTime(year, 6, 30) : LastOfYear(year);
 
@@ -728,13 +730,57 @@ namespace OptiPaie.Services
             DateTime to = employee.ExitDate.HasValue ? Min(employee.ExitDate.Value.Date, windowEnd) : windowEnd;
             if (to < from) return 0m;
 
-            int months = ((to.Year - from.Year) * 12) + to.Month - from.Month;
-            if (to.Day >= from.Day) months++;
+            // Default OFF → the historical day-of-month heuristic (byte-identical). ON → loi 90-11
+            // art. 44 : the first partial month of recruitment counts only with >15 jours ouvrables.
+            int months = s.FirstMonthRuleArt44
+                ? MonthsWithArt44(employee.HireDate.Date, from, to, windowStart, s)
+                : LegacyMonthCount(from, to);
             if (months < 0) months = 0;
             if (months > 12) months = 12;
 
             decimal earned = months * s.DaysPerMonth;
             return earned > s.AnnualCap ? s.AnnualCap : earned;
+        }
+
+        /// <summary>Historical month count: the month span, plus one more when the end day reaches the start day.</summary>
+        private static int LegacyMonthCount(DateTime from, DateTime to)
+            => ((to.Year - from.Year) * 12) + to.Month - from.Month + (to.Day >= from.Day ? 1 : 0);
+
+        /// <summary>
+        /// loi 90-11 art. 44 : « la période supérieure à quinze jours ouvrables du premier mois de
+        /// recrutement équivaut à un (1) mois de travail ». The first partial month of recruitment
+        /// (hired after the 1st, within the window) counts as a full month ONLY when it holds more than
+        /// 15 working days (jours ouvrables = excluding the company's weekly rest days); 15 or fewer →
+        /// it accrues nothing. Every other calendar month present in the window counts once.
+        /// </summary>
+        private static int MonthsWithArt44(DateTime hire, DateTime from, DateTime to, DateTime windowStart, LeaveSettings s)
+        {
+            int months = 0;
+            for (DateTime m = new DateTime(from.Year, from.Month, 1); m <= to; m = m.AddMonths(1))
+            {
+                DateTime monthStart = Max(m, from);
+                DateTime monthEnd = Min(new DateTime(m.Year, m.Month, DateTime.DaysInMonth(m.Year, m.Month)), to);
+
+                bool isFirstRecruitMonth = m.Year == hire.Year && m.Month == hire.Month && hire.Day > 1 && hire >= windowStart;
+                if (isFirstRecruitMonth)
+                {
+                    if (WorkingDayCount(monthStart, monthEnd, s) > 15) months++;
+                }
+                else
+                {
+                    months++;
+                }
+            }
+            return months;
+        }
+
+        /// <summary>Working days (jours ouvrables) in [start, end] — calendar days minus the company's weekly rest days.</summary>
+        private static int WorkingDayCount(DateTime start, DateTime end, LeaveSettings s)
+        {
+            int n = 0;
+            for (DateTime d = start.Date; d <= end.Date; d = d.AddDays(1))
+                if (!IsRestDay(d, s)) n++;
+            return n;
         }
 
         /// <summary>Month-by-month accrual view (informative). Unpaid-dominated months show 0 when the option is on.</summary>
@@ -858,6 +904,7 @@ namespace OptiPaie.Services
                 settings.ReferenceJulyToJune = Flag(uow, Scoped(KeyRefJulyJune, companyId));
                 settings.AccrualExcludesUnpaid = Flag(uow, Scoped(KeyAccrualExclUnpaid, companyId));
                 settings.StrictCnasTreatment = Flag(uow, Scoped(KeyStrictCnas, companyId));
+                settings.FirstMonthRuleArt44 = Flag(uow, Scoped(KeyFirstMonthRule, companyId));
             }
 
             return settings;

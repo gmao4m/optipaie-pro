@@ -55,6 +55,8 @@
                           Content="{loc:Loc LeaveSet_AccrualExcludesUnpaid}" />
                 <CheckBox Margin="0,6,0,0" IsChecked="{Binding StrictCnasTreatment}"
                           Content="{loc:Loc LeaveSet_StrictCnas}" />
+                <CheckBox Margin="0,6,0,0" IsChecked="{Binding FirstMonthRule}"
+                          Content="{loc:Loc LeaveSet_FirstMonthRule}" />
 
                 <TextBlock Style="{StaticResource Caption}" Margin="0,14,0,0" Text="{loc:Loc LeaveSet_MaternityDays}" />
                 <TextBox Style="{StaticResource AppTextBox}" Margin="0,4,0,0" Width="120" HorizontalAlignment="Left"

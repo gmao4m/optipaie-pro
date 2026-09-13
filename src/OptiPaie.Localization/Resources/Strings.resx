@@ -1859,6 +1859,7 @@
   <data name="LeaveSet_RefJulyJune" xml:space="preserve"><value>Année de référence de juillet à juin</value></data>
   <data name="LeaveSet_AccrualExcludesUnpaid" xml:space="preserve"><value>Ne pas acquérir de congé pendant un congé sans solde</value></data>
   <data name="LeaveSet_StrictCnas" xml:space="preserve"><value>Traitement CNAS strict (congés à charge de la sécurité sociale)</value></data>
+  <data name="LeaveSet_FirstMonthRule" xml:space="preserve"><value>1er mois de recrutement : &gt; 15 jours ouvrables (art. 44)</value></data>
   <data name="LeaveSet_MaternityDays" xml:space="preserve"><value>Congé de maternité (jours)</value></data>
   <data name="Loan_CountStatus" xml:space="preserve"><value>{0} prêt(s) · {1} en cours</value></data>
   <data name="Loan_NoActiveEmployees" xml:space="preserve"><value>Aucun employé actif dans cette entreprise.</value></data>

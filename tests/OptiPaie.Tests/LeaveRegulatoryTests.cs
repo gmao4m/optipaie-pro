@@ -134,6 +134,35 @@ namespace OptiPaie.Tests
         }
 
         [Test]
+        public void Accrual_Art44_ExcludesFirstMonth_WhenItHasFifteenOrFewerWorkingDays()
+        {
+            // Hired on the 22nd → the first partial month holds well under 15 working days
+            // (10 calendar days, ~7 jours ouvrables) in any year, so the classification is stable.
+            long emp = InsertEmployeeHere(new DateTime(Year, 3, 22));
+
+            Assert.That(_leave.GetBalance(emp, Year).Entitlement, Is.EqualTo(25m),
+                "défaut (heuristique historique) : mars compté → 10 mois × 2,5");
+
+            SetFlags(s => s.FirstMonthRuleArt44 = true);
+            Assert.That(_leave.GetBalance(emp, Year).Entitlement, Is.EqualTo(22.5m),
+                "art. 44 : mars (≤ 15 jours ouvrables) n'accorde rien → 9 mois × 2,5");
+        }
+
+        [Test]
+        public void Accrual_Art44_CountsFirstMonth_WhenItHasMoreThanFifteenWorkingDays()
+        {
+            // Hired on the 2nd → the first month holds well over 15 working days (≥ 20 jours ouvrables)
+            // in any year, so art. 44 keeps counting it — same result as the historical heuristic.
+            long emp = InsertEmployeeHere(new DateTime(Year, 3, 2));
+
+            Assert.That(_leave.GetBalance(emp, Year).Entitlement, Is.EqualTo(25m), "défaut : 10 mois × 2,5");
+
+            SetFlags(s => s.FirstMonthRuleArt44 = true);
+            Assert.That(_leave.GetBalance(emp, Year).Entitlement, Is.EqualTo(25m),
+                "art. 44 : mars a > 15 jours ouvrables → toujours compté (10 mois × 2,5)");
+        }
+
+        [Test]
         public void Accrual_ExcludesUnpaidDominatedMonths_WhenEnabled()
         {
             SetFlags(s => s.AccrualExcludesUnpaid = true);

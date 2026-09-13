@@ -1859,6 +1859,7 @@
   <data name="LeaveSet_RefJulyJune" xml:space="preserve"><value>السنة المرجعية من جويلية إلى جوان</value></data>
   <data name="LeaveSet_AccrualExcludesUnpaid" xml:space="preserve"><value>عدم اكتساب العطلة أثناء عطلة بدون أجر</value></data>
   <data name="LeaveSet_StrictCnas" xml:space="preserve"><value>معالجة CNAS الصارمة (عطل على حساب الضمان الاجتماعي)</value></data>
+  <data name="LeaveSet_FirstMonthRule" xml:space="preserve"><value>الشهر الأول للتوظيف: أكثر من 15 يوم عمل (المادة 44)</value></data>
   <data name="LeaveSet_MaternityDays" xml:space="preserve"><value>عطلة الأمومة (أيام)</value></data>
   <data name="Loan_CountStatus" xml:space="preserve"><value>{0} قرض · {1} قيد السداد</value></data>
   <data name="Loan_NoActiveEmployees" xml:space="preserve"><value>لا يوجد موظف نشط في هذه المؤسسة.</value></data>

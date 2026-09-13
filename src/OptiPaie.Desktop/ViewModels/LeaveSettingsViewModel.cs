@@ -31,6 +31,7 @@ namespace OptiPaie.Desktop.ViewModels
         private bool _referenceJulyToJune;
         private bool _accrualExcludesUnpaid;
         private bool _strictCnasTreatment;
+        private bool _firstMonthRule;
         private string _maternityDays;
 
         public LeaveSettingsViewModel(ILeaveService service, long companyId)
@@ -57,6 +58,7 @@ namespace OptiPaie.Desktop.ViewModels
             _referenceJulyToJune = current.ReferenceJulyToJune;
             _accrualExcludesUnpaid = current.AccrualExcludesUnpaid;
             _strictCnasTreatment = current.StrictCnasTreatment;
+            _firstMonthRule = current.FirstMonthRuleArt44;
             _maternityDays = current.MaternityDays.ToString("0.##", CultureInfo.InvariantCulture);
 
             var fr = CultureInfo.GetCultureInfo("fr-FR");
@@ -93,6 +95,8 @@ namespace OptiPaie.Desktop.ViewModels
         public bool AccrualExcludesUnpaid { get => _accrualExcludesUnpaid; set => Set(ref _accrualExcludesUnpaid, value); }
         /// <summary>Traitement CNAS strict des congés à charge de la sécurité sociale.</summary>
         public bool StrictCnasTreatment { get => _strictCnasTreatment; set => Set(ref _strictCnasTreatment, value); }
+        /// <summary>loi 90-11 art. 44 — le 1er mois de recrutement n'ouvre droit à congé que s'il compte > 15 jours ouvrables.</summary>
+        public bool FirstMonthRule { get => _firstMonthRule; set => Set(ref _firstMonthRule, value); }
         /// <summary>Durée du congé de maternité, en jours (paramètre informatif).</summary>
         public string MaternityDays { get => _maternityDays; set => Set(ref _maternityDays, value); }
 
@@ -135,6 +139,7 @@ namespace OptiPaie.Desktop.ViewModels
             _settings.ReferenceJulyToJune = _referenceJulyToJune;
             _settings.AccrualExcludesUnpaid = _accrualExcludesUnpaid;
             _settings.StrictCnasTreatment = _strictCnasTreatment;
+            _settings.FirstMonthRuleArt44 = _firstMonthRule;
             _settings.MaternityDays = maternity;
 
             Result result = _service.SaveSettings(_companyId, _settings);

@@ -82,6 +82,14 @@ namespace OptiPaie.Core.Dtos
         /// <summary>Apply the strict legal treatment to CNAS-paid leave (employer suspends the salary). Default OFF (salary maintained, as today).</summary>
         public bool StrictCnasTreatment { get; set; }
 
+        /// <summary>
+        /// loi 90-11 art. 44 : the first (partial) month of recruitment counts as a full month for
+        /// annual-leave accrual only when it has MORE than 15 working days (jours ouvrables); 15 or
+        /// fewer → it accrues nothing. Default OFF → the historical day-of-month heuristic (a mid-month
+        /// hire's first month is counted as a full month), so existing databases are byte-identical.
+        /// </summary>
+        public bool FirstMonthRuleArt44 { get; set; }
+
         /// <summary>Maternity duration in days (loi 25-08/2025 = 150 ; à vérifier au Journal Officiel). Informative parameter.</summary>
         public decimal MaternityDays { get; set; } = 150m;
     }
