@@ -30,7 +30,8 @@ namespace OptiPaie.Desktop.ViewModels
 
         private string _headcount = "0", _avgAge = "—", _avgAgeNote = string.Empty;
         private string _entries = "0", _exits = "0", _turnover = "0 %", _turnoverRaw = string.Empty, _turnoverTip = string.Empty;
-        private bool _currentUnreliable;
+        private string _retire = "0", _retirePct = string.Empty, _retireSub = string.Empty;
+        private bool _currentUnreliable, _currentIsTable;
 
         public WorkforceViewModel(AppServices services)
         {
@@ -42,12 +43,15 @@ namespace OptiPaie.Desktop.ViewModels
             Axes.Add(new AxisOption("marital", L("Workforce_Axis_Marital"), w => w.ByMaritalStatus));
             Axes.Add(new AxisOption("age", L("Workforce_Axis_Age"), w => w.ByAgeBand));
             Axes.Add(new AxisOption("seniority", L("Workforce_Axis_Seniority"), w => w.BySeniority));
+            // Poste is many single-count entries → rendered as a compact scrollable table, not bars.
+            Axes.Add(new AxisOption("poste", L("Workforce_Axis_Poste"), w => w.ByPoste));
             _axis = Axes[0];
 
             OpenBucketCommand = new RelayCommand(p => OpenBucket(p as BucketVM));
             OpenHeadcountCommand = new RelayCommand(() => OpenList(L("Workforce_Headcount"), _wa?.HeadcountIds));
             OpenEntriesCommand = new RelayCommand(() => OpenList(L("Workforce_Entries"), _wa?.EntryIds));
             OpenExitsCommand = new RelayCommand(() => OpenList(L("Workforce_Exits"), _wa?.ExitIds));
+            OpenRetirementCommand = new RelayCommand(OpenRetirement);
         }
 
         // ── key figures ──
@@ -60,6 +64,12 @@ namespace OptiPaie.Desktop.ViewModels
         public string TurnoverRaw { get => _turnoverRaw; private set => Set(ref _turnoverRaw, value); }
         public string TurnoverTooltip { get => _turnoverTip; private set => Set(ref _turnoverTip, value); }
 
+        // ── retirement indicator ──
+        public string RetirementText { get => _retire; private set => Set(ref _retire, value); }
+        public string RetirementPctText { get => _retirePct; private set => Set(ref _retirePct, value); }
+        public string RetirementSubText { get => _retireSub; private set { if (Set(ref _retireSub, value)) Raise(nameof(HasRetirementSub)); } }
+        public bool HasRetirementSub => !string.IsNullOrEmpty(_retireSub);
+
         // ── distribution panel ──
         public ObservableCollection<AxisOption> Axes { get; } = new ObservableCollection<AxisOption>();
         public AxisOption SelectedAxis
@@ -69,6 +79,9 @@ namespace OptiPaie.Desktop.ViewModels
         }
         public ObservableCollection<BucketVM> CurrentBuckets { get; } = new ObservableCollection<BucketVM>();
         public bool CurrentUnreliable { get => _currentUnreliable; private set => Set(ref _currentUnreliable, value); }
+        /// <summary>True when the current axis is rendered as a scrollable table (poste) rather than bars.</summary>
+        public bool CurrentIsTable { get => _currentIsTable; private set { if (Set(ref _currentIsTable, value)) Raise(nameof(CurrentIsBars)); } }
+        public bool CurrentIsBars => !_currentIsTable;
         public string UnreliableText => L("Workforce_Unreliable");
 
         // ── department donut ──
@@ -79,6 +92,7 @@ namespace OptiPaie.Desktop.ViewModels
         public ICommand OpenHeadcountCommand { get; }
         public ICommand OpenEntriesCommand { get; }
         public ICommand OpenExitsCommand { get; }
+        public ICommand OpenRetirementCommand { get; }
 
         /// <summary>Pushes freshly-built analytics into the panel (called on the UI thread by the parent).</summary>
         public void Apply(WorkforceAnalytics wa)
@@ -95,6 +109,16 @@ namespace OptiPaie.Desktop.ViewModels
             TurnoverRaw = string.Format(L("Workforce_TurnoverRaw"), wa.Exits, wa.AverageHeadcount.ToString("0.#", Fr));
             TurnoverTooltip = L("Workforce_TurnoverTooltip");
 
+            // Retirement: count within 12 months + % of headcount; already-passed and no-birth-date
+            // excluded are surfaced (never silently omitted) in the sub-line.
+            RetirementText = wa.RetirementSoonCount.ToString(Fr);
+            double retirePct = wa.Headcount > 0 ? (double)wa.RetirementSoonCount / wa.Headcount * 100.0 : 0.0;
+            RetirementPctText = "(" + retirePct.ToString("0.#", Fr) + " %)";
+            var subParts = new List<string>();
+            if (wa.RetirementPassedCount > 0) subParts.Add(string.Format(L("Workforce_Retirement_Passed"), wa.RetirementPassedCount));
+            if (wa.RetirementUnknownCount > 0) subParts.Add(string.Format(L("Workforce_Retirement_Excluded"), wa.RetirementUnknownCount));
+            RetirementSubText = string.Join(" · ", subParts);
+
             RebuildCurrent();
             BuildDonut(wa.ByDepartment);
         }
@@ -102,6 +126,7 @@ namespace OptiPaie.Desktop.ViewModels
         private void RebuildCurrent()
         {
             if (_wa == null || _axis == null) return;
+            CurrentIsTable = _axis.Key == "poste"; // many single-count rows → table, not bars
             WorkforceDistribution d = _axis.Select(_wa);
             CurrentBuckets.Clear();
             int max = d.Buckets.Count > 0 ? d.Buckets.Max(b => b.Count) : 0;
@@ -170,6 +195,16 @@ namespace OptiPaie.Desktop.ViewModels
         private void OpenBucket(BucketVM b)
         {
             if (b != null) OpenList(b.DrillTitle, b.EmployeeIds);
+        }
+
+        private void OpenRetirement()
+        {
+            if (_wa == null) return;
+            var vm = new RetirementListViewModel(_services, L("Workforce_Retirement"), _services.CompanyContext.ActiveId, _wa.RetirementCandidates);
+            var win = new Views.RetirementListWindow { DataContext = vm, Owner = Application.Current.MainWindow };
+            App.ApplyFlowDirection(win);
+            vm.RequestClose = () => win.Close();
+            win.ShowDialog();
         }
 
         private void OpenList(string title, IReadOnlyList<long> ids)

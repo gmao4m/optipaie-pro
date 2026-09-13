@@ -211,7 +211,9 @@
                                                     <Grid>
                                                         <StackPanel HorizontalAlignment="Left">
                                                             <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="12.5" />
-                                                            <TextBlock Text="{Binding Detail}" Foreground="{DynamicResource TextSecondary}" FontSize="11.5" Margin="0,2,0,0" />
+                                                            <!-- Force LTR so the date range reads start → end even under Arabic RTL. -->
+                                                            <TextBlock Text="{Binding Detail}" Foreground="{DynamicResource TextSecondary}" FontSize="11.5" Margin="0,2,0,0"
+                                                                       FlowDirection="LeftToRight" />
                                                         </StackPanel>
                                                         <TextBlock Text="{loc:Loc Dashboard_Process}" HorizontalAlignment="Right" VerticalAlignment="Center"
                                                                    Foreground="{DynamicResource BrandText}" FontWeight="SemiBold" FontSize="12" />

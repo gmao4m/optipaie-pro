@@ -310,6 +310,95 @@ namespace OptiPaie.Tests
             Assert.That(o.Workforce.ByDepartment.Buckets.Sum(b => b.Count), Is.EqualTo(1));
         }
 
+        // ──────────────────────────────────────── retirement indicator
+
+        private long SeedRetirementCompany()
+        {
+            long c = _companies.Create(new Company { NameFr = "SARL Retraite", Nif = "000000000000000" }).Value;
+            // A: man, passed 60 (~1 month ago)
+            Emp(c, Gender.Male, _today.AddYears(-60).AddMonths(-1), "Cadre", ContractType.Cdi, "P", "Chef", _today.AddYears(-10), null, true, 50000m, "APASSED");
+            // B: man, reaches 60 in ~6 months
+            Emp(c, Gender.Male, _today.AddYears(-59).AddMonths(-6), "Cadre", ContractType.Cdi, "P", "Chef", _today.AddYears(-10), null, true, 50000m, "BSOON");
+            // C: woman, reaches 55 in ~3 months
+            Emp(c, Gender.Female, _today.AddYears(-54).AddMonths(-9), "Cadre", ContractType.Cdi, "P", "Chef", _today.AddYears(-10), null, true, 50000m, "CSOON");
+            // D: man, age 30 — far from retirement
+            Emp(c, Gender.Male, _today.AddYears(-30), "Cadre", ContractType.Cdi, "P", "Chef", _today.AddYears(-2), null, true, 50000m, "DYOUNG");
+            // E: no birth date — excluded (never silently omitted)
+            Emp(c, Gender.Male, null, "Cadre", ContractType.Cdi, "P", "Chef", _today.AddYears(-2), null, true, 50000m, "ENOBIRTH");
+            // F: woman, passed 55 (~1 year ago)
+            Emp(c, Gender.Female, _today.AddYears(-56), "Cadre", ContractType.Cdi, "P", "Chef", _today.AddYears(-10), null, true, 50000m, "FPASSED");
+            return c;
+        }
+
+        [Test]
+        public void Retirement_CountsSoonPassedAndUnknown_SortedSoonestFirst()
+        {
+            long c = SeedRetirementCompany();
+            WorkforceAnalytics w = _dashboard.BuildOverview(c, _today.AddDays(-30), _today, 30, RetirementPolicy.Default).Workforce;
+
+            Assert.That(w.RetirementSoonCount, Is.EqualTo(2), "B (man, +6 mois) and C (woman, +3 mois)");
+            Assert.That(w.RetirementPassedCount, Is.EqualTo(2), "A (man) and F (woman) are already past the age");
+            Assert.That(w.RetirementUnknownCount, Is.EqualTo(1), "E has no birth date — excluded, never silently omitted");
+            Assert.That(w.RetirementCandidates.Count, Is.EqualTo(4));
+            Assert.That(w.RetirementCandidates.Select(x => x.RetirementDate).ToList(), Is.Ordered, "soonest retirement date first");
+            Assert.That(w.RetirementCandidates.First().AlreadyReached, Is.True, "an already-passed employee sorts first");
+        }
+
+        [Test]
+        public void Retirement_HonoursConfiguredAges()
+        {
+            long c = SeedRetirementCompany();
+            // Raise the male age to 62: B no longer within a year and A no longer past it; the women are unaffected.
+            WorkforceAnalytics w = _dashboard.BuildOverview(c, _today.AddDays(-30), _today, 30, new RetirementPolicy(62, 55)).Workforce;
+            Assert.That(w.RetirementSoonCount, Is.EqualTo(1), "only C (woman) within a year once men retire at 62");
+            Assert.That(w.RetirementPassedCount, Is.EqualTo(1), "only F (woman) still past the age at 62 for men");
+        }
+
+        [Test]
+        public void Gender_CannotBeUnspecified_EnforcedByTheDatabase()
+        {
+            // The spec asks for a "gender unspecified" count. There is none by design: the DB enforces
+            // CHECK (Gender IN (1, 2)), so every employee is Male or Female — the unspecified count is
+            // structurally always zero.
+            long c = _companies.Create(new Company { NameFr = "SARL G", Nif = "000000000000000" }).Value;
+            Assert.That(() => Emp(c, (Gender)0, _today.AddYears(-40), "Cadre", ContractType.Cdi, "P", "Chef", _today.AddYears(-10), null, true, 50000m, "NOGENDER"),
+                Throws.InstanceOf<Exception>(), "an unset gender is rejected at the database level");
+        }
+
+        [Test]
+        public void Retirement_EmptyAndSingleUnknown_AreZeroOrExcluded()
+        {
+            // Empty company.
+            long empty = _companies.Create(new Company { NameFr = "SARL Vide", Nif = "000000000000000" }).Value;
+            WorkforceAnalytics we = _dashboard.BuildOverview(empty, _today.AddDays(-30), _today, 30, RetirementPolicy.Default).Workforce;
+            Assert.That(we.RetirementSoonCount, Is.EqualTo(0));
+            Assert.That(we.RetirementPassedCount, Is.EqualTo(0));
+            Assert.That(we.RetirementUnknownCount, Is.EqualTo(0));
+            Assert.That(we.RetirementCandidates, Is.Empty);
+
+            // One employee, no birth date → excluded, not omitted.
+            long one = _companies.Create(new Company { NameFr = "SARL Un", Nif = "000000000000000" }).Value;
+            Emp(one, Gender.Male, null, "Cadre", ContractType.Cdi, "P", "Chef", _today.AddYears(-1), null, true, 50000m, "NOBIRTH");
+            WorkforceAnalytics wo = _dashboard.BuildOverview(one, _today.AddDays(-30), _today, 30, RetirementPolicy.Default).Workforce;
+            Assert.That(wo.RetirementUnknownCount, Is.EqualTo(1));
+            Assert.That(wo.RetirementSoonCount, Is.EqualTo(0));
+            Assert.That(wo.RetirementPassedCount, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void Poste_And_Gender_DistributionsAreAvailable_AndSumToHeadcount()
+        {
+            SeedRich();
+            WorkforceAnalytics w = Build().Workforce;
+            // Poste distribution present and its percentages sum to 100 (counts sum to total).
+            Assert.That(w.ByPoste.Buckets.Sum(b => b.Count), Is.EqualTo(w.ByPoste.Total));
+            Assert.That(w.ByPoste.Buckets.Count, Is.GreaterThan(0));
+            // Gender is a controlled enum → no "unknown" bucket; every active employee is counted.
+            Assert.That(w.ByGender.UnknownCount, Is.EqualTo(0));
+            Assert.That(w.ByGender.Buckets.Sum(b => b.Count), Is.EqualTo(w.ByGender.Total));
+            Assert.That(w.ByGender.Total, Is.EqualTo(w.Headcount));
+        }
+
         [Test]
         public void BuildOverview_RequiresACompany()
         {

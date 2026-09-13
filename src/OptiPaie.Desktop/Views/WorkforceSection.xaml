@@ -42,12 +42,25 @@
     <StackPanel>
         <!-- Key figures strip. Headcount is NOT repeated here — it is the hero figure and the donut
              centre; the strip carries the flow/derived figures that give the period its context. -->
-        <UniformGrid Rows="1" Columns="4">
+        <UniformGrid Rows="1" Columns="5">
             <Border Style="{StaticResource FigureTile}">
                 <StackPanel>
                     <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Workforce_AverageAge}" />
                     <TextBlock Style="{StaticResource KpiValue}" FontSize="20" Text="{Binding AverageAgeText}" />
                     <TextBlock Style="{StaticResource Caption}" FontSize="10" TextWrapping="Wrap" Text="{Binding AverageAgeNote}" />
+                </StackPanel>
+            </Border>
+            <!-- Retirement (count + % of headcount; already-passed / no-birth-date surfaced below) -->
+            <Border Style="{StaticResource FigureTile}" Cursor="Hand" ToolTip="{loc:Loc Common_Open}">
+                <Border.InputBindings><MouseBinding MouseAction="LeftClick" Command="{Binding OpenRetirementCommand}" /></Border.InputBindings>
+                <StackPanel>
+                    <TextBlock Style="{StaticResource Caption}" TextWrapping="Wrap" Text="{loc:Loc Workforce_Retirement_Tile}" />
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Style="{StaticResource KpiValue}" FontSize="20" Text="{Binding RetirementText}" />
+                        <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Bottom" Margin="6,0,0,4" Text="{Binding RetirementPctText}" />
+                    </StackPanel>
+                    <TextBlock Style="{StaticResource Caption}" FontSize="10" TextWrapping="Wrap" Text="{Binding RetirementSubText}"
+                               Visibility="{Binding HasRetirementSub, Converter={StaticResource BoolToVis}}" />
                 </StackPanel>
             </Border>
             <Border Style="{StaticResource FigureTile}" Cursor="Hand">
@@ -92,7 +105,52 @@
                         Visibility="{Binding CurrentUnreliable, Converter={StaticResource BoolToVis}}">
                     <TextBlock TextWrapping="Wrap" FontSize="12" Foreground="{DynamicResource StatusPendingText}" Text="{Binding UnreliableText}" />
                 </Border>
-                <ItemsControl Margin="0,10,0,0" ItemsSource="{Binding CurrentBuckets}" ItemTemplate="{StaticResource BucketBar}" />
+
+                <!-- Bars: for the small-category axes (contract, gender, age band, …) -->
+                <ItemsControl Margin="0,10,0,0" ItemsSource="{Binding CurrentBuckets}" ItemTemplate="{StaticResource BucketBar}"
+                              Visibility="{Binding CurrentIsBars, Converter={StaticResource BoolToVis}}" />
+
+                <!-- Table: for « poste » (many single-count rows) — compact, sorted, scrollable -->
+                <StackPanel Margin="0,10,0,0" Visibility="{Binding CurrentIsTable, Converter={StaticResource BoolToVis}}">
+                    <Grid Margin="0,0,0,4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="70" />
+                            <ColumnDefinition Width="60" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Style="{StaticResource Caption}" Text="{loc:Loc Workforce_Axis_Poste}" />
+                        <TextBlock Grid.Column="1" Style="{StaticResource Caption}" Text="{loc:Loc Workforce_Col_Count}" TextAlignment="Right" />
+                        <TextBlock Grid.Column="2" Style="{StaticResource Caption}" Text="{loc:Loc Workforce_Col_Pct}" TextAlignment="Right" />
+                    </Grid>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="240">
+                        <ItemsControl ItemsSource="{Binding CurrentBuckets}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Cursor="Hand" Background="Transparent" Padding="0,4" ToolTip="{loc:Loc Common_Open}">
+                                        <Border.InputBindings>
+                                            <MouseBinding MouseAction="LeftClick"
+                                                          Command="{Binding DataContext.OpenBucketCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                          CommandParameter="{Binding}" />
+                                        </Border.InputBindings>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="70" />
+                                                <ColumnDefinition Width="60" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="{Binding Label}" FontSize="12.5" TextTrimming="CharacterEllipsis"
+                                                       Foreground="{DynamicResource TextPrimary}" />
+                                            <TextBlock Grid.Column="1" Text="{Binding CountText}" FontSize="12.5" FontWeight="SemiBold"
+                                                       TextAlignment="Right" Foreground="{DynamicResource TextPrimary}" />
+                                            <TextBlock Grid.Column="2" Text="{Binding PctText}" FontSize="11.5" TextAlignment="Right"
+                                                       Foreground="{DynamicResource TextSecondary}" />
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </StackPanel>
             </StackPanel>
 
             <!-- Department donut + clickable legend -->

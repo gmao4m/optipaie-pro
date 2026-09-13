@@ -144,7 +144,7 @@ namespace OptiPaie.Desktop.ViewModels
             NoCompany = false;
 
             DateTime today = DateTime.Today;
-            DashboardOverview ov = _services.Dashboard.BuildOverview(companyId, PeriodStart(_period?.Key, today), today, 30);
+            DashboardOverview ov = _services.Dashboard.BuildOverview(companyId, PeriodStart(_period?.Key, today), today, 30, RetirementPolicyFromSettings());
             var activity = _services.Audit.GetRecentForCompany(companyId, 12).ToList();
             ApplyOverview(ov, activity);
             IsLoading = false;
@@ -184,9 +184,10 @@ namespace OptiPaie.Desktop.ViewModels
 
             try
             {
+                RetirementPolicy policy = RetirementPolicyFromSettings();
                 CacheEntry fresh = await Task.Run(() =>
                 {
-                    DashboardOverview ov = _services.Dashboard.BuildOverview(companyId, start, today, 30);
+                    DashboardOverview ov = _services.Dashboard.BuildOverview(companyId, start, today, 30, policy);
                     var activity = _services.Audit.GetRecentForCompany(companyId, 12).ToList();
                     return new CacheEntry { Overview = ov, Activity = activity };
                 }).ConfigureAwait(true);
@@ -288,6 +289,8 @@ namespace OptiPaie.Desktop.ViewModels
                     ModuleKey = a.ModuleKey
                 };
             }
+            // The view forces this detail's TextBlock to LeftToRight so the "start → end" range never
+            // flips to "end → start" under Arabic RTL (the date range is pure numbers + an arrow).
             string detail = a.StartDate.HasValue && a.EndDate.HasValue
                 ? a.StartDate.Value.ToString("dd/MM/yyyy", Fr) + " → " + a.EndDate.Value.ToString("dd/MM/yyyy", Fr)
                 : string.Empty;
@@ -356,6 +359,18 @@ namespace OptiPaie.Desktop.ViewModels
 
         private string FormatDa(decimal amount) => amount.ToString("N0", Fr) + " " + L("Common_CurrencyDa");
         private string L(string key) => _services.Localization.GetString(key);
+
+        /// <summary>Legal retirement ages read from configuration (Settings), so they can change
+        /// without a code change; falls back to the Algerian legal defaults (60 / 55).</summary>
+        private RetirementPolicy RetirementPolicyFromSettings()
+        {
+            int male = ParseAge(_services.Settings.Get("Retirement.AgeMale", "60"), 60);
+            int female = ParseAge(_services.Settings.Get("Retirement.AgeFemale", "55"), 55);
+            return new RetirementPolicy(male, female);
+        }
+
+        private static int ParseAge(string s, int fallback)
+            => int.TryParse(s, NumberStyles.Integer, CultureInfo.InvariantCulture, out int v) && v > 0 && v < 120 ? v : fallback;
 
         private static DateTime PeriodStart(string key, DateTime today)
         {

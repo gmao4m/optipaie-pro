@@ -1977,4 +1977,17 @@
   <data name="Dashboard_Group_Finance" xml:space="preserve"><value>Finances</value></data>
   <data name="Dashboard_Group_Contracts" xml:space="preserve"><value>Contrats &amp; effectif</value></data>
   <data name="Dashboard_Group_Recruitment" xml:space="preserve"><value>Recrutement &amp; biens</value></data>
+  <!-- Spec closure: retirement indicator + poste distribution -->
+  <data name="Workforce_Axis_Poste" xml:space="preserve"><value>Poste</value></data>
+  <data name="Workforce_Retirement" xml:space="preserve"><value>Départs en retraite</value></data>
+  <data name="Workforce_Retirement_Tile" xml:space="preserve"><value>Départs retraite (≤ 12 mois)</value></data>
+  <data name="Workforce_Retirement_Passed" xml:space="preserve"><value>{0} déjà en âge</value></data>
+  <data name="Workforce_Retirement_Excluded" xml:space="preserve"><value>{0} sans date de naissance</value></data>
+  <data name="Workforce_Retirement_Empty" xml:space="preserve"><value>Aucun départ en retraite dans l'année à venir.</value></data>
+  <data name="Workforce_Retirement_StatusSoon" xml:space="preserve"><value>≤ 12 mois</value></data>
+  <data name="Workforce_Retirement_StatusPassed" xml:space="preserve"><value>Déjà atteint</value></data>
+  <data name="Workforce_Col_BirthDate" xml:space="preserve"><value>Date de naissance</value></data>
+  <data name="Workforce_Col_Age" xml:space="preserve"><value>Âge</value></data>
+  <data name="Workforce_Col_RetirementDate" xml:space="preserve"><value>Départ en retraite</value></data>
+  <data name="Workforce_Col_RetirementStatus" xml:space="preserve"><value>Statut</value></data>
 </root>

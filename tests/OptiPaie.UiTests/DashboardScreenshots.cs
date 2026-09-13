@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Windows;
@@ -107,6 +108,34 @@ namespace OptiPaie.UiTests
                     }
                 }
             }
+
+            // Extra: the « poste » distribution rendered as a compact table (FR / light), so the
+            // job-title breakdown restored per the spec can be seen even though the default axis is
+            // « type de contrat ».
+            try
+            {
+                services.Localization.SetLanguage("fr");
+                ThemeManager.Apply(false);
+                var vm = new DashboardViewModel(services, _ => { });
+                vm.LoadSynchronouslyForRender();
+                var poste = vm.Workforce.Axes.FirstOrDefault(a => a.Key == "poste");
+                if (poste != null) vm.Workforce.SelectedAxis = poste;
+
+                var view = new DashboardView { DataContext = vm };
+                var host = new Border { Background = (Brush)Application.Current.Resources["Canvas"], FlowDirection = FlowDirection.LeftToRight, Child = view };
+                host.Measure(new Size(Width, double.PositiveInfinity));
+                double h = Math.Max(600, host.DesiredSize.Height);
+                host.Arrange(new Rect(0, 0, Width, h)); host.UpdateLayout();
+                host.Measure(new Size(Width, double.PositiveInfinity)); h = Math.Max(600, host.DesiredSize.Height);
+                host.Arrange(new Rect(0, 0, Width, h)); host.UpdateLayout();
+                var rtb = new RenderTargetBitmap((int)(Width * Scale), (int)(h * Scale), 96 * Scale, 96 * Scale, PixelFormats.Pbgra32);
+                rtb.Render(host);
+                string file = Path.Combine(outDir, "dashboard-fr-light-poste.png");
+                var enc = new PngBitmapEncoder(); enc.Frames.Add(BitmapFrame.Create(rtb));
+                using (var fs = new FileStream(file, FileMode.Create)) enc.Save(fs);
+                Bc("  wrote " + file);
+            }
+            catch (Exception ex) { Bc("  ERROR poste " + ex.Message); }
         }
 
         private static string FindRepoRoot()

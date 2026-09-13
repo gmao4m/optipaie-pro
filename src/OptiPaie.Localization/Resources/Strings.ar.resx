@@ -1977,4 +1977,17 @@
   <data name="Dashboard_Group_Finance" xml:space="preserve"><value>المالية</value></data>
   <data name="Dashboard_Group_Contracts" xml:space="preserve"><value>العقود والتعداد</value></data>
   <data name="Dashboard_Group_Recruitment" xml:space="preserve"><value>التوظيف والأصول</value></data>
+  <!-- Spec closure: retirement indicator + poste distribution -->
+  <data name="Workforce_Axis_Poste" xml:space="preserve"><value>المنصب</value></data>
+  <data name="Workforce_Retirement" xml:space="preserve"><value>الإحالات على التقاعد</value></data>
+  <data name="Workforce_Retirement_Tile" xml:space="preserve"><value>التقاعد (≤ 12 شهراً)</value></data>
+  <data name="Workforce_Retirement_Passed" xml:space="preserve"><value>{0} بلغوا السنّ</value></data>
+  <data name="Workforce_Retirement_Excluded" xml:space="preserve"><value>{0} دون تاريخ ميلاد</value></data>
+  <data name="Workforce_Retirement_Empty" xml:space="preserve"><value>لا إحالات على التقاعد خلال السنة القادمة.</value></data>
+  <data name="Workforce_Retirement_StatusSoon" xml:space="preserve"><value>≤ 12 شهراً</value></data>
+  <data name="Workforce_Retirement_StatusPassed" xml:space="preserve"><value>بلغ السنّ</value></data>
+  <data name="Workforce_Col_BirthDate" xml:space="preserve"><value>تاريخ الميلاد</value></data>
+  <data name="Workforce_Col_Age" xml:space="preserve"><value>العمر</value></data>
+  <data name="Workforce_Col_RetirementDate" xml:space="preserve"><value>تاريخ التقاعد</value></data>
+  <data name="Workforce_Col_RetirementStatus" xml:space="preserve"><value>الحالة</value></data>
 </root>

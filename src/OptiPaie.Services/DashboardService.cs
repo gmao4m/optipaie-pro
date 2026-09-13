@@ -86,7 +86,7 @@ namespace OptiPaie.Services
 
         // ------------------------------------------------------------------ consolidated overview
 
-        public DashboardOverview BuildOverview(long companyId, DateTime periodStart, DateTime periodEnd, int expiryWindowDays = 30)
+        public DashboardOverview BuildOverview(long companyId, DateTime periodStart, DateTime periodEnd, int expiryWindowDays = 30, RetirementPolicy retirement = null)
         {
             RequireCompany(companyId);
 
@@ -108,7 +108,7 @@ namespace OptiPaie.Services
             o.MasseTrend = BuildMasseTrend(roster, today);
 
             // ── workforce analytics (from the already-loaded lists) ──
-            o.Workforce = BuildWorkforceCore(active, roster, start, end, today);
+            o.Workforce = BuildWorkforceCore(active, roster, start, end, today, retirement ?? RetirementPolicy.Default);
 
             // ── module KPIs via single SQL aggregates (no N+1) ──
             LoanPortfolio loans = _loans.GetActivePortfolio(companyId);
@@ -231,14 +231,14 @@ namespace OptiPaie.Services
             DateTime today = DateTime.Today;
             IReadOnlyList<Employee> roster = _employees.GetByCompany(companyId, true);
             List<Employee> active = roster.Where(e => e.IsActive).ToList();
-            return BuildWorkforceCore(active, roster, periodStart.Date, periodEnd.Date, today);
+            return BuildWorkforceCore(active, roster, periodStart.Date, periodEnd.Date, today, RetirementPolicy.Default);
         }
 
         /// <summary>The workforce computation, over pre-loaded lists so the overview never re-queries
         /// employees. State distributions read <paramref name="active"/>; flow figures read the full
         /// <paramref name="roster"/> so a departure in the period is counted.</summary>
         private static WorkforceAnalytics BuildWorkforceCore(
-            IReadOnlyList<Employee> active, IReadOnlyList<Employee> roster, DateTime start, DateTime end, DateTime today)
+            IReadOnlyList<Employee> active, IReadOnlyList<Employee> roster, DateTime start, DateTime end, DateTime today, RetirementPolicy retirement)
         {
             var wa = new WorkforceAnalytics { AsOf = today, PeriodStart = start, PeriodEnd = end };
 
@@ -269,6 +269,31 @@ namespace OptiPaie.Services
             wa.ByPoste = FreeTextDistribution(active, e => e.Poste);
             wa.ByAgeBand = BandDistribution(active, AgeBandOrder, e => e.BirthDate.HasValue ? AgeBandKey(AgeAt(e.BirthDate.Value, today)) : null);
             wa.BySeniority = BandDistribution(active, SeniorityBandOrder, e => SeniorityBandKey(SeniorityYears(e.HireDate, today)));
+
+            // ── retirement (from the same active list; needs the birth date, so it is computed in
+            //    memory over the roster already loaded — it adds no query) ──
+            var candidates = new List<RetirementCandidate>();
+            int soon = 0, passed = 0, unknown = 0;
+            DateTime horizon = today.AddYears(1);
+            foreach (Employee e in active)
+            {
+                if (!e.BirthDate.HasValue) { unknown++; continue; }
+                DateTime retDate = e.BirthDate.Value.Date.AddYears(retirement.AgeFor(e.Gender));
+                if (retDate <= today)
+                {
+                    passed++;
+                    candidates.Add(new RetirementCandidate { EmployeeId = e.Id, RetirementDate = retDate, AlreadyReached = true });
+                }
+                else if (retDate <= horizon)
+                {
+                    soon++;
+                    candidates.Add(new RetirementCandidate { EmployeeId = e.Id, RetirementDate = retDate, AlreadyReached = false });
+                }
+            }
+            wa.RetirementSoonCount = soon;
+            wa.RetirementPassedCount = passed;
+            wa.RetirementUnknownCount = unknown;
+            wa.RetirementCandidates = candidates.OrderBy(c => c.RetirementDate).ToList();
 
             return wa;
         }

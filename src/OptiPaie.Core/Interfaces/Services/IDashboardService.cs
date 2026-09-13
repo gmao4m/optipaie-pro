@@ -23,7 +23,7 @@ namespace OptiPaie.Core.Interfaces.Services
         /// aggregates (no N+1); designed to run off the UI thread. Flow figures span
         /// [<paramref name="periodStart"/>, <paramref name="periodEnd"/>]; state figures are at today.
         /// </summary>
-        DashboardOverview BuildOverview(long companyId, DateTime periodStart, DateTime periodEnd, int expiryWindowDays = 30);
+        DashboardOverview BuildOverview(long companyId, DateTime periodStart, DateTime periodEnd, int expiryWindowDays = 30, RetirementPolicy retirement = null);
 
         /// <summary>
         /// Workforce (effectif) analytics for ONE company (<paramref name="companyId"/> MANDATORY, throws

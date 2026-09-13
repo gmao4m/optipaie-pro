@@ -34,6 +34,16 @@ namespace OptiPaie.Core.Dtos
         public int HeadcountStart { get; set; }
         public int HeadcountEnd { get; set; }
 
+        // ── retirement (state, at AsOf) ──
+        /// <summary>Active employees reaching legal retirement age within the next 12 months (not yet past it).</summary>
+        public int RetirementSoonCount { get; set; }
+        /// <summary>Active employees who have ALREADY passed legal retirement age.</summary>
+        public int RetirementPassedCount { get; set; }
+        /// <summary>Active employees excluded from the retirement figures because they have no birth date.</summary>
+        public int RetirementUnknownCount { get; set; }
+        /// <summary>Every retirement candidate (soon + already past), soonest retirement date first.</summary>
+        public IReadOnlyList<RetirementCandidate> RetirementCandidates { get; set; } = new List<RetirementCandidate>();
+
         /// <summary>Average headcount over the period = (start + end) / 2.</summary>
         public decimal AverageHeadcount { get; set; }
 
