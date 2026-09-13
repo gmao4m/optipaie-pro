@@ -254,5 +254,88 @@ namespace OptiPaie.Tests
             s.DaysPerMonth = 0.25m; s.AnnualCap = 3m;
             Assert.That(_leave.SaveSettings(_companyId, s).IsSuccess, Is.True);
         }
+
+        // ============================================================ per-company regulatory flags
+        // The five options are per-company. These prove the remaining two toggles actually change the
+        // calculation, and that a flag set for one company never leaks into another (the scoping fix).
+
+        [Test]
+        public void Count_IncludesWeekend_WhenCalendarDayCountEnabled()
+        {
+            DateTime mon = _weekStart.AddDays(1);   // Monday
+            DateTime sun = _weekStart.AddDays(7);   // Mon..Sun = 7 calendar days (Fri+Sat inside)
+
+            Assert.That(_leave.Preview(Req(LeaveType.Annual, mon, sun)).Days, Is.EqualTo(5m),
+                "jours ouvrés (défaut) → week-end exclu");
+
+            SetFlags(s => s.CalendarDayCount = true);
+            Assert.That(_leave.Preview(Req(LeaveType.Annual, mon, sun)).Days, Is.EqualTo(7m),
+                "jours calendaires → week-end compté");
+        }
+
+        [Test]
+        public void Accrual_UsesJulyToJuneWindow_WhenEnabled()
+        {
+            long emp = InsertEmployeeHere(new DateTime(Year, 4, 1)); // hired 1 April of the reference year
+
+            Assert.That(_leave.GetBalance(emp, Year).Entitlement, Is.EqualTo(22.5m),
+                "année civile (défaut) : avril→déc = 9 mois × 2,5");
+
+            SetFlags(s => s.ReferenceJulyToJune = true);
+            Assert.That(_leave.GetBalance(emp, Year).Entitlement, Is.EqualTo(7.5m),
+                "référence juillet→juin : seuls avril→juin comptent = 3 mois × 2,5");
+        }
+
+        [Test]
+        public void RegulatoryFlags_AreScopedPerCompany_OneCompanyDoesNotAffectAnother()
+        {
+            DateTime monday = _weekStart.AddDays(1);
+
+            (long _, long empB) = InsertOtherCompanyWithEmployee(new DateTime(Year - 4, 1, 1));
+
+            // Enable holiday-exclusion for THIS company only, with a stored holiday on the Monday.
+            SetFlags(s => s.ExcludeHolidays = true);
+            InsertHoliday(monday, "عيد تجريبي");
+
+            Assert.That(_leave.Preview(Req(LeaveType.Annual, monday, monday)).Days, Is.EqualTo(0m),
+                "société A : le férié est exclu (option activée pour elle)");
+
+            var reqB = new LeaveRequest { EmployeeId = empB, Type = LeaveType.Annual, StartDate = monday, EndDate = monday, Reason = "T" };
+            Assert.That(_leave.Preview(reqB).Days, Is.EqualTo(1m),
+                "société B : l'option activée pour une autre société ne l'affecte pas (portée par société)");
+        }
+
+        private long InsertEmployeeHere(DateTime hire)
+        {
+            using (IUnitOfWork uow = _uow.Create())
+            {
+                uow.BeginTransaction();
+                long id = uow.Employees.Insert(new Employee
+                {
+                    CompanyId = _companyId, LastNameFr = "MIDYEAR", FirstNameFr = "T",
+                    Gender = Gender.Male, MaritalStatus = MaritalStatus.Single, PaymentMode = PaymentMode.Cash,
+                    ContractType = ContractType.Cdi, HireDate = hire, BaseSalary = 40000m, IsActive = true
+                });
+                uow.Commit();
+                return id;
+            }
+        }
+
+        private (long companyId, long employeeId) InsertOtherCompanyWithEmployee(DateTime hire)
+        {
+            using (IUnitOfWork uow = _uow.Create())
+            {
+                uow.BeginTransaction();
+                long cid = uow.Companies.Insert(new Company { NameFr = "SARL Autre", Nif = "000000000000001" });
+                long eid = uow.Employees.Insert(new Employee
+                {
+                    CompanyId = cid, LastNameFr = "AUTRE", FirstNameFr = "Z",
+                    Gender = Gender.Male, MaritalStatus = MaritalStatus.Single, PaymentMode = PaymentMode.Cash,
+                    ContractType = ContractType.Cdi, HireDate = hire, BaseSalary = 40000m, IsActive = true
+                });
+                uow.Commit();
+                return (cid, eid);
+            }
+        }
     }
 }

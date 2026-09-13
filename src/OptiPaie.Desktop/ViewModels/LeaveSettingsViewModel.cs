@@ -20,6 +20,7 @@ namespace OptiPaie.Desktop.ViewModels
     public sealed class LeaveSettingsViewModel : ObservableObject
     {
         private readonly ILeaveService _service;
+        private readonly long _companyId;
         private readonly LeaveSettings _settings;
 
         private string _daysPerMonth;
@@ -32,13 +33,21 @@ namespace OptiPaie.Desktop.ViewModels
         private bool _strictCnasTreatment;
         private string _maternityDays;
 
-        public LeaveSettingsViewModel(ILeaveService service)
+        public LeaveSettingsViewModel(ILeaveService service, long companyId)
         {
             _service = service;
 
-            // Keep the loaded settings and mutate THEM on save, so the six regulatory options are
+            // The five regulatory options are PER-COMPANY (loi 90-11 lets a company opt into each).
+            // Read AND write them scoped to the ACTIVE company — historically the dialog used the
+            // company-agnostic GetSettings()/SaveSettings() (company id 0), so what it saved was stored
+            // under ".0" while the leave/payroll calculation reads ".{companyId}" — the checkboxes had
+            // no effect. Scoping both sides here is the fix. (DaysPerMonth/AnnualCap/WeekendDays/
+            // Maternity remain global keys, unchanged.)
+            _companyId = companyId;
+
+            // Keep the loaded settings and mutate THEM on save, so the regulatory options are
             // never silently reset to their defaults by a save that only knew about a few fields.
-            _settings = service.GetSettings();
+            _settings = service.GetSettings(companyId);
             LeaveSettings current = _settings;
             _daysPerMonth = current.DaysPerMonth.ToString("0.##", CultureInfo.InvariantCulture);
             _annualCap = current.AnnualCap.ToString("0.##", CultureInfo.InvariantCulture);
@@ -128,7 +137,7 @@ namespace OptiPaie.Desktop.ViewModels
             _settings.StrictCnasTreatment = _strictCnasTreatment;
             _settings.MaternityDays = maternity;
 
-            Result result = _service.SaveSettings(_settings);
+            Result result = _service.SaveSettings(_companyId, _settings);
 
             if (result.IsFailure)
             {

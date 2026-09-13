@@ -513,7 +513,9 @@ namespace OptiPaie.Desktop.ViewModels
 
         private void OpenSettings()
         {
-            var vm = new LeaveSettingsViewModel(_services.Leave);
+            // Scope the regulatory options to the ACTIVE company (they are per-company). Without a
+            // company there is nothing to scope to — the dialog still edits the global fields.
+            var vm = new LeaveSettingsViewModel(_services.Leave, _selectedCompany?.Id ?? 0L);
             var window = new LeaveSettingsWindow { DataContext = vm, Owner = Application.Current.MainWindow };
             App.ApplyFlowDirection(window);
             vm.RequestClose = ok => window.DialogResult = ok;
