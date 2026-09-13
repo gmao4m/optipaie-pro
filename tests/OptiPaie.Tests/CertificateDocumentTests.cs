@@ -72,7 +72,8 @@ namespace OptiPaie.Tests
         [Test]
         public void MapAts_UsesDdMmYyDates_DaAmounts_AndSlashForUnusedSlots()
         {
-            AtsCertificateData data = SampleAts(resumed: false, months: 2);
+            // Work-stoppage case: the « en cas d'arrêt de travail » dates are filled (ddMMyy).
+            AtsCertificateData data = SampleAts(resumed: false, months: 2, isWorkStoppage: true);
             Dictionary<string, string> v = CertificateBookmarkMapper.MapAts(data);
 
             Assert.That(v["NMS"], Is.EqualTo("BENALI Karim"));
@@ -84,6 +85,19 @@ namespace OptiPaie.Tests
             Assert.That(v["PO1"], Is.EqualTo("3600 DA"), "part ouvrière = 9% of 40000 = 3600");
             Assert.That(v["JT12"], Is.EqualTo("/"), "unused trailing slot prints '/'");
             Assert.That(v["DATEAUJRH"], Is.Not.Empty, "not resumed → today's date is filled");
+        }
+
+        [Test]
+        public void MapAts_OrdinaryAttestation_LeavesWorkStoppageDatesBlank()
+        {
+            // DEFECT 1: an ordinary attestation (default) must NOT auto-fill the work-stoppage dates —
+            // « dernier jour de travail », « reprise de travail » and « n'a pas repris à ce jour » stay
+            // blank for the employer. The hire date (a general fact) is still printed.
+            Dictionary<string, string> v = CertificateBookmarkMapper.MapAts(SampleAts(resumed: false, months: 2));
+            Assert.That(v["DATEAT"], Is.Empty, "date du dernier jour de travail — blank on an ordinary attestation");
+            Assert.That(v["DATEREPRISE"], Is.Empty, "date de reprise de travail — blank on an ordinary attestation");
+            Assert.That(v["DATEAUJRH"], Is.Empty, "n'a pas repris son travail à ce jour — blank on an ordinary attestation");
+            Assert.That(v["DATER"], Is.Not.Empty, "date de recrutement is a general fact and stays filled");
         }
 
         [Test]
@@ -217,7 +231,7 @@ namespace OptiPaie.Tests
             Position = "Technicien"
         };
 
-        private static AtsCertificateData SampleAts(bool resumed, int months)
+        private static AtsCertificateData SampleAts(bool resumed, int months, bool isWorkStoppage = false)
         {
             var svc = new CertificateService(new WeekendConfig());
             List<MonthlyContribution> grid = svc.BuildEmptyMonthGrid(new DateTime(2025, 12, 1), months, false);
@@ -225,7 +239,7 @@ namespace OptiPaie.Tests
                 if (row.IsActive) { row.DaysWorked = 22m; row.AbsenceReason = ""; row.ContributionBase = 40000m; }
 
             var stoppage = new WorkStoppage { StoppageDate = new DateTime(2026, 1, 4), NumberOfDays = 15 };
-            return svc.BuildAts(SampleCompany(), SampleEmployee(), stoppage, resumed, grid);
+            return svc.BuildAts(SampleCompany(), SampleEmployee(), stoppage, resumed, grid, isWorkStoppage);
         }
 
         private static DrtCertificateData SampleDrt(bool resumed)

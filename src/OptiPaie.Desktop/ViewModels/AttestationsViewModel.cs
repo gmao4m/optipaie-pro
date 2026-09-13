@@ -27,6 +27,7 @@ namespace OptiPaie.Desktop.ViewModels
         private Employee _selectedEmployee;
         private string _certType = "ATS";      // "ATS" | "DRT"
 
+        private bool _isWorkStoppage;           // false = ordinary attestation (stoppage dates blank)
         private DateTime _stoppageDate = DateTime.Today;
         private int _numberOfDays = 15;
         private bool _hasResumedWork;
@@ -36,8 +37,9 @@ namespace OptiPaie.Desktop.ViewModels
         private decimal _offsetX, _offsetY;
         private bool _loadingOffsets;
 
-        // ATS 12-month grid controls.
-        private DateTime _gridStartDate = new DateTime(DateTime.Today.Year, 1, 1);
+        // ATS 12-month grid controls. Default window = the last 12 months up to the current month,
+        // so the reference table lists the employee's most recent payroll history.
+        private DateTime _gridStartDate = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1).AddMonths(-11);
         private int _monthCount = 12;
 
         // Auto-filled, editable identity (so a missing stored field can be completed inline).
@@ -66,7 +68,7 @@ namespace OptiPaie.Desktop.ViewModels
         public Employee SelectedEmployee
         {
             get => _selectedEmployee;
-            set { if (Set(ref _selectedEmployee, value)) AutoFill(); CommandManager.InvalidateRequerySuggested(); }
+            set { if (Set(ref _selectedEmployee, value)) { AutoFill(); BuildGrid(); } CommandManager.InvalidateRequerySuggested(); }
         }
 
         // ── document type ────────────────────────────────────────────────────
@@ -80,6 +82,9 @@ namespace OptiPaie.Desktop.ViewModels
         public bool IsDrt { get => _certType == "DRT"; set { if (value) CertType = "DRT"; } }
 
         // ── work stoppage ────────────────────────────────────────────────────
+        /// <summary>OFF by default: an ordinary attestation leaves the « en cas d'arrêt de travail »
+        /// dates blank. ON only when the attestation documents an actual work stoppage.</summary>
+        public bool IsWorkStoppage { get => _isWorkStoppage; set => Set(ref _isWorkStoppage, value); }
         public DateTime StoppageDate { get => _stoppageDate; set { if (Set(ref _stoppageDate, value)) RaisePreviews(); } }
 
         // Clamped 0..365 exactly like the source tool's NumericUpDown (a negative count would
@@ -144,8 +149,7 @@ namespace OptiPaie.Desktop.ViewModels
                 foreach (Employee e in _services.Employees.GetByCompany(_company.Id, false))
                     Employees.Add(e);
 
-            SelectedEmployee = Employees.Count > 0 ? Employees[0] : null;
-            if (Contributions.Count == 0) BuildGrid();
+            SelectedEmployee = Employees.Count > 0 ? Employees[0] : null; // setter fills the grid from payroll
 
             LoadPrinters();
         }
@@ -236,15 +240,21 @@ namespace OptiPaie.Desktop.ViewModels
 
         private void BuildGrid()
         {
+            Contributions.Clear();
+            if (_company == null || _selectedEmployee == null) return;
+
             int count = Math.Min(12, Math.Max(1, _monthCount));
             // Month labels follow the APP UI language (like the source tool), NOT the DRT-only
             // language flag — otherwise a French-UI user would get Arabic months on the ATS form.
             bool arabicMonths = _services.Localization.CurrentLanguage == "ar";
-            List<Cert.MonthlyContribution> grid = _services.AtsDrtDocuments.BuildMonthGrid(_gridStartDate, count, arabicMonths);
 
-            // Only the active months are editable in the grid; the mapper emits the unused
-            // trailing slots as "/" automatically, so passing just the active rows is correct.
-            Contributions.Clear();
+            // Fill the reference table from the employee's ACTUAL payroll history — the SAME persisted
+            // contributable base (Payslip.BaseCotisable) the CNAS declarations use. Only months with a
+            // payslip are returned as active rows; the renderer strikes unused rows with "/". The grid
+            // stays editable so the employer can add a « motif absences » or adjust before printing.
+            List<Cert.MonthlyContribution> grid = _services.AtsDrtDocuments
+                .BuildContributionsFromPayroll(_company.Id, _selectedEmployee.Id, _gridStartDate, count, arabicMonths);
+
             foreach (Cert.MonthlyContribution row in grid)
                 if (row.IsActive) Contributions.Add(new ContributionRow(row));
         }
@@ -308,7 +318,7 @@ namespace OptiPaie.Desktop.ViewModels
                     var contribs = new List<Cert.MonthlyContribution>();
                     foreach (ContributionRow r in Contributions) contribs.Add(r.ToModel());
                     pdfPath = _services.AtsDrtDocuments.GenerateAts(
-                        certCompany, certEmployee, stoppage, _hasResumedWork, contribs, weekend, ox, oy, dialog.FileName);
+                        certCompany, certEmployee, stoppage, _hasResumedWork, contribs, weekend, ox, oy, dialog.FileName, _isWorkStoppage);
                 }
                 else
                 {

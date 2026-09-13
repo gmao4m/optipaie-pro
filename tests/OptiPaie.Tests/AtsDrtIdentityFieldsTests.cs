@@ -73,7 +73,7 @@ namespace OptiPaie.Tests
             Assert.That(e.Address, Is.EqualTo("Cité 200 logements, Rouiba"));
 
             // The bridge auto-fills the certificate snapshot from the stored files.
-            var docs = new AtsDrtDocumentService(_companies, _employees);
+            var docs = new AtsDrtDocumentService(_companies, _employees, new ArchiveService(_uow));
 
             Cert.Company cc = docs.MapCompany(companyId);
             Assert.That(cc.ManagerName, Is.EqualTo("CHERIF Mohamed"));

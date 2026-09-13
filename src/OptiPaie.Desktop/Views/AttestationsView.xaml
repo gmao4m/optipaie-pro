@@ -86,37 +86,46 @@
                 <Border Style="{StaticResource Card}" Padding="18" Margin="0,0,0,14">
                     <StackPanel>
                         <TextBlock Style="{StaticResource H2}" Text="2 · Arrêt de travail" />
-                        <Grid Margin="0,12,0,0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="16" />
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="16" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Grid.Column="0">
-                                <TextBlock Style="{StaticResource FieldLabel}" Text="Date d'arrêt de travail" />
-                                <DatePicker Height="34" SelectedDate="{Binding StoppageDate}" />
-                            </StackPanel>
-                            <StackPanel Grid.Column="2">
-                                <TextBlock Style="{StaticResource FieldLabel}" Text="Nombre de jours" />
-                                <TextBox Style="{StaticResource AppTextBox}" Text="{Binding NumberOfDays, UpdateSourceTrigger=PropertyChanged}" />
-                            </StackPanel>
-                            <StackPanel Grid.Column="4" VerticalAlignment="Bottom">
-                                <CheckBox Content="L'employé a repris le travail" IsChecked="{Binding HasResumedWork}"
-                                          VerticalContentAlignment="Center" Margin="0,0,0,8" />
-                            </StackPanel>
-                        </Grid>
-                        <Border Background="{DynamicResource BrandSoft}" CornerRadius="6" Padding="12,8" Margin="0,12,0,0">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Foreground="{DynamicResource BrandText}">
-                                    <Run Text="Dernier jour travaillé : " FontWeight="SemiBold" /><Run Text="{Binding LastWorkedDatePreview, Mode=OneWay}" />
-                                </TextBlock>
-                                <TextBlock Margin="24,0,0,0" Foreground="{DynamicResource BrandText}">
-                                    <Run Text="Date de reprise : " FontWeight="SemiBold" /><Run Text="{Binding ResumeDatePreview, Mode=OneWay}" />
-                                </TextBlock>
-                            </StackPanel>
-                        </Border>
+                        <!-- OFF by default: an ordinary attestation leaves the « en cas d'arrêt de
+                             travail » date boxes empty on the official form for hand-completion.
+                             Checked only for a genuine stoppage (maladie/maternité/accident/invalidité). -->
+                        <CheckBox Margin="0,12,0,0" VerticalContentAlignment="Center" IsChecked="{Binding IsWorkStoppage}"
+                                  Content="Cette attestation concerne un arrêt de travail (maladie, maternité, accident, invalidité)" />
+                        <TextBlock Style="{StaticResource Caption}" Margin="0,6,0,0" TextWrapping="Wrap"
+                                   Text="Décoché (attestation ordinaire) : les cases « dernier jour de travail », « reprise du travail » et « n'a pas repris à ce jour » restent vides sur le formulaire, à compléter à la main le cas échéant." />
+                        <StackPanel Visibility="{Binding IsWorkStoppage, Converter={StaticResource BoolToVis}}">
+                            <Grid Margin="0,12,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="16" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="16" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Style="{StaticResource FieldLabel}" Text="Date d'arrêt de travail" />
+                                    <DatePicker Height="34" SelectedDate="{Binding StoppageDate}" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Style="{StaticResource FieldLabel}" Text="Nombre de jours" />
+                                    <TextBox Style="{StaticResource AppTextBox}" Text="{Binding NumberOfDays, UpdateSourceTrigger=PropertyChanged}" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="4" VerticalAlignment="Bottom">
+                                    <CheckBox Content="L'employé a repris le travail" IsChecked="{Binding HasResumedWork}"
+                                              VerticalContentAlignment="Center" Margin="0,0,0,8" />
+                                </StackPanel>
+                            </Grid>
+                            <Border Background="{DynamicResource BrandSoft}" CornerRadius="6" Padding="12,8" Margin="0,12,0,0">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Foreground="{DynamicResource BrandText}">
+                                        <Run Text="Dernier jour travaillé : " FontWeight="SemiBold" /><Run Text="{Binding LastWorkedDatePreview, Mode=OneWay}" />
+                                    </TextBlock>
+                                    <TextBlock Margin="24,0,0,0" Foreground="{DynamicResource BrandText}">
+                                        <Run Text="Date de reprise : " FontWeight="SemiBold" /><Run Text="{Binding ResumeDatePreview, Mode=OneWay}" />
+                                    </TextBlock>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
                     </StackPanel>
                 </Border>
 

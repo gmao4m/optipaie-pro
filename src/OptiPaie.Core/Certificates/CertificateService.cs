@@ -14,6 +14,14 @@ namespace OptiPaie.Core.Certificates
         public DateTime? ResumeDate { get; set; }          // set only if HasResumedWork = true
         public List<MonthlyContribution> Contributions { get; set; } = new List<MonthlyContribution>();
         public DateTime IssueDate { get; set; }
+
+        /// <summary>
+        /// True only when the attestation documents an ACTUAL work stoppage (sickness, maternity,
+        /// work accident, invalidity). The « EN CAS D'ARRÊT DE TRAVAIL » date fields — last worked
+        /// day, resume date, "not resumed to date" — are printed ONLY then. For an ordinary
+        /// employment-and-salary attestation they stay blank for the employer to complete by hand.
+        /// </summary>
+        public bool IsWorkStoppage { get; set; }
     }
 
     /// <summary>Everything needed to render a DRT certificate.</summary>
@@ -47,7 +55,8 @@ namespace OptiPaie.Core.Certificates
             Employee employee,
             WorkStoppage stoppage,
             bool hasResumedWork,
-            List<MonthlyContribution> contributions)
+            List<MonthlyContribution> contributions,
+            bool isWorkStoppage = false)
         {
             var data = new AtsCertificateData
             {
@@ -56,7 +65,8 @@ namespace OptiPaie.Core.Certificates
                 LastWorkedDate = BusinessDayCalculator.PreviousBusinessDay(stoppage.StoppageDate, _weekendConfig),
                 HasResumedWork = hasResumedWork,
                 Contributions = contributions ?? new List<MonthlyContribution>(),
-                IssueDate = DateTime.Today
+                IssueDate = DateTime.Today,
+                IsWorkStoppage = isWorkStoppage
             };
 
             if (hasResumedWork)

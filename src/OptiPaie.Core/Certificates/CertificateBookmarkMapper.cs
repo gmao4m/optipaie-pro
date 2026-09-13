@@ -32,23 +32,37 @@ namespace OptiPaie.Core.Certificates
                 // both sides are filled.
                 ["DATENAR"] = FormatDdMmYy(data.Employee.BirthDate),
                 ["NEAAR"] = data.Employee.BirthPlace,
+                // « Date de recrutement » — a general fact of the employment, always printed.
                 ["DATER"] = FormatDdMmYy(data.Employee.HireDate),
 
-                ["DATEAT"] = FormatDdMmYy(data.LastWorkedDate),
                 ["AUJOURDHUI"] = FormatDdMmYyyySlash(data.IssueDate),
             };
 
-            // Same "resumed work or not" question the original tool asks on the ATS
-            // form itself (Optbtn2OUI/Optbtn2NON in frmCotis).
-            if (data.HasResumedWork)
+            // « EN CAS D'ARRÊT DE TRAVAIL … » subsection — the last-worked-day, resume date and
+            // "not resumed to date" fields belong to a WORK-STOPPAGE case only (maladie, maternité,
+            // accident de travail, invalidité). For an ordinary attestation they MUST stay blank so
+            // the employer completes them by hand if the case ever applies. The boxed placeholders
+            // remain on the printed form either way.
+            if (data.IsWorkStoppage)
             {
-                values["DATEAUJRH"] = "";
-                values["DATEREPRISE"] = FormatDdMmYy(data.ResumeDate);
+                values["DATEAT"] = FormatDdMmYy(data.LastWorkedDate);
+                // Same "resumed work or not" question the original tool asks (Optbtn2OUI/NON in frmCotis).
+                if (data.HasResumedWork)
+                {
+                    values["DATEAUJRH"] = "";
+                    values["DATEREPRISE"] = FormatDdMmYy(data.ResumeDate);
+                }
+                else
+                {
+                    values["DATEAUJRH"] = FormatDdMmYy(data.IssueDate);
+                    values["DATEREPRISE"] = "";
+                }
             }
             else
             {
-                values["DATEAUJRH"] = FormatDdMmYy(data.IssueDate);
+                values["DATEAT"] = "";
                 values["DATEREPRISE"] = "";
+                values["DATEAUJRH"] = "";
             }
 
             // 12-month table (ATS page 2). Column order on the official form:

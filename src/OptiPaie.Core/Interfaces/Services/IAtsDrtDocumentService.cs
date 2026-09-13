@@ -19,8 +19,18 @@ namespace OptiPaie.Core.Interfaces.Services
         /// <summary>Snapshots an OptiPaie employee into the certificate model (auto-fill). Null if missing.</summary>
         Employee MapEmployee(long employeeId);
 
-        /// <summary>The 12-row month grid used on the ATS certificate.</summary>
+        /// <summary>The 12-row month grid used on the ATS certificate (empty labels only).</summary>
         List<MonthlyContribution> BuildMonthGrid(DateTime startDate, int numberOfMonths, bool arabicMonthNames);
+
+        /// <summary>
+        /// The ATS page-2 salary table filled from the employee's ACTUAL payroll history: for every
+        /// reference month with a payslip it carries the SAME persisted contributable base
+        /// (<c>Payslip.BaseCotisable</c>) the CNAS declarations use, the worked days and the employee
+        /// CNAS share. Only months that have a payslip are returned as active rows (soonest window
+        /// first); the renderer strikes the unused rows with "/". Scoped to the active company only.
+        /// </summary>
+        List<MonthlyContribution> BuildContributionsFromPayroll(
+            long companyId, long employeeId, DateTime windowStart, int monthCount, bool arabicMonthNames);
 
         /// <summary>
         /// Renders the ATS (AS.08, 2 pages) as a PDF that carries ONLY the values, positioned at
@@ -29,7 +39,7 @@ namespace OptiPaie.Core.Interfaces.Services
         /// </summary>
         string GenerateAts(Company company, Employee employee, WorkStoppage stoppage,
             bool hasResumedWork, List<MonthlyContribution> contributions, WeekendConfig weekend,
-            double offsetXmm, double offsetYmm, string outputPdfPath);
+            double offsetXmm, double offsetYmm, string outputPdfPath, bool isWorkStoppage = false);
 
         /// <summary>
         /// Renders the DRT (AS.9, 1 page) as an absolute-coordinate overlay PDF. The official AS.9
