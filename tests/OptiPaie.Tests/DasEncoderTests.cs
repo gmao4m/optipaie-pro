@@ -106,6 +106,57 @@ namespace OptiPaie.Tests
                 new DasLineBuilder(DasFileSpec.DetailLength).Put(DasFileSpec.Detail.SalaryT1, DasFormat.Amount(99999.99m)));
         }
 
+        // ------------------------------------------------- One-value widening (pending real deposit)
+
+        [Test]
+        public void ChangingOnlyTheQuarterSalaryWidth_WidensAllFourColumns_ShiftsEverythingAfter_AndGrowsTheLine()
+        {
+            // The shipped default is 7 (99 999,99 DA cap) and must stay byte-stable until a real deposit.
+            Assert.That(DasFileSpec.Config.QuarterSalaryWidth, Is.EqualTo(7));
+            Assert.That(DasFileSpec.DetailLength, Is.EqualTo(195));
+            Assert.That(DasFileSpec.Detail.SalaryT1.Length, Is.EqualTo(7));
+            // The export guard reads the SAME single value → changing it relaxes the guard too.
+            Assert.That(DasFileSpec.QuarterSalaryLength, Is.EqualTo(DasFileSpec.Config.QuarterSalaryWidth));
+
+            // Simulate the one-value edit: build the detail layout with a wider quarterly salary.
+            var wide = new DasDetailLayout(9);
+
+            // All four salary columns widen…
+            foreach (DasFieldSpec s in new[] { wide.SalaryT1, wide.SalaryT2, wide.SalaryT3, wide.SalaryT4 })
+                Assert.That(s.Length, Is.EqualTo(9), s.Name);
+
+            // …the first salary keeps its offset; each later field shifts by 2 per prior widened column…
+            Assert.That(wide.SalaryT1.Offset, Is.EqualTo(94), "rien avant T1 ne bouge");
+            Assert.That(wide.SalaryT2.Offset, Is.EqualTo(110), "108 + 2");
+            Assert.That(wide.SalaryT3.Offset, Is.EqualTo(126), "122 + 4");
+            Assert.That(wide.SalaryT4.Offset, Is.EqualTo(142), "136 + 6");
+            Assert.That(wide.AnnualTotal.Offset, Is.EqualTo(154), "146 + 8");
+            Assert.That(wide.End.Offset, Is.EqualTo(202), "194 + 8");
+
+            // …and the line grows by exactly 4 × (9 − 7) = 8, with no overlap.
+            Assert.That(wide.Length, Is.EqualTo(203));
+            AssertNoOverlap(wide.All, wide.Length);
+
+            // An amount that OVERFLOWS the default 7-wide field (100 000,00 DA → 8 centime-digits)…
+            string tooBigAt7 = DasFormat.Amount(100000.00m); // "10000000"
+            Assert.Throws<DasEncodingException>(() =>
+                new DasLineBuilder(DasFileSpec.DetailLength).Put(DasFileSpec.Detail.SalaryT1, tooBigAt7));
+
+            // …now fits in the widened field, right-aligned and space-filled, with the following field
+            // (annual total) still correctly placed and aligned — every field stays aligned.
+            string line = new DasLineBuilder(wide.Length)
+                .Put(wide.SalaryT1, tooBigAt7)
+                .Put(wide.AnnualTotal, DasFormat.Amount(400000.00m))
+                .Build();
+            Assert.That(line.Length, Is.EqualTo(203));
+            Assert.That(line.Substring(wide.SalaryT1.Offset, 9), Is.EqualTo(" 10000000")); // 8 digits, right in 9
+            Assert.That(line.Substring(wide.AnnualTotal.Offset, 8), Is.EqualTo("40000000")); // next field aligned
+
+            // The default (shipped) layout is untouched by building an alternate one.
+            Assert.That(DasFileSpec.DetailLength, Is.EqualTo(195));
+            Assert.That(DasFileSpec.Detail.SalaryT1.Length, Is.EqualTo(7));
+        }
+
         // ---------------------------------------------------------------- Formatting
 
         [Test]
