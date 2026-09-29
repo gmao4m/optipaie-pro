@@ -25,18 +25,23 @@ namespace OptiPaie.Tests
         }
 
         [Test]
-        public void A_NifThatIsNot15Digits_IsRejected()
+        public void A_NifOfAnyLength_IsAccepted_NoInventedFixedWidth()
         {
-            Assert.That(_validator.Validate(new Company { NameFr = "SARL Test", Nif = "12345" }).IsValid, Is.False);
+            // Corrected: a real Algerian NIF varies in length. Forcing 15 digits blocked customers,
+            // so the length is no longer constrained — only the presence of a NIF is required.
+            Assert.That(_validator.Validate(new Company { NameFr = "SARL Test", Nif = "12345" }).IsValid, Is.True,
+                "un NIF plus court que 15 chiffres doit être accepté");
+            Assert.That(_validator.Validate(new Company { NameFr = "SARL Test", Nif = "00091602547893100000" }).IsValid, Is.True,
+                "un NIF plus long que 15 chiffres doit être accepté");
         }
 
         [Test]
-        public void AMalformed_Nis_IsRejected_ButAnEmptyNisIsAllowed()
+        public void A_Nis_OfAnyLength_IsAccepted_AndEmptyIsAllowed()
         {
-            Assert.That(_validator.Validate(new Company { NameFr = "T", Nif = "000123456789012", Nis = "999" }).IsValid, Is.False,
-                "a provided NIS must be well-formed");
-            Assert.That(_validator.Validate(new Company { NameFr = "T", Nif = "000123456789012", Nis = "" }).IsValid, Is.True,
-                "but the NIS is optional");
+            Assert.That(_validator.Validate(new Company { NameFr = "T", Nif = "1", Nis = "999" }).IsValid, Is.True,
+                "le NIS n'est plus contraint en longueur");
+            Assert.That(_validator.Validate(new Company { NameFr = "T", Nif = "1", Nis = "" }).IsValid, Is.True,
+                "et le NIS reste facultatif");
         }
     }
 }
