@@ -14,6 +14,9 @@
           wix extension add -g WixToolset.UI.wixext/5.0.2
           wix extension add -g WixToolset.BootstrapperApplications.wixext/5.0.2
           wix extension add -g WixToolset.Netfx.wixext/5.0.2
+          wix extension add -g WixToolset.Util.wixext/5.0.2
+      * Internet access at BUILD time (this machine) to fetch the .NET 4.8 offline
+        redistributable once - it is then EMBEDDED so the client never downloads it.
 
     Usage:  powershell -ExecutionPolicy Bypass -File installer\build-installer.ps1
 #>
@@ -110,11 +113,33 @@ Write-Host "==> Building MSI..." -ForegroundColor Cyan
     -o (Join-Path $outDir "OptiPaie PRO.msi")
 if ($LASTEXITCODE -ne 0) { throw "MSI build failed." }
 
-Write-Host "==> Building Setup.exe bootstrapper..." -ForegroundColor Cyan
+# ---------------------------------------------------------------------------
+# .NET Framework 4.8 OFFLINE redistributable - fetched here (build machine has
+# internet + TLS 1.2) and EMBEDDED into Setup.exe (Bundle.wxs, Compressed="yes"),
+# so the bootstrapper NEVER downloads .NET at install time. An un-updated Windows 7
+# SP1 cannot negotiate TLS 1.2 and failed the old web download (0x80072f7d); carrying
+# .NET offline removes that failure entirely.
+$redistDir = Join-Path $PSScriptRoot "redist"
+$redist    = Join-Path $redistDir "ndp48-x86-x64-allos-enu.exe"
+New-Item -ItemType Directory -Force $redistDir | Out-Null
+if (-not (Test-Path $redist) -or (Get-Item $redist).Length -lt 100MB) {
+    Write-Host "==> Downloading .NET Framework 4.8 offline redistributable..." -ForegroundColor Cyan
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    # go.microsoft.com fwlink 2088631 = the FULL offline .NET 4.8 installer (not the web stub).
+    Invoke-WebRequest -Uri "https://go.microsoft.com/fwlink/?linkid=2088631" -OutFile $redist -UseBasicParsing
+}
+$sig = Get-AuthenticodeSignature $redist
+if ($sig.Status -ne 'Valid' -or ($sig.SignerCertificate.Subject -notmatch 'Microsoft')) {
+    throw "The .NET 4.8 offline redistributable failed Authenticode verification (status=$($sig.Status), signer=$($sig.SignerCertificate.Subject)). Refusing to embed."
+}
+Write-Host ("    OK - .NET 4.8 offline redist verified ({0:N0} MB, signed by Microsoft)." -f ((Get-Item $redist).Length/1MB)) -ForegroundColor Green
+
+Write-Host "==> Building Setup.exe bootstrapper (embeds offline .NET 4.8)..." -ForegroundColor Cyan
 & $wix build (Join-Path $PSScriptRoot "Bundle.wxs") `
     -d "AppVersion=$wixVersion" -b $PSScriptRoot `
     -ext WixToolset.BootstrapperApplications.wixext `
     -ext WixToolset.Netfx.wixext `
+    -ext WixToolset.Util.wixext `
     -o (Join-Path $outDir "OptiPaie PRO Setup.exe")
 if ($LASTEXITCODE -ne 0) { throw "Setup.exe build failed." }
 

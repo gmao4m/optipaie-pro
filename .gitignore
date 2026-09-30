@@ -54,3 +54,6 @@ screenshots-ads-dark/
 screenshots-lp/
 screenshots-lp.zip
 rescue/
+
+# .NET 4.8 offline redistributable — downloaded at build time, never committed
+installer/redist/

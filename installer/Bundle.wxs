@@ -2,15 +2,21 @@
 <!--
   OptiPaie PRO - Setup.exe bootstrapper (WiX Burn).
   A single Setup.exe that:
-    1. Silently installs .NET Framework 4.8 if it is missing (present already on
-       Windows 10 1903+ and Windows 11, so it is skipped there).
+    1. Installs .NET Framework 4.8 if it is missing (already present on Windows 10
+       1903+ and Windows 11, so it is skipped there).
     2. Runs the OptiPaie PRO MSI, showing its full install wizard (welcome,
        license, install-location selection, shortcuts, finish).
-  The customer never installs .NET or downloads anything manually.
+
+  WINDOWS 7 FIX: the .NET 4.8 installer is EMBEDDED offline (the full redistributable,
+  Compressed="yes"), NOT downloaded from Microsoft at install time. An un-updated
+  Windows 7 SP1 cannot negotiate TLS 1.2, so the old web bootstrapper failed to
+  download .NET (error 0x80072f7d) and the whole install aborted before OptiPaie was
+  reached. Carrying .NET offline removes that dependency entirely. The redistributable
+  is fetched and Authenticode-verified at BUILD time by build-installer.ps1.
 -->
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
      xmlns:bal="http://wixtoolset.org/schemas/v4/wxs/bal"
-     xmlns:netfx="http://wixtoolset.org/schemas/v4/wxs/netfx">
+     xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
 
   <Bundle Name="OptiPaie PRO"
           Manufacturer="OptiPaie"
@@ -24,9 +30,34 @@
           Theme="rtfLicense" />
     </BootstrapperApplication>
 
+    <!-- Installed .NET Framework 4.x release number (528040 = .NET 4.8). Absent key
+         leaves the variable unset, so the ExePackage below is treated as not-present
+         and installs .NET. -->
+    <util:RegistrySearch
+        Id="NetFx48ReleaseSearch"
+        Variable="NetFx48Release"
+        Root="HKLM"
+        Key="SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full"
+        Value="Release"
+        Result="value" />
+
     <Chain>
-      <!-- Prerequisite: .NET Framework 4.8 (installed only if absent) -->
-      <PackageGroupRef Id="NetFx48Web" />
+      <!-- .NET Framework 4.8 - EMBEDDED offline redistributable (no install-time download,
+           so it works on Windows 7 SP1 with no internet / no TLS 1.2). Installed only when
+           .NET 4.8 (release >= 528040) is absent. Permanent: never removed on uninstall. -->
+      <ExePackage Id="NetFx48"
+                  DisplayName=".NET Framework 4.8"
+                  SourceFile="redist\ndp48-x86-x64-allos-enu.exe"
+                  Compressed="yes"
+                  PerMachine="yes"
+                  Permanent="yes"
+                  Vital="yes"
+                  DetectCondition="NetFx48Release AND NetFx48Release &gt;= 528040"
+                  InstallArguments="/q /norestart"
+                  RepairArguments="/q /norestart">
+        <ExitCode Value="1641" Behavior="scheduleReboot" />
+        <ExitCode Value="3010" Behavior="scheduleReboot" />
+      </ExePackage>
 
       <!-- The application (installed to the default location, like Chrome/Discord). -->
       <MsiPackage Id="OptiPaiePro"

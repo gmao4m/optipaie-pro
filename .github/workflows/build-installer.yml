@@ -1,0 +1,42 @@
+name: Build installer (artifact only)
+
+# Builds OptiPaie-PRO-Setup.exe on demand and uploads it as a downloadable ARTIFACT.
+# Does NOT create a GitHub release and does NOT touch version.json — nothing reaches
+# customers. Use it to obtain a self-contained installer (with .NET 4.8 embedded
+# offline for Windows 7) for testing or to hand to a specific client.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Install WiX v5 CLI + extensions
+        shell: pwsh
+        run: |
+          dotnet tool install --global wix --version 5.0.2
+          wix extension add -g WixToolset.UI.wixext/5.0.2
+          wix extension add -g WixToolset.BootstrapperApplications.wixext/5.0.2
+          wix extension add -g WixToolset.Netfx.wixext/5.0.2
+          wix extension add -g WixToolset.Util.wixext/5.0.2
+
+      - name: Build installer (embeds offline .NET 4.8 for Windows 7)
+        shell: pwsh
+        run: powershell -ExecutionPolicy Bypass -File installer/build-installer.ps1
+
+      - name: Upload Setup.exe (self-contained, Windows 7-ready)
+        uses: actions/upload-artifact@v4
+        with:
+          name: OptiPaie-PRO-Setup-win7-offline
+          path: installer/output/OptiPaie PRO Setup.exe
+          if-no-files-found: error
+          retention-days: 14
