@@ -595,13 +595,6 @@
   <data name="Dashboard_Kpi_TrainingUpcoming" xml:space="preserve"><value>تكوينات قادمة</value></data>
 
   <!-- Home view -->
-  <data name="Home_Greeting" xml:space="preserve"><value>مرحباً</value></data>
-  <data name="Home_Subtitle" xml:space="preserve"><value>إليك نشاط مؤسستك</value></data>
-  <data name="Home_CurrentPeriod" xml:space="preserve"><value>الفترة الحالية</value></data>
-  <data name="Home_QuickActions" xml:space="preserve"><value>إجراءات سريعة</value></data>
-  <data name="Home_PayrollArchive" xml:space="preserve"><value>أرشيف الأجور</value></data>
-  <data name="Home_RecentActivity" xml:space="preserve"><value>النشاط الأخير</value></data>
-  <data name="Home_RecentEmpty" xml:space="preserve"><value>سيظهر هنا النشاط الأخير لكشوف أجورك.</value></data>
 
   <!-- Reports view -->
   <data name="Reports_Title" xml:space="preserve"><value>مركز التقارير</value></data>
@@ -635,10 +628,6 @@
 
   <!-- Payroll view (labels only — never affects the payroll engine or values) -->
   <data name="Common_Preview" xml:space="preserve"><value>معاينة</value></data>
-  <data name="Payroll_Employee" xml:space="preserve"><value>الموظف</value></data>
-  <data name="Payroll_Month" xml:space="preserve"><value>الشهر</value></data>
-  <data name="Payroll_Year" xml:space="preserve"><value>السنة</value></data>
-  <data name="Payroll_Elements" xml:space="preserve"><value>عناصر الأجر</value></data>
   <data name="Payroll_ManageItems" xml:space="preserve"><value>إدارة العناصر</value></data>
   <data name="Payroll_EmptyState" xml:space="preserve"><value>اختر موظفاً لإعداد كشف أجره.</value></data>
   <data name="Payroll_Col_Label" xml:space="preserve"><value>البيان</value></data>
@@ -651,7 +640,6 @@
   <data name="Payroll_Contributable" xml:space="preserve"><value>الأجر الخاضع للاشتراك</value></data>
   <data name="Payroll_Taxable" xml:space="preserve"><value>الأجر الخاضع للضريبة</value></data>
   <data name="Payroll_Abatement" xml:space="preserve"><value>التخفيض</value></data>
-  <data name="Payroll_Save" xml:space="preserve"><value>حفظ كشف الأجور</value></data>
 
   <!-- Shared column labels -->
   <data name="Common_Type" xml:space="preserve"><value>النوع</value></data>
@@ -1021,10 +1009,6 @@
   <data name="AttMonth_Overtime" xml:space="preserve"><value>س. إضافية</value></data>
 
   <!-- Placeholder + premium upsell -->
-  <data name="Placeholder_Text" xml:space="preserve"><value>هذه الوحدة قيد الإنهاء.</value></data>
-  <data name="Premium_Badge" xml:space="preserve"><value>وحدة متقدمة</value></data>
-  <data name="Premium_KeyFeatures" xml:space="preserve"><value>الميزات الرئيسية</value></data>
-  <data name="Premium_ContactSupport" xml:space="preserve"><value>الاتصال بالدعم</value></data>
 
   <!-- Attendance matrix view -->
   <data name="Att_Subtitle" xml:space="preserve"><value>شاشة واحدة للشهر بأكمله. اختر حالة وانقر على الخلايا — حفظ تلقائي.</value></data>

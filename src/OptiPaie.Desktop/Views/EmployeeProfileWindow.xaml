@@ -170,7 +170,7 @@
                                             <Border Grid.Column="0" Style="{StaticResource RowTypePill}"><TextBlock Style="{StaticResource PillText}" Text="{Binding TypeLabel}" /></Border>
                                             <TextBlock Grid.Column="1" Style="{StaticResource RowText}" Text="{Binding Position}" FontWeight="{Binding IsCurrent, Converter={StaticResource BoolToWeight}}" />
                                             <TextBlock Grid.Column="2" Style="{StaticResource RowNum}" Text="{Binding SalaryText}" />
-                                            <TextBlock Grid.Column="3" Style="{StaticResource RowMuted}" Text="{Binding PeriodText}" FontFamily="{StaticResource MonoFont}" TextAlignment="Center" />
+                                            <TextBlock Grid.Column="3" Style="{StaticResource RowMuted}" Text="{Binding PeriodText}" FontFamily="{StaticResource MonoFont}" TextAlignment="Center" FlowDirection="LeftToRight" />
                                             <Border Grid.Column="4" Style="{StaticResource StatusPill}"><TextBlock Style="{StaticResource PillText}" Text="{Binding StatusLabel}" /></Border>
                                         </Grid>
                                     </Border>
@@ -194,7 +194,7 @@
                                     <Border Padding="0,7" BorderBrush="{DynamicResource Border}" BorderThickness="0,0,0,1">
                                         <Grid>
                                             <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="160" /><ColumnDefinition Width="120" /></Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0" Style="{StaticResource RowText}" Text="{Binding PeriodText}" />
+                                            <TextBlock Grid.Column="0" Style="{StaticResource RowText}" Text="{Binding PeriodText}" FlowDirection="LeftToRight" />
                                             <TextBlock Grid.Column="1" Style="{StaticResource RowNum}" Text="{Binding NetText}" Margin="0,0,16,0" />
                                             <Button Grid.Column="2" Style="{StaticResource Link}" HorizontalAlignment="Right" Content="{loc:Loc Profile_OpenPayslip}"
                                                     Command="{Binding DataContext.ReopenPayslipCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}" />
@@ -252,7 +252,9 @@
                                             <Grid>
                                                 <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="170" /><ColumnDefinition Width="80" /></Grid.ColumnDefinitions>
                                                 <TextBlock Grid.Column="0" Style="{StaticResource RowText}" Text="{Binding AssetName}" />
-                                                <TextBlock Grid.Column="1" Style="{StaticResource RowMuted}" FontFamily="{StaticResource MonoFont}" FontSize="11.5">
+                                                <!-- Force LTR so the assignment date range reads start → end even under Arabic RTL. -->
+                                                <TextBlock Grid.Column="1" Style="{StaticResource RowMuted}" FontFamily="{StaticResource MonoFont}" FontSize="11.5"
+                                                           FlowDirection="LeftToRight">
                                                     <Run Text="{Binding AssignedText, Mode=OneWay}" /><Run Text=" → " /><Run Text="{Binding ReturnedText, Mode=OneWay}" />
                                                 </TextBlock>
                                                 <Border Grid.Column="2" Style="{StaticResource StatusPill}"><TextBlock Style="{StaticResource PillText}" Text="{Binding StatusLabel}" /></Border>

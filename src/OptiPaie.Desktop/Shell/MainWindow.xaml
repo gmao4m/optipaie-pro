@@ -26,9 +26,6 @@
         <DataTemplate DataType="{x:Type vm:AttestationsViewModel}">
             <views:AttestationsView />
         </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:HomeViewModel}">
-            <views:HomeView />
-        </DataTemplate>
         <DataTemplate DataType="{x:Type vm:EmployeesViewModel}">
             <views:EmployeesView />
         </DataTemplate>
@@ -70,12 +67,6 @@
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:CertificateViewModel}">
             <views:CertificateView />
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:PremiumModuleViewModel}">
-            <views:PremiumModuleView />
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:ModuleReadyViewModel}">
-            <views:PlaceholderView />
         </DataTemplate>
 
         <!-- One navigation entry (bound to a NavItemViewModel) -->
@@ -291,8 +282,9 @@
                                                                         Background="{Binding Severity, Converter={StaticResource SeverityBrush}}" />
                                                                 <StackPanel>
                                                                     <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="12.5" TextWrapping="Wrap" />
+                                                                    <!-- Detail is Latin content (dates, a start → end range); force LTR so it is not reversed under Arabic RTL. -->
                                                                     <TextBlock Text="{Binding Detail}" Foreground="{DynamicResource TextSecondary}" FontSize="11.5"
-                                                                               Margin="0,2,0,0" TextWrapping="Wrap" />
+                                                                               Margin="0,2,0,0" TextWrapping="Wrap" FlowDirection="LeftToRight" />
                                                                 </StackPanel>
                                                             </StackPanel>
                                                         </Border>

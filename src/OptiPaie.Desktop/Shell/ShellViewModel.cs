@@ -27,7 +27,6 @@ namespace OptiPaie.Desktop.Shell
 
         private DashboardViewModel _dashboard;
         private ReportsViewModel _reports;
-        private HomeViewModel _home;
         private EmployeesViewModel _employees;
         private CompaniesViewModel _companies;
         private PayrollViewModel _payroll;
@@ -44,11 +43,6 @@ namespace OptiPaie.Desktop.Shell
         private CertificateViewModel _certificates;
         private CnasHubViewModel _cnas;
         private AttestationsViewModel _attestations;
-
-        private readonly Dictionary<string, PremiumModuleViewModel> _premium =
-            new Dictionary<string, PremiumModuleViewModel>();
-        private readonly Dictionary<string, ModuleReadyViewModel> _ready =
-            new Dictionary<string, ModuleReadyViewModel>();
 
         private readonly List<NavItemViewModel> _allNav = new List<NavItemViewModel>();
 
@@ -397,9 +391,6 @@ namespace OptiPaie.Desktop.Shell
                         target = _attestations ?? (_attestations = new AttestationsViewModel(_services));
                     }
                     break;
-                case "home":
-                    target = _home ?? (_home = new HomeViewModel(_services, Navigate));
-                    break;
                 default:
                     if (_registry.Exists(key))
                     {
@@ -502,14 +493,9 @@ namespace OptiPaie.Desktop.Shell
                     return _certificates ?? (_certificates = new CertificateViewModel(_services));
                 }
 
-                if (!_ready.TryGetValue(key, out ModuleReadyViewModel ready))
-                {
-                    ModuleDescriptor descriptor = _registry.Find(key);
-                    ready = new ModuleReadyViewModel(descriptor != null ? descriptor.NameFr : key);
-                    _ready[key] = ready;
-                }
-
-                return ready;
+                // Every registered module resolves to a real VM above; a key that somehow reaches
+                // here falls back to the dashboard (the single landing screen), not a placeholder.
+                return _dashboard ?? (_dashboard = new DashboardViewModel(_services, Navigate));
             }
 
             // Reachable only in a rare, transient degraded state (a background sync just

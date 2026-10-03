@@ -104,7 +104,14 @@
                 <DataGridTextColumn Header="{loc:Loc Training_Col_Title}" Binding="{Binding Title}" Width="*" />
                 <DataGridTextColumn Header="{loc:Loc Training_Domain}" Binding="{Binding Category}" Width="130" />
                 <DataGridTextColumn Header="{loc:Loc Training_Provider}" Binding="{Binding Provider}" Width="150" />
-                <DataGridTextColumn Header="{loc:Loc Training_Dates}" Binding="{Binding DatesText}" Width="180" ElementStyle="{StaticResource CenterText}" />
+                <DataGridTextColumn Header="{loc:Loc Training_Dates}" Binding="{Binding DatesText}" Width="180">
+                    <!-- Force LTR so the start → end date range is not reversed under Arabic RTL. -->
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock" BasedOn="{StaticResource CenterText}">
+                            <Setter Property="FlowDirection" Value="LeftToRight" />
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
                 <DataGridTextColumn Header="{loc:Loc Training_Cost}" Binding="{Binding CostText}" Width="110" ElementStyle="{StaticResource RightText}" />
                 <DataGridTextColumn Header="{loc:Loc Training_Passed}" Binding="{Binding ParticipantsText}" Width="80" ElementStyle="{StaticResource CenterText}" />
                 <DataGridTemplateColumn Header="{loc:Loc Common_Status}" Width="110">
