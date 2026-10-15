@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Linq;
 using System.Windows.Input;
 using OptiPaie.Core.Entities;
+using OptiPaie.Core.Primitives;
 using OptiPaie.Desktop.Common;
 using OptiPaie.Desktop.Composition;
 using OptiPaie.Desktop.Documents;
@@ -49,6 +50,9 @@ namespace OptiPaie.Desktop.ViewModels
             SearchCommand = new RelayCommand(Search);
             PreviewCommand = new RelayCommand(() => WithFiche(m => _fiche.Preview(m)));
             PrintCommand = new RelayCommand(() => WithFiche(m => _fiche.Print(m)));
+            CorrectCommand = new RelayCommand(Correct);
+            DeleteCommand = new RelayCommand(Delete);
+            HistoryCommand = new RelayCommand(OpenHistory);
         }
 
         public ObservableCollection<Company> Companies { get; }
@@ -87,6 +91,9 @@ namespace OptiPaie.Desktop.ViewModels
         public ICommand SearchCommand { get; }
         public ICommand PreviewCommand { get; }
         public ICommand PrintCommand { get; }
+        public ICommand CorrectCommand { get; }
+        public ICommand DeleteCommand { get; }
+        public ICommand HistoryCommand { get; }
 
         public void OnActivated()
         {
@@ -156,7 +163,7 @@ namespace OptiPaie.Desktop.ViewModels
 
             FichePaieModel model = _fiche.FromPayslip(
                 company, employee, payslip, _services.Localization.IsRightToLeft,
-                SelectedRow.Year, SelectedRow.Month);
+                SelectedRow.Year, SelectedRow.Month, L("Fiche_RectificatifMark"));
 
             try
             {
@@ -167,6 +174,108 @@ namespace OptiPaie.Desktop.ViewModels
                 Dialogs.ErrorWithLog("Impossible de produire la fiche de paie. تعذّر إنشاء كشف الراتب.", ex);
             }
         }
+
+        private void Correct()
+        {
+            if (SelectedRow == null || SelectedCompany == null)
+            {
+                return;
+            }
+
+            Payslip payslip = _services.Archive.GetPayslip(SelectedRow.PayslipId);
+            Employee employee = _services.Employees.Get(SelectedRow.EmployeeId);
+            Company company = _services.Companies.Get(SelectedCompany.Id);
+            if (payslip == null || employee == null || company == null)
+            {
+                Dialogs.Error(L("Archive_PreviewRow"));
+                return;
+            }
+
+            var vm = new PayslipCorrectionViewModel(_services, payslip, company, employee, SelectedRow.Year, SelectedRow.Month);
+            if (Dialogs.ShowPayslipCorrection(vm))
+            {
+                Search(); // the corrected version replaces the row (same employee/period)
+            }
+        }
+
+        private void Delete()
+        {
+            if (SelectedRow == null || SelectedCompany == null)
+            {
+                return;
+            }
+
+            Payslip payslip = _services.Archive.GetPayslip(SelectedRow.PayslipId);
+            if (payslip == null)
+            {
+                Dialogs.Error(L("Archive_PreviewRow"));
+                return;
+            }
+
+            // The confirmation shows the REAL figures and escalates when a CNAS declaration exists.
+            decimal loanReversal = payslip.Details
+                .Where(d => d.ElementType == OptiPaie.Core.Enums.ElementType.Deduction &&
+                            string.Equals(d.LabelFr, "Remboursement prêt", StringComparison.Ordinal))
+                .Sum(d => d.Amount);
+
+            string message = string.Format(L("Delete_Summary"), SelectedRow.EmployeeName, SelectedRow.PeriodText,
+                                 payslip.NetSalaire.ToString("N2", Fr) + " DA")
+                + Environment.NewLine + Environment.NewLine + L("Delete_Body");
+            if (loanReversal > 0m)
+            {
+                message += Environment.NewLine + Environment.NewLine
+                    + string.Format(L("Delete_LoanReversal"), loanReversal.ToString("N2", Fr) + " DA");
+            }
+            if (DeclarationExists(SelectedCompany.Id, SelectedRow.Year))
+            {
+                message += Environment.NewLine + Environment.NewLine
+                    + string.Format(L("Delete_DeclarationWarning"), SelectedRow.PeriodText);
+            }
+
+            if (!Dialogs.Confirm(message))
+            {
+                return;
+            }
+
+            string reason = Dialogs.Prompt(L("Delete_Title"), L("Delete_Reason"), null, required: true);
+            if (string.IsNullOrWhiteSpace(reason))
+            {
+                return;
+            }
+
+            Result result = _services.PayslipRevision.Cancel(SelectedRow.PayslipId, reason);
+            if (!result.IsSuccess)
+            {
+                Dialogs.Error(result.Error);
+                return;
+            }
+
+            Dialogs.Info(L("Delete_Done"));
+            Search();
+        }
+
+        private void OpenHistory()
+        {
+            if (SelectedCompany == null)
+            {
+                return;
+            }
+
+            int? month = _selectedMonth == 0 ? (int?)null : _selectedMonth;
+            Dialogs.ShowPayslipHistory(new PayslipHistoryViewModel(_services, SelectedCompany.Id, _selectedYear, month));
+            Search(); // a restore re-activates a payslip; refresh the active list
+        }
+
+        private bool DeclarationExists(long companyId, int year)
+        {
+            string token = " | " + year.ToString(CultureInfo.InvariantCulture) + " | ";
+            string das = _services.Settings.Get("Cnas.Das.Log." + companyId, string.Empty);
+            string dac = _services.Settings.Get("Cnas.Dac.Log." + companyId, string.Empty);
+            return das.IndexOf(token, StringComparison.Ordinal) >= 0
+                || dac.IndexOf(token, StringComparison.Ordinal) >= 0;
+        }
+
+        private string L(string key) => _services.Localization.GetString(key);
 
         private static string MonthName(int m)
         {

@@ -41,6 +41,11 @@ namespace OptiPaie.Desktop.Documents
         public decimal NetSalaire { get; set; }
         public decimal WorkedDays { get; set; }
 
+        /// <summary>When set, a bilingual "bulletin rectificatif" badge is printed under the header to
+        /// signal this is a corrected version replacing an earlier one. Null on an ordinary bulletin.
+        /// The text is a single resource string resolved by the caller (one-value edit).</summary>
+        public string RevisionMark { get; set; }
+
         public List<FicheLineModel> Lines { get; set; } = new List<FicheLineModel>();
     }
 }

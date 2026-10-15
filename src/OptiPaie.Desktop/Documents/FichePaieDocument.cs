@@ -109,6 +109,14 @@ namespace OptiPaie.Desktop.Documents
                         t.Span(PeriodLabel()).FontSize(11).Bold().FontColor(Teal);
                     });
                 });
+
+                // Corrected version — a gold badge under the header makes it unmistakable that this
+                // bulletin replaces an earlier one. Absent on an ordinary bulletin.
+                if (!string.IsNullOrWhiteSpace(_m.RevisionMark))
+                {
+                    col.Item().PaddingTop(4).Background(Teal).PaddingVertical(3).PaddingHorizontal(12)
+                        .Text(_m.RevisionMark).FontSize(9).Bold().FontColor(Navy);
+                }
             });
         }
 

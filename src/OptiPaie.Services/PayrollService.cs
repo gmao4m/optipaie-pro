@@ -339,12 +339,19 @@ namespace OptiPaie.Services
                         uow.PayrollRuns.Update(run);
                     }
 
-                    Payslip payslip = MapPayslip(request, outcome, result, run.Id);
+                    Payslip payslip = PayslipFactory.BuildPayslip(
+                        run.Id,
+                        request.EmployeeId,
+                        result,
+                        outcome.Snapshot.CnasEmployeeRate,
+                        outcome.Snapshot.CnasEmployerRate,
+                        outcome.Context.WorkedDays,
+                        outcome.Context.WorkedHours);
                     uow.Payslips.Insert(payslip);
 
                     foreach (PayrollLineResult line in result.Lines)
                     {
-                        uow.PayrollDetails.Insert(MapDetail(payslip.Id, line));
+                        uow.PayrollDetails.Insert(PayslipFactory.BuildDetail(payslip.Id, line));
                     }
 
                     uow.Commit();
@@ -356,61 +363,6 @@ namespace OptiPaie.Services
                     return Result.Fail<long>("Erreur lors de l'enregistrement de la paie.", PayrollErrorCodes.PersistFailed);
                 }
             }
-        }
-
-        private static Payslip MapPayslip(
-            PayrollGenerationRequest request,
-            BuildOutcome outcome,
-            PayrollResult result,
-            long runId)
-        {
-            PayrollTotals totals = result.Totals;
-
-            return new Payslip
-            {
-                RunId = runId,
-                EmployeeId = request.EmployeeId,
-                SalaireBrut = totals.SalaireBrut,
-                BaseCotisable = totals.BaseCotisable,
-                CnasEmployee = totals.CnasEmployee,
-                CnasEmployer = totals.CnasEmployer,
-                BaseImposable = totals.BaseImposable,
-                IrgBrut = totals.IrgBrut,
-                Abattement = totals.Abattement,
-                Irg = totals.Irg,
-                NetSalaire = totals.NetSalaire,
-                CnasEmployeeRateUsed = outcome.Snapshot.CnasEmployeeRate,
-                CnasEmployerRateUsed = outcome.Snapshot.CnasEmployerRate,
-                WorkedDays = outcome.Context.WorkedDays,
-                WorkedHours = outcome.Context.WorkedHours,
-                EngineVersion = result.EngineVersion,
-                GeneratedAtUtc = DateTime.UtcNow
-            };
-        }
-
-        private static PayrollDetail MapDetail(long payslipId, PayrollLineResult line)
-        {
-            return new PayrollDetail
-            {
-                PayslipId = payslipId,
-                // A free (manual) worksheet line — e.g. the automatic "Remboursement prêt" —
-                // has no catalog element, so it carries id 0. Store that as NULL: the archive
-                // column has a foreign key to PayrollElements and 0 is not a real element, so
-                // a manual line would otherwise fail to persist. Reference only — no amount,
-                // rate, base or any calculated value is affected.
-                ElementId = line.ElementId.HasValue && line.ElementId.Value != 0 ? line.ElementId : (long?)null,
-                LabelFr = line.LabelFr,
-                LabelAr = line.LabelAr,
-                ElementType = line.ElementType,
-                Base = line.Base,
-                Rate = line.Rate,
-                Quantity = line.Quantity,
-                UnitPrice = line.UnitPrice,
-                Amount = line.Amount,
-                IsCnasApplicable = line.IsCnasApplicable,
-                IsIrgApplicable = line.IsIrgApplicable,
-                DisplayOrder = line.DisplayOrder
-            };
         }
 
         // -- Helpers --------------------------------------------------------------

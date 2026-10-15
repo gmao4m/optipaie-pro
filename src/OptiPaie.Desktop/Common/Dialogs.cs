@@ -111,6 +111,31 @@ namespace OptiPaie.Desktop.Common
             window.ShowDialog();
         }
 
+        /// <summary>Opens the payslip correction editor. Returns true when a correction was saved.</summary>
+        public static bool ShowPayslipCorrection(PayslipCorrectionViewModel vm)
+        {
+            var window = new PayslipCorrectionWindow
+            {
+                DataContext = vm,
+                Owner = Application.Current.MainWindow
+            };
+            App.ApplyFlowDirection(window);
+            vm.RequestClose = ok => window.DialogResult = ok;
+            return window.ShowDialog() == true;
+        }
+
+        /// <summary>Opens the cancelled/corrected payslips history (with restore).</summary>
+        public static void ShowPayslipHistory(PayslipHistoryViewModel vm)
+        {
+            var window = new PayslipHistoryWindow
+            {
+                DataContext = vm,
+                Owner = Application.Current.MainWindow
+            };
+            App.ApplyFlowDirection(window);
+            window.ShowDialog();
+        }
+
         public static bool ShowPayrollItemEditor(PayrollItemEditViewModel vm)
         {
             var window = new PayrollItemEditWindow

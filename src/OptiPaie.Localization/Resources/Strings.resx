@@ -1118,6 +1118,33 @@
   <data name="Ats_PipelineRow" xml:space="preserve"><value>Ouvrir les candidatures</value></data>
   <data name="Archive_PreviewRow" xml:space="preserve"><value>Aperçu du bulletin</value></data>
   <data name="Archive_PrintRow" xml:space="preserve"><value>Imprimer le bulletin</value></data>
+  <data name="Archive_CorrectRow" xml:space="preserve"><value>Corriger le bulletin</value></data>
+  <data name="Archive_DeleteRow" xml:space="preserve"><value>Supprimer le bulletin</value></data>
+  <data name="Archive_History" xml:space="preserve"><value>Bulletins annulés / corrigés</value></data>
+  <data name="Archive_RestoreRow" xml:space="preserve"><value>Restaurer le bulletin</value></data>
+  <data name="Archive_HistoryEmpty" xml:space="preserve"><value>Aucun bulletin annulé ou corrigé pour cette période.</value></data>
+  <data name="Archive_HistoryTitle" xml:space="preserve"><value>Historique des bulletins</value></data>
+  <data name="Fiche_RectificatifMark" xml:space="preserve"><value>BULLETIN DE PAIE RECTIFICATIF — remplace une version antérieure / كشف راتب مُصحَّح — يحلّ محلّ نسخة سابقة</value></data>
+  <data name="Correct_Title" xml:space="preserve"><value>Corriger le bulletin de paie</value></data>
+  <data name="Correct_Subtitle" xml:space="preserve"><value>Une nouvelle version corrigée remplacera l'originale, qui est conservée pour l'audit. Les déclarations CNAS et le net seront recalculés.</value></data>
+  <data name="Correct_Lines" xml:space="preserve"><value>Lignes du bulletin</value></data>
+  <data name="Correct_Reason" xml:space="preserve"><value>Motif de la correction (obligatoire)</value></data>
+  <data name="Correct_OldNet" xml:space="preserve"><value>Ancien net</value></data>
+  <data name="Correct_NewNet" xml:space="preserve"><value>Nouveau net</value></data>
+  <data name="Correct_Save" xml:space="preserve"><value>Enregistrer la correction</value></data>
+  <data name="Correct_Done" xml:space="preserve"><value>La correction a été enregistrée. Une nouvelle version a remplacé l'originale.</value></data>
+  <data name="Correct_DeclarationWarning" xml:space="preserve"><value>Attention : une déclaration CNAS (DAC/DAS) a déjà été produite pour {0}. La correction rendra la déclaration déposée incohérente — vous devrez régulariser auprès de votre agence CNAS.</value></data>
+  <data name="Delete_Title" xml:space="preserve"><value>Supprimer le bulletin de paie</value></data>
+  <data name="Delete_Summary" xml:space="preserve"><value>Bulletin de {0} — {1}, net {2}.</value></data>
+  <data name="Delete_Body" xml:space="preserve"><value>Le bulletin sera annulé et conservé pour l'audit (jamais réimprimable). La période sera libérée et pourra être recalculée. Vous pourrez le restaurer.</value></data>
+  <data name="Delete_Reason" xml:space="preserve"><value>Motif de la suppression (obligatoire)</value></data>
+  <data name="Delete_LoanReversal" xml:space="preserve"><value>Le remboursement de prêt de {0} prélevé sur ce bulletin sera réintégré au solde.</value></data>
+  <data name="Delete_DeclarationWarning" xml:space="preserve"><value>Attention : une déclaration CNAS (DAC/DAS) a déjà été produite pour {0}. Supprimer ce bulletin laissera un salarié déclaré sans bulletin pour cette période — régularisez auprès de votre agence CNAS.</value></data>
+  <data name="Delete_Done" xml:space="preserve"><value>Le bulletin a été annulé. La période est de nouveau disponible.</value></data>
+  <data name="Restore_Confirm" xml:space="preserve"><value>Restaurer ce bulletin annulé ? Il redeviendra actif et occupera de nouveau sa période.</value></data>
+  <data name="Restore_Done" xml:space="preserve"><value>Le bulletin a été restauré.</value></data>
+  <data name="History_Status_Superseded" xml:space="preserve"><value>Corrigé (remplacé)</value></data>
+  <data name="History_Status_Cancelled" xml:space="preserve"><value>Annulé</value></data>
   <data name="Employees_OpenFile" xml:space="preserve"><value>Ouvrir le dossier</value></data>
   <data name="Employees_EditRow" xml:space="preserve"><value>Modifier la fiche</value></data>
   <data name="Employees_DeleteRow" xml:space="preserve"><value>Supprimer l'employé</value></data>

@@ -87,6 +87,13 @@ namespace OptiPaie.Desktop.Composition
             IPayrollEngine engine = new PayrollCalculationEngine();
             var payrollService = new PayrollService(unitOfWorkFactory, configurationService, engine);
 
+            // Payslip correction / deletion / restore. Re-runs the SAME engine (via Preview) and
+            // persists the result; the payslip status change and the loan reversal/re-application
+            // commit in one transaction. Audit + actor are wired below with the other sinks.
+            var payslipRevisionService = new PayslipRevisionService(
+                unitOfWorkFactory, payrollService, configurationService, loanService);
+            payslipRevisionService.Audit = auditService; // payslip correction / cancellation / restore
+
             // Licensing (provider-agnostic). Only SupabaseLicenseBackend knows the
             // backend is Supabase; everything else depends on the interfaces. No
             // network I/O happens here — the service only reads/verifies the local
@@ -151,6 +158,7 @@ namespace OptiPaie.Desktop.Composition
                 archiveService,
                 backupService,
                 payrollService,
+                payslipRevisionService,
                 localizationService,
                 moduleRegistry,
                 licensingService,
@@ -202,6 +210,10 @@ namespace OptiPaie.Desktop.Composition
 
                 return null;
             };
+
+            // The payslip revision service records WHO corrected/cancelled on the payslip row itself.
+            // Reuse the exact same actor resolution as the audit log, so the two always agree.
+            payslipRevisionService.ActorProvider = auditService.ActorProvider;
 
             // Scope every audit entry to the ACTIVE company, resolved at record time. This is the
             // single choke point through which all module writes pass, so no call site can forget

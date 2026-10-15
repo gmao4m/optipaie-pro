@@ -1118,6 +1118,33 @@
   <data name="Ats_PipelineRow" xml:space="preserve"><value>فتح الترشيحات</value></data>
   <data name="Archive_PreviewRow" xml:space="preserve"><value>معاينة الكشف</value></data>
   <data name="Archive_PrintRow" xml:space="preserve"><value>طباعة الكشف</value></data>
+  <data name="Archive_CorrectRow" xml:space="preserve"><value>تعديل الكشف</value></data>
+  <data name="Archive_DeleteRow" xml:space="preserve"><value>حذف الكشف</value></data>
+  <data name="Archive_History" xml:space="preserve"><value>الكشوف الملغاة / المصحّحة</value></data>
+  <data name="Archive_RestoreRow" xml:space="preserve"><value>استعادة الكشف</value></data>
+  <data name="Archive_HistoryEmpty" xml:space="preserve"><value>لا يوجد كشف ملغى أو مصحّح لهذه الفترة.</value></data>
+  <data name="Archive_HistoryTitle" xml:space="preserve"><value>سجلّ الكشوف</value></data>
+  <data name="Fiche_RectificatifMark" xml:space="preserve"><value>كشف راتب مُصحَّح — يحلّ محلّ نسخة سابقة / BULLETIN DE PAIE RECTIFICATIF</value></data>
+  <data name="Correct_Title" xml:space="preserve"><value>تعديل كشف الراتب</value></data>
+  <data name="Correct_Subtitle" xml:space="preserve"><value>ستحلّ نسخة مصحّحة جديدة محلّ النسخة الأصلية، مع الاحتفاظ بالأصل للتدقيق. سيُعاد حساب تصريحات CNAS والصافي.</value></data>
+  <data name="Correct_Lines" xml:space="preserve"><value>سطور الكشف</value></data>
+  <data name="Correct_Reason" xml:space="preserve"><value>سبب التعديل (إلزامي)</value></data>
+  <data name="Correct_OldNet" xml:space="preserve"><value>الصافي السابق</value></data>
+  <data name="Correct_NewNet" xml:space="preserve"><value>الصافي الجديد</value></data>
+  <data name="Correct_Save" xml:space="preserve"><value>حفظ التعديل</value></data>
+  <data name="Correct_Done" xml:space="preserve"><value>تمّ حفظ التعديل. نسخة جديدة حلّت محلّ الأصل.</value></data>
+  <data name="Correct_DeclarationWarning" xml:space="preserve"><value>تنبيه: تمّ إصدار تصريح CNAS ‏(DAC/DAS) لـ {0}. سيجعل التعديل التصريح المودع غير متطابق — عليك التسوية لدى وكالة CNAS.</value></data>
+  <data name="Delete_Title" xml:space="preserve"><value>حذف كشف الراتب</value></data>
+  <data name="Delete_Summary" xml:space="preserve"><value>كشف {0} — {1}، الصافي {2}.</value></data>
+  <data name="Delete_Body" xml:space="preserve"><value>سيُلغى الكشف ويُحتفظ به للتدقيق (لا يُعاد طبعه أبدًا). ستتحرّر الفترة ويمكن إعادة حسابها. يمكنك استعادته لاحقًا.</value></data>
+  <data name="Delete_Reason" xml:space="preserve"><value>سبب الحذف (إلزامي)</value></data>
+  <data name="Delete_LoanReversal" xml:space="preserve"><value>سيُعاد مبلغ استرجاع القرض {0} المقتطع في هذا الكشف إلى الرصيد.</value></data>
+  <data name="Delete_DeclarationWarning" xml:space="preserve"><value>تنبيه: تمّ إصدار تصريح CNAS ‏(DAC/DAS) لـ {0}. حذف هذا الكشف سيترك موظفًا مُصرَّحًا به دون كشف لهذه الفترة — سوِّ الوضع لدى وكالة CNAS.</value></data>
+  <data name="Delete_Done" xml:space="preserve"><value>تمّ إلغاء الكشف. الفترة متاحة من جديد.</value></data>
+  <data name="Restore_Confirm" xml:space="preserve"><value>استعادة هذا الكشف الملغى؟ سيعود نشطًا ويشغل فترته من جديد.</value></data>
+  <data name="Restore_Done" xml:space="preserve"><value>تمّت استعادة الكشف.</value></data>
+  <data name="History_Status_Superseded" xml:space="preserve"><value>مُصحَّح (مُستبدَل)</value></data>
+  <data name="History_Status_Cancelled" xml:space="preserve"><value>ملغى</value></data>
   <data name="Employees_OpenFile" xml:space="preserve"><value>فتح الملف</value></data>
   <data name="Employees_EditRow" xml:space="preserve"><value>تعديل البطاقة</value></data>
   <data name="Employees_DeleteRow" xml:space="preserve"><value>حذف الموظف</value></data>

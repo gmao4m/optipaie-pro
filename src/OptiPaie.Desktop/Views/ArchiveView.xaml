@@ -34,6 +34,8 @@
                     <ComboBox Style="{StaticResource AppComboBox}" ItemsSource="{Binding Months}" SelectedValue="{Binding SelectedMonth}" SelectedValuePath="Value" DisplayMemberPath="Label" />
                 </StackPanel>
                 <!-- The list refreshes automatically when the period changes (no Search button needed). -->
+                <Button Grid.Column="3" VerticalAlignment="Bottom" Style="{StaticResource SecondaryButton}" Height="38"
+                        Content="{loc:Loc Archive_History}" Command="{Binding HistoryCommand}" />
             </Grid>
         </Border>
 
@@ -49,6 +51,9 @@
                         <ContextMenu DataContext="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
                             <MenuItem Header="{loc:Loc Archive_PreviewRow}" Command="{Binding PreviewCommand}" />
                             <MenuItem Header="{loc:Loc Archive_PrintRow}" Command="{Binding PrintCommand}" />
+                            <Separator />
+                            <MenuItem Header="{loc:Loc Archive_CorrectRow}" Command="{Binding CorrectCommand}" />
+                            <MenuItem Header="{loc:Loc Archive_DeleteRow}" Command="{Binding DeleteCommand}" />
                         </ContextMenu>
                     </ListBox.ContextMenu>
                     <ListBox.ItemContainerStyle>
@@ -99,6 +104,9 @@
                                             <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
                                                 <MenuItem Header="{loc:Loc Archive_PreviewRow}" Command="{Binding PreviewCommand}" />
                                                 <MenuItem Header="{loc:Loc Archive_PrintRow}" Command="{Binding PrintCommand}" />
+                                                <Separator />
+                                                <MenuItem Header="{loc:Loc Archive_CorrectRow}" Command="{Binding CorrectCommand}" />
+                                                <MenuItem Header="{loc:Loc Archive_DeleteRow}" Command="{Binding DeleteCommand}" />
                                             </ContextMenu>
                                         </Button.ContextMenu>
                                     </Button>
