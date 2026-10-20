@@ -180,7 +180,20 @@ namespace OptiPaie.Desktop.ViewModels
                         return;
                     }
 
-                    Logo = File.ReadAllBytes(dialog.FileName);
+                    // Normalise to a clean PNG at upload time so a BMP/CMYK-JPEG/odd image can never be
+                    // stored in a form the payslip renderer chokes on. An unreadable file is refused
+                    // here with a clear message rather than silently becoming an un-printable logo later.
+                    byte[] raw = File.ReadAllBytes(dialog.FileName);
+                    byte[] safe = OptiPaie.Desktop.Common.SafeImage.ToRenderablePng(raw, out string problem);
+                    if (safe == null)
+                    {
+                        Dialogs.Error("Ce fichier n'est pas une image lisible (" + (problem ?? "format non pris en charge") + "). " +
+                                      "Choisissez une image PNG ou JPEG.\n" +
+                                      "هذا الملف ليس صورة قابلة للقراءة. اختر صورة بصيغة PNG أو JPEG.");
+                        return;
+                    }
+
+                    Logo = safe;
                 }
                 catch
                 {

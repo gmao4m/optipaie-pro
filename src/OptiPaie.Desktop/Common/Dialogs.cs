@@ -17,14 +17,28 @@ namespace OptiPaie.Desktop.Common
         }
 
         /// <summary>
-        /// Shows a clean BUSINESS message to the client and writes the raw technical exception to the
-        /// journal — never the .NET exception text on screen. Use it in every catch that used to do
-        /// <c>Dialogs.Error("…" + ex.Message)</c>.
+        /// Shows the business message AND the real technical exception (type · message · full dump
+        /// with a bilingual « Copier les détails » button), and writes it to the journal. A caught
+        /// failure — e.g. a payslip that will not render — must never be a dead end that tells the
+        /// customer and support nothing: the exact cause is on screen and one click from the clipboard.
+        /// Reuses the crash dialog built for unhandled UI exceptions.
         /// </summary>
         public static void ErrorWithLog(string businessMessage, System.Exception ex)
         {
             try { Logger?.Error(businessMessage, ex); } catch { /* logging must never mask the message */ }
-            MessageBox.Show(businessMessage, "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+
+            try
+            {
+                string details = businessMessage + System.Environment.NewLine +
+                                 CrashLog.Describe(businessMessage, ex);
+                CrashLog.Fatal(businessMessage, ex); // also persist to crash.log for after-the-fact support
+                CrashDialog.Show(ex, CrashLog.Directory, details);
+            }
+            catch
+            {
+                // The rich dialog must never itself swallow the error — fall back to a plain box.
+                MessageBox.Show(businessMessage, "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         public static void Info(string message, string caption = "OptiPaie DZ")
