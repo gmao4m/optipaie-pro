@@ -88,10 +88,18 @@ namespace OptiPaie.Desktop.Documents
             {
                 col.Item().Row(row =>
                 {
-                    if (_m.Company?.Logo != null && _m.Company.Logo.Length > 0)
-                        row.ConstantItem(50).Height(50).AlignMiddle().MaxHeight(50).Image(_m.Company.Logo);
+                    // Validate/normalise the logo BEFORE QuestPDF renders it. QuestPDF decodes images
+                    // lazily at GeneratePdf time and throws there on a bad/unsupported one — which used
+                    // to abort the ENTIRE bulletin. A logo is decorative: an unreadable one is skipped
+                    // (and logged), the payslip is still produced. See Common.SafeImage.
+                    byte[] logo = OptiPaie.Desktop.Common.SafeImage.ToRenderablePng(_m.Company?.Logo, out string logoProblem);
+                    if (logo != null)
+                        row.ConstantItem(50).Height(50).AlignMiddle().MaxHeight(50).Image(logo);
+                    else if (!string.IsNullOrEmpty(logoProblem))
+                        OptiPaie.Desktop.Common.CrashLog.Breadcrumb(
+                            "Fiche de paie : logo ignoré (" + logoProblem + ") — bulletin rendu sans logo.");
 
-                    row.RelativeItem().PaddingLeft(_m.Company?.Logo != null ? 14 : 0).AlignMiddle().Column(cc =>
+                    row.RelativeItem().PaddingLeft(logo != null ? 14 : 0).AlignMiddle().Column(cc =>
                     {
                         cc.Item().Text(CompanyName()).FontSize(16).Bold().FontColor(Navy);
                         cc.Item().PaddingTop(1).Text(CompanyAddress()).FontSize(9).FontColor(Muted);
