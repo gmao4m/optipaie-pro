@@ -332,6 +332,7 @@ namespace OptiPaie.Desktop.ViewModels
             {
                 var document = new CnasDacDocument(_report, company.NameFr, PeriodLabel, _movementRows);
                 Document.Create(document.Compose).GeneratePdf(dialog.FileName);
+                RecordTrace(company.Id, dialog.FileName);
                 OpenFile(dialog.FileName);
             }
             catch (Exception ex)
@@ -339,6 +340,21 @@ namespace OptiPaie.Desktop.ViewModels
                 _services.Logger.Error("Export PDF DAC", ex);
                 Dialogs.ErrorWithLog(L("Cnas_Dac_ExportError"), ex);
             }
+        }
+
+        private void RecordTrace(long companyId, string path)
+        {
+            // Discreet trace via the existing settings store (no migration), mirroring the DAS trace:
+            // once a DAC has been produced for a period, the payslip correction/deletion flow can warn
+            // that a filed declaration would become inconsistent. The year + period label let that
+            // warning know which periods are affected.
+            string key = "Cnas.Dac.Log." + companyId;
+            string existing = _services.Settings.Get(key, string.Empty);
+            string line = DateTime.Now.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture)
+                + " | " + _year.ToString(CultureInfo.InvariantCulture)
+                + " | " + (_period != null ? _period.Label : string.Empty)
+                + " | " + (_report != null ? _report.Assiette.ToString("N2", Fr) : "0") + " DA | " + path;
+            _services.Settings.Set(key, existing.Length == 0 ? line : existing + "\n" + line);
         }
 
         private void OpenFile(string path)

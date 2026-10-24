@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using OptiPaie.Core.Dtos;
 using OptiPaie.Core.Entities;
+using OptiPaie.Core.Interfaces.Repositories;
 using OptiPaie.Core.Primitives;
 
 namespace OptiPaie.Core.Interfaces.Services
@@ -70,5 +71,24 @@ namespace OptiPaie.Core.Interfaces.Services
 
         /// <summary>Amount an employee still owes across every active loan.</summary>
         decimal GetOutstanding(long employeeId);
+
+        /// <summary>
+        /// Reverses the payroll-recorded recovery for one employee and period, ENLISTING in the
+        /// caller's transaction (<paramref name="uow"/>): the payroll (non-manual) repayment rows of
+        /// that period are soft-deleted and each affected loan's status is reconciled (a settled loan
+        /// reopens). Manual repayments are never touched. Performs no commit/rollback — the caller's
+        /// unit of work owns atomicity, so the payslip status change and this reversal succeed or fail
+        /// together. Used by payslip correction/cancellation.
+        /// </summary>
+        void ReversePayrollRepayment(IUnitOfWork uow, long employeeId, int year, int month);
+
+        /// <summary>
+        /// (Re)applies the period's recovery for one employee from the amount actually withheld
+        /// (<paramref name="withheld"/>), ENLISTING in the caller's transaction — the same distribution
+        /// and idempotency as <see cref="RecordPayrollDeductions(long,int,int,decimal)"/> but with no
+        /// commit, so it participates in the caller's atomic operation. Returns the total applied.
+        /// Used by payslip correction (re-apply after reversal) and restore.
+        /// </summary>
+        decimal ApplyPayrollRepayment(IUnitOfWork uow, long employeeId, int year, int month, decimal withheld);
     }
 }
