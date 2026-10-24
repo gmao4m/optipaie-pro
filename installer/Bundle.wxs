@@ -41,6 +41,18 @@
         Value="Release"
         Result="value" />
 
+    <!-- Visual C++ 2015-2022 x86 runtime presence. The x86 runtime registers under the 32-bit
+         registry view (WOW6432Node on a 64-bit OS), which this x86 search reads by default.
+         Installed=1 means a compatible 14.x runtime is present; an absent key leaves the variable
+         unset so the ExePackage below installs it. -->
+    <util:RegistrySearch
+        Id="VCppX86InstalledSearch"
+        Variable="VCppX86Installed"
+        Root="HKLM"
+        Key="SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\X86"
+        Value="Installed"
+        Result="value" />
+
     <Chain>
       <!-- .NET Framework 4.8 - EMBEDDED offline redistributable (no install-time download,
            so it works on Windows 7 SP1 with no internet / no TLS 1.2). Installed only when
@@ -55,6 +67,26 @@
                   DetectCondition="NetFx48Release AND NetFx48Release &gt;= 528040"
                   InstallArguments="/q /norestart"
                   RepairArguments="/q /norestart">
+        <ExitCode Value="1641" Behavior="scheduleReboot" />
+        <ExitCode Value="3010" Behavior="scheduleReboot" />
+      </ExePackage>
+
+      <!-- Visual C++ 2015-2022 x86 runtime - EMBEDDED offline. The app's PDF renderer loads the
+           x86 libSkiaSharp.dll, which cannot load on a stock Windows 7 SP1 without this runtime
+           (and the UCRT it carries) - document generation then fails. Installed only when absent
+           (Installed=1 under the 14.0 x86 runtimes key). Permanent: never removed on uninstall.
+           Exit 1638 = a newer runtime already present (treated as success). -->
+      <ExePackage Id="VCRedistX86"
+                  DisplayName="Microsoft Visual C++ 2015-2022 Redistributable (x86)"
+                  SourceFile="redist\vc_redist.x86.exe"
+                  Compressed="yes"
+                  PerMachine="yes"
+                  Permanent="yes"
+                  Vital="yes"
+                  DetectCondition="VCppX86Installed AND VCppX86Installed = 1"
+                  InstallArguments="/install /quiet /norestart"
+                  RepairArguments="/repair /quiet /norestart">
+        <ExitCode Value="1638" Behavior="success" />
         <ExitCode Value="1641" Behavior="scheduleReboot" />
         <ExitCode Value="3010" Behavior="scheduleReboot" />
       </ExePackage>
