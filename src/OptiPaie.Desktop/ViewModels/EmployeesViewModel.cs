@@ -35,6 +35,9 @@ namespace OptiPaie.Desktop.ViewModels
             EditCommand = new RelayCommand(Edit);
             DeleteCommand = new RelayCommand(Delete);
             OpenProfileCommand = new RelayCommand(OpenProfile, () => _selectedEmployee != null);
+            ImportCommand = new RelayCommand(Import);
+            ExportCommand = new RelayCommand(Export);
+            DownloadTemplateCommand = new RelayCommand(DownloadTemplate);
         }
 
         public ObservableCollection<Company> Companies { get; }
@@ -64,11 +67,114 @@ namespace OptiPaie.Desktop.ViewModels
         public ICommand EditCommand { get; }
         public ICommand DeleteCommand { get; }
         public ICommand OpenProfileCommand { get; }
+        public ICommand ImportCommand { get; }
+        public ICommand ExportCommand { get; }
+        public ICommand DownloadTemplateCommand { get; }
 
         private void OpenProfile()
         {
             if (_selectedEmployee == null) return;
             Dialogs.ShowEmployeeProfile(new EmployeeProfileViewModel(_services, _selectedEmployee.Id, _navigate));
+        }
+
+        private string L(string key) => _services.Localization.GetString(key);
+
+        private static OptiPaie.Core.Dtos.ImportFileFormat FormatOf(string path) =>
+            path.EndsWith(".csv", System.StringComparison.OrdinalIgnoreCase)
+                ? OptiPaie.Core.Dtos.ImportFileFormat.Csv : OptiPaie.Core.Dtos.ImportFileFormat.Xlsx;
+
+        private void DownloadTemplate()
+        {
+            var dlg = new Microsoft.Win32.SaveFileDialog
+            {
+                Filter = "Excel (*.xlsx)|*.xlsx|CSV (*.csv)|*.csv",
+                FileName = "modele_employes.xlsx"
+            };
+            if (dlg.ShowDialog() != true) return;
+            try
+            {
+                _services.EmployeeImportExport.WriteTemplate(dlg.FileName, FormatOf(dlg.FileName));
+                Dialogs.Info(L("Employees_TemplateSaved") + "\n" + dlg.FileName);
+            }
+            catch (System.Exception ex) { Dialogs.ErrorWithLog(L("Employees_IoError"), ex); }
+        }
+
+        private void Export()
+        {
+            if (SelectedCompany == null) { Dialogs.Error(L("Cnas_NoCompany")); return; }
+            var dlg = new Microsoft.Win32.SaveFileDialog
+            {
+                Filter = "Excel (*.xlsx)|*.xlsx|CSV (*.csv)|*.csv",
+                FileName = "employes_" + System.DateTime.Now.ToString("yyyyMMdd") + ".xlsx"
+            };
+            if (dlg.ShowDialog() != true) return;
+            try
+            {
+                _services.EmployeeImportExport.Export(SelectedCompany.Id, dlg.FileName, FormatOf(dlg.FileName));
+                Dialogs.Info(L("Employees_ExportDone") + "\n" + dlg.FileName);
+            }
+            catch (System.Exception ex) { Dialogs.ErrorWithLog(L("Employees_IoError"), ex); }
+        }
+
+        private void Import()
+        {
+            if (SelectedCompany == null) { Dialogs.Error(L("Cnas_NoCompany")); return; }
+
+            // Step 1 — choose file.
+            var dlg = new Microsoft.Win32.OpenFileDialog
+            {
+                Filter = "Excel/CSV (*.xlsx;*.csv)|*.xlsx;*.csv|Excel (*.xlsx)|*.xlsx|CSV (*.csv)|*.csv"
+            };
+            if (dlg.ShowDialog() != true) return;
+
+            OptiPaie.Core.Dtos.ImportTable table;
+            OptiPaie.Core.Dtos.ImportPreview preview;
+            try
+            {
+                table = _services.EmployeeImportExport.Read(dlg.FileName);
+                preview = _services.EmployeeImportExport.BuildPreview(SelectedCompany.Id, table, null);
+            }
+            catch (System.Exception ex) { Dialogs.ErrorWithLog(L("Employees_IoError"), ex); return; }
+
+            // Step 2 — review. Headers must match the template/export (mapping UI is a later refinement).
+            if (preview.MissingColumns.Count > 0)
+            {
+                Dialogs.Error(L("Employees_ImportHeaders") + "\n" + string.Join("\n", preview.MissingColumns));
+                return;
+            }
+
+            if (preview.ErrorCount > 0)
+            {
+                var sb = new System.Text.StringBuilder();
+                sb.AppendLine(string.Format(L("Employees_ImportErrors"), preview.ErrorCount));
+                sb.AppendLine();
+                foreach (OptiPaie.Core.Dtos.ImportIssue i in preview.Issues.Take(15))
+                    sb.AppendLine("• " + string.Format(L("Employees_ImportIssueLine"), i.RowNumber, i.Column) + " : " + i.Message);
+                if (preview.Issues.Count > 15) sb.AppendLine("…");
+                Dialogs.Error(sb.ToString());
+                return; // nothing written
+            }
+
+            string summary = string.Format(L("Employees_ImportSummary"), preview.NewCount, preview.DuplicateCount);
+            OptiPaie.Core.Dtos.DuplicateResolution resolution = OptiPaie.Core.Dtos.DuplicateResolution.SkipDuplicates;
+            if (preview.DuplicateCount > 0)
+            {
+                // Skip duplicates (Yes) or stop and fix the file (No).
+                if (!Dialogs.Confirm(summary + "\n\n" + L("Employees_ImportDuplicates")))
+                    return;
+            }
+            else if (!Dialogs.Confirm(summary + "\n\n" + L("Employees_ImportConfirm")))
+            {
+                return;
+            }
+
+            // Step 3 — confirm → atomic write.
+            Result<OptiPaie.Core.Dtos.ImportSummary> result =
+                _services.EmployeeImportExport.Commit(SelectedCompany.Id, table, null, resolution, System.IO.Path.GetFileName(dlg.FileName));
+            if (result.IsFailure) { Dialogs.Error(result.Error); return; }
+
+            LoadEmployees();
+            Dialogs.Info(string.Format(L("Employees_ImportDone"), result.Value.Created, result.Value.SkippedDuplicates));
         }
 
         public void OnActivated()

@@ -94,6 +94,12 @@ namespace OptiPaie.Desktop.Composition
                 unitOfWorkFactory, payrollService, configurationService, loanService);
             payslipRevisionService.Audit = auditService; // payslip correction / cancellation / restore
 
+            // Employee import/export (xlsx/csv, atomic bulk import). Shares the same EmployeeValidator
+            // as manual entry so the import enforces identical rules, nothing stricter.
+            var employeeImportExport = new OptiPaie.Services.ImportExport.EmployeeImportExportService(
+                unitOfWorkFactory, new EmployeeValidator());
+            employeeImportExport.Audit = auditService;
+
             // Licensing (provider-agnostic). Only SupabaseLicenseBackend knows the
             // backend is Supabase; everything else depends on the interfaces. No
             // network I/O happens here — the service only reads/verifies the local
@@ -159,6 +165,7 @@ namespace OptiPaie.Desktop.Composition
                 backupService,
                 payrollService,
                 payslipRevisionService,
+                employeeImportExport,
                 localizationService,
                 moduleRegistry,
                 licensingService,

@@ -555,6 +555,23 @@
 
   <!-- Employees view -->
   <data name="Employees_New" xml:space="preserve"><value>موظف جديد</value></data>
+  <data name="Employees_Import" xml:space="preserve"><value>استيراد</value></data>
+  <data name="Employees_ImportTip" xml:space="preserve"><value>استيراد الموظفين من ملف Excel/CSV</value></data>
+  <data name="Employees_Export" xml:space="preserve"><value>تصدير</value></data>
+  <data name="Employees_ExportTip" xml:space="preserve"><value>تصدير موظفي المؤسسة النشطة إلى Excel/CSV</value></data>
+  <data name="Employees_Template" xml:space="preserve"><value>النموذج</value></data>
+  <data name="Employees_TemplateTip" xml:space="preserve"><value>تنزيل نموذج فارغ بالأعمدة الصحيحة</value></data>
+  <data name="Employees_TemplateSaved" xml:space="preserve"><value>تمّ حفظ النموذج:</value></data>
+  <data name="Employees_ExportDone" xml:space="preserve"><value>تمّ تصدير الموظفين:</value></data>
+  <data name="Employees_IoError" xml:space="preserve"><value>تعذّر قراءة الملف أو كتابته. / Impossible de lire ou d'écrire le fichier.</value></data>
+  <data name="Employees_ImportHeaders" xml:space="preserve"><value>أعمدة الملف لا تطابق النموذج. نزّل «النموذج» وأعد المحاولة. الأعمدة الإلزامية الناقصة:
+Les colonnes ne correspondent pas au modèle. Colonnes obligatoires manquantes :</value></data>
+  <data name="Employees_ImportErrors" xml:space="preserve"><value>الملف يحتوي على {0} سطرًا بها أخطاء — لن يُستورد شيء. صحِّح الملف ثم أعد المحاولة. / Le fichier contient {0} ligne(s) en erreur — rien n'est importé.</value></data>
+  <data name="Employees_ImportIssueLine" xml:space="preserve"><value>السطر {0}، العمود «{1}»</value></data>
+  <data name="Employees_ImportSummary" xml:space="preserve"><value>{0} موظف للإنشاء · {1} تكرار. / {0} à créer · {1} doublon(s).</value></data>
+  <data name="Employees_ImportConfirm" xml:space="preserve"><value>هل تريد الاستيراد الآن؟ / Importer maintenant ?</value></data>
+  <data name="Employees_ImportDuplicates" xml:space="preserve"><value>نعم: استيراد الجدد وتجاهل التكرارات. لا: التوقّف لتصحيح الملف. / Oui : ignorer les doublons. Non : corriger le fichier.</value></data>
+  <data name="Employees_ImportDone" xml:space="preserve"><value>اكتمل الاستيراد: {0} أُنشئوا، {1} تكرارات مُتجاهَلة. / Import terminé : {0} créé(s), {1} ignoré(s).</value></data>
   <data name="Employees_SearchPlaceholder" xml:space="preserve"><value>البحث عن موظف</value></data>
   <data name="Employees_EmptyState" xml:space="preserve"><value>اختر موظفاً لعرض ملفه.</value></data>
 

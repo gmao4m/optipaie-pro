@@ -17,7 +17,12 @@
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
                 <!-- Company selection is global (header selector) -->
-
+                <Button Style="{StaticResource SecondaryButton}" Command="{Binding DownloadTemplateCommand}"
+                        Content="{loc:Loc Employees_Template}" ToolTip="{loc:Loc Employees_TemplateTip}" />
+                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Command="{Binding ImportCommand}"
+                        Content="{loc:Loc Employees_Import}" ToolTip="{loc:Loc Employees_ImportTip}" />
+                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Command="{Binding ExportCommand}"
+                        Content="{loc:Loc Employees_Export}" ToolTip="{loc:Loc Employees_ExportTip}" />
                 <Button Style="{StaticResource PrimaryButton}" Margin="12,0,0,0" Command="{Binding NewCommand}"
                         Content="{loc:Loc Employees_New}" />
             </StackPanel>

@@ -555,6 +555,23 @@
 
   <!-- Employees view -->
   <data name="Employees_New" xml:space="preserve"><value>Nouvel employé</value></data>
+  <data name="Employees_Import" xml:space="preserve"><value>Importer</value></data>
+  <data name="Employees_ImportTip" xml:space="preserve"><value>Importer des employés depuis un fichier Excel/CSV</value></data>
+  <data name="Employees_Export" xml:space="preserve"><value>Exporter</value></data>
+  <data name="Employees_ExportTip" xml:space="preserve"><value>Exporter les employés de l'entreprise active vers Excel/CSV</value></data>
+  <data name="Employees_Template" xml:space="preserve"><value>Modèle</value></data>
+  <data name="Employees_TemplateTip" xml:space="preserve"><value>Télécharger un modèle vierge avec les bonnes colonnes</value></data>
+  <data name="Employees_TemplateSaved" xml:space="preserve"><value>Le modèle a été enregistré :</value></data>
+  <data name="Employees_ExportDone" xml:space="preserve"><value>Les employés ont été exportés :</value></data>
+  <data name="Employees_IoError" xml:space="preserve"><value>Impossible de lire ou d'écrire le fichier. / تعذّر قراءة الملف أو كتابته.</value></data>
+  <data name="Employees_ImportHeaders" xml:space="preserve"><value>Les colonnes du fichier ne correspondent pas au modèle. Colonnes obligatoires introuvables — téléchargez le « Modèle » et réessayez :
+أعمدة الملف لا تطابق النموذج. نزّل «النموذج» وأعد المحاولة. الأعمدة الناقصة:</value></data>
+  <data name="Employees_ImportErrors" xml:space="preserve"><value>Le fichier contient {0} ligne(s) en erreur — rien ne sera importé. Corrigez le fichier puis réessayez. / الملف يحتوي على {0} سطرًا بها أخطاء — لن يُستورد شيء.</value></data>
+  <data name="Employees_ImportIssueLine" xml:space="preserve"><value>Ligne {0}, colonne « {1} »</value></data>
+  <data name="Employees_ImportSummary" xml:space="preserve"><value>{0} employé(s) à créer · {1} doublon(s) détecté(s). / {0} موظف للإنشاء · {1} تكرار.</value></data>
+  <data name="Employees_ImportConfirm" xml:space="preserve"><value>Importer maintenant ? / هل تريد الاستيراد الآن؟</value></data>
+  <data name="Employees_ImportDuplicates" xml:space="preserve"><value>Oui : importer les nouveaux et ignorer les doublons. Non : arrêter et corriger le fichier. / نعم: استيراد الجدد وتجاهل التكرارات. لا: التوقّف لتصحيح الملف.</value></data>
+  <data name="Employees_ImportDone" xml:space="preserve"><value>Import terminé : {0} employé(s) créé(s), {1} doublon(s) ignoré(s). / اكتمل الاستيراد: {0} أُنشئوا، {1} تكرارات مُتجاهَلة.</value></data>
   <data name="Employees_SearchPlaceholder" xml:space="preserve"><value>Rechercher un employé</value></data>
   <data name="Employees_EmptyState" xml:space="preserve"><value>Sélectionnez un employé pour voir son profil.</value></data>
 
