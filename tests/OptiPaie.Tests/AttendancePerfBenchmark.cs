@@ -85,12 +85,19 @@ namespace OptiPaie.Tests
             sw.Stop();
             long loadMs = sw.ElapsedMilliseconds;
 
-            // --- SAVE path 2: erase ONE day for all employees via the matrix's per-cell ClearDay ---
+            // --- SAVE path 2a: erase ONE day for all employees via the OLD per-cell ClearDay ---
             DateTime eraseDay = workingDays.Last();
             sw.Restart();
-            foreach (long id in empIds) attendance.ClearDay(id, eraseDay); // N independent transactions (current EraseCells)
+            foreach (long id in empIds) attendance.ClearDay(id, eraseDay); // N independent transactions (old EraseCells)
             sw.Stop();
             long erasePerCellMs = sw.ElapsedMilliseconds;
+
+            // --- SAVE path 2b: NEW atomic ClearDayBulk for the same day (1 transaction) ---
+            attendance.SetDayStatusBulk(empIds.Select(id => new AttendanceDayStatus(id, eraseDay, AttendanceStatus.Present)).ToList());
+            sw.Restart();
+            attendance.ClearDayBulk(empIds.Select(id => new AttendanceDayStatus(id, eraseDay, AttendanceStatus.Present)).ToList());
+            sw.Stop();
+            long eraseBulkMs = sw.ElapsedMilliseconds;
 
             // --- SAVE path 3: single cell paint (one SetDayStatus = its own transaction) ---
             sw.Restart();
@@ -101,9 +108,10 @@ namespace OptiPaie.Tests
             int cells = allEntries.Count;
             TestContext.Out.WriteLine("=== Pointage perf (150 employees, " + workingDays.Count + " working days) ===");
             TestContext.Out.WriteLine("Matrix LOAD (GetCompanyMonth, 1 query)          : " + loadMs + " ms for " + loaded.Count + " records");
-            TestContext.Out.WriteLine("Bulk 'apply month to all' INSERT (" + cells + " cells): " + bulkInsertMs + " ms  (~" + (2 * cells) + " queries, 1 tx)");
-            TestContext.Out.WriteLine("Bulk 'apply month to all' UPDATE (" + cells + " cells): " + bulkUpdateMs + " ms  (point-SELECT+UPDATE per cell)");
-            TestContext.Out.WriteLine("Erase one day, " + Employees + " cells, per-cell ClearDay: " + erasePerCellMs + " ms  (" + Employees + " SEPARATE transactions)");
+            TestContext.Out.WriteLine("Bulk 'apply month to all' INSERT (" + cells + " cells): " + bulkInsertMs + " ms  (" + cells + " UPSERTs, 1 tx, no point-SELECT)");
+            TestContext.Out.WriteLine("Bulk 'apply month to all' UPDATE (" + cells + " cells): " + bulkUpdateMs + " ms  (" + cells + " UPSERTs update-in-place, 1 tx)");
+            TestContext.Out.WriteLine("Erase one day, " + Employees + " cells, OLD per-cell ClearDay: " + erasePerCellMs + " ms  (" + Employees + " SEPARATE transactions)");
+            TestContext.Out.WriteLine("Erase one day, " + Employees + " cells, NEW ClearDayBulk      : " + eraseBulkMs + " ms  (1 atomic transaction)");
             TestContext.Out.WriteLine("Paint 50 single cells (50 transactions)          : " + single50Ms + " ms  (" + (single50Ms / 50.0).ToString("0.0") + " ms/click)");
 
             System.Data.SQLite.SQLiteConnection.ClearAllPools();

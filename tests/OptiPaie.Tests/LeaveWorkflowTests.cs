@@ -451,12 +451,25 @@ namespace OptiPaie.Tests
                 return _inner.Insert(record);
             }
 
+            public void Upsert(AttendanceRecord record)
+            {
+                // The write path now goes through Upsert; inject the same mid-write failure as Insert.
+                _inserts++;
+                if (_inserts >= _failOn)
+                {
+                    throw new InvalidOperationException("Injected attendance failure at upsert #" + _inserts);
+                }
+                _inner.Upsert(record);
+            }
+
             public AttendanceRecord GetById(long id) => _inner.GetById(id);
             public AttendanceRecord GetByEmployeeAndDate(long employeeId, DateTime workDate) => _inner.GetByEmployeeAndDate(employeeId, workDate);
             public IEnumerable<AttendanceRecord> GetByEmployeeRange(long employeeId, DateTime from, DateTime to) => _inner.GetByEmployeeRange(employeeId, from, to);
             public IEnumerable<AttendanceRecord> GetByCompanyRange(long companyId, DateTime from, DateTime to) => _inner.GetByCompanyRange(companyId, from, to);
+            public IEnumerable<AttendanceRecord> GetByEmployeesAndDateRange(IEnumerable<long> employeeIds, DateTime from, DateTime to) => _inner.GetByEmployeesAndDateRange(employeeIds, from, to);
             public void Update(AttendanceRecord record) => _inner.Update(record);
             public void SoftDelete(long id) => _inner.SoftDelete(id);
+            public void SoftDeleteMany(IEnumerable<long> ids) => _inner.SoftDeleteMany(ids);
         }
     }
 }

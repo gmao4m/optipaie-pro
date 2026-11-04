@@ -46,6 +46,10 @@ namespace OptiPaie.Core.Interfaces.Services
         /// refuses a day synced from an approved leave.</summary>
         Result ClearDay(long employeeId, DateTime workDate);
 
+        /// <summary>Erases many days in a single all-or-nothing transaction (bulk "gomme"); days synced
+        /// from an approved leave are protected (never deleted here). Only EmployeeId + WorkDate are used.</summary>
+        Result ClearDayBulk(IEnumerable<AttendanceDayStatus> entries);
+
         /// <summary>The record of one employee on one day, or null.</summary>
         AttendanceRecord Get(long employeeId, DateTime workDate);
 

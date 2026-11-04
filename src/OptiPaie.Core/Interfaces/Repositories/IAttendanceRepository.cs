@@ -18,10 +18,23 @@ namespace OptiPaie.Core.Interfaces.Repositories
         /// <summary>All records of a company's employees within an inclusive date range.</summary>
         IEnumerable<AttendanceRecord> GetByCompanyRange(long companyId, DateTime from, DateTime to);
 
+        /// <summary>Active records for a set of employees within an inclusive range, in ONE query
+        /// (for bulk operations — avoids a point-select per cell).</summary>
+        IEnumerable<AttendanceRecord> GetByEmployeesAndDateRange(IEnumerable<long> employeeIds, DateTime from, DateTime to);
+
         long Insert(AttendanceRecord record);
 
         void Update(AttendanceRecord record);
 
+        /// <summary>Inserts the day's record, or updates the existing active one for the same
+        /// (employee, day) — a single statement using the partial unique index, no prior SELECT.
+        /// Preserves the original CreatedAtUtc on update.</summary>
+        void Upsert(AttendanceRecord record);
+
         void SoftDelete(long id);
+
+        /// <summary>Soft-deletes many records by id in one operation (chunked under the SQLite
+        /// variable limit) — for an atomic bulk erase.</summary>
+        void SoftDeleteMany(IEnumerable<long> ids);
     }
 }

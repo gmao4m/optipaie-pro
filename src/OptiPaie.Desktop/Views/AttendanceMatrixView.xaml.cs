@@ -18,6 +18,10 @@ namespace OptiPaie.Desktop.Views
     {
         private static readonly CultureInfo Fr = CultureInfo.GetCultureInfo("fr-FR");
         private AttendanceMatrixViewModel _vm;
+        // Remember what the columns were last built for: rebuilding them runs XamlReader.Parse once per
+        // day column (the dominant open cost). The day columns only change when the month/year changes;
+        // a department/company/search/refresh keeps the same days, so we skip the rebuild then.
+        private int _builtYear = -1, _builtMonth = -1, _builtDays = -1;
 
         public AttendanceMatrixView()
         {
@@ -32,6 +36,7 @@ namespace OptiPaie.Desktop.Views
             if (_vm != null)
             {
                 _vm.LayoutChanged += OnLayoutChanged;
+                _builtYear = _builtMonth = _builtDays = -1; // force a build for the new VM
                 BuildColumns();
             }
         }
@@ -41,6 +46,17 @@ namespace OptiPaie.Desktop.Views
         private void BuildColumns()
         {
             if (_vm == null) return;
+
+            // Skip the costly column rebuild when the day layout is unchanged (same month/year/day-count
+            // and columns already present) — e.g. a department switch, a refresh, a bulk edit.
+            if (_vm.SelectedYear == _builtYear && _vm.SelectedMonth == _builtMonth &&
+                _vm.DayCount == _builtDays && Grid.Columns.Count > 0)
+            {
+                return;
+            }
+            _builtYear = _vm.SelectedYear;
+            _builtMonth = _vm.SelectedMonth;
+            _builtDays = _vm.DayCount;
 
             Grid.Columns.Clear();
             Grid.Columns.Add(SelectColumn());

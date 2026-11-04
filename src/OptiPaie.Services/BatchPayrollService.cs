@@ -117,6 +117,13 @@ namespace OptiPaie.Services
             int total = plan.Employees.Count;
             int done = 0;
 
+            // Prefetch the whole company's attendance for the month in ONE query (no per-employee N+1).
+            IReadOnlyDictionary<long, AttendanceSummary> attendanceCache =
+                _isModuleEnabled(ModuleKeys.Attendance)
+                    ? _attendance.GetCompanyMonthlySummary(companyId, year, month)
+                        .GroupBy(s => s.EmployeeId).ToDictionary(g => g.Key, g => g.First())
+                    : null;
+
             foreach (BatchEmployeeCheck check in plan.Employees)
             {
                 progress?.Report(new BatchProgress { Done = done, Total = total, CurrentEmployee = check.EmployeeName });
@@ -131,7 +138,7 @@ namespace OptiPaie.Services
                 }
                 else
                 {
-                    PayrollGenerationRequest request = BuildRequest(companyId, check.EmployeeId, year, month);
+                    PayrollGenerationRequest request = BuildRequest(companyId, check.EmployeeId, year, month, attendanceCache);
                     Result<long> generated = _payroll.Generate(request);
 
                     if (generated.IsSuccess)
@@ -179,7 +186,8 @@ namespace OptiPaie.Services
 
         // ------------------------------------------------------- request assembly
 
-        public PayrollGenerationRequest BuildRequest(long companyId, long employeeId, int year, int month)
+        public PayrollGenerationRequest BuildRequest(long companyId, long employeeId, int year, int month,
+            IReadOnlyDictionary<long, AttendanceSummary> attendanceCache = null)
         {
             Employee employee = _employees.Get(employeeId);
             if (employee == null)
@@ -237,7 +245,13 @@ namespace OptiPaie.Services
             decimal workedHours = 0m;
             if (_isModuleEnabled(ModuleKeys.Attendance))
             {
-                AttendanceSummary summary = _attendance.GetMonthlySummary(employeeId, year, month);
+                // One company-wide summary (passed in by Run) instead of a per-employee query — same
+                // Summarise logic, identical figures, no N+1. Falls back to the single query when no
+                // cache is supplied (the single-employee callers / tests).
+                AttendanceSummary summary = null;
+                if (attendanceCache == null) summary = _attendance.GetMonthlySummary(employeeId, year, month);
+                else attendanceCache.TryGetValue(employeeId, out summary);
+
                 if (summary != null && summary.RecordedDays > 0)
                 {
                     workedDays = Math.Max(0m, monthDays - summary.AbsentDays);

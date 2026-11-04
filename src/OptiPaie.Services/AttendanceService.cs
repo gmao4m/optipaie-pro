@@ -93,17 +93,8 @@ namespace OptiPaie.Services
                     foreach (AttendanceRecord record in list)
                     {
                         Apply(record, settings);
-                        AttendanceRecord existing = uow.Attendance.GetByEmployeeAndDate(record.EmployeeId, record.WorkDate);
-                        if (existing == null)
-                        {
-                            uow.Attendance.Insert(record);
-                        }
-                        else
-                        {
-                            record.Id = existing.Id;
-                            record.CreatedAtUtc = existing.CreatedAtUtc;
-                            uow.Attendance.Update(record);
-                        }
+                        // UPSERT on the (EmployeeId, WorkDate) partial unique index — no point-SELECT per record.
+                        uow.Attendance.Upsert(record);
                     }
 
                     uow.Commit();
@@ -149,20 +140,10 @@ namespace OptiPaie.Services
                             continue;
                         }
 
-                        AttendanceRecord existing = uow.Attendance.GetByEmployeeAndDate(entry.EmployeeId, day);
-                        var record = existing ?? new AttendanceRecord { EmployeeId = entry.EmployeeId, WorkDate = day };
-                        record.WorkDate = day;
-                        record.Status = entry.Status;
+                        var record = new AttendanceRecord { EmployeeId = entry.EmployeeId, WorkDate = day, Status = entry.Status };
                         ApplyStatusOnly(record, settings);
-
-                        if (existing == null)
-                        {
-                            uow.Attendance.Insert(record);
-                        }
-                        else
-                        {
-                            uow.Attendance.Update(record);
-                        }
+                        // UPSERT on the (EmployeeId, WorkDate) partial unique index — no point-SELECT per cell.
+                        uow.Attendance.Upsert(record);
                     }
 
                     uow.Commit();
@@ -227,6 +208,56 @@ namespace OptiPaie.Services
                 return Result.Ok();
             }
         }
+
+        /// <summary>
+        /// Erases many days in ONE transaction (the matrix "gomme" over a column or a month-selection).
+        /// Loads the involved records in a single query, protects any day synced from an approved leave
+        /// (never deleted here), then soft-deletes the rest atomically — all-or-nothing. Replaces the
+        /// old per-cell loop that opened a separate transaction per cell and could stop half-done.
+        /// Only EmployeeId + WorkDate of each entry are used.
+        /// </summary>
+        public Result ClearDayBulk(IEnumerable<AttendanceDayStatus> entries)
+        {
+            List<AttendanceDayStatus> list = (entries ?? Enumerable.Empty<AttendanceDayStatus>())
+                .Where(e => e != null && e.EmployeeId > 0).ToList();
+            if (list.Count == 0) return Result.Ok();
+
+            using (IUnitOfWork uow = _unitOfWorkFactory.Create())
+            {
+                List<long> empIds = list.Select(e => e.EmployeeId).Distinct().ToList();
+                DateTime min = list.Min(e => e.WorkDate.Date);
+                DateTime max = list.Max(e => e.WorkDate.Date);
+
+                var wanted = new HashSet<string>(list.Select(e => Key(e.EmployeeId, e.WorkDate.Date)));
+                var toDelete = new List<long>();
+
+                foreach (AttendanceRecord rec in uow.Attendance.GetByEmployeesAndDateRange(empIds, min, max))
+                {
+                    if (!wanted.Contains(Key(rec.EmployeeId, rec.WorkDate.Date))) continue;
+                    // A day synced from an approved leave is undone from the Leave module, never here.
+                    if (rec.Notes != null && rec.Notes.StartsWith("[Congé]", StringComparison.Ordinal)) continue;
+                    toDelete.Add(rec.Id);
+                }
+
+                if (toDelete.Count == 0) return Result.Ok();
+
+                uow.BeginTransaction();
+                try
+                {
+                    uow.Attendance.SoftDeleteMany(toDelete);
+                    uow.Commit();
+                    return Result.Ok();
+                }
+                catch
+                {
+                    uow.Rollback();
+                    throw;
+                }
+            }
+        }
+
+        private static string Key(long employeeId, DateTime day) =>
+            employeeId.ToString(CultureInfo.InvariantCulture) + "|" + day.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
 
         public AttendanceRecord Get(long employeeId, DateTime workDate)
         {

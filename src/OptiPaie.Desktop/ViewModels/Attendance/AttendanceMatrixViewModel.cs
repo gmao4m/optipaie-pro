@@ -333,24 +333,28 @@ namespace OptiPaie.Desktop.ViewModels.Attendance
         /// <summary>Erases a set of cells (the "gomme"): removes each day's record, protecting synced leaves.</summary>
         private void EraseCells(IReadOnlyList<MatrixCellViewModel> cells, string context)
         {
-            int erased = 0, protectedLeave = 0;
+            int protectedLeave = 0;
+            var erasable = new List<MatrixCellViewModel>();
             foreach (MatrixCellViewModel cell in cells)
             {
                 if (cell.IsFuture) continue;
                 if (cell.IsLeaveLinked) { protectedLeave++; continue; } // a synced leave is undone from the Leave module
                 if (!cell.Status.HasValue) continue;                    // already empty
-
-                Result result = _services.Attendance.ClearDay(cell.EmployeeId, cell.Date);
-                if (result.IsFailure)
-                {
-                    Dialogs.Error(result.Error);
-                    Load(); // resync the grid with the store
-                    return;
-                }
-
-                cell.Clear();
-                erased++;
+                erasable.Add(cell);
             }
+
+            // One atomic transaction for the whole erase — never a partial erase that stops mid-way.
+            Result result = _services.Attendance.ClearDayBulk(
+                erasable.Select(c => new AttendanceDayStatus(c.EmployeeId, c.Date, AttendanceStatus.Present)).ToList());
+            if (result.IsFailure)
+            {
+                Dialogs.Error(result.Error);
+                Load(); // resync the grid with the store
+                return;
+            }
+
+            foreach (MatrixCellViewModel cell in erasable) cell.Clear();
+            int erased = erasable.Count;
 
             RecomputeKpis();
             if (erased == 0 && protectedLeave == 0) { StatusMessage = "Aucune modification."; return; }

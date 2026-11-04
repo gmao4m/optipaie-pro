@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using OptiPaie.Core.Dtos;
 
 namespace OptiPaie.Core.Interfaces.Services
@@ -34,6 +35,7 @@ namespace OptiPaie.Core.Interfaces.Services
         /// worksheet does (same inputs). Exposed so the orchestration can be verified against
         /// the single path field-for-field.
         /// </summary>
-        PayrollGenerationRequest BuildRequest(long companyId, long employeeId, int year, int month);
+        PayrollGenerationRequest BuildRequest(long companyId, long employeeId, int year, int month,
+            IReadOnlyDictionary<long, AttendanceSummary> attendanceCache = null);
     }
 }
