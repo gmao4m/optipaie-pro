@@ -70,9 +70,9 @@ namespace OptiPaie.Tests
                 applied = new MigrationRunner(connection).Run();
             }
 
-            // 3. Exactly the pending migrations (0033, 0034, 0035) applied — cleanly, no throw.
-            Assert.That(applied, Is.EqualTo(3), "expected exactly 0033 + 0034 + 0035 to apply on a v32 database");
-            Assert.That(AppliedVersions(), Does.Contain(33).And.Contain(34).And.Contain(35));
+            // 3. Exactly the pending migrations (0033, 0034, 0035, 0036) applied — cleanly, no throw.
+            Assert.That(applied, Is.EqualTo(4), "expected exactly 0033 + 0034 + 0035 + 0036 to apply on a v32 database");
+            Assert.That(AppliedVersions(), Does.Contain(33).And.Contain(34).And.Contain(35).And.Contain(36));
 
             // 4. The new schema is present.
             Assert.That(ColumnExists("JobPostings", "ContractType"), Is.True, "0033 did not add JobPostings.ContractType");
@@ -83,6 +83,22 @@ namespace OptiPaie.Tests
             // additively, without disturbing the populated pre-update database.
             Assert.That(Convert.ToInt64(Scalar("SELECT COUNT(*) FROM LeaveTypes WHERE Code = 'RECOVERY' AND CompanyId IS NULL;"), CultureInfo.InvariantCulture),
                 Is.EqualTo(1L), "0035 did not seed the global Congé de récupération type exactly once");
+            // 0036 adds the payslip lifecycle status + revision metadata, and swaps the uniqueness
+            // index for the ACTIVE-only partial index.
+            Assert.That(ColumnExists("Payslips", "Status"), Is.True, "0036 did not add Payslips.Status");
+            Assert.That(ColumnExists("Payslips", "SupersedesPayslipId"), Is.True, "0036 did not add Payslips.SupersedesPayslipId");
+            Assert.That(ColumnExists("Payslips", "RevisionReason"), Is.True, "0036 did not add Payslips.RevisionReason");
+            Assert.That(Convert.ToInt64(Scalar("SELECT COUNT(*) FROM sqlite_master WHERE type='index' AND name='UX_Payslips_Run_Employee';"), CultureInfo.InvariantCulture),
+                Is.EqualTo(0L), "0036 did not drop the old full uniqueness index");
+            Assert.That(Convert.ToInt64(Scalar("SELECT COUNT(*) FROM sqlite_master WHERE type='index' AND name='UX_Payslips_Run_Employee_Active';"), CultureInfo.InvariantCulture),
+                Is.EqualTo(1L), "0036 did not create the active-only partial uniqueness index");
+            // The pre-update payslip ROW survived and defaulted to Active (1) — its figures untouched.
+            Assert.That(Convert.ToInt64(Scalar("SELECT Status FROM Payslips WHERE NetSalaire = '55000';"), CultureInfo.InvariantCulture),
+                Is.EqualTo(1L), "a pre-update payslip must default to Active after 0036");
+            Assert.That(Scalar("SELECT BaseCotisable FROM Payslips WHERE NetSalaire = '55000';"),
+                Is.EqualTo("60000"), "the pre-update payslip's figures must be untouched by 0036");
+            Assert.That(Scalar("SELECT RevisionReason FROM Payslips WHERE NetSalaire = '55000';"),
+                Is.EqualTo(DBNull.Value), "a pre-update payslip carries no revision metadata (NULL), never a guessed value");
 
             // 5. No data loss: every pre-update row survives untouched, and the new nullable column
             //    is NULL for rows written before the update (never back-filled with a guessed value).
@@ -157,6 +173,19 @@ namespace OptiPaie.Tests
                     audit.Parameters.AddWithValue("@t", "2024-06-15 09:30:00");
                     audit.ExecuteNonQuery();
                 }
+
+                // A payslip written on the OLD schema (no Status column exists yet). FK enforcement is
+                // relaxed for the seed so we need not reproduce the full Employees row — the point is
+                // that this pre-update Payslips ROW survives migration 0036 untouched and defaults to
+                // Active, exactly as a real customer's archived bulletins must.
+                Exec(connection, "PRAGMA foreign_keys = OFF;");
+                Exec(connection,
+                    "INSERT INTO PayrollRuns (CompanyId, PeriodYear, PeriodMonth, RunStatus, EngineVersion, CreatedAtUtc) " +
+                    "VALUES (1, 2024, 6, 2, '1.0', '2024-06-30 00:00:00');");
+                Exec(connection,
+                    "INSERT INTO Payslips (RunId, EmployeeId, BaseCotisable, NetSalaire, GeneratedAtUtc, CreatedAtUtc) " +
+                    "VALUES ((SELECT Id FROM PayrollRuns WHERE PeriodYear = 2024 AND PeriodMonth = 6), 7, '60000', '55000', " +
+                    "'2024-06-30 00:00:00', '2024-06-30 00:00:00');");
             }
         }
 

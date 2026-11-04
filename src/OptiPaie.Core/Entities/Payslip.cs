@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using OptiPaie.Core.Enums;
 
 namespace OptiPaie.Core.Entities
 {
@@ -60,6 +61,26 @@ namespace OptiPaie.Core.Entities
 
         /// <summary>UTC timestamp when the payslip was generated.</summary>
         public DateTime GeneratedAtUtc { get; set; }
+
+        /// <summary>
+        /// Lifecycle state (migration 0036). Defaults to <see cref="PayslipStatus.Active"/> —
+        /// the only state read by declarations, the archive and every downstream artifact.
+        /// Superseded/Cancelled rows are kept for audit and excluded from the active view.
+        /// </summary>
+        public PayslipStatus Status { get; set; } = PayslipStatus.Active;
+
+        /// <summary>When this is a corrected version, the id of the original payslip it replaces;
+        /// otherwise null. Drives the bilingual "bulletin rectificatif" reprint mark.</summary>
+        public long? SupersedesPayslipId { get; set; }
+
+        /// <summary>Mandatory typed reason captured when the payslip was corrected or cancelled.</summary>
+        public string RevisionReason { get; set; }
+
+        /// <summary>Who performed the correction/cancellation (session user or owner), for audit.</summary>
+        public string RevisedByUser { get; set; }
+
+        /// <summary>UTC timestamp of the correction/cancellation, or null when never revised.</summary>
+        public DateTime? RevisedAtUtc { get; set; }
 
         /// <summary>
         /// The detail lines making up this payslip. Populated by services; not mapped by Dapper.

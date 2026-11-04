@@ -32,6 +32,10 @@
     <!-- Declarative, fixed-layout PDF engine for the Fiche de Paie (A4, print-identical).
          2022.12.x targets netstandard2.0 and is consumable from .NET Framework 4.8. -->
     <PackageReference Include="QuestPDF" Version="2022.12.1" />
+    <!-- Explicit (not merely transitive via QuestPDF): we decode/validate the company logo
+         ourselves before rendering, so a corrupt or unsupported image degrades to "no logo"
+         instead of aborting the payslip. Pinned to the exact version QuestPDF uses. -->
+    <PackageReference Include="SkiaSharp" Version="2.88.3" />
   </ItemGroup>
 
   <!-- Reads licensing endpoints/anon key from App.config (ConfigurationManager). -->

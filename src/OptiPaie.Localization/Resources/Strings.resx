@@ -555,6 +555,35 @@
 
   <!-- Employees view -->
   <data name="Employees_New" xml:space="preserve"><value>Nouvel employé</value></data>
+  <data name="Employees_Import" xml:space="preserve"><value>Importer</value></data>
+  <data name="Employees_ImportTip" xml:space="preserve"><value>Importer des employés depuis un fichier Excel/CSV</value></data>
+  <data name="Employees_Export" xml:space="preserve"><value>Exporter</value></data>
+  <data name="Employees_ExportTip" xml:space="preserve"><value>Exporter les employés de l'entreprise active vers Excel/CSV</value></data>
+  <data name="Employees_Template" xml:space="preserve"><value>Modèle</value></data>
+  <data name="Employees_TemplateTip" xml:space="preserve"><value>Télécharger un modèle vierge avec les bonnes colonnes</value></data>
+  <data name="Employees_TemplateSaved" xml:space="preserve"><value>Le modèle a été enregistré :</value></data>
+  <data name="Employees_ExportDone" xml:space="preserve"><value>Les employés ont été exportés :</value></data>
+  <data name="Employees_IoError" xml:space="preserve"><value>Impossible de lire ou d'écrire le fichier. / تعذّر قراءة الملف أو كتابته.</value></data>
+  <data name="Employees_ImportHeaders" xml:space="preserve"><value>Les colonnes du fichier ne correspondent pas au modèle. Colonnes obligatoires introuvables — téléchargez le « Modèle » et réessayez :
+أعمدة الملف لا تطابق النموذج. نزّل «النموذج» وأعد المحاولة. الأعمدة الناقصة:</value></data>
+  <data name="Employees_ImportErrors" xml:space="preserve"><value>Le fichier contient {0} ligne(s) en erreur — rien ne sera importé. Corrigez le fichier puis réessayez. / الملف يحتوي على {0} سطرًا بها أخطاء — لن يُستورد شيء.</value></data>
+  <data name="Employees_ImportIssueLine" xml:space="preserve"><value>Ligne {0}, colonne « {1} »</value></data>
+  <data name="Employees_ImportSummary" xml:space="preserve"><value>{0} employé(s) à créer · {1} doublon(s) détecté(s). / {0} موظف للإنشاء · {1} تكرار.</value></data>
+  <data name="Employees_ImportConfirm" xml:space="preserve"><value>Importer maintenant ? / هل تريد الاستيراد الآن؟</value></data>
+  <data name="Employees_ImportDuplicates" xml:space="preserve"><value>Oui : importer les nouveaux et ignorer les doublons. Non : arrêter et corriger le fichier. / نعم: استيراد الجدد وتجاهل التكرارات. لا: التوقّف لتصحيح الملف.</value></data>
+  <data name="Employees_ImportDone" xml:space="preserve"><value>Import terminé : {0} employé(s) créé(s), {1} doublon(s) ignoré(s). / اكتمل الاستيراد: {0} أُنشئوا، {1} تكرارات مُتجاهَلة.</value></data>
+  <data name="Import_Title" xml:space="preserve"><value>Importer des employés</value></data>
+  <data name="Import_Subtitle" xml:space="preserve"><value>Associez vos colonnes à nos champs, vérifiez l'aperçu, puis confirmez. Rien n'est enregistré avant votre confirmation.</value></data>
+  <data name="Import_OurField" xml:space="preserve"><value>Notre champ</value></data>
+  <data name="Import_YourColumn" xml:space="preserve"><value>Votre colonne</value></data>
+  <data name="Import_Recheck" xml:space="preserve"><value>Vérifier</value></data>
+  <data name="Import_Summary" xml:space="preserve"><value>{0} à créer · {1} doublon(s) · {2} erreur(s)</value></data>
+  <data name="Import_RequiredMissing" xml:space="preserve"><value>Champ(s) obligatoire(s) non associé(s) : {0}. Choisissez la colonne correspondante pour continuer.</value></data>
+  <data name="Import_RowWord" xml:space="preserve"><value>Ligne</value></data>
+  <data name="Import_DupTitle" xml:space="preserve"><value>Doublons détectés</value></data>
+  <data name="Import_DupSkip" xml:space="preserve"><value>Ignorer les doublons et importer les nouveaux</value></data>
+  <data name="Import_DupStop" xml:space="preserve"><value>Arrêter et corriger le fichier</value></data>
+  <data name="Import_DoImport" xml:space="preserve"><value>Importer</value></data>
   <data name="Employees_SearchPlaceholder" xml:space="preserve"><value>Rechercher un employé</value></data>
   <data name="Employees_EmptyState" xml:space="preserve"><value>Sélectionnez un employé pour voir son profil.</value></data>
 
@@ -1118,6 +1147,33 @@
   <data name="Ats_PipelineRow" xml:space="preserve"><value>Ouvrir les candidatures</value></data>
   <data name="Archive_PreviewRow" xml:space="preserve"><value>Aperçu du bulletin</value></data>
   <data name="Archive_PrintRow" xml:space="preserve"><value>Imprimer le bulletin</value></data>
+  <data name="Archive_CorrectRow" xml:space="preserve"><value>Corriger le bulletin</value></data>
+  <data name="Archive_DeleteRow" xml:space="preserve"><value>Supprimer le bulletin</value></data>
+  <data name="Archive_History" xml:space="preserve"><value>Bulletins annulés / corrigés</value></data>
+  <data name="Archive_RestoreRow" xml:space="preserve"><value>Restaurer le bulletin</value></data>
+  <data name="Archive_HistoryEmpty" xml:space="preserve"><value>Aucun bulletin annulé ou corrigé pour cette période.</value></data>
+  <data name="Archive_HistoryTitle" xml:space="preserve"><value>Historique des bulletins</value></data>
+  <data name="Fiche_RectificatifMark" xml:space="preserve"><value>BULLETIN DE PAIE RECTIFICATIF — remplace une version antérieure / كشف راتب مُصحَّح — يحلّ محلّ نسخة سابقة</value></data>
+  <data name="Correct_Title" xml:space="preserve"><value>Corriger le bulletin de paie</value></data>
+  <data name="Correct_Subtitle" xml:space="preserve"><value>Une nouvelle version corrigée remplacera l'originale, qui est conservée pour l'audit. Les déclarations CNAS et le net seront recalculés.</value></data>
+  <data name="Correct_Lines" xml:space="preserve"><value>Lignes du bulletin</value></data>
+  <data name="Correct_Reason" xml:space="preserve"><value>Motif de la correction (obligatoire)</value></data>
+  <data name="Correct_OldNet" xml:space="preserve"><value>Ancien net</value></data>
+  <data name="Correct_NewNet" xml:space="preserve"><value>Nouveau net</value></data>
+  <data name="Correct_Save" xml:space="preserve"><value>Enregistrer la correction</value></data>
+  <data name="Correct_Done" xml:space="preserve"><value>La correction a été enregistrée. Une nouvelle version a remplacé l'originale.</value></data>
+  <data name="Correct_DeclarationWarning" xml:space="preserve"><value>Attention : une déclaration CNAS (DAC/DAS) a déjà été produite pour {0}. La correction rendra la déclaration déposée incohérente — vous devrez régulariser auprès de votre agence CNAS.</value></data>
+  <data name="Delete_Title" xml:space="preserve"><value>Supprimer le bulletin de paie</value></data>
+  <data name="Delete_Summary" xml:space="preserve"><value>Bulletin de {0} — {1}, net {2}.</value></data>
+  <data name="Delete_Body" xml:space="preserve"><value>Le bulletin sera annulé et conservé pour l'audit (jamais réimprimable). La période sera libérée et pourra être recalculée. Vous pourrez le restaurer.</value></data>
+  <data name="Delete_Reason" xml:space="preserve"><value>Motif de la suppression (obligatoire)</value></data>
+  <data name="Delete_LoanReversal" xml:space="preserve"><value>Le remboursement de prêt de {0} prélevé sur ce bulletin sera réintégré au solde.</value></data>
+  <data name="Delete_DeclarationWarning" xml:space="preserve"><value>Attention : une déclaration CNAS (DAC/DAS) a déjà été produite pour {0}. Supprimer ce bulletin laissera un salarié déclaré sans bulletin pour cette période — régularisez auprès de votre agence CNAS.</value></data>
+  <data name="Delete_Done" xml:space="preserve"><value>Le bulletin a été annulé. La période est de nouveau disponible.</value></data>
+  <data name="Restore_Confirm" xml:space="preserve"><value>Restaurer ce bulletin annulé ? Il redeviendra actif et occupera de nouveau sa période.</value></data>
+  <data name="Restore_Done" xml:space="preserve"><value>Le bulletin a été restauré.</value></data>
+  <data name="History_Status_Superseded" xml:space="preserve"><value>Corrigé (remplacé)</value></data>
+  <data name="History_Status_Cancelled" xml:space="preserve"><value>Annulé</value></data>
   <data name="Employees_OpenFile" xml:space="preserve"><value>Ouvrir le dossier</value></data>
   <data name="Employees_EditRow" xml:space="preserve"><value>Modifier la fiche</value></data>
   <data name="Employees_DeleteRow" xml:space="preserve"><value>Supprimer l'employé</value></data>

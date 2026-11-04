@@ -134,7 +134,26 @@ if ($sig.Status -ne 'Valid' -or ($sig.SignerCertificate.Subject -notmatch 'Micro
 }
 Write-Host ("    OK - .NET 4.8 offline redist verified ({0:N0} MB, signed by Microsoft)." -f ((Get-Item $redist).Length/1MB)) -ForegroundColor Green
 
-Write-Host "==> Building Setup.exe bootstrapper (embeds offline .NET 4.8)..." -ForegroundColor Cyan
+# ---------------------------------------------------------------------------
+# Visual C++ 2015-2022 x86 runtime OFFLINE redistributable - fetched here and EMBEDDED too.
+# The app is x86, so its PDF renderer loads the x86 libSkiaSharp.dll, which fails to load on a
+# stock Windows 7 SP1 without this runtime (and the Universal CRT it carries) - document
+# generation then fails with "Impossible de produire la fiche de paie". Carrying it offline
+# closes that failure mode on an un-updated machine.
+$vcredist = Join-Path $redistDir "vc_redist.x86.exe"
+if (-not (Test-Path $vcredist) -or (Get-Item $vcredist).Length -lt 10MB) {
+    Write-Host "==> Downloading Visual C++ 2015-2022 x86 redistributable..." -ForegroundColor Cyan
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    # aka.ms/vs/17/release/vc_redist.x86.exe = the current VS2015-2022 (14.x) x86 runtime.
+    Invoke-WebRequest -Uri "https://aka.ms/vs/17/release/vc_redist.x86.exe" -OutFile $vcredist -UseBasicParsing
+}
+$vcsig = Get-AuthenticodeSignature $vcredist
+if ($vcsig.Status -ne 'Valid' -or ($vcsig.SignerCertificate.Subject -notmatch 'Microsoft')) {
+    throw "The VC++ 2015-2022 x86 redistributable failed Authenticode verification (status=$($vcsig.Status), signer=$($vcsig.SignerCertificate.Subject)). Refusing to embed."
+}
+Write-Host ("    OK - VC++ x86 redist verified ({0:N0} MB, signed by Microsoft)." -f ((Get-Item $vcredist).Length/1MB)) -ForegroundColor Green
+
+Write-Host "==> Building Setup.exe bootstrapper (embeds offline .NET 4.8 + VC++ x86 runtime)..." -ForegroundColor Cyan
 & $wix build (Join-Path $PSScriptRoot "Bundle.wxs") `
     -d "AppVersion=$wixVersion" -b $PSScriptRoot `
     -ext WixToolset.BootstrapperApplications.wixext `

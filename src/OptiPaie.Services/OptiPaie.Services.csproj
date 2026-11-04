@@ -24,6 +24,13 @@
     <PackageReference Include="BouncyCastle.Cryptography" Version="2.4.0" />
   </ItemGroup>
 
+  <!-- Employee import/export: read/write real .xlsx workbooks (netstandard2.0, runs on net48).
+       CSV uses no library. The import/validation logic is format-agnostic and works on an
+       abstract row table, so it is fully unit-tested without this package. -->
+  <ItemGroup>
+    <PackageReference Include="ClosedXML" Version="0.102.3" />
+  </ItemGroup>
+
   <!-- IBM Plex Sans Arabic (Latin + Arabic glyphs) embedded so the bilingual leave/attestation
        documents render the same in the app AND in tests/CI, with no reliance on machine fonts. -->
   <ItemGroup>

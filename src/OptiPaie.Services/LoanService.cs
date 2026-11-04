@@ -348,55 +348,10 @@ namespace OptiPaie.Services
         {
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
-                int period = Period(year, month);
-                List<Loan> loans = uow.Loans.GetByEmployee(employeeId).ToList();
-
-                // When an explicit withheld amount is given, it is the pot to distribute across the
-                // active loans (in order); each loan takes min(remaining pot, its outstanding). The
-                // loan schedule is therefore credited EXACTLY what the payslip deducted — if the line
-                // was zeroed, nothing is credited; if it was reduced, less is credited.
-                decimal? remaining = actualWithheld.HasValue ? Math.Max(0m, actualWithheld.Value) : (decimal?)null;
-
                 uow.BeginTransaction();
                 try
                 {
-                    decimal total = 0m;
-
-                    foreach (Loan loan in loans)
-                    {
-                        if (loan.Status != LoanStatus.Active) continue;
-                        if (period < Period(loan.StartYear, loan.StartMonth)) continue;
-
-                        // Idempotent: never record the same period twice.
-                        if (uow.Loans.GetRepayment(loan.Id, year, month) != null) continue;
-
-                        decimal outstanding = loan.Principal - Repaid(uow, loan.Id);
-                        if (outstanding <= 0m)
-                        {
-                            SettleIfNeeded(uow, loan, 0m);
-                            continue;
-                        }
-
-                        decimal amount = remaining.HasValue
-                            ? Math.Min(remaining.Value, outstanding)               // exactly what was withheld
-                            : Math.Min(loan.MonthlyInstallment, outstanding);      // theoretical instalment
-
-                        if (amount <= 0m) continue;
-
-                        uow.Loans.InsertRepayment(new LoanRepayment
-                        {
-                            LoanId = loan.Id,
-                            Year = year,
-                            Month = month,
-                            Amount = amount,
-                            IsManual = false
-                        });
-
-                        total += amount;
-                        if (remaining.HasValue) remaining -= amount;
-                        SettleIfNeeded(uow, loan, outstanding - amount);
-                    }
-
+                    decimal total = ApplyCore(uow, employeeId, year, month, actualWithheld);
                     uow.Commit();
                     return Result.Ok(total);
                 }
@@ -405,6 +360,89 @@ namespace OptiPaie.Services
                     uow.Rollback();
                     throw;
                 }
+            }
+        }
+
+        public void ReversePayrollRepayment(IUnitOfWork uow, long employeeId, int year, int month)
+        {
+            Guard.AgainstNull(uow, nameof(uow));
+            ReverseCore(uow, employeeId, year, month);
+        }
+
+        public decimal ApplyPayrollRepayment(IUnitOfWork uow, long employeeId, int year, int month, decimal withheld)
+        {
+            Guard.AgainstNull(uow, nameof(uow));
+            // Always an explicit amount here (the corrected/restored payslip's recovery line), so the
+            // loan schedule is credited exactly what that payslip deducts — never the theoretical one.
+            return ApplyCore(uow, employeeId, year, month, Math.Max(0m, withheld));
+        }
+
+        /// <summary>
+        /// Records the period's recovery for the employee's active loans, enlisting in the given
+        /// unit of work (no commit). When <paramref name="actualWithheld"/> is null each loan takes
+        /// its theoretical instalment; otherwise that amount is the pot distributed across the loans
+        /// in order, each capped at its outstanding — so the schedule is credited exactly what the
+        /// payslip deducted. Idempotent per (loan, period). Returns the total applied.
+        /// </summary>
+        private static decimal ApplyCore(IUnitOfWork uow, long employeeId, int year, int month, decimal? actualWithheld)
+        {
+            int period = Period(year, month);
+            List<Loan> loans = uow.Loans.GetByEmployee(employeeId).ToList();
+            decimal? remaining = actualWithheld.HasValue ? Math.Max(0m, actualWithheld.Value) : (decimal?)null;
+            decimal total = 0m;
+
+            foreach (Loan loan in loans)
+            {
+                if (loan.Status != LoanStatus.Active) continue;
+                if (period < Period(loan.StartYear, loan.StartMonth)) continue;
+
+                // Idempotent: never record the same period twice.
+                if (uow.Loans.GetRepayment(loan.Id, year, month) != null) continue;
+
+                decimal outstanding = loan.Principal - Repaid(uow, loan.Id);
+                if (outstanding <= 0m)
+                {
+                    SettleIfNeeded(uow, loan, 0m);
+                    continue;
+                }
+
+                decimal amount = remaining.HasValue
+                    ? Math.Min(remaining.Value, outstanding)               // exactly what was withheld
+                    : Math.Min(loan.MonthlyInstallment, outstanding);      // theoretical instalment
+
+                if (amount <= 0m) continue;
+
+                uow.Loans.InsertRepayment(new LoanRepayment
+                {
+                    LoanId = loan.Id,
+                    Year = year,
+                    Month = month,
+                    Amount = amount,
+                    IsManual = false
+                });
+
+                total += amount;
+                if (remaining.HasValue) remaining -= amount;
+                SettleIfNeeded(uow, loan, outstanding - amount);
+            }
+
+            return total;
+        }
+
+        /// <summary>
+        /// Soft-deletes the PAYROLL (non-manual) repayment of each of the employee's loans for the
+        /// period and reconciles the loan status, enlisting in the given unit of work (no commit). A
+        /// manual repayment the user entered by hand is deliberately left intact.
+        /// </summary>
+        private static void ReverseCore(IUnitOfWork uow, long employeeId, int year, int month)
+        {
+            foreach (Loan loan in uow.Loans.GetByEmployee(employeeId).ToList())
+            {
+                LoanRepayment repayment = uow.Loans.GetRepayment(loan.Id, year, month);
+                if (repayment == null || repayment.IsManual) continue;
+
+                uow.Loans.SoftDeleteRepayment(repayment.Id);
+                ReconcileStatus(uow, loan.Id);
             }
         }
 

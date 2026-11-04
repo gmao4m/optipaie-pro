@@ -35,6 +35,9 @@ namespace OptiPaie.Desktop.ViewModels
             EditCommand = new RelayCommand(Edit);
             DeleteCommand = new RelayCommand(Delete);
             OpenProfileCommand = new RelayCommand(OpenProfile, () => _selectedEmployee != null);
+            ImportCommand = new RelayCommand(Import);
+            ExportCommand = new RelayCommand(Export);
+            DownloadTemplateCommand = new RelayCommand(DownloadTemplate);
         }
 
         public ObservableCollection<Company> Companies { get; }
@@ -64,11 +67,77 @@ namespace OptiPaie.Desktop.ViewModels
         public ICommand EditCommand { get; }
         public ICommand DeleteCommand { get; }
         public ICommand OpenProfileCommand { get; }
+        public ICommand ImportCommand { get; }
+        public ICommand ExportCommand { get; }
+        public ICommand DownloadTemplateCommand { get; }
 
         private void OpenProfile()
         {
             if (_selectedEmployee == null) return;
             Dialogs.ShowEmployeeProfile(new EmployeeProfileViewModel(_services, _selectedEmployee.Id, _navigate));
+        }
+
+        private string L(string key) => _services.Localization.GetString(key);
+
+        private static OptiPaie.Core.Dtos.ImportFileFormat FormatOf(string path) =>
+            path.EndsWith(".csv", System.StringComparison.OrdinalIgnoreCase)
+                ? OptiPaie.Core.Dtos.ImportFileFormat.Csv : OptiPaie.Core.Dtos.ImportFileFormat.Xlsx;
+
+        private void DownloadTemplate()
+        {
+            var dlg = new Microsoft.Win32.SaveFileDialog
+            {
+                Filter = "Excel (*.xlsx)|*.xlsx|CSV (*.csv)|*.csv",
+                FileName = "modele_employes.xlsx"
+            };
+            if (dlg.ShowDialog() != true) return;
+            try
+            {
+                _services.EmployeeImportExport.WriteTemplate(dlg.FileName, FormatOf(dlg.FileName));
+                Dialogs.Info(L("Employees_TemplateSaved") + "\n" + dlg.FileName);
+            }
+            catch (System.Exception ex) { Dialogs.ErrorWithLog(L("Employees_IoError"), ex); }
+        }
+
+        private void Export()
+        {
+            if (SelectedCompany == null) { Dialogs.Error(L("Cnas_NoCompany")); return; }
+            var dlg = new Microsoft.Win32.SaveFileDialog
+            {
+                Filter = "Excel (*.xlsx)|*.xlsx|CSV (*.csv)|*.csv",
+                FileName = "employes_" + System.DateTime.Now.ToString("yyyyMMdd") + ".xlsx"
+            };
+            if (dlg.ShowDialog() != true) return;
+            try
+            {
+                _services.EmployeeImportExport.Export(SelectedCompany.Id, dlg.FileName, FormatOf(dlg.FileName));
+                Dialogs.Info(L("Employees_ExportDone") + "\n" + dlg.FileName);
+            }
+            catch (System.Exception ex) { Dialogs.ErrorWithLog(L("Employees_IoError"), ex); }
+        }
+
+        private void Import()
+        {
+            if (SelectedCompany == null) { Dialogs.Error(L("Cnas_NoCompany")); return; }
+
+            // Step 1 — choose file.
+            var dlg = new Microsoft.Win32.OpenFileDialog
+            {
+                Filter = "Excel/CSV (*.xlsx;*.csv)|*.xlsx;*.csv|Excel (*.xlsx)|*.xlsx|CSV (*.csv)|*.csv"
+            };
+            if (dlg.ShowDialog() != true) return;
+
+            OptiPaie.Core.Dtos.ImportTable table;
+            try { table = _services.EmployeeImportExport.Read(dlg.FileName); }
+            catch (System.Exception ex) { Dialogs.ErrorWithLog(L("Employees_IoError"), ex); return; }
+
+            // Step 2 — map columns + review preview, Step 3 — confirm: all handled in one window.
+            // A file whose headers differ from the template is NOT refused; the window's mapping step
+            // lets the user match their columns to ours (auto-matched where possible, remembered per company).
+            if (Dialogs.ShowEmployeeImport(new EmployeeImportViewModel(_services, SelectedCompany.Id, dlg.FileName, table)))
+            {
+                LoadEmployees();
+            }
         }
 
         public void OnActivated()

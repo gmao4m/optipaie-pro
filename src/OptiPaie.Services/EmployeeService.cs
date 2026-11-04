@@ -81,7 +81,7 @@ namespace OptiPaie.Services
                 // (soft-delete hides them from GetByCompany) makes the DAS skip their payslips while
                 // the DAC still counts them, corrupting the annual cross-check. Refuse; the user marks
                 // a departure with an exit date instead (which keeps the payslips declarable).
-                if (uow.Payslips.GetByEmployee(id).Any())
+                if (uow.Payslips.HasAnyByEmployee(id))
                 {
                     return Result.Fail(
                         "Impossible de supprimer cet employé : il possède des bulletins de paie (historique CNAS/DAS). " +

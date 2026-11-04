@@ -56,7 +56,7 @@ namespace OptiPaie.Desktop.Documents
             return model;
         }
 
-        public FichePaieModel FromPayslip(Company company, Employee employee, Payslip payslip, bool isArabic, int year, int month)
+        public FichePaieModel FromPayslip(Company company, Employee employee, Payslip payslip, bool isArabic, int year, int month, string revisionMark = null)
         {
             var model = new FichePaieModel
             {
@@ -74,7 +74,9 @@ namespace OptiPaie.Desktop.Documents
                 Abattement = payslip.Abattement,
                 Irg = payslip.Irg,
                 NetSalaire = payslip.NetSalaire,
-                WorkedDays = payslip.WorkedDays
+                WorkedDays = payslip.WorkedDays,
+                // A corrected version (it supersedes an earlier payslip) prints the rectificatif badge.
+                RevisionMark = payslip.SupersedesPayslipId.HasValue ? revisionMark : null
             };
 
             int i = 1;

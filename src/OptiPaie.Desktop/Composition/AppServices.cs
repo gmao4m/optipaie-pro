@@ -25,6 +25,8 @@ namespace OptiPaie.Desktop.Composition
             IArchiveService archive,
             IBackupService backup,
             IPayrollService payroll,
+            IPayslipRevisionService payslipRevision,
+            IEmployeeImportExportService employeeImportExport,
             ILocalizationService localization,
             IModuleRegistry modules,
             ILicensingService licensing,
@@ -62,6 +64,8 @@ namespace OptiPaie.Desktop.Composition
             Archive = archive;
             Backup = backup;
             Payroll = payroll;
+            PayslipRevision = payslipRevision;
+            EmployeeImportExport = employeeImportExport;
             Localization = localization;
             Modules = modules;
             Licensing = licensing;
@@ -126,6 +130,13 @@ namespace OptiPaie.Desktop.Composition
         public IArchiveService Archive { get; }
         public IBackupService Backup { get; }
         public IPayrollService Payroll { get; }
+
+        /// <summary>Correct / cancel / restore a saved payslip, with atomic downstream consistency.</summary>
+        public IPayslipRevisionService PayslipRevision { get; }
+
+        /// <summary>Import / export of employees for the active company (xlsx/csv, atomic bulk import).</summary>
+        public IEmployeeImportExportService EmployeeImportExport { get; }
+
         public ILocalizationService Localization { get; }
 
         /// <summary>Catalogue of licensable modules (nav is generated from this).</summary>
