@@ -572,6 +572,18 @@ Les colonnes ne correspondent pas au modèle. Colonnes obligatoires manquantes :
   <data name="Employees_ImportConfirm" xml:space="preserve"><value>هل تريد الاستيراد الآن؟ / Importer maintenant ?</value></data>
   <data name="Employees_ImportDuplicates" xml:space="preserve"><value>نعم: استيراد الجدد وتجاهل التكرارات. لا: التوقّف لتصحيح الملف. / Oui : ignorer les doublons. Non : corriger le fichier.</value></data>
   <data name="Employees_ImportDone" xml:space="preserve"><value>اكتمل الاستيراد: {0} أُنشئوا، {1} تكرارات مُتجاهَلة. / Import terminé : {0} créé(s), {1} ignoré(s).</value></data>
+  <data name="Import_Title" xml:space="preserve"><value>استيراد الموظفين</value></data>
+  <data name="Import_Subtitle" xml:space="preserve"><value>اربط أعمدة ملفك بحقولنا، راجع المعاينة، ثمّ أكّد. لا يُحفظ شيء قبل التأكيد.</value></data>
+  <data name="Import_OurField" xml:space="preserve"><value>حقلنا</value></data>
+  <data name="Import_YourColumn" xml:space="preserve"><value>عمودك</value></data>
+  <data name="Import_Recheck" xml:space="preserve"><value>تحقّق</value></data>
+  <data name="Import_Summary" xml:space="preserve"><value>{0} للإنشاء · {1} تكرار · {2} خطأ</value></data>
+  <data name="Import_RequiredMissing" xml:space="preserve"><value>حقول إلزامية غير مربوطة: {0}. اختر العمود المقابل للمتابعة.</value></data>
+  <data name="Import_RowWord" xml:space="preserve"><value>السطر</value></data>
+  <data name="Import_DupTitle" xml:space="preserve"><value>تمّ اكتشاف تكرارات</value></data>
+  <data name="Import_DupSkip" xml:space="preserve"><value>تجاهل التكرارات واستيراد الجدد</value></data>
+  <data name="Import_DupStop" xml:space="preserve"><value>التوقّف وتصحيح الملف</value></data>
+  <data name="Import_DoImport" xml:space="preserve"><value>استيراد</value></data>
   <data name="Employees_SearchPlaceholder" xml:space="preserve"><value>البحث عن موظف</value></data>
   <data name="Employees_EmptyState" xml:space="preserve"><value>اختر موظفاً لعرض ملفه.</value></data>
 

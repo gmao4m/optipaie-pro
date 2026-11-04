@@ -572,6 +572,18 @@
   <data name="Employees_ImportConfirm" xml:space="preserve"><value>Importer maintenant ? / هل تريد الاستيراد الآن؟</value></data>
   <data name="Employees_ImportDuplicates" xml:space="preserve"><value>Oui : importer les nouveaux et ignorer les doublons. Non : arrêter et corriger le fichier. / نعم: استيراد الجدد وتجاهل التكرارات. لا: التوقّف لتصحيح الملف.</value></data>
   <data name="Employees_ImportDone" xml:space="preserve"><value>Import terminé : {0} employé(s) créé(s), {1} doublon(s) ignoré(s). / اكتمل الاستيراد: {0} أُنشئوا، {1} تكرارات مُتجاهَلة.</value></data>
+  <data name="Import_Title" xml:space="preserve"><value>Importer des employés</value></data>
+  <data name="Import_Subtitle" xml:space="preserve"><value>Associez vos colonnes à nos champs, vérifiez l'aperçu, puis confirmez. Rien n'est enregistré avant votre confirmation.</value></data>
+  <data name="Import_OurField" xml:space="preserve"><value>Notre champ</value></data>
+  <data name="Import_YourColumn" xml:space="preserve"><value>Votre colonne</value></data>
+  <data name="Import_Recheck" xml:space="preserve"><value>Vérifier</value></data>
+  <data name="Import_Summary" xml:space="preserve"><value>{0} à créer · {1} doublon(s) · {2} erreur(s)</value></data>
+  <data name="Import_RequiredMissing" xml:space="preserve"><value>Champ(s) obligatoire(s) non associé(s) : {0}. Choisissez la colonne correspondante pour continuer.</value></data>
+  <data name="Import_RowWord" xml:space="preserve"><value>Ligne</value></data>
+  <data name="Import_DupTitle" xml:space="preserve"><value>Doublons détectés</value></data>
+  <data name="Import_DupSkip" xml:space="preserve"><value>Ignorer les doublons et importer les nouveaux</value></data>
+  <data name="Import_DupStop" xml:space="preserve"><value>Arrêter et corriger le fichier</value></data>
+  <data name="Import_DoImport" xml:space="preserve"><value>Importer</value></data>
   <data name="Employees_SearchPlaceholder" xml:space="preserve"><value>Rechercher un employé</value></data>
   <data name="Employees_EmptyState" xml:space="preserve"><value>Sélectionnez un employé pour voir son profil.</value></data>
 

@@ -128,53 +128,16 @@ namespace OptiPaie.Desktop.ViewModels
             if (dlg.ShowDialog() != true) return;
 
             OptiPaie.Core.Dtos.ImportTable table;
-            OptiPaie.Core.Dtos.ImportPreview preview;
-            try
-            {
-                table = _services.EmployeeImportExport.Read(dlg.FileName);
-                preview = _services.EmployeeImportExport.BuildPreview(SelectedCompany.Id, table, null);
-            }
+            try { table = _services.EmployeeImportExport.Read(dlg.FileName); }
             catch (System.Exception ex) { Dialogs.ErrorWithLog(L("Employees_IoError"), ex); return; }
 
-            // Step 2 — review. Headers must match the template/export (mapping UI is a later refinement).
-            if (preview.MissingColumns.Count > 0)
+            // Step 2 — map columns + review preview, Step 3 — confirm: all handled in one window.
+            // A file whose headers differ from the template is NOT refused; the window's mapping step
+            // lets the user match their columns to ours (auto-matched where possible, remembered per company).
+            if (Dialogs.ShowEmployeeImport(new EmployeeImportViewModel(_services, SelectedCompany.Id, dlg.FileName, table)))
             {
-                Dialogs.Error(L("Employees_ImportHeaders") + "\n" + string.Join("\n", preview.MissingColumns));
-                return;
+                LoadEmployees();
             }
-
-            if (preview.ErrorCount > 0)
-            {
-                var sb = new System.Text.StringBuilder();
-                sb.AppendLine(string.Format(L("Employees_ImportErrors"), preview.ErrorCount));
-                sb.AppendLine();
-                foreach (OptiPaie.Core.Dtos.ImportIssue i in preview.Issues.Take(15))
-                    sb.AppendLine("• " + string.Format(L("Employees_ImportIssueLine"), i.RowNumber, i.Column) + " : " + i.Message);
-                if (preview.Issues.Count > 15) sb.AppendLine("…");
-                Dialogs.Error(sb.ToString());
-                return; // nothing written
-            }
-
-            string summary = string.Format(L("Employees_ImportSummary"), preview.NewCount, preview.DuplicateCount);
-            OptiPaie.Core.Dtos.DuplicateResolution resolution = OptiPaie.Core.Dtos.DuplicateResolution.SkipDuplicates;
-            if (preview.DuplicateCount > 0)
-            {
-                // Skip duplicates (Yes) or stop and fix the file (No).
-                if (!Dialogs.Confirm(summary + "\n\n" + L("Employees_ImportDuplicates")))
-                    return;
-            }
-            else if (!Dialogs.Confirm(summary + "\n\n" + L("Employees_ImportConfirm")))
-            {
-                return;
-            }
-
-            // Step 3 — confirm → atomic write.
-            Result<OptiPaie.Core.Dtos.ImportSummary> result =
-                _services.EmployeeImportExport.Commit(SelectedCompany.Id, table, null, resolution, System.IO.Path.GetFileName(dlg.FileName));
-            if (result.IsFailure) { Dialogs.Error(result.Error); return; }
-
-            LoadEmployees();
-            Dialogs.Info(string.Format(L("Employees_ImportDone"), result.Value.Created, result.Value.SkippedDuplicates));
         }
 
         public void OnActivated()

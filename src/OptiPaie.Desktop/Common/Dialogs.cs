@@ -125,6 +125,19 @@ namespace OptiPaie.Desktop.Common
             window.ShowDialog();
         }
 
+        /// <summary>Opens the employee import window (mapping + preview + confirm). True when an import was committed.</summary>
+        public static bool ShowEmployeeImport(EmployeeImportViewModel vm)
+        {
+            var window = new EmployeeImportWindow
+            {
+                DataContext = vm,
+                Owner = Application.Current.MainWindow
+            };
+            App.ApplyFlowDirection(window);
+            vm.RequestClose = ok => window.DialogResult = ok;
+            return window.ShowDialog() == true;
+        }
+
         /// <summary>Opens the payslip correction editor. Returns true when a correction was saved.</summary>
         public static bool ShowPayslipCorrection(PayslipCorrectionViewModel vm)
         {
