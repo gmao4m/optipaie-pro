@@ -68,7 +68,7 @@ namespace OptiPaie.Admin.Api
                 string f = FilePath;
                 if (File.Exists(f)) File.Delete(f);
             }
-            catch { }
+            catch (System.Exception ex) { System.Diagnostics.Trace.WriteLine("AdminSession.Clear: suppression du fichier de session impossible: " + ex.Message); }
         }
 
         private sealed class Data

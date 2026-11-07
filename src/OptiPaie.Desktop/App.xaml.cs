@@ -58,8 +58,11 @@ namespace OptiPaie.Desktop
             // updates). .NET Framework can otherwise negotiate only TLS 1.0/1.1, which
             // Supabase/Cloudflare reject — the handshake then throws and was being reported
             // to the user as a bogus "Aucune connexion Internet" during activation.
-            try { System.Net.ServicePointManager.SecurityProtocol |= System.Net.SecurityProtocolType.Tls12; } catch { }
-            try { System.Net.ServicePointManager.SecurityProtocol |= System.Net.SecurityProtocolType.Tls13; } catch { }
+            try { System.Net.ServicePointManager.SecurityProtocol |= System.Net.SecurityProtocolType.Tls12; }
+            catch (Exception ex) { OptiPaie.Desktop.Common.CrashLog.Breadcrumb("TLS 1.2 non activable: " + ex.Message); }
+            // TLS 1.3 is unavailable on older Windows (e.g. 7); best-effort, the TLS 1.2 line above suffices there.
+            try { System.Net.ServicePointManager.SecurityProtocol |= System.Net.SecurityProtocolType.Tls13; }
+            catch (Exception ex) { OptiPaie.Desktop.Common.CrashLog.Breadcrumb("TLS 1.3 non activable: " + ex.Message); }
 
             base.OnStartup(e);
 

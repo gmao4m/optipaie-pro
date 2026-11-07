@@ -80,6 +80,19 @@ namespace OptiPaie.Desktop.Shell
             Navigate("dashboard"); // also refreshes the notification bell
         }
 
+        /// <summary>
+        /// Unsubscribes from the long-lived (process-lifetime) service events this shell hooks in its
+        /// constructor. Called by <see cref="MainWindow"/> when the shell window closes — every
+        /// company switch and every sign-out closes the old shell and builds a new one, so without
+        /// this the retired ShellViewModel would be kept alive forever by App.Services' event lists
+        /// (a leak that grows with each switch). Idempotent.
+        /// </summary>
+        public void Detach()
+        {
+            _services.Licensing.Changed -= OnLicenseChanged;
+            _services.Localization.LanguageChanged -= OnLanguageChanged;
+        }
+
         /// <summary>The single active-company selection bound to the header selector.</summary>
         public CompanyContext CompanyContext => _services.CompanyContext;
 

@@ -52,11 +52,20 @@ AuditDataIntegrityTests.GetPendingVersions_FreshReturnsAll_ThenEmptyAfterRun    
 AuditDataIntegrityTests.FreshDatabase_...AndTakesNoNeedlessBackup (تثبيت جديد = 0 نسخة)           → Passed
 ```
 
-## D5 — السطور اليتيمة
+## D5 — السطور اليتيمة (تنفيذ فعلي، round 2)
 
-السلسلة محميّة بنيوياً بـ FK: `Payslips→Runs` CASCADE، `ArchiveDocuments→Payslips` RESTRICT، `Employees→Companies` RESTRICT، و`PRAGMA foreign_keys=ON` في كل اتصال (`SqliteConnectionFactory:51,77`). `foreign_key_check` أعلاه = 0 صف ⇒ لا يتامى على قاعدة مولّدة.
+الدليل: `AuditRoundTwo.ForeignKey_Orphans_StayZero_AfterSeed_Scale_Correction_AndDeletion` (أخضر).
+`PRAGMA foreign_key_check` (فحص SQLite الشامل لكامل القاعدة) = **0 صف** في الحالات الثلاث على نفس القاعدة:
+- (أ) بعد الإضافة والحذف (حذف ناعم لـ10 موظفين لهم كشوف) ⇒ 0.
+- (ب) 200 موظفاً + كشوف على عدة فترات (`_batch.Run` ×2) ⇒ 0. (الفحص شامل ومستقلّ عن الحجم.)
+- (ج) بعد S20 (تصحيح كشف) + S21 (إلغاء كشف) ⇒ 0.
+مطبوع أيضاً جدول « Table | Column | Parent | Orphans » عبر `PRAGMA foreign_key_list` لكل جدول: لا سطر يتيم.
+الحماية البنيوية: FK مفروضة (`PRAGMA foreign_keys=ON`، `SqliteConnectionFactory:51,77`)؛ `Payslips→Runs` CASCADE، `ArchiveDocuments→Payslips` RESTRICT، `Employees→Companies` RESTRICT؛ الحذف منطقي (soft) والإلغاء يغيّر Status لا يحذف فيزيائياً.
 
-> لم أتمكّن من التحقق — إحصاء اليتامى على **بيانات زبون حقيقية بحجم 200 موظف** (D5): يحتاج نسخة قاعدة زبون + تشغيل الاستعلامات عليها. مُدرَج ضمن ما يحتاج بيئة اختبار فعلية.
+> يبقى على بيئة فعلية فقط: التشغيل على نسخة قاعدة زبون حقيقية (D1) — الاختبار أعلاه يثبت الآلية على قاعدة مولّدة بنفس الهجرات بحجم 200 موظف.
+
+## 0028 — سكربت تحسّم السؤال (round 2)
+`tools/forensics/check-0028-dataloss.py` (read-only، stdlib `sqlite3`) يأخذ قاعدة زبون (+ مجلّد النسخ) ويجيب: هل كانت جداول التقييم القديمة (التي أسقطتها 0028) تحوي بيانات؟ يفحص القاعدة الحالية + كل `*.db` في النسخ، يطبع عدد الصفوف لكل جدول قديم وتاريخ تطبيق 0028، ويعطي حكماً. مُجرَّب على قاعدتين اصطناعيتين (قبل 0028 ببيانات → « REELLE »؛ بعد 0028 → « aucune trace، فوّر نسخة أقدم من تاريخ 0028 للحسم »).
 
 ## يحتاج قرار من المالك
 

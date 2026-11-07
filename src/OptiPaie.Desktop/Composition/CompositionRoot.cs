@@ -28,8 +28,17 @@ namespace OptiPaie.Desktop.Composition
     {
         public static AppServices Build()
         {
-            AppConfiguration configuration = AppConfigurationReader.Read();
+            return Build(AppConfigurationReader.Read());
+        }
 
+        /// <summary>
+        /// Builds the full object graph against an explicit configuration. Production uses
+        /// <see cref="Build()"/> (machine config); this overload lets a test compose the real graph
+        /// over a temporary data directory — e.g. the startup render smoke test constructing the shell.
+        /// Behaviour for production is unchanged (same body, config simply injected).
+        /// </summary>
+        public static AppServices Build(AppConfiguration configuration)
+        {
             ILogger logger = new FileLogger(Path.Combine(configuration.DataDirectory, "Logs", AppConstants.LogFileName));
 
             var bootstrapper = new DatabaseBootstrapper(configuration);

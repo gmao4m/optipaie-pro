@@ -127,7 +127,7 @@ namespace OptiPaie.Services.Updates
                 string loc = Assembly.GetEntryAssembly()?.Location;
                 if (!string.IsNullOrEmpty(loc)) return loc;
             }
-            catch { }
+            catch (System.Exception ex) { System.Diagnostics.Trace.WriteLine("InstallerLauncher: GetEntryAssembly().Location indisponible, repli sur BaseDirectory: " + ex.Message); }
 
             return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "OptiPaie PRO.exe");
         }

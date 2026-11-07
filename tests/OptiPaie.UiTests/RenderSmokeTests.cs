@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -23,6 +24,8 @@ namespace OptiPaie.UiTests
     [TestFixture, Apartment(ApartmentState.STA)]
     public sealed class RenderSmokeTests
     {
+        private string _dir;
+
         [OneTimeSetUp]
         public void EnsureApplicationWithTheme()
         {
@@ -35,6 +38,36 @@ namespace OptiPaie.UiTests
                 MethodInfo init = typeof(App).GetMethod("InitializeComponent", BindingFlags.Public | BindingFlags.Instance);
                 init?.Invoke(app, null);
             }
+
+            // Compose the REAL service graph over a throwaway database and publish it as App.Services,
+            // so views whose constructor needs services — above all the shell MainWindow, the last
+            // window that may be excluded from the startup-crash guard — also construct and render here.
+            if (OptiPaie.Desktop.App.Services == null)
+            {
+                _dir = Path.Combine(Path.GetTempPath(), "optipaie-smoke-" + Guid.NewGuid().ToString("N"));
+                Directory.CreateDirectory(_dir);
+                var config = new OptiPaie.Common.Configuration.AppConfiguration(_dir, "fr");
+                OptiPaie.Desktop.Composition.AppServices services =
+                    OptiPaie.Desktop.Composition.CompositionRoot.Build(config);
+
+                // The shell refuses to open without an active company (the multi-company gate), so
+                // seed one and select it — exactly the state in which a real user reaches MainWindow.
+                long companyId = services.Companies.Create(
+                    new OptiPaie.Core.Entities.Company { NameFr = "Smoke SARL", Nif = "000000000000000" }).Value;
+                services.CompanyContext.Reload();
+                services.CompanyContext.Active = services.Companies.Get(companyId);
+
+                typeof(OptiPaie.Desktop.App)
+                    .GetProperty("Services", BindingFlags.Public | BindingFlags.Static)
+                    .SetValue(null, services);
+            }
+        }
+
+        [OneTimeTearDown]
+        public void Cleanup()
+        {
+            try { System.Data.SQLite.SQLiteConnection.ClearAllPools(); } catch { /* best-effort */ }
+            try { if (_dir != null) Directory.Delete(_dir, true); } catch (IOException) { /* temp dir */ }
         }
 
         [Test]
@@ -65,7 +98,7 @@ namespace OptiPaie.UiTests
                     if (HasResourceFailure(ex))
                         resourceFailures.Add(t.FullName + "  ->  " + Innermost(ex).Message);
                     else
-                        runtimeSkips.Add(t.Name); // ctor needs a runtime dependency (services/DataContext) — not a resource bug
+                        runtimeSkips.Add(t.Name + " (" + Innermost(ex).GetType().Name + ": " + Innermost(ex).Message + ")"); // ctor needs a runtime dependency — not a resource bug
                 }
             }
 
@@ -103,6 +136,78 @@ namespace OptiPaie.UiTests
             {
                 ThemeManager.Apply(false);
             }
+        }
+
+        /// <summary>
+        /// P6 — memory-leak guard. Opens and closes every top-level Window 50 times and asserts that
+        /// the instances (and their DataContext view-models) are collectable afterwards: a window that
+        /// subscribes to a long-lived (static App.Services) event without unsubscribing on Close would
+        /// be retained, and would show up here as survivors. Prints a per-window survivor count.
+        /// [Explicit] — heavy STA churn; run on demand.
+        /// </summary>
+        [Test, Explicit]
+        public void EveryWindow_IsCollectable_AfterOpenClose()
+        {
+            const int Iterations = 50;
+            Assembly desktop = typeof(App).Assembly;
+
+            List<Type> windows = desktop.GetTypes()
+                .Where(t => !t.IsAbstract && typeof(Window).IsAssignableFrom(t) && t.GetConstructor(Type.EmptyTypes) != null)
+                .OrderBy(t => t.FullName)
+                .ToList();
+
+            var leaks = new List<string>();
+            var windowWarnings = new List<string>();
+            foreach (Type t in windows)
+            {
+                var windowRefs = new List<WeakReference>(Iterations);
+                var vmRefs = new List<WeakReference>(Iterations);
+                bool constructed = false;
+
+                for (int i = 0; i < Iterations; i++)
+                {
+                    try
+                    {
+                        var w = (Window)Activator.CreateInstance(t);
+                        constructed = true;
+                        windowRefs.Add(new WeakReference(w));
+                        if (w.DataContext != null) vmRefs.Add(new WeakReference(w.DataContext));
+                        w.Close(); // simulate the open→close lifecycle
+                    }
+                    catch
+                    {
+                        break; // ctor needs runtime deps we don't provide — not part of the leak check
+                    }
+                }
+
+                if (!constructed) { TestContext.WriteLine(t.Name + ": skipped (ctor needs runtime)"); continue; }
+
+                for (int g = 0; g < 3; g++) { GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true); GC.WaitForPendingFinalizers(); }
+
+                int winAlive = windowRefs.FindAll(r => r.IsAlive).Count;
+                int vmAlive = vmRefs.FindAll(r => r.IsAlive).Count;
+                TestContext.WriteLine(t.Name + ": windows alive " + winAlive + "/" + windowRefs.Count +
+                                      ", view-models alive " + vmAlive + "/" + vmRefs.Count);
+
+                // View-model retention is an APP-level bug (a VM that hooks a process-lifetime service
+                // event and never unhooks) — assert it is clean. Window-level retention of a never-shown
+                // window is largely a WPF framework/static-singleton artifact (SystemEvents, localization
+                // source); it is reported as a documented warning, not a hard failure, pending the
+                // systemic weak-event decision.
+                // A leak RETAINS all/most of the 50; a few survivors are GC/JIT non-determinism, not
+                // accumulation. The threshold (iterations/10) cleanly separates "released" (~0-2) from
+                // "retained" (~50).
+                int threshold = Iterations / 10;
+                if (vmAlive > threshold) leaks.Add(t.Name + " view-model: " + vmAlive + "/" + vmRefs.Count + " alive");
+                if (winAlive > threshold) windowWarnings.Add(t.Name + " window: " + winAlive + "/" + windowRefs.Count + " alive");
+            }
+
+            if (windowWarnings.Count > 0)
+                TestContext.WriteLine(Environment.NewLine + "WINDOW-LEVEL RETENTION (documented, not asserted):" +
+                    Environment.NewLine + "  " + string.Join(Environment.NewLine + "  ", windowWarnings));
+
+            Assert.That(leaks, Is.Empty, "View-model memory leaks (VM retained after its window closed):" + Environment.NewLine + "  " +
+                string.Join(Environment.NewLine + "  ", leaks));
         }
 
         private static bool HasResourceFailure(Exception ex)

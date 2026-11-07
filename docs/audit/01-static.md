@@ -17,20 +17,18 @@ Passed!  Failed: 0, Passed: 2  (RenderSmokeTests)
 
 > فجوة معروفة: `MainWindow` يُتخطّى لأنه يحتاج خدمات وقت التشغيل في المُنشئ، فلا يغطّيه اختبار الدخان. انظر 02-e2e (G2) — يحتاج فتحاً فعلياً للصدفة.
 
-## ب) catch فارغ / يبتلع الاستثناء
+## ب) catch فارغ / يبتلع الاستثناء — **أُصلح (G3 = 0)، round 2**
 
-ست حالات، **كلها خارج مسار الحساب/العميل الحرج**، مصنّفة:
+كانت 4 مواضع (6 كتل) تبتلع الاستثناء دون تسجيل. أُضيف تسجيل في كلٍّ (دون تغيير أي سلوك — إضافة سطر log فقط):
 
-| الملف:السطر | السياق | الحكم |
+| الملف:السطر | السياق | الإصلاح |
 |---|---|---|
-| `Desktop/App.xaml.cs:61,62` | ترقية بروتوكول TLS عند الإقلاع | مقبول (أفضل-جهد؛ فشل الترقية غير قاتل) — منخفض |
-| `Admin/App.xaml.cs:19,20` | نفسه (أداة الأدمِن) | مقبول — منخفض |
-| `Admin/Api/AdminSession.cs:71` | حذف ملف جلسة أفضل-جهد (أداة الأدمِن) | منخفض — غير مُسجَّل |
-| `Services/Updates/InstallerLauncher.cs:130` | سلسلة fallback لتحديد مسار exe (التالي يلتقط) | مقبول — نمط fallback |
+| `Desktop/App.xaml.cs:61-64` | ترقية TLS 1.2/1.3 عند الإقلاع | `CrashLog.Breadcrumb("TLS … non activable: …")` |
+| `Admin/App.xaml.cs:19-20` | نفسه (أداة الأدمِن) | `Trace.WriteLine(…)` |
+| `Admin/Api/AdminSession.cs:71` | حذف ملف جلسة أفضل-جهد | `Trace.WriteLine("AdminSession.Clear: …")` |
+| `Services/Updates/InstallerLauncher.cs:130` | fallback مسار exe | `Trace.WriteLine("InstallerLauncher: …")` |
 
-ملاحظة: `InstallerLauncher.cs:111` نتيجة إيجابية كاذبة — `catch {}` داخل نص سكربت PowerShell مولّد، ليس C#.
-لا يوجد أي catch فارغ في `OptiPaie.PayrollEngine` ولا في مسار حساب/حفظ الأجور.
-الحالات الأربع الفعلية منخفضة الخطورة؛ لم أغيّرها (رقم 6: سلوك إقلاع/أدمِن قائم) — مُوصى بإضافة تسجيل لـ `AdminSession.Clear`.
+التحقق: إعادة مسح `catch\s*(\(…\))?\s*\{\s*\}` على `src/` ⇒ **تطابق واحد فقط = نصّ سكربت PowerShell مولّد** (`InstallerLauncher.cs:111`، ليس C#). أي **صفر catch فارغ C#**. لا catch فارغ في `OptiPaie.PayrollEngine` ولا في مسار الحساب/الحفظ.
 
 ## ج) `.Result` / `.Wait()` / `async void` خارج معالجات الأحداث
 

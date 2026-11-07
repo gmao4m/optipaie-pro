@@ -16,8 +16,10 @@ namespace OptiPaie.Admin
             // Force modern TLS so the owner login + REST calls to Supabase always negotiate
             // TLS 1.2+ (the .NET Framework default can fall back to 1.0/1.1, which Supabase
             // rejects, surfacing as a bogus connection failure).
-            try { System.Net.ServicePointManager.SecurityProtocol |= System.Net.SecurityProtocolType.Tls12; } catch { }
-            try { System.Net.ServicePointManager.SecurityProtocol |= System.Net.SecurityProtocolType.Tls13; } catch { }
+            try { System.Net.ServicePointManager.SecurityProtocol |= System.Net.SecurityProtocolType.Tls12; }
+            catch (System.Exception ex) { System.Diagnostics.Trace.WriteLine("TLS 1.2 non activable: " + ex.Message); }
+            try { System.Net.ServicePointManager.SecurityProtocol |= System.Net.SecurityProtocolType.Tls13; }
+            catch (System.Exception ex) { System.Diagnostics.Trace.WriteLine("TLS 1.3 non activable: " + ex.Message); }
 
             Api = SupabaseAdminClient.FromConfig();
 
