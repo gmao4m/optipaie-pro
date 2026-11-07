@@ -49,6 +49,24 @@ namespace OptiPaie.Data.Migrations
             return pending.Count;
         }
 
+        /// <summary>
+        /// The versions of the migrations that are embedded but not yet applied, in ascending
+        /// order — WITHOUT applying them. Used by the bootstrapper to decide whether a
+        /// pre-migration safety backup is needed (a backup is only worth taking when an EXISTING
+        /// database is about to change). Ensures the bookkeeping table exists, like <see cref="Run"/>.
+        /// </summary>
+        public IReadOnlyList<int> GetPendingVersions()
+        {
+            EnsureMigrationsTable();
+
+            HashSet<int> applied = GetAppliedVersions();
+            return LoadEmbeddedScripts()
+                .Select(s => s.Version)
+                .Where(v => !applied.Contains(v))
+                .OrderBy(v => v)
+                .ToList();
+        }
+
         private void EnsureMigrationsTable()
         {
             using (SQLiteCommand command = _connection.CreateCommand())
