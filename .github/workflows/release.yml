@@ -1,23 +1,36 @@
 name: Release
 
 # ============================================================================
-# Automatic release + auto-update — triggered ONLY by a product VERSION change.
+# BUILD & PUBLISH — stage 1 of 2. Triggered ONLY by a product VERSION change.
 #
-# To diffuse a new version (see docs/RELEASE-HOWTO.md):
+# This workflow builds the package and creates the GitHub Release. It NEVER
+# touches version.json, so creating a release does NOT, by itself, tell any
+# client that an update exists. Announcing to clients is a SEPARATE, manual
+# step (stage 2) — see .github/workflows/announce.yml.
+#
+# Why the split (incident 2026-11-08): when build+publish+announce were one
+# automatic job, a version-change push silently advertised the new build to
+# every client with zero human approval. Announcing is now a deliberate,
+# human-pressed button, never an automatic side effect of a push.
+#
+# To PUBLISH a new version (stage 1, see docs/RELEASE-HOWTO.md):
 #   1. bump <Version> in Directory.Build.props,
 #   2. write docs/CHANGELOG-<version>-ar.md (Arabic, client-facing),
 #   3. git push.
 #
-# The workflow then, and ONLY when <Version> actually changed in the push:
+# This workflow then, and ONLY when <Version> actually changed in the push:
 #   - REQUIRES docs/CHANGELOG-<version>-ar.md (else it FAILS, publishes nothing);
-#   - runs the tests (blocking);
+#   - runs the tests + WPF render smoke test (blocking);
 #   - builds the installer via build-installer.ps1 (completeness guards blocking);
 #   - creates the GitHub Release (body = the Arabic changelog — NEVER a commit list);
-#   - verifies the asset is publicly downloadable;
-#   - ONLY THEN flips version.json → clients are never pointed at a dead link.
+#   - verifies the asset is publicly downloadable.
+#   It then STOPS. The release exists but NO client is told about it yet.
 #
-# A push that does NOT change <Version> releases nothing. version.json is pushed
-# back with the built-in token + [skip ci] and is path-ignored, so it never loops.
+# To ANNOUNCE it to clients (stage 2): run the "Announce update" workflow by
+# hand (Actions tab → Announce update → Run workflow). That is the ONLY thing
+# that flips version.json. A push NEVER announces.
+#
+# A push that does NOT change <Version> releases nothing (the gate short-circuits).
 # ============================================================================
 
 on:
@@ -160,7 +173,7 @@ jobs:
             installer/output/OptiPaie-PRO-Setup.exe
             installer/output/OptiPaie PRO.msi
 
-      - name: "Verify the asset is publicly downloadable (BLOCKING — before touching version.json)"
+      - name: "Verify the asset is publicly downloadable (BLOCKING — a release must be installable)"
         if: steps.gate.outputs.go == 'true'
         shell: pwsh
         run: |
@@ -175,44 +188,17 @@ jobs:
             Start-Sleep -Seconds 6
           }
           if (-not $ok) {
-            Write-Host "::error::Released asset is NOT publicly downloadable — NOT flipping version.json (no dead-link notification)."
+            Write-Host "::error::Released asset is NOT publicly downloadable."
             exit 1
           }
           Write-Host "Asset public download OK (200)."
 
-      - name: "Flip version.json (Arabic notes from the changelog) and push it back"
+      # NOTE: version.json is intentionally NOT touched here. The release now exists but
+      # is NOT advertised to any client. Announcing is the separate, manual
+      # "Announce update" workflow (announce.yml) — a human-pressed button.
+      - name: "Done — built & published, NOT announced"
         if: steps.gate.outputs.go == 'true'
         shell: pwsh
         run: |
-          $v = "${{ steps.ver.outputs.version }}"
-          $md = Get-Content "docs/CHANGELOG-$v-ar.md" -Raw
-
-          # Strip markdown to clean plain text for the in-app updater dialog (no # * > markers).
-          $plain = foreach ($ln in ($md -split "`r?`n")) {
-            $t = $ln
-            $t = $t -replace '^\s{0,3}#{1,6}\s*', ''   # headings
-            $t = $t -replace '\*\*', ''                # bold
-            $t = $t -replace '^\s*>\s?', ''            # blockquote
-            $t = $t -replace '^\s*[-*]\s+', ''         # bullets
-            $t.Trim()
-          }
-          $notes = (($plain | Where-Object { $_ -ne '' }) -join "`n")
-
-          $manifest = [ordered]@{
-            latest_version = $v
-            download_url   = "https://github.com/${{ github.repository }}/releases/latest/download/OptiPaie-PRO-Setup.exe"
-            release_notes  = $notes
-            mandatory      = $false
-          }
-          ($manifest | ConvertTo-Json -Depth 5) | Set-Content -Path version.json -Encoding utf8
-
-          git config user.name  "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add version.json
-          if (git diff --cached --quiet) {
-            Write-Host "version.json already up to date."
-          } else {
-            git commit -m "chore(release): version.json -> $v [skip ci]"
-            git pull --rebase origin main
-            git push origin HEAD:main
-          }
+          Write-Host "::notice::Release ${{ steps.ver.outputs.tag }} is PUBLISHED but NOT announced."
+          Write-Host "::notice::No client will see it until you run the 'Announce update' workflow (announce.yml)."

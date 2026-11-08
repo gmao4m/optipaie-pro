@@ -74,6 +74,29 @@ namespace OptiPaie.Tests
             Assert.That(UpdatePolicy.Evaluate("OptiPaie PRO", "1.14.0", "1.8.0", false, "").UpdateAvailable, Is.False);
         }
 
+        /// <summary>
+        /// Incident regression (2026-11-08): after a release, the server manifest was rolled
+        /// BACK to the previous version as a safety net. A client already running the newer
+        /// build must NEVER be offered the older version as an "update" (a silent downgrade).
+        /// The comparison is strictly-greater ("newer than"), not "different from" — this test
+        /// fails the instant anyone weakens it to an inequality.
+        /// </summary>
+        [Test]
+        public void Policy_DoesNotOfferDowngrade_WhenServerManifestIsRolledBack()
+        {
+            // Client installed 1.40.1; server manifest announces 1.40.0 (rolled back).
+            AppUpdateCheck rolledBack = UpdatePolicy.Evaluate("OptiPaie PRO", "1.40.1", "1.40.0", false, "notes");
+            Assert.That(rolledBack.UpdateAvailable, Is.False,
+                "A rolled-back server manifest must NOT offer the running client an older version.");
+
+            // And the primitive the policy relies on agrees: 1.40.0 is NOT newer than 1.40.1.
+            Assert.That(AppVersion.IsNewer("1.40.0", "1.40.1"), Is.False);
+            // Equal manifest (client == server) is likewise not an update.
+            Assert.That(AppVersion.IsNewer("1.40.1", "1.40.1"), Is.False);
+            // Sanity: a genuine forward step is still offered.
+            Assert.That(AppVersion.IsNewer("1.40.1", "1.40.0"), Is.True);
+        }
+
         [Test]
         public void AppVersion_StripsInformationalBuildSuffix_AndComparesProductVsFrozen()
         {

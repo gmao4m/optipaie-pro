@@ -1,0 +1,160 @@
+name: Announce update
+
+# ============================================================================
+# ANNOUNCE — stage 2 of 2. MANUAL ONLY (workflow_dispatch). A human presses this.
+#
+# This is the ONLY thing in the whole repository that flips version.json, i.e.
+# the only thing that tells existing clients "a new version is available".
+# It is never triggered by a push. Building/publishing a release (release.yml)
+# does NOT announce it — this does, and only when you run it by hand.
+#
+# What it does for the version you pick (default: the current <Version>):
+#   1. REQUIRES docs/CHANGELOG-<version>-ar.md (else FAIL — no announce).
+#   2. REQUIRES the GitHub Release tag v<version> to exist AND its
+#      OptiPaie-PRO-Setup.exe asset to be publicly downloadable (else FAIL —
+#      never advertise a version with no installable package / a dead link).
+#   3. REQUIRES you to retype the version in `confirm` (anti-fat-finger).
+#   4. Writes version.json (latest_version + notes from the Arabic changelog)
+#      and pushes it with [skip ci] so it does not loop.
+#
+# HOW TO RUN: GitHub → Actions → "Announce update" → Run workflow →
+#   version = e.g. 1.40.1   (blank = current <Version> in Directory.Build.props)
+#   confirm = the same version string, typed again
+# CLI equivalent:  gh workflow run announce.yml -f version=1.40.1 -f confirm=1.40.1
+#
+# TO ROLL BACK an announcement: run it again for the previous version (its
+# release still exists), or revert version.json on main with [skip ci].
+# ============================================================================
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to announce (blank = current <Version> in Directory.Build.props)'
+        type: string
+        required: false
+        default: ''
+      confirm:
+        description: 'Retype the SAME version string to confirm you mean to tell clients'
+        type: string
+        required: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: announce-main
+  cancel-in-progress: false
+
+jobs:
+  announce:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout (main, full history)
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: "Resolve version (input or Directory.Build.props) + check confirmation"
+        id: ver
+        shell: pwsh
+        run: |
+          $v = "${{ github.event.inputs.version }}".Trim()
+          if (-not $v) {
+            [xml]$p = Get-Content "Directory.Build.props"
+            $v = ([string]$p.Project.PropertyGroup.Version).Trim()
+          }
+          if (-not $v) { Write-Host "::error::No version to announce."; exit 1 }
+
+          $confirm = "${{ github.event.inputs.confirm }}".Trim()
+          if ($confirm -ne $v) {
+            Write-Host "::error::Confirmation '$confirm' does not match version '$v'. Refusing to announce."
+            exit 1
+          }
+          "version=$v" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "tag=v$v"    | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          Write-Host "Announcing version = $v"
+
+      - name: "Require the Arabic changelog for this version (else FAIL)"
+        shell: pwsh
+        run: |
+          $f = "docs/CHANGELOG-${{ steps.ver.outputs.version }}-ar.md"
+          if (-not (Test-Path $f)) {
+            Write-Host "::error::Missing $f — refusing to announce ${{ steps.ver.outputs.version }} without its Arabic changelog."
+            exit 1
+          }
+          if (((Get-Content $f -Raw).Trim()).Length -lt 20) {
+            Write-Host "::error::$f is essentially empty — refusing to announce."
+            exit 1
+          }
+          Write-Host "Found $f"
+
+      - name: "Require the GitHub Release tag to exist (else FAIL — nothing to announce)"
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = "${{ steps.ver.outputs.tag }}"
+          gh release view $tag --repo ${{ github.repository }} > $null 2>&1
+          if ($LASTEXITCODE -ne 0) {
+            Write-Host "::error::No GitHub Release '$tag' — build & publish it first (release.yml). Refusing to announce a version with no release."
+            exit 1
+          }
+          Write-Host "Release $tag exists."
+
+      - name: "Require the installer asset to be publicly downloadable (else FAIL — no dead link)"
+        shell: pwsh
+        run: |
+          $url = "https://github.com/${{ github.repository }}/releases/download/${{ steps.ver.outputs.tag }}/OptiPaie-PRO-Setup.exe"
+          $ok = $false
+          for ($i = 1; $i -le 8; $i++) {
+            try {
+              $r = Invoke-WebRequest -Uri $url -Method Head -MaximumRedirection 5 -UseBasicParsing -TimeoutSec 30
+              if ($r.StatusCode -eq 200) { $ok = $true; break }
+            } catch { }
+            Write-Host "asset not reachable yet (attempt $i)..."
+            Start-Sleep -Seconds 6
+          }
+          if (-not $ok) {
+            Write-Host "::error::OptiPaie-PRO-Setup.exe for ${{ steps.ver.outputs.tag }} is NOT publicly downloadable — refusing to announce (clients must never be pointed at a dead link)."
+            exit 1
+          }
+          Write-Host "Asset public download OK (200)."
+
+      - name: "Flip version.json (Arabic notes from the changelog) and push it"
+        shell: pwsh
+        run: |
+          $v = "${{ steps.ver.outputs.version }}"
+          $md = Get-Content "docs/CHANGELOG-$v-ar.md" -Raw
+
+          # Strip markdown to clean plain text for the in-app updater dialog (no # * > markers).
+          $plain = foreach ($ln in ($md -split "`r?`n")) {
+            $t = $ln
+            $t = $t -replace '^\s{0,3}#{1,6}\s*', ''   # headings
+            $t = $t -replace '\*\*', ''                # bold
+            $t = $t -replace '^\s*>\s?', ''            # blockquote
+            $t = $t -replace '^\s*[-*]\s+', ''         # bullets
+            $t.Trim()
+          }
+          $notes = (($plain | Where-Object { $_ -ne '' }) -join "`n")
+
+          $manifest = [ordered]@{
+            latest_version = $v
+            download_url   = "https://github.com/${{ github.repository }}/releases/latest/download/OptiPaie-PRO-Setup.exe"
+            release_notes  = $notes
+            mandatory      = $false
+          }
+          ($manifest | ConvertTo-Json -Depth 5) | Set-Content -Path version.json -Encoding utf8
+
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add version.json
+          if (git diff --cached --quiet) {
+            Write-Host "::notice::version.json already announces $v — nothing to change."
+          } else {
+            git commit -m "chore(announce): version.json -> $v [skip ci]"
+            git pull --rebase origin main
+            git push origin HEAD:main
+            Write-Host "::notice::ANNOUNCED $v — clients will now see the update on their next check."
+          }
