@@ -1,7 +1,11 @@
 # Diffuser une nouvelle version — en DEUX étapes séparées
 
-Depuis l'incident du 2026-11-08, publier et **annoncer** sont deux actions distinctes.
-Construire une release **ne prévient aucun client**. Prévenir les clients est un **bouton
+> **Principe (incident 2026-11-08) :** une release **publiée mais non annoncée n'atteint aucun
+> client.** Construire/publier une release ne prévient personne. **Chaque diffusion se termine
+> par une étape d'annonce explicite et manuelle** (`announce.yml`) — c'est la seule chose qui
+> bascule `version.json`, et donc la seule chose qui dit aux clients « une mise à jour existe ».
+
+Publier et **annoncer** sont deux actions distinctes. Prévenir les clients est un **bouton
 manuel** que vous pressez vous-même.
 
 ## Étape 1 — Construire & publier (automatique sur changement de version)
