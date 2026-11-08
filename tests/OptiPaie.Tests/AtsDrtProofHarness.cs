@@ -14,11 +14,22 @@ namespace OptiPaie.Tests
     [TestFixture, Explicit]
     public sealed class AtsDrtProofHarness
     {
-        private static readonly string Repo = @"C:\Users\PC\Desktop\OptiPaie PRO";
-        private static readonly string Layout =
-            Path.Combine(Repo, "src", "OptiPaie.Desktop", "Assets", "AtsDrtTemplates", "form-layout.json");
-        private static readonly string Forms =
-            @"C:\Users\PC\AppData\Local\Temp\claude\C--Users-PC-Desktop-OptiPaie-PRO\41f83509-89aa-418a-93d7-98a06fa73bb7\scratchpad\forms";
+        // Machine-independent: assets are discovered from the repo root; outputs go to a temp folder
+        // into which the official form images + layout are copied at setup (no hard-coded paths).
+        private static readonly string Assets = TestPaths.AtsDrtAssets();
+        private static readonly string Layout = Path.Combine(Assets, "form-layout.json");
+        private static readonly string Forms = Path.Combine(Path.GetTempPath(), "optipaie-ats-proof");
+
+        [OneTimeSetUp]
+        public void StageForms()
+        {
+            Directory.CreateDirectory(Forms);
+            foreach (string name in new[] { "ATS_image1.jpeg", "ATS_image2.jpeg", "DRTFR_image1.png", "form-layout.json" })
+            {
+                string src = Path.Combine(Assets, name);
+                if (File.Exists(src)) File.Copy(src, Path.Combine(Forms, name), overwrite: true);
+            }
+        }
 
         private static Dictionary<string, string> AtsNormal() => new Dictionary<string, string>
         {
@@ -154,7 +165,7 @@ namespace OptiPaie.Tests
         }
 
         // Simulates CertificateBookmarkMapper.MapAts' 12-month table: `active` real months,
-        // the rest printed as "/" (Mois column blank), exactly like production.
+        // the rest COMPLETELY BLANK (owner decision — no "/" filler), exactly like production.
         private static void FillMonths(Dictionary<string, string> v, int active, bool extreme)
         {
             string[] months = { "Janvier 2025", "Février 2025", "Mars 2025", "Avril 2025", "Mai 2025",
@@ -165,10 +176,10 @@ namespace OptiPaie.Tests
                 int n = i + 1;
                 bool on = i < active;
                 v[$"M{n}"] = on ? months[i] : "";
-                v[$"JT{n}"] = on ? (extreme ? "26" : "22") : "/";
-                v[$"MT{n}"] = on ? (extreme ? "Maladie longue durée prolongée avec hospitalisation puis congé annuel et récupération heures" : (i % 3 == 0 ? "Maladie" : "")) : "/";
-                v[$"SS{n}"] = on ? (extreme ? "1250000,00 DA" : "45000,00 DA") : "/";
-                v[$"PO{n}"] = on ? (extreme ? "112500,00 DA" : "4050,00 DA") : "/";
+                v[$"JT{n}"] = on ? (extreme ? "26" : "22") : "";
+                v[$"MT{n}"] = on ? (extreme ? "Maladie longue durée prolongée avec hospitalisation puis congé annuel et récupération heures" : (i % 3 == 0 ? "Maladie" : "")) : "";
+                v[$"SS{n}"] = on ? (extreme ? "1250000,00 DA" : "45000,00 DA") : "";
+                v[$"PO{n}"] = on ? (extreme ? "112500,00 DA" : "4050,00 DA") : "";
             }
         }
 

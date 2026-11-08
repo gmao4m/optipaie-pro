@@ -70,7 +70,7 @@ namespace OptiPaie.Tests
         }
 
         [Test]
-        public void MapAts_UsesDdMmYyDates_DaAmounts_AndSlashForUnusedSlots()
+        public void MapAts_UsesDdMmYyDates_DaAmounts_AndBlankUnusedSlots()
         {
             // Work-stoppage case: the « en cas d'arrêt de travail » dates are filled (ddMMyy).
             AtsCertificateData data = SampleAts(resumed: false, months: 2, isWorkStoppage: true);
@@ -83,8 +83,18 @@ namespace OptiPaie.Tests
             Assert.That(v["MT1"], Is.EqualTo(""), "motif column is free text, not a day count");
             Assert.That(v["SS1"], Does.Contain(" DA"), "salaire soumis à cotisations");
             Assert.That(v["PO1"], Is.EqualTo("3600 DA"), "part ouvrière = 9% of 40000 = 3600");
-            Assert.That(v["JT12"], Is.EqualTo("/"), "unused trailing slot prints '/'");
             Assert.That(v["DATEAUJRH"], Is.Not.Empty, "not resumed → today's date is filled");
+
+            // OWNER DECISION: an unused (inactive) month row must be COMPLETELY BLANK — no "/" filler in
+            // ANY column. This guards against the stray "/" the customer complained about ever returning.
+            for (int n = 3; n <= 12; n++) // months 1-2 are active in this sample; 3-12 are unused
+            {
+                Assert.That(v[$"M{n}"], Is.Empty, $"M{n} empty-row must be blank");
+                Assert.That(v[$"JT{n}"], Is.Empty, $"JT{n} empty-row must be blank (no '/')");
+                Assert.That(v[$"MT{n}"], Is.Empty, $"MT{n} empty-row must be blank (no '/')");
+                Assert.That(v[$"SS{n}"], Is.Empty, $"SS{n} empty-row must be blank (no '/')");
+                Assert.That(v[$"PO{n}"], Is.Empty, $"PO{n} empty-row must be blank (no '/')");
+            }
         }
 
         [Test]

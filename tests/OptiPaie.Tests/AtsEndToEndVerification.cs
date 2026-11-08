@@ -28,9 +28,7 @@ namespace OptiPaie.Tests
     [TestFixture, Explicit]
     public sealed class AtsEndToEndVerification
     {
-        private static readonly string Repo = @"C:\Users\PC\Desktop\OptiPaie PRO";
-        private static readonly string RepoAssets =
-            Path.Combine(Repo, "src", "OptiPaie.Desktop", "Assets", "AtsDrtTemplates");
+        private static readonly string RepoAssets = TestPaths.AtsDrtAssets();
         // Machine-independent output folder — the produced PDF + page PNGs land here for inspection.
         private static readonly string OutDir =
             Path.Combine(Path.GetTempPath(), "optipaie-ats-verify");
@@ -166,9 +164,13 @@ namespace OptiPaie.Tests
                 Assert.That(v["PO" + n], Is.Not.EqualTo("/"), $"PO{n}: part ouvrière is real data");
                 Assert.That(v["JT" + n], Is.Not.EqualTo("/"), $"JT{n}: jours travaillés is real data");
             }
-            // Unused rows 7..12 remain the official "/" (néant) — distinct from a failure.
+            // Owner decision (round 3): unused rows 7..12 are COMPLETELY BLANK — no "/" filler.
             for (int n = 7; n <= 12; n++)
-                Assert.That(v["SS" + n], Is.EqualTo("/"), $"SS{n}: unused row is struck '/'");
+            {
+                Assert.That(v["SS" + n], Is.Empty, $"SS{n}: unused row blank (no '/')");
+                Assert.That(v["JT" + n], Is.Empty, $"JT{n}: unused row blank (no '/')");
+                Assert.That(v["PO" + n], Is.Empty, $"PO{n}: unused row blank (no '/')");
+            }
 
             // ── 8. The page-2 base equals the persisted Payslip.BaseCotisable AND the CNAS DAC assiette.
             List<Cert.MonthlyContribution> active = contributions.Where(r => r.IsActive).ToList();

@@ -71,7 +71,8 @@ namespace OptiPaie.Core.Certificates
             //   MT  = Motif absences               (free text — never a day count)
             //   SS  = Salaire soumis à cotisations
             //   PO  = Montant de la cotisation (part ouvrière) = 9 % of SS
-            // Unused trailing slots print "/", exactly matching the original tool.
+            // Owner decision: unused (inactive) month rows must print COMPLETELY BLANK — no "/"
+            // filler in any column, so an empty row can never be read as a stray mark.
             for (int i = 0; i < 12; i++)
             {
                 int n = i + 1;
@@ -79,14 +80,14 @@ namespace OptiPaie.Core.Certificates
                 bool isActive = row?.IsActive == true;
 
                 values[$"M{n}"] = isActive ? row.MonthLabel : "";
-                values[$"JT{n}"] = isActive ? (row.DaysWorked?.ToString("0.##") ?? "") : "/";
-                values[$"MT{n}"] = isActive ? (row.AbsenceReason ?? "") : "/";
+                values[$"JT{n}"] = isActive ? (row.DaysWorked?.ToString("0.##") ?? "") : "";
+                values[$"MT{n}"] = isActive ? (row.AbsenceReason ?? "") : "";
                 values[$"SS{n}"] = isActive
                     ? (row.ContributionBase.HasValue ? $"{row.ContributionBase:0.##} DA" : "")
-                    : "/";
+                    : "";
                 values[$"PO{n}"] = isActive
                     ? (row.EmployeeShare.HasValue ? $"{row.EmployeeShare:0.##} DA" : "")
-                    : "/";
+                    : "";
             }
 
             return values;
