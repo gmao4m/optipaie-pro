@@ -222,6 +222,7 @@ namespace OptiPaie.Desktop.Composition
             // Enforcement activates only while the login gate is on AND a user exists; the signed-in
             // role then drives AccessPolicy at every write-capable service.
             access.Bind(appServices.Session, userService, customerAccount);
+            appServices.Authorization = access; // the UI gates navigation/actions from the same context
 
             // Attribute every audit entry to WHO performed it. Evaluated at record time so it
             // always reflects the CURRENT session: the signed-in local user (username), else the

@@ -226,35 +226,30 @@ namespace OptiPaie.Desktop.Shell
             SettingsNav.Clear();
             _allNav.Clear();
 
-            // Administrator screens (company setup and application settings) are hidden for a
-            // signed-in manager; when no login is enforced everyone is treated as an admin.
-            bool isAdmin = _services.Session.IsAdmin;
             bool rtl = _services.Localization.IsRightToLeft;
 
             // Tableau de bord is the single landing screen (Accueil is merged into it).
             // Choosing the company context comes first conceptually, so Entreprises sits at top.
+            // Every entry is gated by CanShow(key) = AccessPolicy.CanOpen for the signed-in role (the
+            // SAME source the services enforce with). Hidden, not disabled. Gate off = all visible.
             AddCore("dashboard", L("Shell_Nav_Dashboard"), "IconTrend");
-            if (isAdmin)
-            {
-                AddCore("companies", L("Shell_Nav_Companies"), "IconBuilding");
-            }
+            AddCore("companies", L("Shell_Nav_Companies"), "IconBuilding");
             AddCore("employees", L("Shell_Nav_Employees"), "IconUsers");
             AddCore("payroll", L("Shell_Nav_Payroll"), "IconCash");
 
             // Déclarations CNAS is a step of the payroll flow (not a report) — it sits right
             // after Paie; the DAC and DAS grow on the same screen. It follows the license:
             // shown locked (🔒) when the app is not usable, refreshed on every license change.
-            AddCore("cnas", L("Shell_Nav_Cnas"), "IconFileCheck");
-            _cnasNav = CoreNav[CoreNav.Count - 1];
-            _cnasNav.IsLocked = !_gate.IsUsable;
+            _cnasNav = AddCore("cnas", L("Shell_Nav_Cnas"), "IconFileCheck");
+            if (_cnasNav != null) _cnasNav.IsLocked = !_gate.IsUsable;
 
             // ATS/DRT official attestations — same license-follows-usability rule as CNAS.
-            AddCore("attestations", L("Shell_Nav_Attestations"), "IconFileCheck");
-            _attestationsNav = CoreNav[CoreNav.Count - 1];
-            _attestationsNav.IsLocked = !_gate.IsUsable;
+            _attestationsNav = AddCore("attestations", L("Shell_Nav_Attestations"), "IconFileCheck");
+            if (_attestationsNav != null) _attestationsNav.IsLocked = !_gate.IsUsable;
 
             foreach (ModuleDescriptor module in _registry.Upsells)
             {
+                if (!CanShow(module.Key)) continue;
                 NavItemViewModel item = NewItem(module.Key, module.DisplayName(rtl), IconKeyFor(module.Key), true);
                 item.IsLocked = false; // every section is always unlocked — no per-module licensing
                 ModuleNav.Add(item);
@@ -265,7 +260,7 @@ namespace OptiPaie.Desktop.Shell
             AddBottom("archive", L("Shell_Nav_Archive"), "IconArchive");
             AddBottom("reports", L("Shell_Nav_Reports"), "IconFile");
 
-            if (isAdmin)
+            if (CanShow("settings"))
             {
                 NavItemViewModel settings = NewItem("settings", L("Shell_Nav_Settings"), "IconSettings", false);
                 SettingsNav.Add(settings);
@@ -312,15 +307,30 @@ namespace OptiPaie.Desktop.Shell
             }
         }
 
-        private void AddCore(string key, string title, string iconKey)
+        /// <summary>
+        /// Whether the signed-in role may OPEN this screen — the SAME source the service layer uses
+        /// (AccessPolicy). Not enforced (gate off / no context) = everything visible, exactly as
+        /// before. A visible entry can therefore never disagree with what the services allow.
+        /// </summary>
+        private bool CanShow(string key)
         {
+            OptiPaie.Core.Security.IAccessContext a = _services.Authorization;
+            if (a == null || !a.IsEnforced) return true;
+            return OptiPaie.Core.Security.AccessPolicy.CanOpen(a.CurrentRole, key);
+        }
+
+        private NavItemViewModel AddCore(string key, string title, string iconKey)
+        {
+            if (!CanShow(key)) return null;
             NavItemViewModel item = NewItem(key, title, iconKey, false);
             CoreNav.Add(item);
             _allNav.Add(item);
+            return item;
         }
 
         private void AddBottom(string key, string title, string iconKey)
         {
+            if (!CanShow(key)) return;
             NavItemViewModel item = NewItem(key, title, iconKey, false);
             BottomNav.Add(item);
             _allNav.Add(item);
@@ -357,8 +367,9 @@ namespace OptiPaie.Desktop.Shell
             // cross-company view. The startup gate guarantees one is set; this fails loudly if not.
             _services.CompanyContext.RequireActiveId();
 
-            // Managers cannot reach the administrator screens even via a direct key.
-            if (!_services.Session.IsAdmin && (key == "companies" || key == "settings"))
+            // A role can never reach a screen it may not open, even via a direct key — same source
+            // (CanShow) that hides the navigation entry. Dashboard is open to everyone.
+            if (!CanShow(key))
             {
                 key = "dashboard";
             }

@@ -87,6 +87,48 @@ namespace OptiPaie.Core.Security
         }
 
         /// <summary>
+        /// Whether a role may OPEN (view) a module/screen — the "V" column of the role matrix, and
+        /// the single source the UI navigation uses so a visible entry can never disagree with what
+        /// the service layer allows. Administrators open everything; viewing (read) is open to every
+        /// role except for the admin-only and domain-restricted screens listed here.
+        /// </summary>
+        public static bool CanOpen(UserRole role, string moduleKey)
+        {
+            if (role == UserRole.Admin)
+            {
+                return true;
+            }
+
+            switch (moduleKey)
+            {
+                // Administration — administrators only.
+                case "companies":
+                case "settings":
+                case "users":
+                    return false;
+
+                // CNAS declarations: not HR.
+                case "cnas":
+                    return role != UserRole.Hr;
+
+                // Performance & recruitment: HR domain + read-only; not payroll/accountant.
+                case "performance":
+                case "ats":          // the recruitment module key
+                case "recruitment":
+                    return role == UserRole.Hr || role == UserRole.ReadOnly;
+
+                // Training & assets: everyone except payroll.
+                case "training":
+                case "assets":
+                    return role != UserRole.Payroll;
+
+                default:
+                    return true; // viewable by every role (dashboard, employees, payroll, attendance,
+                                 // leave, loans, contracts, attestations, work_certificate, archive, reports)
+            }
+        }
+
+        /// <summary>
         /// Enforces an OWNER-only operation (e.g. database restore). Fails closed on a null context;
         /// allows an unenforced (open) install; otherwise requires <see cref="IAccessContext.IsOwner"/>
         /// — an administrator user is NOT the owner.

@@ -112,6 +112,13 @@ namespace OptiPaie.Desktop.Composition
         /// <summary>The current login session (who is signed in and their role).</summary>
         public UserSession Session { get; } = new UserSession();
 
+        /// <summary>
+        /// The service-layer authorization context (the same instance the services enforce with), so
+        /// the UI gates navigation/actions from the one source of truth. Set by composition; null
+        /// until then is treated as "not enforced" (show everything).
+        /// </summary>
+        public OptiPaie.Core.Security.IAccessContext Authorization { get; set; }
+
         private CompanyContext _companyContext;
 
         /// <summary>
