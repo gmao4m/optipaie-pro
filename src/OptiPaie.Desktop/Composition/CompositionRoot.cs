@@ -118,7 +118,7 @@ namespace OptiPaie.Desktop.Composition
             // Employee import/export (xlsx/csv, atomic bulk import). Shares the same EmployeeValidator
             // as manual entry so the import enforces identical rules, nothing stricter.
             var employeeImportExport = new OptiPaie.Services.ImportExport.EmployeeImportExportService(
-                unitOfWorkFactory, new EmployeeValidator());
+                unitOfWorkFactory, new EmployeeValidator(), access);
             employeeImportExport.Audit = auditService;
 
             // Licensing (provider-agnostic). Only SupabaseLicenseBackend knows the

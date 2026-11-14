@@ -42,7 +42,7 @@ namespace OptiPaie.Tests
 
             var companies = new CompanyService(uow, new CompanyValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
             var employees = new EmployeeService(uow, new EmployeeValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
-            var io = new EmployeeImportExportService(uow, new EmployeeValidator());
+            var io = new EmployeeImportExportService(uow, new EmployeeValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
 
             long companyId = companies.Create(new Company { NameFr = "SARL Démo OptiPaie", Nif = "000000000000000" }).Value;
             Seed(employees, companyId, "BENALI", "Karim", "1985-05-20", "55000", "123456789012");
@@ -90,7 +90,7 @@ namespace OptiPaie.Tests
             IUnitOfWorkFactory uow = new UnitOfWorkFactory(factory);
             var companies = new CompanyService(uow, new CompanyValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
             var employees = new EmployeeService(uow, new EmployeeValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
-            var io = new EmployeeImportExportService(uow, new EmployeeValidator());
+            var io = new EmployeeImportExportService(uow, new EmployeeValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
             long companyId = companies.Create(new Company { NameFr = "SARL Démo", Nif = "000000000000000" }).Value;
 
             // A real customer file whose headers match NOTHING in our template.

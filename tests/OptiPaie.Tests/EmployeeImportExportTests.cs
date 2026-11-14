@@ -46,7 +46,7 @@ namespace OptiPaie.Tests
             _uow = new UnitOfWorkFactory(factory);
             _companies = new CompanyService(_uow, new CompanyValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
             _employees = new EmployeeService(_uow, new EmployeeValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
-            _io = new EmployeeImportExportService(_uow, new EmployeeValidator());
+            _io = new EmployeeImportExportService(_uow, new EmployeeValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
             _companyId = _companies.Create(new Company { NameFr = "SARL Import", Nif = "000000000000000" }).Value;
         }
 
@@ -79,6 +79,29 @@ namespace OptiPaie.Tests
             if (nss != null) d[EmployeeImportColumns.Nss] = nss;
             if (birth != null) d[EmployeeImportColumns.BirthDate] = birth;
             return d;
+        }
+
+        [Test]
+        public void Import_IsDenied_ForAnUnauthorizedRole_AndWritesZeroRows()
+        {
+            // A read-only, enforced context: no EditEmployees permission.
+            var denied = new EmployeeImportExportService(_uow, new EmployeeValidator(),
+                new NoPermAccess());
+
+            ImportTable table = Table(Person("BENALI", "Karim"), Person("ZERAD", "Sara"));
+
+            Assert.Throws<OptiPaie.Core.Security.AccessDeniedException>(
+                () => denied.Commit(_companyId, table, null, DuplicateResolution.SkipDuplicates, "staff.xlsx"));
+
+            // Nothing was written — not a single row.
+            Assert.That(_employees.GetByCompany(_companyId, true).Count, Is.EqualTo(0));
+        }
+
+        private sealed class NoPermAccess : OptiPaie.Core.Security.IAccessContext
+        {
+            public bool IsEnforced => true;
+            public OptiPaie.Core.Enums.UserRole CurrentRole => OptiPaie.Core.Enums.UserRole.ReadOnly;
+            public bool IsOwner => false;
         }
 
         private ImportTable Table(params IDictionary<string, string>[] people)

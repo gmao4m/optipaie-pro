@@ -27,11 +27,13 @@ namespace OptiPaie.Services.ImportExport
 
         private readonly IUnitOfWorkFactory _unitOfWorkFactory;
         private readonly IValidator<Employee> _validator;
+        private readonly OptiPaie.Core.Security.IAccessContext _access;
 
-        public EmployeeImportExportService(IUnitOfWorkFactory unitOfWorkFactory, IValidator<Employee> validator)
+        public EmployeeImportExportService(IUnitOfWorkFactory unitOfWorkFactory, IValidator<Employee> validator, OptiPaie.Core.Security.IAccessContext access = null)
         {
             _unitOfWorkFactory = Guard.AgainstNull(unitOfWorkFactory, nameof(unitOfWorkFactory));
             _validator = Guard.AgainstNull(validator, nameof(validator));
+            _access = access;
         }
 
         /// <summary>Audit sink (records who/when/how-many/which-file). Best-effort; wired by composition.</summary>
@@ -163,6 +165,10 @@ namespace OptiPaie.Services.ImportExport
         public Result<ImportSummary> Commit(long companyId, ImportTable table, IReadOnlyDictionary<string, string> mapping,
             DuplicateResolution resolution, string fileName)
         {
+            // A bulk import creates many employees in one action: check the permission ONCE, before
+            // anything is read or written, so an unauthorized import writes nothing at all.
+            OptiPaie.Core.Security.AccessPolicy.Require(_access, OptiPaie.Core.Security.Permission.EditEmployees);
+
             // Re-validate exactly what the preview showed; refuse on any error.
             ImportPreview preview = BuildPreview(companyId, table, mapping);
             if (preview.MissingColumns.Count > 0)
