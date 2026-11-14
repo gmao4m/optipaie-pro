@@ -551,6 +551,10 @@
   <!-- Roles &amp; session -->
   <data name="Role_Admin" xml:space="preserve"><value>مدير</value></data>
   <data name="Role_Manager" xml:space="preserve"><value>مسؤول</value></data>
+  <data name="Role_Hr" xml:space="preserve"><value>الموارد البشرية</value></data>
+  <data name="Role_Payroll" xml:space="preserve"><value>مسيّر الأجور</value></data>
+  <data name="Role_Accountant" xml:space="preserve"><value>محاسب</value></data>
+  <data name="Role_ReadOnly" xml:space="preserve"><value>اطّلاع</value></data>
   <data name="Session_FullAccess" xml:space="preserve"><value>وصول كامل</value></data>
 
   <!-- Employees view -->

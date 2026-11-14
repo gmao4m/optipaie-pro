@@ -551,6 +551,10 @@
   <!-- Roles &amp; session -->
   <data name="Role_Admin" xml:space="preserve"><value>Administrateur</value></data>
   <data name="Role_Manager" xml:space="preserve"><value>Responsable</value></data>
+  <data name="Role_Hr" xml:space="preserve"><value>Ressources humaines</value></data>
+  <data name="Role_Payroll" xml:space="preserve"><value>Gestionnaire de paie</value></data>
+  <data name="Role_Accountant" xml:space="preserve"><value>Comptable</value></data>
+  <data name="Role_ReadOnly" xml:space="preserve"><value>Consultation</value></data>
   <data name="Session_FullAccess" xml:space="preserve"><value>Accès complet</value></data>
 
   <!-- Employees view -->

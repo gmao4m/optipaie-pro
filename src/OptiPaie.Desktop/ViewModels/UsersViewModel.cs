@@ -59,7 +59,10 @@ namespace OptiPaie.Desktop.ViewModels
             _services = services;
 
             Roles.Add(new RoleOption(UserRole.Admin, L("Role_Admin")));
-            Roles.Add(new RoleOption(UserRole.Manager, L("Role_Manager")));
+            Roles.Add(new RoleOption(UserRole.Hr, L("Role_Hr")));
+            Roles.Add(new RoleOption(UserRole.Payroll, L("Role_Payroll")));
+            Roles.Add(new RoleOption(UserRole.Accountant, L("Role_Accountant")));
+            Roles.Add(new RoleOption(UserRole.ReadOnly, L("Role_ReadOnly")));
             _newRole = Roles[0];
 
             AddCommand = new RelayCommand(Add);
@@ -122,7 +125,7 @@ namespace OptiPaie.Desktop.ViewModels
             Users.Clear();
             foreach (User u in _services.Users.GetAll())
             {
-                string role = u.Role == UserRole.Admin ? L("Role_Admin") : L("Role_Manager");
+                string role = L(RoleLabelKey(u.Role));
                 string active = L(u.IsActive ? "State_Active" : "State_Inactive");
                 Users.Add(new UserRowViewModel(u, role, active));
             }
@@ -135,6 +138,18 @@ namespace OptiPaie.Desktop.ViewModels
         }
 
         private string L(string key) => _services.Localization.GetString(key);
+
+        private static string RoleLabelKey(UserRole role)
+        {
+            switch (role)
+            {
+                case UserRole.Admin: return "Role_Admin";
+                case UserRole.Payroll: return "Role_Payroll";
+                case UserRole.Accountant: return "Role_Accountant";
+                case UserRole.ReadOnly: return "Role_ReadOnly";
+                default: return "Role_Hr"; // Hr (and its Manager alias)
+            }
+        }
 
         private string Err(Result r) => Localization.ResultText.Localize(_services.Localization, r.Error, r.ErrorCode);
 
@@ -175,7 +190,8 @@ namespace OptiPaie.Desktop.ViewModels
                 return;
             }
 
-            Result r = _services.Users.ChangePassword(_selected.Id, _newPassword);
+            // Administrator reset: the user must replace this temporary password at next login.
+            Result r = _services.Users.ChangePassword(_selected.Id, _newPassword, mustChangePassword: true);
             if (r.IsFailure) { Dialogs.Error(Err(r)); return; }
 
             NewPassword = string.Empty;

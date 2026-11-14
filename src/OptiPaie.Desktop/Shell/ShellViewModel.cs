@@ -143,7 +143,7 @@ namespace OptiPaie.Desktop.Shell
                 }
 
                 OptiPaie.Core.Entities.User user = _services.Session.Current;
-                string role = L(user.Role == OptiPaie.Core.Enums.UserRole.Admin ? "Role_Admin" : "Role_Manager");
+                string role = L(RoleLabelKey(user.Role));
                 return _services.Session.DisplayName + " · " + role;
             }
         }
@@ -274,6 +274,18 @@ namespace OptiPaie.Desktop.Shell
         }
 
         private string L(string key) => _services.Localization.GetString(key);
+
+        private static string RoleLabelKey(OptiPaie.Core.Enums.UserRole role)
+        {
+            switch (role)
+            {
+                case OptiPaie.Core.Enums.UserRole.Admin: return "Role_Admin";
+                case OptiPaie.Core.Enums.UserRole.Payroll: return "Role_Payroll";
+                case OptiPaie.Core.Enums.UserRole.Accountant: return "Role_Accountant";
+                case OptiPaie.Core.Enums.UserRole.ReadOnly: return "Role_ReadOnly";
+                default: return "Role_Hr";
+            }
+        }
 
         private void OnLanguageChanged(object sender, EventArgs e)
         {
