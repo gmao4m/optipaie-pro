@@ -30,21 +30,25 @@ namespace OptiPaie.Services
         private readonly IUnitOfWorkFactory _unitOfWorkFactory;
         private readonly AppConfiguration _configuration;
         private readonly ILogger _logger;
+        private readonly OptiPaie.Core.Security.IAccessContext _access;
 
         public BackupService(
             IDatabaseBackupProvider provider,
             IUnitOfWorkFactory unitOfWorkFactory,
             AppConfiguration configuration,
-            ILogger logger)
+            ILogger logger,
+            OptiPaie.Core.Security.IAccessContext access = null)
         {
             _provider = Guard.AgainstNull(provider, nameof(provider));
             _unitOfWorkFactory = Guard.AgainstNull(unitOfWorkFactory, nameof(unitOfWorkFactory));
             _configuration = Guard.AgainstNull(configuration, nameof(configuration));
             _logger = Guard.AgainstNull(logger, nameof(logger));
+            _access = access;
         }
 
         public Result<BackupRecord> Backup(BackupType type)
         {
+            OptiPaie.Core.Security.AccessPolicy.Require(_access, OptiPaie.Core.Security.Permission.ManageSettings);
             try
             {
                 Directory.CreateDirectory(_configuration.BackupDirectory);
@@ -82,6 +86,8 @@ namespace OptiPaie.Services
 
         public Result Restore(string backupFilePath)
         {
+            // Restore overwrites the ENTIRE database — owner-only (not even an administrator user).
+            OptiPaie.Core.Security.AccessPolicy.RequireOwner(_access);
             try
             {
                 if (string.IsNullOrWhiteSpace(backupFilePath) || !File.Exists(backupFilePath))

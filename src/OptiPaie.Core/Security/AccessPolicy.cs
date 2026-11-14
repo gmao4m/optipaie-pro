@@ -12,6 +12,13 @@ namespace OptiPaie.Core.Security
     {
         public static bool IsAllowed(UserRole role, Permission permission)
         {
+            // Owner-only operations are never granted by a role (not even Admin) — they are checked
+            // via IAccessContext.IsOwner through RequireOwner.
+            if (permission == Permission.RestoreDatabase)
+            {
+                return false;
+            }
+
             if (role == UserRole.Admin)
             {
                 return true; // administrators have every permission
@@ -76,6 +83,29 @@ namespace OptiPaie.Core.Security
             if (!IsAllowed(context.CurrentRole, permission))
             {
                 throw new AccessDeniedException(permission);
+            }
+        }
+
+        /// <summary>
+        /// Enforces an OWNER-only operation (e.g. database restore). Fails closed on a null context;
+        /// allows an unenforced (open) install; otherwise requires <see cref="IAccessContext.IsOwner"/>
+        /// — an administrator user is NOT the owner.
+        /// </summary>
+        public static void RequireOwner(IAccessContext context)
+        {
+            if (context == null)
+            {
+                throw new AccessDeniedException(Permission.RestoreDatabase);
+            }
+
+            if (!context.IsEnforced)
+            {
+                return;
+            }
+
+            if (!context.IsOwner)
+            {
+                throw new AccessDeniedException(Permission.RestoreDatabase);
             }
         }
     }

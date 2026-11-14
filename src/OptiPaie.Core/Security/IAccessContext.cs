@@ -15,5 +15,11 @@ namespace OptiPaie.Core.Security
 
         /// <summary>The signed-in user's role (only meaningful when <see cref="IsEnforced"/> is true).</summary>
         UserRole CurrentRole { get; }
+
+        /// <summary>
+        /// True when the signed-in principal is the account OWNER (the customer account), not merely
+        /// an administrator user. Gates the few owner-only operations (e.g. database restore).
+        /// </summary>
+        bool IsOwner { get; }
     }
 }

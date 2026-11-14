@@ -71,7 +71,7 @@ namespace OptiPaie.Desktop.Composition
             var contractService = new ContractService(unitOfWorkFactory, access);
             var performanceService = new PerformanceService(unitOfWorkFactory, access);
             var assetService = new AssetService(unitOfWorkFactory, access);
-            var departmentService = new DepartmentService(unitOfWorkFactory);
+            var departmentService = new DepartmentService(unitOfWorkFactory, access);
             var trainingService = new TrainingService(unitOfWorkFactory, access);
             var atsService = new AtsService(unitOfWorkFactory, new EmployeeValidator(), access);
             var certificateService = new WorkCertificateService(unitOfWorkFactory, access);
@@ -100,7 +100,7 @@ namespace OptiPaie.Desktop.Composition
             assetService.Audit = auditService;
             employeeService.Audit = auditService;   // employee lifecycle + salary changes
             atsService.Audit = auditService;         // recruitment: candidate hired -> employee
-            var backupService = new BackupService(backupProvider, unitOfWorkFactory, configuration, logger);
+            var backupService = new BackupService(backupProvider, unitOfWorkFactory, configuration, logger, access);
             var localizationService = new LocalizationService();
             var userService = new UserService(unitOfWorkFactory, settingsService, access);
             userService.Audit = auditService;        // user management + login-gate changes
@@ -112,7 +112,7 @@ namespace OptiPaie.Desktop.Composition
             // persists the result; the payslip status change and the loan reversal/re-application
             // commit in one transaction. Audit + actor are wired below with the other sinks.
             var payslipRevisionService = new PayslipRevisionService(
-                unitOfWorkFactory, payrollService, configurationService, loanService);
+                unitOfWorkFactory, payrollService, configurationService, loanService, access);
             payslipRevisionService.Audit = auditService; // payslip correction / cancellation / restore
 
             // Employee import/export (xlsx/csv, atomic bulk import). Shares the same EmployeeValidator
@@ -215,13 +215,13 @@ namespace OptiPaie.Desktop.Composition
                 activationState);
 
             // Configurable-types + holidays services (post-construction, like leaveService.Audit above).
-            appServices.LeaveTypes = new LeaveTypeService(unitOfWorkFactory);
-            appServices.Holidays = new HolidayService(unitOfWorkFactory);
+            appServices.LeaveTypes = new LeaveTypeService(unitOfWorkFactory, access);
+            appServices.Holidays = new HolidayService(unitOfWorkFactory, access);
 
             // Bind the service-layer authorization choke point to the real session now that it exists.
             // Enforcement activates only while the login gate is on AND a user exists; the signed-in
             // role then drives AccessPolicy at every write-capable service.
-            access.Bind(appServices.Session, userService);
+            access.Bind(appServices.Session, userService, customerAccount);
 
             // Attribute every audit entry to WHO performed it. Evaluated at record time so it
             // always reflects the CURRENT session: the signed-in local user (username), else the

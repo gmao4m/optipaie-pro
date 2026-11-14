@@ -34,18 +34,26 @@ namespace OptiPaie.Services
         private readonly IPayrollService _payroll;
         private readonly IConfigurationService _configuration;
         private readonly ILoanService _loans;
+        private readonly OptiPaie.Core.Security.IAccessContext _access;
 
         public PayslipRevisionService(
             IUnitOfWorkFactory unitOfWorkFactory,
             IPayrollService payroll,
             IConfigurationService configuration,
-            ILoanService loans)
+            ILoanService loans,
+            OptiPaie.Core.Security.IAccessContext access = null)
         {
             _unitOfWorkFactory = Guard.AgainstNull(unitOfWorkFactory, nameof(unitOfWorkFactory));
             _payroll = Guard.AgainstNull(payroll, nameof(payroll));
             _configuration = Guard.AgainstNull(configuration, nameof(configuration));
             _loans = Guard.AgainstNull(loans, nameof(loans));
+            _access = access;
         }
+
+        // Correcting, cancelling or restoring an ISSUED payslip is the most sensitive write surface:
+        // it requires the payroll permission AND is audited (with the operator) on every revision.
+        private void Require() =>
+            OptiPaie.Core.Security.AccessPolicy.Require(_access, OptiPaie.Core.Security.Permission.RunPayroll);
 
         /// <summary>Optional audit sink (no-op unless wired by composition).</summary>
         public IAuditSink Audit { get; set; } = NullAuditSink.Instance;
@@ -58,6 +66,7 @@ namespace OptiPaie.Services
 
         public Result<long> Correct(PayslipCorrectionRequest request)
         {
+            Require();
             if (request == null || request.Amended == null)
             {
                 return Result.Fail<long>("Requête de correction absente.", "Payslip_Correction_RequestMissing");
@@ -173,6 +182,7 @@ namespace OptiPaie.Services
 
         public Result Cancel(long payslipId, string reason)
         {
+            Require();
             string motive = (reason ?? string.Empty).Trim();
             if (motive.Length == 0)
             {
@@ -235,6 +245,7 @@ namespace OptiPaie.Services
 
         public Result Restore(long payslipId)
         {
+            Require();
             string actor = ResolveActor();
 
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())

@@ -85,7 +85,7 @@ namespace OptiPaie.UiTests
                 loans, new AttendanceService(uow, OptiPaie.Core.Security.AccessContext.Unrestricted), payroll, contracts, archive, _ => true);
             var cnas = new CnasDeclarationService(companies, employees, archive, config);
             var ats = new AtsDrtDocumentService(companies, employees, archive);
-            var revision = new PayslipRevisionService(uow, payroll, config, loans);
+            var revision = new PayslipRevisionService(uow, payroll, config, loans, OptiPaie.Core.Security.AccessContext.Unrestricted);
 
             long companyId = companies.Create(new Company
             {

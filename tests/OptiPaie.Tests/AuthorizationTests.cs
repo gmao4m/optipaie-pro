@@ -74,12 +74,30 @@ namespace OptiPaie.Tests
         // ---- pure policy matrix -------------------------------------------------
 
         [Test]
-        public void Policy_Admin_MayDoEverything()
+        public void Policy_Admin_MayDoEverything_ExceptOwnerOnly()
         {
             foreach (Permission p in Enum.GetValues(typeof(Permission)))
             {
-                Assert.That(AccessPolicy.IsAllowed(UserRole.Admin, p), Is.True, "admin should hold " + p);
+                // RestoreDatabase is owner-only (checked via IsOwner), never granted by any role.
+                bool expected = p != Permission.RestoreDatabase;
+                Assert.That(AccessPolicy.IsAllowed(UserRole.Admin, p), Is.EqualTo(expected),
+                    "admin vs " + p);
             }
+        }
+
+        [Test]
+        public void Restore_IsOwnerOnly_NotEvenAdminByRole()
+        {
+            // No role grants RestoreDatabase.
+            foreach (UserRole r in Enum.GetValues(typeof(UserRole)))
+            {
+                Assert.That(AccessPolicy.IsAllowed(r, Permission.RestoreDatabase), Is.False, r + " must not hold RestoreDatabase");
+            }
+            // RequireOwner: a null context fails closed; an admin USER (not owner) is denied; the owner passes.
+            Assert.Throws<AccessDeniedException>(() => AccessPolicy.RequireOwner(null));
+            Assert.Throws<AccessDeniedException>(() => AccessPolicy.RequireOwner(new FakeAccess { IsEnforced = true, CurrentRole = UserRole.Admin, IsOwner = false }));
+            Assert.DoesNotThrow(() => AccessPolicy.RequireOwner(new FakeAccess { IsEnforced = true, IsOwner = true }));
+            Assert.DoesNotThrow(() => AccessPolicy.RequireOwner(new FakeAccess { IsEnforced = false })); // open install
         }
 
         [Test]
@@ -228,6 +246,7 @@ namespace OptiPaie.Tests
         {
             public bool IsEnforced { get; set; }
             public UserRole CurrentRole { get; set; }
+            public bool IsOwner { get; set; }
         }
     }
 }

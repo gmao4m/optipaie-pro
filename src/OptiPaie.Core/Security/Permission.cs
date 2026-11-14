@@ -29,6 +29,10 @@ namespace OptiPaie.Core.Security
         ManagePayrollElements,
 
         // Shared between HR and payroll.
-        ManageAttendance
+        ManageAttendance,
+
+        // Owner-only (checked via IAccessContext.IsOwner, not by role): overwriting the whole
+        // database from a backup. No role grants it.
+        RestoreDatabase
     }
 }

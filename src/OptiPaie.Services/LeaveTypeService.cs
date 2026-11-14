@@ -12,11 +12,16 @@ namespace OptiPaie.Services
     public sealed class LeaveTypeService : ILeaveTypeService
     {
         private readonly IUnitOfWorkFactory _unitOfWorkFactory;
+        private readonly OptiPaie.Core.Security.IAccessContext _access;
 
-        public LeaveTypeService(IUnitOfWorkFactory unitOfWorkFactory)
+        public LeaveTypeService(IUnitOfWorkFactory unitOfWorkFactory, OptiPaie.Core.Security.IAccessContext access = null)
         {
             _unitOfWorkFactory = Guard.AgainstNull(unitOfWorkFactory, nameof(unitOfWorkFactory));
+            _access = access;
         }
+
+        private void Require() =>
+            OptiPaie.Core.Security.AccessPolicy.Require(_access, OptiPaie.Core.Security.Permission.ManageLeave);
 
         public IReadOnlyList<LeaveTypeDefinition> GetAll(long companyId)
         {
@@ -31,6 +36,7 @@ namespace OptiPaie.Services
 
         public Result<long> Save(LeaveTypeDefinition type)
         {
+            Require();
             if (type == null) return Result.Fail<long>("Type manquant.", "LeaveType_Required");
             if (string.IsNullOrWhiteSpace(type.LabelAr)) return Result.Fail<long>("Le libellé arabe est obligatoire.", "LeaveType_LabelRequired");
             if ((int)type.BaseType < 1 || (int)type.BaseType > 5) return Result.Fail<long>("Type de base invalide.", "LeaveType_BaseInvalid");
@@ -50,6 +56,7 @@ namespace OptiPaie.Services
 
         public Result SetActive(long id, bool active)
         {
+            Require();
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 LeaveTypeDefinition t = uow.LeaveTypes.GetById(id);

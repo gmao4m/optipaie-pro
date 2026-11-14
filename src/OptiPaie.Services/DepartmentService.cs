@@ -30,11 +30,16 @@ namespace OptiPaie.Services
         };
 
         private readonly IUnitOfWorkFactory _unitOfWorkFactory;
+        private readonly OptiPaie.Core.Security.IAccessContext _access;
 
-        public DepartmentService(IUnitOfWorkFactory unitOfWorkFactory)
+        public DepartmentService(IUnitOfWorkFactory unitOfWorkFactory, OptiPaie.Core.Security.IAccessContext access = null)
         {
             _unitOfWorkFactory = Guard.AgainstNull(unitOfWorkFactory, nameof(unitOfWorkFactory));
+            _access = access;
         }
+
+        private void Require() =>
+            OptiPaie.Core.Security.AccessPolicy.Require(_access, OptiPaie.Core.Security.Permission.EditEmployees);
 
         public IReadOnlyList<Department> GetForCompany(long companyId)
         {
@@ -63,6 +68,8 @@ namespace OptiPaie.Services
 
         public Result<long> Save(Department department)
         {
+            Require();
+            Require();
             if (department == null)
             {
                 return Result.Fail<long>("Aucun département.", "Department_Required");
@@ -117,6 +124,8 @@ namespace OptiPaie.Services
 
         public Result Remove(long departmentId)
         {
+            Require();
+            Require();
             if (departmentId <= 0)
             {
                 return Result.Fail("Département introuvable.", "Department_NotFound");

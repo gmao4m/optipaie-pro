@@ -1,5 +1,6 @@
 using OptiPaie.Core.Enums;
 using OptiPaie.Core.Interfaces.Services;
+using OptiPaie.Core.Licensing;
 using OptiPaie.Core.Security;
 
 namespace OptiPaie.Desktop.Composition
@@ -16,16 +17,23 @@ namespace OptiPaie.Desktop.Composition
     {
         private UserSession _session;
         private IUserService _users;
+        private ICustomerAccountService _owner;
 
-        public void Bind(UserSession session, IUserService users)
+        public void Bind(UserSession session, IUserService users, ICustomerAccountService owner)
         {
             _session = session;
             _users = users;
+            _owner = owner;
         }
 
         public bool IsEnforced => _users != null && _users.IsLoginRequired();
 
         public UserRole CurrentRole =>
             _session != null && _session.Current != null ? _session.Current.Role : UserRole.Admin;
+
+        // The owner is the signed-in customer account (no local user seated). An administrator USER
+        // is not the owner.
+        public bool IsOwner =>
+            (_session == null || _session.Current == null) && _owner != null && _owner.IsSignedIn;
     }
 }

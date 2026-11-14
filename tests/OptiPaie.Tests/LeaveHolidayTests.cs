@@ -36,7 +36,7 @@ namespace OptiPaie.Tests
             using (var c = factory.CreateOpenConnection()) new MigrationRunner(c).Run();
 
             _uow = new UnitOfWorkFactory(factory);
-            _holidays = new HolidayService(_uow);
+            _holidays = new HolidayService(_uow, OptiPaie.Core.Security.AccessContext.Unrestricted);
             _leave = new LeaveService(_uow, OptiPaie.Core.Security.AccessContext.Unrestricted);
 
             using (IUnitOfWork uow = _uow.Create())

@@ -27,12 +27,14 @@ namespace OptiPaie.Services
 
         private readonly string _licensePath;
         private readonly ILogger _logger;
+        private readonly OptiPaie.Core.Security.IAccessContext _access;
 
-        public LicenseService(AppConfiguration configuration, ILogger logger)
+        public LicenseService(AppConfiguration configuration, ILogger logger, OptiPaie.Core.Security.IAccessContext access = null)
         {
             _licensePath = Path.Combine(
                 Guard.AgainstNull(configuration, nameof(configuration)).DataDirectory, "license.lic");
             _logger = Guard.AgainstNull(logger, nameof(logger));
+            _access = access;
         }
 
         public string GetMachineId()
@@ -80,6 +82,7 @@ namespace OptiPaie.Services
 
         public Result Activate(string serialNumber, string customerName)
         {
+            OptiPaie.Core.Security.AccessPolicy.Require(_access, OptiPaie.Core.Security.Permission.ManageSettings);
             string serial = (serialNumber ?? string.Empty).Trim().ToUpperInvariant();
             if (!SerialPattern.IsMatch(serial))
             {

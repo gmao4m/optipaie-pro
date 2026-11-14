@@ -60,7 +60,7 @@ namespace OptiPaie.Tests
             _batch = new BatchPayrollService(
                 _employees, new PayrollElementService(_uow, new PayrollElementValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted),
                 _loans, _attendance, _payroll, _contracts, _archive, _ => true);
-            _revision = new PayslipRevisionService(_uow, _payroll, _config, _loans);
+            _revision = new PayslipRevisionService(_uow, _payroll, _config, _loans, OptiPaie.Core.Security.AccessContext.Unrestricted);
         }
 
         [TearDown]

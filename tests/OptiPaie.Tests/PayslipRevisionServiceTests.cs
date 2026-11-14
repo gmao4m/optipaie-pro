@@ -69,7 +69,7 @@ namespace OptiPaie.Tests
                 _employees, new PayrollElementService(_uow, new PayrollElementValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted),
                 _loans, new AttendanceService(_uow, OptiPaie.Core.Security.AccessContext.Unrestricted), _payroll, _contracts, _archive, _ => true);
             _cnas = new CnasDeclarationService(_companies, _employees, _archive, _config);
-            _revision = new PayslipRevisionService(_uow, _payroll, _config, _loans);
+            _revision = new PayslipRevisionService(_uow, _payroll, _config, _loans, OptiPaie.Core.Security.AccessContext.Unrestricted);
         }
 
         [TearDown]
@@ -107,7 +107,7 @@ namespace OptiPaie.Tests
             long loanId = AddLoan(empId, 100000m, 20000m);
             long payslipId = GenerateWithLoanRecovery(companyId, empId, Month);
 
-            var sabotaged = new PayslipRevisionService(_uow, _payroll, _config, new ThrowingLoanService(_loans, onReverse: true));
+            var sabotaged = new PayslipRevisionService(_uow, _payroll, _config, new ThrowingLoanService(_loans, onReverse: true), OptiPaie.Core.Security.AccessContext.Unrestricted);
             Result cancel = sabotaged.Cancel(payslipId, "motif");
 
             Assert.That(cancel.IsSuccess, Is.False, "the operation must fail, not half-apply");
@@ -124,7 +124,7 @@ namespace OptiPaie.Tests
             long payslipId = GenerateWithLoanRecovery(companyId, empId, Month);
 
             PayrollGenerationRequest amended = _batch.BuildRequest(companyId, empId, Year, Month);
-            var sabotaged = new PayslipRevisionService(_uow, _payroll, _config, new ThrowingLoanService(_loans, onApply: true));
+            var sabotaged = new PayslipRevisionService(_uow, _payroll, _config, new ThrowingLoanService(_loans, onApply: true), OptiPaie.Core.Security.AccessContext.Unrestricted);
             Result<long> correct = sabotaged.Correct(new PayslipCorrectionRequest
             {
                 OriginalPayslipId = payslipId, Amended = amended, Reason = "test"
