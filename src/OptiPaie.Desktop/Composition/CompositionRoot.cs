@@ -39,6 +39,12 @@ namespace OptiPaie.Desktop.Composition
         /// </summary>
         public static AppServices Build(AppConfiguration configuration)
         {
+            // Refuse to run from a shared/network location BEFORE touching the database: an SQLite
+            // file opened from two machines over a share is silently corrupted. Throws a bilingual,
+            // non-technical DataPathException that startup shows as-is. (A local path — the default
+            // %AppData% — passes untouched, so no existing customer is affected.)
+            DataPathGuard.Validate(configuration.DataDirectory);
+
             ILogger logger = new FileLogger(Path.Combine(configuration.DataDirectory, "Logs", AppConstants.LogFileName));
 
             var bootstrapper = new DatabaseBootstrapper(configuration);

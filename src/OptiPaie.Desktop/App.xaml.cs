@@ -120,6 +120,15 @@ namespace OptiPaie.Desktop
                 bool darkTheme = string.Equals(Services.Settings.Get("Ui.Theme", "light"), "dark", StringComparison.OrdinalIgnoreCase);
                 ThemeManager.Apply(darkTheme);
             }
+            catch (OptiPaie.Common.Configuration.DataPathException dpe)
+            {
+                // Data directory is on a network share/UNC: show the bilingual, non-technical
+                // warning (its own .Message) and refuse to start, rather than risking corruption.
+                CrashLog.Fatal("Démarrage refusé : base de données sur un emplacement réseau", dpe);
+                MessageBox.Show(dpe.Message, "OptiPaie PRO", MessageBoxButton.OK, MessageBoxImage.Warning);
+                Shutdown(-1);
+                return;
+            }
             catch (Exception ex)
             {
                 // Consistent with the other fatal catches: persist the full technical detail to the
