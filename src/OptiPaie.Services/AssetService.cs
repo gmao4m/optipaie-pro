@@ -21,16 +21,23 @@ namespace OptiPaie.Services
     {
         private readonly IUnitOfWorkFactory _unitOfWorkFactory;
 
-        public AssetService(IUnitOfWorkFactory unitOfWorkFactory)
+        private readonly OptiPaie.Core.Security.IAccessContext _access;
+
+        public AssetService(IUnitOfWorkFactory unitOfWorkFactory, OptiPaie.Core.Security.IAccessContext access = null)
         {
             _unitOfWorkFactory = Guard.AgainstNull(unitOfWorkFactory, nameof(unitOfWorkFactory));
+            _access = access;
         }
+
+        private void Require() =>
+            OptiPaie.Core.Security.AccessPolicy.Require(_access, OptiPaie.Core.Security.Permission.ManageAssets);
 
         /// <summary>Optional audit sink (no-op unless wired by composition).</summary>
         public IAuditSink Audit { get; set; } = NullAuditSink.Instance;
 
         public Result<long> Save(Asset asset)
         {
+            Require();
             if (asset == null)
             {
                 return Result.Fail<long>("Aucun matériel.", "Asset_Required");
@@ -75,6 +82,7 @@ namespace OptiPaie.Services
 
         public Result Assign(long assetId, long employeeId, DateTime date, string conditionOut, string notes)
         {
+            Require();
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 Asset asset = uow.Assets.GetById(assetId);
@@ -150,6 +158,7 @@ namespace OptiPaie.Services
 
         public Result Return(long assetId, DateTime date, string conditionIn)
         {
+            Require();
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 Asset asset = uow.Assets.GetById(assetId);
@@ -176,6 +185,7 @@ namespace OptiPaie.Services
 
         public Result ReturnFrom(long assetId, long employeeId, DateTime date, string conditionIn)
         {
+            Require();
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 Asset asset = uow.Assets.GetById(assetId);
@@ -235,6 +245,7 @@ namespace OptiPaie.Services
 
         public Result SetStatus(long assetId, AssetStatus status)
         {
+            Require();
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 Asset asset = uow.Assets.GetById(assetId);
@@ -256,6 +267,7 @@ namespace OptiPaie.Services
 
         public Result Delete(long assetId)
         {
+            Require();
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 Asset asset = uow.Assets.GetById(assetId);

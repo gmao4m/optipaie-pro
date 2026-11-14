@@ -31,10 +31,16 @@ namespace OptiPaie.Services
         // "Needs support" cutoff.
         private const decimal SupportBelow = 60m;
 
-        public PerformanceService(IUnitOfWorkFactory unitOfWorkFactory)
+        private readonly OptiPaie.Core.Security.IAccessContext _access;
+
+        public PerformanceService(IUnitOfWorkFactory unitOfWorkFactory, OptiPaie.Core.Security.IAccessContext access = null)
         {
             _uowFactory = unitOfWorkFactory ?? throw new ArgumentNullException(nameof(unitOfWorkFactory));
+            _access = access;
         }
+
+        private void Require() =>
+            OptiPaie.Core.Security.AccessPolicy.Require(_access, OptiPaie.Core.Security.Permission.ManagePerformance);
 
         // ===================== TEMPLATES =====================================
 
@@ -107,6 +113,7 @@ namespace OptiPaie.Services
 
         public Result<long> SaveTemplate(EvalTemplate template, IEnumerable<EvalCriterion> criteria)
         {
+            Require();
             if (template == null) return Result.Fail<long>("Template requis.", "Performance_TemplateRequired");
             if (string.IsNullOrWhiteSpace(template.Name))
                 return Result.Fail<long>("Le nom du modèle est requis.", "Performance_NameRequired");
@@ -169,6 +176,7 @@ namespace OptiPaie.Services
 
         public Result<long> DuplicateTemplate(long sourceTemplateId, long companyId, string newName, string department)
         {
+            Require();
             using (IUnitOfWork uow = _uowFactory.Create())
             {
                 EvalTemplate src = uow.Performance.GetTemplate(sourceTemplateId);
@@ -213,6 +221,7 @@ namespace OptiPaie.Services
 
         public Result SetDefaultTemplate(long companyId, long templateId)
         {
+            Require();
             using (IUnitOfWork uow = _uowFactory.Create())
             {
                 EvalTemplate t = uow.Performance.GetTemplate(templateId);
@@ -235,6 +244,7 @@ namespace OptiPaie.Services
 
         public Result DeleteTemplate(long templateId)
         {
+            Require();
             using (IUnitOfWork uow = _uowFactory.Create())
             {
                 EvalTemplate t = uow.Performance.GetTemplate(templateId);
@@ -281,6 +291,7 @@ namespace OptiPaie.Services
 
         public Result<long> SavePeriod(EvalPeriod period)
         {
+            Require();
             if (period == null) return Result.Fail<long>("Période requise.", "Performance_PeriodRequired");
             if (string.IsNullOrWhiteSpace(period.Name))
                 return Result.Fail<long>("Le nom de la période est requis.", "Performance_NameRequired");
@@ -305,6 +316,7 @@ namespace OptiPaie.Services
 
         private Result SetPeriodStatus(long periodId, PeriodStatus status)
         {
+            Require();
             using (IUnitOfWork uow = _uowFactory.Create())
             {
                 EvalPeriod p = uow.Performance.GetPeriod(periodId);
@@ -317,6 +329,7 @@ namespace OptiPaie.Services
 
         public Result DeletePeriod(long periodId)
         {
+            Require();
             using (IUnitOfWork uow = _uowFactory.Create())
             {
                 EvalPeriod p = uow.Performance.GetPeriod(periodId);
@@ -392,6 +405,7 @@ namespace OptiPaie.Services
 
         public Result<long> CreateEvaluation(long periodId, long employeeId, long? templateId)
         {
+            Require();
             using (IUnitOfWork uow = _uowFactory.Create())
             {
                 EvalPeriod period = uow.Performance.GetPeriod(periodId);
@@ -454,6 +468,7 @@ namespace OptiPaie.Services
 
         public Result SaveEvaluation(Evaluation evaluation, IEnumerable<EvaluationScore> scores)
         {
+            Require();
             if (evaluation == null) return Result.Fail("Évaluation requise.", "Performance_EvaluationRequired");
             var lines = (scores ?? Enumerable.Empty<EvaluationScore>()).ToList();
 
@@ -490,6 +505,7 @@ namespace OptiPaie.Services
 
         public Result CompleteEvaluation(long evaluationId)
         {
+            Require();
             using (IUnitOfWork uow = _uowFactory.Create())
             {
                 Evaluation ev = uow.Performance.GetEvaluation(evaluationId);
@@ -515,6 +531,7 @@ namespace OptiPaie.Services
 
         public Result ReopenEvaluation(long evaluationId)
         {
+            Require();
             using (IUnitOfWork uow = _uowFactory.Create())
             {
                 Evaluation ev = uow.Performance.GetEvaluation(evaluationId);
@@ -529,6 +546,7 @@ namespace OptiPaie.Services
 
         public Result DeleteEvaluation(long evaluationId)
         {
+            Require();
             using (IUnitOfWork uow = _uowFactory.Create())
             {
                 Evaluation ev = uow.Performance.GetEvaluation(evaluationId);
@@ -614,6 +632,7 @@ namespace OptiPaie.Services
 
         public Result<long> LogBehavior(long companyId, long employeeId, bool isPositive, string note, DateTime occurredAt)
         {
+            Require();
             using (IUnitOfWork uow = _uowFactory.Create())
             {
                 if (!uow.Employees.ExistsById(employeeId))
@@ -654,6 +673,7 @@ namespace OptiPaie.Services
 
         public Result DeleteBehavior(long behaviorId)
         {
+            Require();
             using (IUnitOfWork uow = _uowFactory.Create())
             {
                 if (uow.Performance.GetBehavior(behaviorId) == null)

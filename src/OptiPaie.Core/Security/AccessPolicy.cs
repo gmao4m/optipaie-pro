@@ -40,6 +40,7 @@ namespace OptiPaie.Core.Security
                 case Permission.RunPayroll:
                 case Permission.ManageCnas:
                 case Permission.ManageLoans:
+                case Permission.ManagePayrollElements:
                     return role == UserRole.Payroll;
 
                 // Shared between HR and payroll.

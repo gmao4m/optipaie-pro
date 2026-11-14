@@ -25,12 +25,17 @@ namespace OptiPaie.Services
     {
         private readonly IUnitOfWorkFactory _unitOfWorkFactory;
         private readonly IValidator<Employee> _employeeValidator;
+        private readonly OptiPaie.Core.Security.IAccessContext _access;
 
-        public AtsService(IUnitOfWorkFactory unitOfWorkFactory, IValidator<Employee> employeeValidator)
+        public AtsService(IUnitOfWorkFactory unitOfWorkFactory, IValidator<Employee> employeeValidator, OptiPaie.Core.Security.IAccessContext access = null)
         {
             _unitOfWorkFactory = Guard.AgainstNull(unitOfWorkFactory, nameof(unitOfWorkFactory));
             _employeeValidator = Guard.AgainstNull(employeeValidator, nameof(employeeValidator));
+            _access = access;
         }
+
+        private void Require() =>
+            OptiPaie.Core.Security.AccessPolicy.Require(_access, OptiPaie.Core.Security.Permission.ManageRecruitment);
 
         /// <summary>Audit trail (candidate hired → employee, etc.). Best-effort.</summary>
         public IAuditSink Audit { get; set; } = NullAuditSink.Instance;
@@ -39,6 +44,7 @@ namespace OptiPaie.Services
 
         public Result<long> SavePosting(JobPosting posting)
         {
+            Require();
             if (posting == null)
             {
                 return Result.Fail<long>("Aucune offre.", "Ats_PostingRequired");
@@ -88,6 +94,7 @@ namespace OptiPaie.Services
 
         public Result SetPostingStatus(long postingId, JobStatus status)
         {
+            Require();
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 JobPosting posting = uow.Ats.GetPostingById(postingId);
@@ -104,6 +111,7 @@ namespace OptiPaie.Services
 
         public Result DeletePosting(long postingId)
         {
+            Require();
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 uow.Ats.SoftDeletePosting(postingId);
@@ -150,6 +158,7 @@ namespace OptiPaie.Services
 
         public Result<long> SaveCandidate(Candidate candidate)
         {
+            Require();
             if (candidate == null)
             {
                 return Result.Fail<long>("Aucun candidat.", "Ats_CandidateRequired");
@@ -210,6 +219,7 @@ namespace OptiPaie.Services
 
         public Result MoveStage(long candidateId, CandidateStage target)
         {
+            Require();
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 Candidate candidate = uow.Ats.GetCandidateById(candidateId);
@@ -260,6 +270,7 @@ namespace OptiPaie.Services
         /// <summary>Advance to the immediate next stage (the single "étape suivante" action).</summary>
         public Result MoveNext(long candidateId)
         {
+            Require();
             Candidate c = GetCandidate(candidateId);
             if (c == null) return Result.Fail("Candidat introuvable.", "Ats_CandidateNotFound");
             return MoveStage(candidateId, (CandidateStage)((int)c.Stage + 1));
@@ -268,6 +279,7 @@ namespace OptiPaie.Services
         /// <summary>Step back exactly one stage to correct a mistake (UI confirms).</summary>
         public Result MoveBack(long candidateId)
         {
+            Require();
             Candidate c = GetCandidate(candidateId);
             if (c == null) return Result.Fail("Candidat introuvable.", "Ats_CandidateNotFound");
             return MoveStage(candidateId, (CandidateStage)((int)c.Stage - 1));
@@ -279,6 +291,7 @@ namespace OptiPaie.Services
 
         private Result Close(long candidateId, CandidateClosure type, string reason)
         {
+            Require();
             if (string.IsNullOrWhiteSpace(reason))
             {
                 return Result.Fail("Le motif est obligatoire.", "Ats_ReasonRequired");
@@ -315,6 +328,7 @@ namespace OptiPaie.Services
 
         public Result<HireResult> Hire(long candidateId)
         {
+            Require();
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 Candidate candidate = uow.Ats.GetCandidateById(candidateId);
@@ -408,6 +422,7 @@ namespace OptiPaie.Services
 
         public Result DeleteCandidate(long candidateId)
         {
+            Require();
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 Candidate candidate = uow.Ats.GetCandidateById(candidateId);
@@ -456,6 +471,7 @@ namespace OptiPaie.Services
 
         public Result<long> SaveInterview(Interview interview)
         {
+            Require();
             if (interview == null || interview.CandidateId <= 0)
             {
                 return Result.Fail<long>("Entretien invalide.", "Ats_InterviewRequired");
@@ -483,6 +499,7 @@ namespace OptiPaie.Services
 
         public Result DeleteInterview(long interviewId)
         {
+            Require();
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 uow.Ats.SoftDeleteInterview(interviewId);
@@ -494,6 +511,7 @@ namespace OptiPaie.Services
 
         public Result<long> AddAttachment(CandidateAttachment attachment)
         {
+            Require();
             if (attachment == null || attachment.CandidateId <= 0 || string.IsNullOrWhiteSpace(attachment.FileName))
             {
                 return Result.Fail<long>("Pièce jointe invalide.", "Ats_AttachmentRequired");
@@ -521,6 +539,7 @@ namespace OptiPaie.Services
 
         public Result DeleteAttachment(long attachmentId)
         {
+            Require();
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 uow.Ats.SoftDeleteAttachment(attachmentId);

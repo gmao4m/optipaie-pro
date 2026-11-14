@@ -26,6 +26,7 @@ namespace OptiPaie.Core.Security
         RunPayroll,
         ManageCnas,
         ManageLoans,
+        ManagePayrollElements,
 
         // Shared between HR and payroll.
         ManageAttendance

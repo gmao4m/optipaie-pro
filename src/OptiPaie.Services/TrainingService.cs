@@ -20,13 +20,20 @@ namespace OptiPaie.Services
     {
         private readonly IUnitOfWorkFactory _unitOfWorkFactory;
 
-        public TrainingService(IUnitOfWorkFactory unitOfWorkFactory)
+        private readonly OptiPaie.Core.Security.IAccessContext _access;
+
+        public TrainingService(IUnitOfWorkFactory unitOfWorkFactory, OptiPaie.Core.Security.IAccessContext access = null)
         {
             _unitOfWorkFactory = Guard.AgainstNull(unitOfWorkFactory, nameof(unitOfWorkFactory));
+            _access = access;
         }
+
+        private void Require() =>
+            OptiPaie.Core.Security.AccessPolicy.Require(_access, OptiPaie.Core.Security.Permission.ManageTraining);
 
         public Result<long> Save(TrainingSession session)
         {
+            Require();
             if (session == null)
             {
                 return Result.Fail<long>("Aucune formation.", "Training_Required");
@@ -81,6 +88,7 @@ namespace OptiPaie.Services
 
         public Result SetStatus(long sessionId, TrainingStatus status)
         {
+            Require();
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 TrainingSession session = uow.Training.GetById(sessionId);
@@ -97,6 +105,7 @@ namespace OptiPaie.Services
 
         public Result Delete(long sessionId)
         {
+            Require();
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 uow.Training.SoftDelete(sessionId);
@@ -141,6 +150,7 @@ namespace OptiPaie.Services
 
         public Result Enroll(long sessionId, long employeeId)
         {
+            Require();
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 TrainingSession session = uow.Training.GetById(sessionId);
@@ -177,6 +187,7 @@ namespace OptiPaie.Services
 
         public Result SetResult(long participantId, TrainingResult result, string score, string certificateRef)
         {
+            Require();
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 TrainingParticipant participant = uow.Training.GetParticipantById(participantId);
@@ -195,6 +206,7 @@ namespace OptiPaie.Services
 
         public Result RemoveParticipant(long participantId)
         {
+            Require();
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 // REVERSIBLE removal: soft-delete (IsDeleted=1) instead of a physical DELETE, so a

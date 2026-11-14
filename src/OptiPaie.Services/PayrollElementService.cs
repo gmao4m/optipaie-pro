@@ -15,15 +15,21 @@ namespace OptiPaie.Services
     {
         private readonly IUnitOfWorkFactory _unitOfWorkFactory;
         private readonly IValidator<PayrollElement> _validator;
+        private readonly OptiPaie.Core.Security.IAccessContext _access;
 
-        public PayrollElementService(IUnitOfWorkFactory unitOfWorkFactory, IValidator<PayrollElement> validator)
+        public PayrollElementService(IUnitOfWorkFactory unitOfWorkFactory, IValidator<PayrollElement> validator, OptiPaie.Core.Security.IAccessContext access = null)
         {
             _unitOfWorkFactory = Guard.AgainstNull(unitOfWorkFactory, nameof(unitOfWorkFactory));
             _validator = Guard.AgainstNull(validator, nameof(validator));
+            _access = access;
         }
+
+        private void Require() =>
+            OptiPaie.Core.Security.AccessPolicy.Require(_access, OptiPaie.Core.Security.Permission.ManagePayrollElements);
 
         public Result<long> Create(PayrollElement element)
         {
+            Require();
             ValidationResult validation = _validator.Validate(element);
             if (!validation.IsValid)
             {
@@ -39,6 +45,7 @@ namespace OptiPaie.Services
 
         public Result Update(PayrollElement element)
         {
+            Require();
             ValidationResult validation = _validator.Validate(element);
             if (!validation.IsValid)
             {
@@ -59,6 +66,7 @@ namespace OptiPaie.Services
 
         public Result Delete(long id)
         {
+            Require();
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 PayrollElement element = uow.PayrollElements.GetById(id);

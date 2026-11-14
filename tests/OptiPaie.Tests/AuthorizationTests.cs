@@ -32,6 +32,12 @@ namespace OptiPaie.Tests
         private LeaveService _leave;
         private ContractService _contracts;
         private AttendanceService _attendance;
+        private PayrollElementService _elements;
+        private PerformanceService _performance;
+        private TrainingService _training;
+        private AssetService _assets;
+        private WorkCertificateService _certificates;
+        private AtsService _ats;
 
         [SetUp]
         public void SetUp()
@@ -50,6 +56,12 @@ namespace OptiPaie.Tests
             _leave = new LeaveService(_uow, _access);
             _contracts = new ContractService(_uow, _access);
             _attendance = new AttendanceService(_uow, _access);
+            _elements = new PayrollElementService(_uow, new PayrollElementValidator(), _access);
+            _performance = new PerformanceService(_uow, _access);
+            _training = new TrainingService(_uow, _access);
+            _assets = new AssetService(_uow, _access);
+            _certificates = new WorkCertificateService(_uow, _access);
+            _ats = new AtsService(_uow, new EmployeeValidator(), _access);
         }
 
         [TearDown]
@@ -170,6 +182,34 @@ namespace OptiPaie.Tests
             AssertAllowed(() => _companies.Create(new Company { NameFr = "X" }));
             AssertAllowed(() => _payroll.Generate(new PayrollGenerationRequest()));
             AssertAllowed(() => _employees.Create(new Employee()));
+        }
+
+        [Test]
+        public void DomainServices_EnforceTheirOwnPermission()
+        {
+            // Read-only is refused on every domain write.
+            _access.CurrentRole = UserRole.ReadOnly;
+            AssertDenied(() => _elements.Create(new PayrollElement()));
+            AssertDenied(() => _performance.SavePeriod(new EvalPeriod()));
+            AssertDenied(() => _training.Save(new TrainingSession()));
+            AssertDenied(() => _assets.Save(new Asset()));
+            AssertDenied(() => _certificates.Save(new WorkCertificate()));
+            AssertDenied(() => _ats.SavePosting(new JobPosting()));
+
+            // HR owns performance/training/assets/certificates/recruitment, NOT payroll elements.
+            _access.CurrentRole = UserRole.Hr;
+            AssertAllowed(() => _performance.SavePeriod(new EvalPeriod()));
+            AssertAllowed(() => _training.Save(new TrainingSession()));
+            AssertAllowed(() => _assets.Save(new Asset()));
+            AssertAllowed(() => _certificates.Save(new WorkCertificate()));
+            AssertAllowed(() => _ats.SavePosting(new JobPosting()));
+            AssertDenied(() => _elements.Create(new PayrollElement()));
+
+            // Payroll owns the payroll-element catalogue, NOT performance.
+            _access.CurrentRole = UserRole.Payroll;
+            AssertAllowed(() => _elements.Create(new PayrollElement()));
+            AssertDenied(() => _performance.SavePeriod(new EvalPeriod()));
+            AssertDenied(() => _training.Save(new TrainingSession()));
         }
 
         // A denied call throws AccessDeniedException (BEFORE any validation/persistence).

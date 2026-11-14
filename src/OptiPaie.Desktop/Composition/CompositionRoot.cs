@@ -61,7 +61,7 @@ namespace OptiPaie.Desktop.Composition
 
             var companyService = new CompanyService(unitOfWorkFactory, new CompanyValidator(), access);
             var employeeService = new EmployeeService(unitOfWorkFactory, new EmployeeValidator(), access);
-            var elementService = new PayrollElementService(unitOfWorkFactory, new PayrollElementValidator());
+            var elementService = new PayrollElementService(unitOfWorkFactory, new PayrollElementValidator(), access);
             var configurationService = new ConfigurationService(unitOfWorkFactory);
             var settingsService = new SettingsService(unitOfWorkFactory);
             var archiveService = new ArchiveService(unitOfWorkFactory);
@@ -69,12 +69,12 @@ namespace OptiPaie.Desktop.Composition
             var leaveService = new LeaveService(unitOfWorkFactory, access);
             var loanService = new LoanService(unitOfWorkFactory, access);
             var contractService = new ContractService(unitOfWorkFactory, access);
-            var performanceService = new PerformanceService(unitOfWorkFactory);
-            var assetService = new AssetService(unitOfWorkFactory);
+            var performanceService = new PerformanceService(unitOfWorkFactory, access);
+            var assetService = new AssetService(unitOfWorkFactory, access);
             var departmentService = new DepartmentService(unitOfWorkFactory);
-            var trainingService = new TrainingService(unitOfWorkFactory);
-            var atsService = new AtsService(unitOfWorkFactory, new EmployeeValidator());
-            var certificateService = new WorkCertificateService(unitOfWorkFactory);
+            var trainingService = new TrainingService(unitOfWorkFactory, access);
+            var atsService = new AtsService(unitOfWorkFactory, new EmployeeValidator(), access);
+            var certificateService = new WorkCertificateService(unitOfWorkFactory, access);
             var dashboardService = new DashboardService(
                 companyService, employeeService, contractService, leaveService, loanService,
                 attendanceService, atsService, assetService, trainingService);

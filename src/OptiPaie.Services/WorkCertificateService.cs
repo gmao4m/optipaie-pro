@@ -22,13 +22,20 @@ namespace OptiPaie.Services
     {
         private readonly IUnitOfWorkFactory _unitOfWorkFactory;
 
-        public WorkCertificateService(IUnitOfWorkFactory unitOfWorkFactory)
+        private readonly OptiPaie.Core.Security.IAccessContext _access;
+
+        public WorkCertificateService(IUnitOfWorkFactory unitOfWorkFactory, OptiPaie.Core.Security.IAccessContext access = null)
         {
             _unitOfWorkFactory = Guard.AgainstNull(unitOfWorkFactory, nameof(unitOfWorkFactory));
+            _access = access;
         }
+
+        private void Require() =>
+            OptiPaie.Core.Security.AccessPolicy.Require(_access, OptiPaie.Core.Security.Permission.ManageCertificates);
 
         public Result<long> Save(WorkCertificate certificate)
         {
+            Require();
             if (certificate == null)
             {
                 return Result.Fail<long>("Aucune attestation.", "Certificate_Required");
@@ -76,6 +83,7 @@ namespace OptiPaie.Services
 
         public Result Delete(long certificateId)
         {
+            Require();
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 uow.Certificates.SoftDelete(certificateId);
