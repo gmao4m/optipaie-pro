@@ -140,7 +140,7 @@ namespace OptiPaie.Tests
         {
             _actor = "boss@corp.dz";
             long a1 = _users.Create("admin", "Admin", "adminpass12", UserRole.Admin, null).Value;
-            _users.Create("admin2", "Admin 2", "adminpas2", UserRole.Admin, null); // 2nd admin so a1 may go
+            _users.Create("admin2", "Admin 2", "adminpass02", UserRole.Admin, null); // 2nd admin so a1 may go
 
             Assert.That(_users.Delete(a1).IsSuccess, Is.True);
             _users.SetLoginEnabled(true);
