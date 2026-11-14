@@ -59,10 +59,16 @@ namespace OptiPaie.Data.Repositories
                 "CnasEmployerNumber = @CnasEmployerNumber, Cacobatph = @Cacobatph, " +
                 "BtphSector = @BtphSector, CacobatphEnabled = @CacobatphEnabled, Bank = @Bank, " +
                 "BankAccount = @BankAccount, Currency = @Currency, ManagerName = @ManagerName, Phone = @Phone, Email = @Email, Logo = @Logo, " +
-                "UpdatedAtUtc = @UpdatedAtUtc, IsDeleted = @IsDeleted " +
-                "WHERE Id = @Id;";
+                "UpdatedAtUtc = @UpdatedAtUtc, IsDeleted = @IsDeleted, RowVersion = RowVersion + 1 " +
+                "WHERE Id = @Id AND RowVersion = @RowVersion;";
 
-            Connection.Execute(sql, company, Transaction);
+            int rows = Connection.Execute(sql, company, Transaction);
+            if (rows == 0)
+            {
+                throw new OptiPaie.Core.Primitives.ConcurrencyException("Company");
+            }
+
+            company.RowVersion += 1;
         }
 
         public void SoftDelete(long id)

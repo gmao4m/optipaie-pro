@@ -67,10 +67,17 @@ namespace OptiPaie.Data.Repositories
                 "UPDATE Assets SET " +
                 "CompanyId = @CompanyId, Name = @Name, Category = @Category, Status = @Status, " +
                 "SerialNumber = @SerialNumber, PurchaseDate = @PurchaseDate, PurchaseValue = @PurchaseValue, " +
-                "Notes = @Notes, IsShared = @IsShared, UpdatedAtUtc = @UpdatedAtUtc, IsDeleted = @IsDeleted " +
-                "WHERE Id = @Id;";
+                "Notes = @Notes, IsShared = @IsShared, UpdatedAtUtc = @UpdatedAtUtc, IsDeleted = @IsDeleted, " +
+                "RowVersion = RowVersion + 1 " +
+                "WHERE Id = @Id AND RowVersion = @RowVersion;";
 
-            Connection.Execute(sql, asset, Transaction);
+            int rows = Connection.Execute(sql, asset, Transaction);
+            if (rows == 0)
+            {
+                throw new OptiPaie.Core.Primitives.ConcurrencyException("Asset");
+            }
+
+            asset.RowVersion += 1;
         }
 
         public void SoftDelete(long id)

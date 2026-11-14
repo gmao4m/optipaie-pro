@@ -80,5 +80,8 @@ namespace OptiPaie.Core.Entities
 
         /// <summary>Soft-delete flag; deleted companies are hidden but never orphan payroll history.</summary>
         public bool IsDeleted { get; set; }
+
+        /// <summary>Optimistic-concurrency token (see <see cref="Employee.RowVersion"/>). Default 0.</summary>
+        public long RowVersion { get; set; }
     }
 }

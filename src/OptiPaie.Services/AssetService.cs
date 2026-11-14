@@ -71,7 +71,14 @@ namespace OptiPaie.Services
                     // The status is driven by assign/return/SetStatus, not by an edit.
                     asset.Status = existing.Status;
                     asset.CreatedAtUtc = existing.CreatedAtUtc;
-                    uow.Assets.Update(asset);
+                    try
+                    {
+                        uow.Assets.Update(asset);
+                    }
+                    catch (OptiPaie.Core.Primitives.ConcurrencyException)
+                    {
+                        return Result.Fail<long>(OptiPaie.Core.Primitives.ConcurrencyException.UserMessage, OptiPaie.Common.Constants.ErrorCodes.Concurrency);
+                    }
                     return Result.Ok(asset.Id);
                 }
 

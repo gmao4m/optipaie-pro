@@ -103,5 +103,8 @@ namespace OptiPaie.Core.Entities
 
         /// <summary>Soft-delete flag.</summary>
         public bool IsDeleted { get; set; }
+
+        /// <summary>Optimistic-concurrency token (see <see cref="Employee.RowVersion"/>). Default 0.</summary>
+        public long RowVersion { get; set; }
     }
 }

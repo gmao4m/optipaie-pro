@@ -71,10 +71,16 @@ namespace OptiPaie.Data.Repositories
                 "IsEnabled = @IsEnabled, IsSystem = @IsSystem, DisplayOrder = @DisplayOrder, " +
                 "InternalCode = @InternalCode, IsPrintable = @IsPrintable, IncludedInLissage = @IncludedInLissage, " +
                 "IsAutomatic = @IsAutomatic, UpdatedAtUtc = @UpdatedAtUtc, " +
-                "IsDeleted = @IsDeleted " +
-                "WHERE Id = @Id;";
+                "IsDeleted = @IsDeleted, RowVersion = RowVersion + 1 " +
+                "WHERE Id = @Id AND RowVersion = @RowVersion;";
 
-            Connection.Execute(sql, element, Transaction);
+            int rows = Connection.Execute(sql, element, Transaction);
+            if (rows == 0)
+            {
+                throw new OptiPaie.Core.Primitives.ConcurrencyException("PayrollElement");
+            }
+
+            element.RowVersion += 1;
         }
 
         public void SoftDelete(long id)

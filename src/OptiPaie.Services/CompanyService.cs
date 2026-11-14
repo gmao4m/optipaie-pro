@@ -57,7 +57,14 @@ namespace OptiPaie.Services
                     return Result.Fail("Entreprise introuvable.", ErrorCodes.NotFound);
                 }
 
-                uow.Companies.Update(company);
+                try
+                {
+                    uow.Companies.Update(company);
+                }
+                catch (ConcurrencyException)
+                {
+                    return Result.Fail(ConcurrencyException.UserMessage, ErrorCodes.Concurrency);
+                }
                 return Result.Ok();
             }
         }

@@ -59,7 +59,14 @@ namespace OptiPaie.Services
                     return Result.Fail("Rubrique introuvable.", ErrorCodes.NotFound);
                 }
 
-                uow.PayrollElements.Update(element);
+                try
+                {
+                    uow.PayrollElements.Update(element);
+                }
+                catch (ConcurrencyException)
+                {
+                    return Result.Fail(ConcurrencyException.UserMessage, ErrorCodes.Concurrency);
+                }
                 return Result.Ok();
             }
         }

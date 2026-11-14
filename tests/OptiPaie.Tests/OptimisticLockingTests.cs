@@ -145,6 +145,23 @@ namespace OptiPaie.Tests
         }
 
         [Test]
+        public void Company_SecondSave_IsRejected()
+        {
+            long id = _companies.Create(new Company { NameFr = "SARL One", Nif = "000000000000000" }).Value;
+            Company a = _companies.Get(id);
+            Company b = _companies.Get(id);
+
+            a.NameFr = "SARL One (A)";
+            Assert.That(_companies.Update(a).IsSuccess, Is.True);
+
+            b.NameFr = "SARL One (B)";
+            Result second = _companies.Update(b);
+            Assert.That(second.IsFailure, Is.True);
+            Assert.That(second.ErrorCode, Is.EqualTo(ErrorCodes.Concurrency));
+            Assert.That(_companies.Get(id).NameFr, Is.EqualTo("SARL One (A)"));
+        }
+
+        [Test]
         public void Contract_SecondSave_IsRejected()
         {
             long empId = NewCompanyAndEmployee(out _);
