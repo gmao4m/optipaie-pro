@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Dapper;
 using OptiPaie.Core.Dtos;
 using OptiPaie.Core.Entities;
+using OptiPaie.Core.Primitives;
 using OptiPaie.Core.Enums;
 using OptiPaie.Core.Interfaces.Repositories;
 using OptiPaie.Data.Context;
@@ -107,10 +108,17 @@ namespace OptiPaie.Data.Repositories
                 "UPDATE Loans SET " +
                 "EmployeeId = @EmployeeId, Type = @Type, Status = @Status, Principal = @Principal, " +
                 "MonthlyInstallment = @MonthlyInstallment, StartYear = @StartYear, StartMonth = @StartMonth, " +
-                "Reason = @Reason, Notes = @Notes, UpdatedAtUtc = @UpdatedAtUtc, IsDeleted = @IsDeleted " +
-                "WHERE Id = @Id;";
+                "Reason = @Reason, Notes = @Notes, UpdatedAtUtc = @UpdatedAtUtc, IsDeleted = @IsDeleted, " +
+                "RowVersion = RowVersion + 1 " +
+                "WHERE Id = @Id AND RowVersion = @RowVersion;";
 
-            Connection.Execute(sql, loan, Transaction);
+            int rows = Connection.Execute(sql, loan, Transaction);
+            if (rows == 0)
+            {
+                throw new ConcurrencyException("Loan");
+            }
+
+            loan.RowVersion += 1;
         }
 
         public void SoftDelete(long id)

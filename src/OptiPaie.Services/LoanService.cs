@@ -8,6 +8,7 @@ using OptiPaie.Core.Entities;
 using OptiPaie.Core.Enums;
 using OptiPaie.Core.Interfaces.Repositories;
 using OptiPaie.Core.Interfaces.Services;
+using OptiPaie.Common.Constants;
 using OptiPaie.Core.Primitives;
 
 namespace OptiPaie.Services
@@ -93,7 +94,14 @@ namespace OptiPaie.Services
                     loan.CreatedAtUtc = existing.CreatedAtUtc;
                     // Status is managed through SetStatus / repayments, not by an edit.
                     loan.Status = existing.Status;
-                    uow.Loans.Update(loan);
+                    try
+                    {
+                        uow.Loans.Update(loan);
+                    }
+                    catch (ConcurrencyException)
+                    {
+                        return Result.Fail<long>(ConcurrencyException.UserMessage, ErrorCodes.Concurrency);
+                    }
                     ReconcileStatus(uow, loan.Id);
                     Audit.Record("Loan", loan.Id, AuditAction.Updated, "Prêt modifié");
                     return Result.Ok(loan.Id);

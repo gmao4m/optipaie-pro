@@ -83,5 +83,12 @@ namespace OptiPaie.Core.Entities
 
         /// <summary>Soft-delete flag; deleted employees never orphan payroll history.</summary>
         public bool IsDeleted { get; set; }
+
+        /// <summary>
+        /// Optimistic-concurrency token. Incremented by the database on every update; an update
+        /// only succeeds when the stored value still equals the one the editor loaded, so a second
+        /// user who saved first is never silently overwritten. Default 0 for existing rows.
+        /// </summary>
+        public long RowVersion { get; set; }
     }
 }

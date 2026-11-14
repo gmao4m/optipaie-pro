@@ -61,6 +61,12 @@ namespace OptiPaie.Services
 
                 record.Id = existing.Id;
                 record.CreatedAtUtc = existing.CreatedAtUtc;
+                // Attendance is a per-cell matrix: the edited record is reconstructed from the cell,
+                // not loaded with a version the UI carries back. Feed the just-read version so a
+                // normal single-user edit never false-conflicts. The RowVersion column exists (added
+                // in 0037) and the repository enforces it, but attendance stays last-write-per-cell by
+                // design (the matrix path uses Upsert). See docs/multiuser concurrency notes.
+                record.RowVersion = existing.RowVersion;
                 uow.Attendance.Update(record);
                 return Result.Ok(record.Id);
             }

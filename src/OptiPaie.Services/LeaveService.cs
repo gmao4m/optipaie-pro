@@ -10,6 +10,7 @@ using OptiPaie.Core.Entities;
 using OptiPaie.Core.Enums;
 using OptiPaie.Core.Interfaces.Repositories;
 using OptiPaie.Core.Interfaces.Services;
+using OptiPaie.Common.Constants;
 using OptiPaie.Core.Primitives;
 using WeekendConfig = OptiPaie.Core.Certificates.WeekendConfig;
 
@@ -121,7 +122,14 @@ namespace OptiPaie.Services
 
                 if (request.Id > 0)
                 {
-                    uow.Leave.Update(request);
+                    try
+                    {
+                        uow.Leave.Update(request);
+                    }
+                    catch (ConcurrencyException)
+                    {
+                        return Result.Fail<long>(ConcurrencyException.UserMessage, ErrorCodes.Concurrency);
+                    }
                     Audit.Record("Leave", request.Id, AuditAction.Updated, "Demande de congé modifiée");
                     return Result.Ok(request.Id);
                 }

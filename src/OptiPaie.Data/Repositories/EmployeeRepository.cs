@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Dapper;
 using OptiPaie.Core.Entities;
 using OptiPaie.Core.Interfaces.Repositories;
+using OptiPaie.Core.Primitives;
 using OptiPaie.Data.Context;
 
 namespace OptiPaie.Data.Repositories
@@ -54,6 +55,9 @@ namespace OptiPaie.Data.Repositories
         {
             employee.UpdatedAtUtc = DateTime.UtcNow;
 
+            // Optimistic concurrency: only write when the stored RowVersion still equals the one the
+            // editor loaded, and bump it. 0 rows => another user saved first (or the row was removed)
+            // => ConcurrencyException, so their save is never silently overwritten.
             const string sql =
                 "UPDATE Employees SET " +
                 "CompanyId = @CompanyId, LastNameFr = @LastNameFr, LastNameAr = @LastNameAr, " +
@@ -62,10 +66,16 @@ namespace OptiPaie.Data.Repositories
                 "Category = @Category, Department = @Department, Poste = @Poste, ContractType = @ContractType, MaritalStatus = @MaritalStatus, " +
                 "Dependents = @Dependents, BaseSalary = @BaseSalary, " +
                 "PaymentMode = @PaymentMode, Rib = @Rib, Address = @Address, IsActive = @IsActive, UpdatedAtUtc = @UpdatedAtUtc, " +
-                "IsDeleted = @IsDeleted " +
-                "WHERE Id = @Id;";
+                "IsDeleted = @IsDeleted, RowVersion = RowVersion + 1 " +
+                "WHERE Id = @Id AND RowVersion = @RowVersion;";
 
-            Connection.Execute(sql, employee, Transaction);
+            int rows = Connection.Execute(sql, employee, Transaction);
+            if (rows == 0)
+            {
+                throw new ConcurrencyException("Employee");
+            }
+
+            employee.RowVersion += 1;
         }
 
         public void SoftDelete(long id)

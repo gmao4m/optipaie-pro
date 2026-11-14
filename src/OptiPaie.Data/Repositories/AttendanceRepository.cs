@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Dapper;
 using OptiPaie.Core.Entities;
+using OptiPaie.Core.Primitives;
 using OptiPaie.Core.Interfaces.Repositories;
 using OptiPaie.Data.Context;
 
@@ -103,10 +104,16 @@ namespace OptiPaie.Data.Repositories
                 "EmployeeId = @EmployeeId, WorkDate = @WorkDate, Status = @Status, " +
                 "CheckIn = @CheckIn, CheckOut = @CheckOut, WorkedHours = @WorkedHours, " +
                 "LateMinutes = @LateMinutes, OvertimeHours = @OvertimeHours, Notes = @Notes, " +
-                "UpdatedAtUtc = @UpdatedAtUtc, IsDeleted = @IsDeleted " +
-                "WHERE Id = @Id;";
+                "UpdatedAtUtc = @UpdatedAtUtc, IsDeleted = @IsDeleted, RowVersion = RowVersion + 1 " +
+                "WHERE Id = @Id AND RowVersion = @RowVersion;";
 
-            Connection.Execute(sql, record, Transaction);
+            int rows = Connection.Execute(sql, record, Transaction);
+            if (rows == 0)
+            {
+                throw new ConcurrencyException("Attendance");
+            }
+
+            record.RowVersion += 1;
         }
 
         public void Upsert(AttendanceRecord record)

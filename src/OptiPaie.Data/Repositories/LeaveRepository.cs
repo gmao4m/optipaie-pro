@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Dapper;
 using OptiPaie.Core.Entities;
+using OptiPaie.Core.Primitives;
 using OptiPaie.Core.Interfaces.Repositories;
 using OptiPaie.Data.Context;
 
@@ -86,10 +87,16 @@ namespace OptiPaie.Data.Repositories
                 "EmployeeId = @EmployeeId, Type = @Type, LeaveTypeId = @LeaveTypeId, Status = @Status, IsDraft = @IsDraft, " +
                 "StartDate = @StartDate, EndDate = @EndDate, Days = @Days, Reason = @Reason, " +
                 "DecisionNote = @DecisionNote, DecidedAtUtc = @DecidedAtUtc, " +
-                "UpdatedAtUtc = @UpdatedAtUtc, IsDeleted = @IsDeleted " +
-                "WHERE Id = @Id;";
+                "UpdatedAtUtc = @UpdatedAtUtc, IsDeleted = @IsDeleted, RowVersion = RowVersion + 1 " +
+                "WHERE Id = @Id AND RowVersion = @RowVersion;";
 
-            Connection.Execute(sql, request, Transaction);
+            int rows = Connection.Execute(sql, request, Transaction);
+            if (rows == 0)
+            {
+                throw new ConcurrencyException("Leave");
+            }
+
+            request.RowVersion += 1;
         }
 
         public void SoftDelete(long id)

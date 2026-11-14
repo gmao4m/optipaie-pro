@@ -8,6 +8,7 @@ using OptiPaie.Core.Entities;
 using OptiPaie.Core.Enums;
 using OptiPaie.Core.Interfaces.Repositories;
 using OptiPaie.Core.Interfaces.Services;
+using OptiPaie.Common.Constants;
 using OptiPaie.Core.Primitives;
 
 namespace OptiPaie.Services
@@ -66,23 +67,31 @@ namespace OptiPaie.Services
                         return Result.Fail<long>("Contrat introuvable.", "Contract_NotFound");
                     }
 
-                    if (existing.Status != ContractStatus.Draft)
+                    try
                     {
-                        // A contract in force keeps its legal terms — only the reference,
-                        // signature date and notes may be corrected. Use Renew/Terminate
-                        // to change the actual terms.
-                        existing.Reference = contract.Reference;
-                        existing.SignedDate = contract.SignedDate;
-                        existing.Notes = contract.Notes;
-                        uow.Contracts.Update(existing);
-                        return Result.Ok(existing.Id);
-                    }
+                        if (existing.Status != ContractStatus.Draft)
+                        {
+                            // A contract in force keeps its legal terms — only the reference,
+                            // signature date and notes may be corrected. Use Renew/Terminate
+                            // to change the actual terms.
+                            existing.Reference = contract.Reference;
+                            existing.SignedDate = contract.SignedDate;
+                            existing.Notes = contract.Notes;
+                            existing.RowVersion = contract.RowVersion; // check against the editor's loaded version
+                            uow.Contracts.Update(existing);
+                            return Result.Ok(existing.Id);
+                        }
 
-                    contract.CreatedAtUtc = existing.CreatedAtUtc;
-                    contract.Status = ContractStatus.Draft;
-                    contract.PreviousContractId = existing.PreviousContractId;
-                    uow.Contracts.Update(contract);
-                    return Result.Ok(contract.Id);
+                        contract.CreatedAtUtc = existing.CreatedAtUtc;
+                        contract.Status = ContractStatus.Draft;
+                        contract.PreviousContractId = existing.PreviousContractId;
+                        uow.Contracts.Update(contract);
+                        return Result.Ok(contract.Id);
+                    }
+                    catch (ConcurrencyException)
+                    {
+                        return Result.Fail<long>(ConcurrencyException.UserMessage, ErrorCodes.Concurrency);
+                    }
                 }
 
                 contract.Status = ContractStatus.Draft;

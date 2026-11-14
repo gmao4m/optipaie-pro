@@ -58,5 +58,8 @@ namespace OptiPaie.Core.Entities
         public DateTime? UpdatedAtUtc { get; set; }
 
         public bool IsDeleted { get; set; }
+
+        /// <summary>Optimistic-concurrency token (see <see cref="Employee.RowVersion"/>). Default 0.</summary>
+        public long RowVersion { get; set; }
     }
 }

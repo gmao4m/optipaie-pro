@@ -61,7 +61,15 @@ namespace OptiPaie.Services
                     return Result.Fail("Entreprise introuvable.", ErrorCodes.EmployeeCompanyNotFound);
                 }
 
-                uow.Employees.Update(employee);
+                try
+                {
+                    uow.Employees.Update(employee);
+                }
+                catch (ConcurrencyException)
+                {
+                    return Result.Fail(ConcurrencyException.UserMessage, ErrorCodes.Concurrency);
+                }
+
                 Audit.Record("Employee", employee.Id, AuditAction.Updated, "Employé modifié : " + NameOf(employee));
                 return Result.Ok();
             }

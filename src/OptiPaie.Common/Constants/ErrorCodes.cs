@@ -10,6 +10,9 @@ namespace OptiPaie.Common.Constants
         // Generic
         public const string NotFound = "Error_NotFound";
 
+        // Optimistic concurrency (another user saved first)
+        public const string Concurrency = "Error_Concurrency";
+
         // Company
         public const string CompanyNameRequired = "Company_NameRequired";
 
