@@ -8,6 +8,7 @@ using OptiPaie.Core.Entities;
 using OptiPaie.Core.Interfaces.Repositories;
 using OptiPaie.Core.Interfaces.Services;
 using OptiPaie.Core.Primitives;
+using OptiPaie.Core.Security;
 using OptiPaie.Services.Validation;
 
 namespace OptiPaie.Services
@@ -17,11 +18,13 @@ namespace OptiPaie.Services
     {
         private readonly IUnitOfWorkFactory _unitOfWorkFactory;
         private readonly IValidator<Employee> _validator;
+        private readonly IAccessContext _access;
 
-        public EmployeeService(IUnitOfWorkFactory unitOfWorkFactory, IValidator<Employee> validator)
+        public EmployeeService(IUnitOfWorkFactory unitOfWorkFactory, IValidator<Employee> validator, IAccessContext access = null)
         {
             _unitOfWorkFactory = Guard.AgainstNull(unitOfWorkFactory, nameof(unitOfWorkFactory));
             _validator = Guard.AgainstNull(validator, nameof(validator));
+            _access = access;
         }
 
         /// <summary>Audit trail (who created/changed/deleted an employee or their salary). Best-effort.</summary>
@@ -34,6 +37,7 @@ namespace OptiPaie.Services
 
         public Result<long> Create(Employee employee)
         {
+            AccessPolicy.Require(_access, Permission.EditEmployees);
             // The single validated + audited creation path (shared with recruitment's Hire).
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
@@ -43,6 +47,7 @@ namespace OptiPaie.Services
 
         public Result Update(Employee employee)
         {
+            AccessPolicy.Require(_access, Permission.EditEmployees);
             ValidationResult validation = _validator.Validate(employee);
             if (!validation.IsValid)
             {
@@ -77,6 +82,7 @@ namespace OptiPaie.Services
 
         public Result Delete(long id)
         {
+            AccessPolicy.Require(_access, Permission.EditEmployees);
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 Employee existing = uow.Employees.GetById(id);
@@ -130,6 +136,7 @@ namespace OptiPaie.Services
 
         public Result<long> AssignElement(EmployeeElement assignment)
         {
+            AccessPolicy.Require(_access, Permission.EditEmployees);
             Guard.AgainstNull(assignment, nameof(assignment));
 
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
@@ -158,6 +165,7 @@ namespace OptiPaie.Services
 
         public Result UpdateElement(EmployeeElement assignment)
         {
+            AccessPolicy.Require(_access, Permission.EditEmployees);
             Guard.AgainstNull(assignment, nameof(assignment));
 
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
@@ -177,6 +185,7 @@ namespace OptiPaie.Services
 
         public Result RemoveElement(long employeeElementId)
         {
+            AccessPolicy.Require(_access, Permission.EditEmployees);
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 EmployeeElement existing = uow.EmployeeElements.GetById(employeeElementId);

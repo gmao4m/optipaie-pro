@@ -53,16 +53,22 @@ namespace OptiPaie.Desktop.Composition
             IUnitOfWorkFactory unitOfWorkFactory = new UnitOfWorkFactory(connectionFactory);
             IDatabaseBackupProvider backupProvider = new SqliteBackupProvider(connectionFactory, configuration);
 
-            var companyService = new CompanyService(unitOfWorkFactory, new CompanyValidator());
-            var employeeService = new EmployeeService(unitOfWorkFactory, new EmployeeValidator());
+            // Service-layer authorization choke point. Created now (empty), passed into every
+            // write-capable service, and Bind-ed to the real session once it exists (below). Until
+            // then — and whenever the login gate is off — it reports "not enforced" = full access,
+            // so existing installs behave exactly as before.
+            var access = new SessionAccessContext();
+
+            var companyService = new CompanyService(unitOfWorkFactory, new CompanyValidator(), access);
+            var employeeService = new EmployeeService(unitOfWorkFactory, new EmployeeValidator(), access);
             var elementService = new PayrollElementService(unitOfWorkFactory, new PayrollElementValidator());
             var configurationService = new ConfigurationService(unitOfWorkFactory);
             var settingsService = new SettingsService(unitOfWorkFactory);
             var archiveService = new ArchiveService(unitOfWorkFactory);
-            var attendanceService = new AttendanceService(unitOfWorkFactory);
-            var leaveService = new LeaveService(unitOfWorkFactory);
-            var loanService = new LoanService(unitOfWorkFactory);
-            var contractService = new ContractService(unitOfWorkFactory);
+            var attendanceService = new AttendanceService(unitOfWorkFactory, access);
+            var leaveService = new LeaveService(unitOfWorkFactory, access);
+            var loanService = new LoanService(unitOfWorkFactory, access);
+            var contractService = new ContractService(unitOfWorkFactory, access);
             var performanceService = new PerformanceService(unitOfWorkFactory);
             var assetService = new AssetService(unitOfWorkFactory);
             var departmentService = new DepartmentService(unitOfWorkFactory);
@@ -96,11 +102,11 @@ namespace OptiPaie.Desktop.Composition
             atsService.Audit = auditService;         // recruitment: candidate hired -> employee
             var backupService = new BackupService(backupProvider, unitOfWorkFactory, configuration, logger);
             var localizationService = new LocalizationService();
-            var userService = new UserService(unitOfWorkFactory, settingsService);
+            var userService = new UserService(unitOfWorkFactory, settingsService, access);
             userService.Audit = auditService;        // user management + login-gate changes
 
             IPayrollEngine engine = new PayrollCalculationEngine();
-            var payrollService = new PayrollService(unitOfWorkFactory, configurationService, engine);
+            var payrollService = new PayrollService(unitOfWorkFactory, configurationService, engine, access);
 
             // Payslip correction / deletion / restore. Re-runs the SAME engine (via Preview) and
             // persists the result; the payslip status change and the loan reversal/re-application
@@ -211,6 +217,11 @@ namespace OptiPaie.Desktop.Composition
             // Configurable-types + holidays services (post-construction, like leaveService.Audit above).
             appServices.LeaveTypes = new LeaveTypeService(unitOfWorkFactory);
             appServices.Holidays = new HolidayService(unitOfWorkFactory);
+
+            // Bind the service-layer authorization choke point to the real session now that it exists.
+            // Enforcement activates only while the login gate is on AND a user exists; the signed-in
+            // role then drives AccessPolicy at every write-capable service.
+            access.Bind(appServices.Session, userService);
 
             // Attribute every audit entry to WHO performed it. Evaluated at record time so it
             // always reflects the CURRENT session: the signed-in local user (username), else the

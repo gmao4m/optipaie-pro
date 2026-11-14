@@ -27,10 +27,12 @@ namespace OptiPaie.Services
     public sealed class LoanService : ILoanService
     {
         private readonly IUnitOfWorkFactory _unitOfWorkFactory;
+        private readonly OptiPaie.Core.Security.IAccessContext _access;
 
-        public LoanService(IUnitOfWorkFactory unitOfWorkFactory)
+        public LoanService(IUnitOfWorkFactory unitOfWorkFactory, OptiPaie.Core.Security.IAccessContext access = null)
         {
             _unitOfWorkFactory = Guard.AgainstNull(unitOfWorkFactory, nameof(unitOfWorkFactory));
+            _access = access;
         }
 
         /// <summary>Optional audit sink (no-op unless wired by composition).</summary>
@@ -38,6 +40,7 @@ namespace OptiPaie.Services
 
         public Result<long> Save(Loan loan)
         {
+            OptiPaie.Core.Security.AccessPolicy.Require(_access, OptiPaie.Core.Security.Permission.ManageLoans);
             if (loan == null)
             {
                 return Result.Fail<long>("Aucun prêt.", "Loan_Required");
@@ -116,6 +119,7 @@ namespace OptiPaie.Services
 
         public Result SetStatus(long id, LoanStatus status)
         {
+            OptiPaie.Core.Security.AccessPolicy.Require(_access, OptiPaie.Core.Security.Permission.ManageLoans);
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 Loan loan = uow.Loans.GetById(id);
@@ -134,6 +138,7 @@ namespace OptiPaie.Services
 
         public Result Delete(long id)
         {
+            OptiPaie.Core.Security.AccessPolicy.Require(_access, OptiPaie.Core.Security.Permission.ManageLoans);
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 Loan loan = uow.Loans.GetById(id);
@@ -226,6 +231,7 @@ namespace OptiPaie.Services
 
         public Result AddManualRepayment(long loanId, int year, int month, decimal amount)
         {
+            OptiPaie.Core.Security.AccessPolicy.Require(_access, OptiPaie.Core.Security.Permission.ManageLoans);
             if (amount <= 0m)
             {
                 return Result.Fail("Le montant doit être positif.", "Loan_RepaymentInvalid");
@@ -283,6 +289,7 @@ namespace OptiPaie.Services
 
         public Result RemoveRepayment(long repaymentId)
         {
+            OptiPaie.Core.Security.AccessPolicy.Require(_access, OptiPaie.Core.Security.Permission.ManageLoans);
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 LoanRepayment repayment = uow.Loans.GetRepaymentById(repaymentId);

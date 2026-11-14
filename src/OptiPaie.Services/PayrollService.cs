@@ -25,15 +25,18 @@ namespace OptiPaie.Services
         private readonly IUnitOfWorkFactory _unitOfWorkFactory;
         private readonly IConfigurationService _configurationService;
         private readonly IPayrollEngine _engine;
+        private readonly OptiPaie.Core.Security.IAccessContext _access;
 
         public PayrollService(
             IUnitOfWorkFactory unitOfWorkFactory,
             IConfigurationService configurationService,
-            IPayrollEngine engine)
+            IPayrollEngine engine,
+            OptiPaie.Core.Security.IAccessContext access = null)
         {
             _unitOfWorkFactory = Guard.AgainstNull(unitOfWorkFactory, nameof(unitOfWorkFactory));
             _configurationService = Guard.AgainstNull(configurationService, nameof(configurationService));
             _engine = Guard.AgainstNull(engine, nameof(engine));
+            _access = access;
         }
 
         public PayrollResult Preview(PayrollGenerationRequest request)
@@ -44,6 +47,7 @@ namespace OptiPaie.Services
 
         public Result<long> Generate(PayrollGenerationRequest request)
         {
+            OptiPaie.Core.Security.AccessPolicy.Require(_access, OptiPaie.Core.Security.Permission.RunPayroll);
             BuildOutcome outcome = BuildContext(request);
             if (outcome.Failure != null)
             {

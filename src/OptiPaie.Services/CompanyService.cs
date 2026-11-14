@@ -6,6 +6,7 @@ using OptiPaie.Core.Entities;
 using OptiPaie.Core.Interfaces.Repositories;
 using OptiPaie.Core.Interfaces.Services;
 using OptiPaie.Core.Primitives;
+using OptiPaie.Core.Security;
 using OptiPaie.Services.Validation;
 
 namespace OptiPaie.Services
@@ -15,15 +16,18 @@ namespace OptiPaie.Services
     {
         private readonly IUnitOfWorkFactory _unitOfWorkFactory;
         private readonly IValidator<Company> _validator;
+        private readonly IAccessContext _access;
 
-        public CompanyService(IUnitOfWorkFactory unitOfWorkFactory, IValidator<Company> validator)
+        public CompanyService(IUnitOfWorkFactory unitOfWorkFactory, IValidator<Company> validator, IAccessContext access = null)
         {
             _unitOfWorkFactory = Guard.AgainstNull(unitOfWorkFactory, nameof(unitOfWorkFactory));
             _validator = Guard.AgainstNull(validator, nameof(validator));
+            _access = access;
         }
 
         public Result<long> Create(Company company)
         {
+            AccessPolicy.Require(_access, Permission.ManageCompanies);
             ValidationResult validation = _validator.Validate(company);
             if (!validation.IsValid)
             {
@@ -39,6 +43,7 @@ namespace OptiPaie.Services
 
         public Result Update(Company company)
         {
+            AccessPolicy.Require(_access, Permission.ManageCompanies);
             ValidationResult validation = _validator.Validate(company);
             if (!validation.IsValid)
             {
@@ -59,6 +64,7 @@ namespace OptiPaie.Services
 
         public Result Delete(long id)
         {
+            AccessPolicy.Require(_access, Permission.ManageCompanies);
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 if (!uow.Companies.ExistsById(id))

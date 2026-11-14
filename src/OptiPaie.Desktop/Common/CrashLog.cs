@@ -54,6 +54,25 @@ namespace OptiPaie.Desktop.Common
             {
                 app.DispatcherUnhandledException += (s, e) =>
                 {
+                    // Expected, user-facing refusals are not crashes: show the friendly bilingual
+                    // message (not a technical dump) and keep going.
+                    if (e.Exception is OptiPaie.Core.Security.AccessDeniedException ade)
+                    {
+                        Breadcrumb("Access denied surfaced to user: " + ade.Permission);
+                        System.Windows.MessageBox.Show(OptiPaie.Core.Security.AccessDeniedException.UserMessage,
+                            "OptiPaie PRO", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+                        e.Handled = true;
+                        return;
+                    }
+                    if (e.Exception is OptiPaie.Core.Primitives.ConcurrencyException)
+                    {
+                        Breadcrumb("Concurrency conflict surfaced to user");
+                        System.Windows.MessageBox.Show(OptiPaie.Core.Primitives.ConcurrencyException.UserMessage,
+                            "OptiPaie PRO", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+                        e.Handled = true;
+                        return;
+                    }
+
                     // Log the FULL dump, then show it — the real exception type + message + a copy
                     // button — and KEEP the process alive. A UI-thread exception must never silently
                     // close the app, and the dialog must tell the customer (and us) what actually failed.

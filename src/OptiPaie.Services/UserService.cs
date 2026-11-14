@@ -10,6 +10,7 @@ using OptiPaie.Core.Enums;
 using OptiPaie.Core.Interfaces.Repositories;
 using OptiPaie.Core.Interfaces.Services;
 using OptiPaie.Core.Primitives;
+using OptiPaie.Core.Security;
 
 namespace OptiPaie.Services
 {
@@ -36,11 +37,13 @@ namespace OptiPaie.Services
 
         private readonly IUnitOfWorkFactory _unitOfWorkFactory;
         private readonly ISettingsService _settings;
+        private readonly IAccessContext _access;
 
-        public UserService(IUnitOfWorkFactory unitOfWorkFactory, ISettingsService settings)
+        public UserService(IUnitOfWorkFactory unitOfWorkFactory, ISettingsService settings, IAccessContext access = null)
         {
             _unitOfWorkFactory = Guard.AgainstNull(unitOfWorkFactory, nameof(unitOfWorkFactory));
             _settings = Guard.AgainstNull(settings, nameof(settings));
+            _access = access;
         }
 
         /// <summary>Audit trail for user management + the login gate (security-relevant). Best-effort.</summary>
@@ -52,6 +55,7 @@ namespace OptiPaie.Services
 
         public Result<long> Create(string username, string fullName, string password, UserRole role, string department, bool mustChangePassword = false)
         {
+            AccessPolicy.Require(_access, Permission.ManageUsers);
             if (string.IsNullOrWhiteSpace(username))
             {
                 return Result.Fail<long>("Le nom d'utilisateur est requis.", "User_UsernameRequired");
@@ -90,6 +94,7 @@ namespace OptiPaie.Services
 
         public Result Update(User user)
         {
+            AccessPolicy.Require(_access, Permission.ManageUsers);
             if (user == null || user.Id <= 0)
             {
                 return Result.Fail("Utilisateur introuvable.", "User_NotFound");
@@ -152,6 +157,7 @@ namespace OptiPaie.Services
 
         public Result Delete(long userId)
         {
+            AccessPolicy.Require(_access, Permission.ManageUsers);
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 User existing = uow.Users.GetById(userId);
@@ -250,6 +256,7 @@ namespace OptiPaie.Services
 
         public void SetLoginEnabled(bool enabled)
         {
+            AccessPolicy.Require(_access, Permission.ManageUsers);
             // Never allow enabling the gate with no active administrator — that would raise a login
             // screen no one can pass (a lock-out). Disabling is always allowed.
             if (enabled && !HasActiveAdmin())

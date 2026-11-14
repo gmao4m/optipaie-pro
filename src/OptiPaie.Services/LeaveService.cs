@@ -43,11 +43,16 @@ namespace OptiPaie.Services
         private static readonly ISet<DateTime> NoHolidays = new HashSet<DateTime>();
 
         private readonly IUnitOfWorkFactory _unitOfWorkFactory;
+        private readonly OptiPaie.Core.Security.IAccessContext _access;
 
-        public LeaveService(IUnitOfWorkFactory unitOfWorkFactory)
+        public LeaveService(IUnitOfWorkFactory unitOfWorkFactory, OptiPaie.Core.Security.IAccessContext access = null)
         {
             _unitOfWorkFactory = Guard.AgainstNull(unitOfWorkFactory, nameof(unitOfWorkFactory));
+            _access = access;
         }
+
+        private void RequireLeave() =>
+            OptiPaie.Core.Security.AccessPolicy.Require(_access, OptiPaie.Core.Security.Permission.ManageLeave);
 
         /// <summary>Optional audit sink (no-op unless wired by composition). Records lifecycle changes.</summary>
         public IAuditSink Audit { get; set; } = NullAuditSink.Instance;
@@ -65,6 +70,7 @@ namespace OptiPaie.Services
 
         public Result<long> Save(LeaveRequest request)
         {
+            RequireLeave();
             if (request == null)
             {
                 return Fail<long>("Aucune demande de congé.", "Leave_Required");
@@ -144,6 +150,7 @@ namespace OptiPaie.Services
 
         public Result Submit(long id)
         {
+            RequireLeave();
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 LeaveRequest request = uow.Leave.GetById(id);
@@ -172,6 +179,7 @@ namespace OptiPaie.Services
 
         public Result ReturnToDraft(long id, string note)
         {
+            RequireLeave();
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 LeaveRequest request = uow.Leave.GetById(id);
@@ -190,6 +198,7 @@ namespace OptiPaie.Services
 
         public Result Approve(long id, string note)
         {
+            RequireLeave();
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 LeaveRequest request = uow.Leave.GetById(id);
@@ -230,6 +239,7 @@ namespace OptiPaie.Services
 
         public Result Reject(long id, string note)
         {
+            RequireLeave();
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 LeaveRequest request = uow.Leave.GetById(id);
@@ -250,6 +260,7 @@ namespace OptiPaie.Services
 
         public Result Cancel(long id, string note)
         {
+            RequireLeave();
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 LeaveRequest request = uow.Leave.GetById(id);
@@ -282,6 +293,7 @@ namespace OptiPaie.Services
 
         public Result Delete(long id)
         {
+            RequireLeave();
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 LeaveRequest request = uow.Leave.GetById(id);
@@ -477,6 +489,7 @@ namespace OptiPaie.Services
 
         public Result SaveSettings(long companyId, LeaveSettings settings)
         {
+            RequireLeave();
             if (settings == null) return Fail("Paramètres manquants.", "Leave_SettingsRequired");
             if (settings.DaysPerMonth <= 0m || settings.DaysPerMonth > 10m) return Fail("Jours acquis par mois invalide.", "Leave_DaysPerMonthInvalid");
             if (settings.AnnualCap <= 0m || settings.AnnualCap > 365m) return Fail("Plafond annuel invalide.", "Leave_CapInvalid");

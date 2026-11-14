@@ -29,14 +29,20 @@ namespace OptiPaie.Services
         private const string KeyTolerance = "Attendance.LateToleranceMinutes";
 
         private readonly IUnitOfWorkFactory _unitOfWorkFactory;
+        private readonly OptiPaie.Core.Security.IAccessContext _access;
 
-        public AttendanceService(IUnitOfWorkFactory unitOfWorkFactory)
+        public AttendanceService(IUnitOfWorkFactory unitOfWorkFactory, OptiPaie.Core.Security.IAccessContext access = null)
         {
             _unitOfWorkFactory = Guard.AgainstNull(unitOfWorkFactory, nameof(unitOfWorkFactory));
+            _access = access;
         }
+
+        private void RequireAttendance() =>
+            OptiPaie.Core.Security.AccessPolicy.Require(_access, OptiPaie.Core.Security.Permission.ManageAttendance);
 
         public Result<long> Save(AttendanceRecord record)
         {
+            RequireAttendance();
             if (record == null)
             {
                 return Result.Fail<long>("Aucune donnée de pointage.", "Attendance_Required");
@@ -74,6 +80,7 @@ namespace OptiPaie.Services
 
         public Result SaveMany(IEnumerable<AttendanceRecord> records)
         {
+            RequireAttendance();
             List<AttendanceRecord> list = (records ?? Enumerable.Empty<AttendanceRecord>()).ToList();
             if (list.Count == 0)
             {
@@ -121,6 +128,7 @@ namespace OptiPaie.Services
 
         public Result SetDayStatusBulk(IEnumerable<AttendanceDayStatus> entries)
         {
+            RequireAttendance();
             List<AttendanceDayStatus> list = (entries ?? Enumerable.Empty<AttendanceDayStatus>())
                 .Where(e => e != null && e.EmployeeId > 0)
                 .ToList();
@@ -183,6 +191,7 @@ namespace OptiPaie.Services
 
         public Result Delete(long id)
         {
+            RequireAttendance();
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 uow.Attendance.SoftDelete(id);
@@ -224,6 +233,7 @@ namespace OptiPaie.Services
         /// </summary>
         public Result ClearDayBulk(IEnumerable<AttendanceDayStatus> entries)
         {
+            RequireAttendance();
             List<AttendanceDayStatus> list = (entries ?? Enumerable.Empty<AttendanceDayStatus>())
                 .Where(e => e != null && e.EmployeeId > 0).ToList();
             if (list.Count == 0) return Result.Ok();
@@ -331,6 +341,7 @@ namespace OptiPaie.Services
 
         public Result SaveSettings(AttendanceSettings settings)
         {
+            RequireAttendance();
             if (settings == null)
             {
                 return Result.Fail("Paramètres manquants.", "Attendance_SettingsRequired");

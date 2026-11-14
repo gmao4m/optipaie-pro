@@ -30,17 +30,23 @@ namespace OptiPaie.Services
         private const int DefaultAlertWindow = 30;
 
         private readonly IUnitOfWorkFactory _unitOfWorkFactory;
+        private readonly OptiPaie.Core.Security.IAccessContext _access;
 
-        public ContractService(IUnitOfWorkFactory unitOfWorkFactory)
+        public ContractService(IUnitOfWorkFactory unitOfWorkFactory, OptiPaie.Core.Security.IAccessContext access = null)
         {
             _unitOfWorkFactory = Guard.AgainstNull(unitOfWorkFactory, nameof(unitOfWorkFactory));
+            _access = access;
         }
+
+        private void RequireContract() =>
+            OptiPaie.Core.Security.AccessPolicy.Require(_access, OptiPaie.Core.Security.Permission.ManageContracts);
 
         /// <summary>Optional audit sink (no-op unless wired by composition).</summary>
         public IAuditSink Audit { get; set; } = NullAuditSink.Instance;
 
         public Result<long> Save(EmploymentContract contract)
         {
+            RequireContract();
             if (contract == null)
             {
                 return Result.Fail<long>("Aucun contrat.", "Contract_Required");
@@ -139,6 +145,7 @@ namespace OptiPaie.Services
 
         public Result Activate(long id)
         {
+            RequireContract();
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 EmploymentContract contract = uow.Contracts.GetById(id);
@@ -178,6 +185,7 @@ namespace OptiPaie.Services
 
         public Result Terminate(long id, DateTime effectiveDate, string reason)
         {
+            RequireContract();
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 EmploymentContract contract = uow.Contracts.GetById(id);
@@ -232,6 +240,7 @@ namespace OptiPaie.Services
 
         public Result<long> Renew(long id, DateTime newStart, DateTime? newEnd, decimal newBaseSalary)
         {
+            RequireContract();
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 EmploymentContract old = uow.Contracts.GetById(id);
@@ -302,6 +311,7 @@ namespace OptiPaie.Services
 
         public Result Delete(long id)
         {
+            RequireContract();
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 EmploymentContract contract = uow.Contracts.GetById(id);
