@@ -142,7 +142,9 @@ namespace OptiPaie.Desktop.Composition
             // The single local customer account (login/logout after first activation).
             // Stored in the settings key/value table and DPAPI-wrapped — no migration,
             // no network: sign-in after a logout is fully offline and never re-asks for a key.
-            ICustomerAccountService customerAccount = new CustomerAccountService(settingsService, cipher, logger);
+            var customerAccountImpl = new CustomerAccountService(settingsService, cipher, logger);
+            customerAccountImpl.Audit = auditService; // owner-recovery attempts are audited
+            ICustomerAccountService customerAccount = customerAccountImpl;
 
             // "Activated once" marker (plain settings flag). Lets the startup / reconnection
             // gate trust a prior activation and never re-ask a paying customer for the license.

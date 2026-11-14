@@ -43,5 +43,22 @@ namespace OptiPaie.Core.Licensing
 
         /// <summary>Removes the account entirely (rarely needed).</summary>
         void Clear();
+
+        /// <summary>True once a one-time recovery code has been issued for the account.</summary>
+        bool HasRecoveryCode { get; }
+
+        /// <summary>
+        /// Generates a NEW one-time recovery code, stores only its hash, and returns the plaintext to
+        /// show ONCE (print/copy). Any previous code is replaced. Returns null when there is no
+        /// account. Fully offline, no network.
+        /// </summary>
+        string IssueRecoveryCode();
+
+        /// <summary>
+        /// Recovers the account with the one-time code: on the correct code it sets a new password,
+        /// CONSUMES the code and issues a fresh one (returned in the result). Rate-limited against
+        /// guessing; every attempt (success or failure) is audited. Fully offline, no network.
+        /// </summary>
+        RecoveryResult RecoverWithCode(string code, string newPassword);
     }
 }
