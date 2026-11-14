@@ -12,14 +12,22 @@ namespace OptiPaie.Core.Interfaces.Services
     /// </summary>
     public interface IUserService
     {
-        /// <summary>Creates a user with a hashed password. Username must be unique.</summary>
-        Result<long> Create(string username, string fullName, string password, UserRole role, string department);
+        /// <summary>
+        /// Creates a user with a hashed password. Username must be unique. Pass
+        /// <paramref name="mustChangePassword"/> = true for an admin-issued temporary password the
+        /// user must replace at first login.
+        /// </summary>
+        Result<long> Create(string username, string fullName, string password, UserRole role, string department, bool mustChangePassword = false);
 
         /// <summary>Updates a user's name, role, department and active flag (not the password).</summary>
         Result Update(User user);
 
-        /// <summary>Sets a new password (re-hashed).</summary>
-        Result ChangePassword(long userId, string newPassword);
+        /// <summary>
+        /// Sets a new password (re-hashed). Pass <paramref name="mustChangePassword"/> = true for an
+        /// administrator reset (the user must replace the temporary password at next login); false
+        /// when the user chooses their own password.
+        /// </summary>
+        Result ChangePassword(long userId, string newPassword, bool mustChangePassword = false);
 
         /// <summary>Soft-deletes a user (never the last active admin).</summary>
         Result Delete(long userId);

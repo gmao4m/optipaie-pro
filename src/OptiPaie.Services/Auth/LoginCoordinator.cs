@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using OptiPaie.Core.Entities;
 using OptiPaie.Core.Interfaces.Services;
 using OptiPaie.Core.Licensing;
@@ -50,11 +51,21 @@ namespace OptiPaie.Services.Auth
     {
         private readonly ICustomerAccountService _owner;
         private readonly IUserService _users;
+        private readonly LoginThrottle _throttle;
+        private readonly Action<TimeSpan> _sleep;
 
         public LoginCoordinator(ICustomerAccountService owner, IUserService users)
+            : this(owner, users, new LoginThrottle(), d => Thread.Sleep(d))
+        {
+        }
+
+        /// <summary>Test seam: inject the throttle and a no-op sleep so the back-off is asserted without waiting.</summary>
+        public LoginCoordinator(ICustomerAccountService owner, IUserService users, LoginThrottle throttle, Action<TimeSpan> sleep)
         {
             _owner = owner;                                   // may be null on installs with no owner account
             _users = users ?? throw new ArgumentNullException(nameof(users));
+            _throttle = throttle ?? new LoginThrottle();
+            _sleep = sleep ?? (d => Thread.Sleep(d));
         }
 
         public LoginOutcome Login(string identifier, string password)
@@ -63,32 +74,58 @@ namespace OptiPaie.Services.Auth
             if (id.Length == 0) return LoginOutcome.Fail(LoginFailure.MissingIdentifier);
             if (string.IsNullOrEmpty(password)) return LoginOutcome.Fail(LoginFailure.MissingPassword);
 
+            // Progressive back-off: a run of failed attempts for this identifier makes the next one
+            // wait longer, throttling password guessing. A correct login clears the counter.
+            TimeSpan delay = _throttle.GetDelay(id);
+            if (delay > TimeSpan.Zero)
+            {
+                _sleep(delay);
+            }
+
+            LoginOutcome outcome;
             try
             {
-                // Owner account (email) — reachable whatever happens to the local users list.
-                if (_owner != null && _owner.HasAccount &&
-                    string.Equals(id, _owner.Email, StringComparison.OrdinalIgnoreCase))
-                {
-                    return _owner.SignIn(id, password)
-                        ? LoginOutcome.Ok(LoginPrincipal.Owner)
-                        : LoginOutcome.Fail(LoginFailure.BadCredentials);
-                }
-
-                // Local user (username).
-                Result<User> r = _users.Authenticate(id, password);
-                if (r.IsSuccess)
-                {
-                    return LoginOutcome.Ok(LoginPrincipal.LocalUser, r.Value);
-                }
-
-                return r.ErrorCode == "User_Disabled"
-                    ? LoginOutcome.Fail(LoginFailure.Disabled)
-                    : LoginOutcome.Fail(LoginFailure.BadCredentials);
+                outcome = Attempt(id, password);
             }
             catch
             {
+                _throttle.OnFailure(id);
                 return LoginOutcome.Fail(LoginFailure.Technical);
             }
+
+            if (outcome.Success)
+            {
+                _throttle.OnSuccess(id);
+            }
+            else
+            {
+                _throttle.OnFailure(id);
+            }
+
+            return outcome;
+        }
+
+        private LoginOutcome Attempt(string id, string password)
+        {
+            // Owner account (email) — reachable whatever happens to the local users list.
+            if (_owner != null && _owner.HasAccount &&
+                string.Equals(id, _owner.Email, StringComparison.OrdinalIgnoreCase))
+            {
+                return _owner.SignIn(id, password)
+                    ? LoginOutcome.Ok(LoginPrincipal.Owner)
+                    : LoginOutcome.Fail(LoginFailure.BadCredentials);
+            }
+
+            // Local user (username).
+            Result<User> r = _users.Authenticate(id, password);
+            if (r.IsSuccess)
+            {
+                return LoginOutcome.Ok(LoginPrincipal.LocalUser, r.Value);
+            }
+
+            return r.ErrorCode == "User_Disabled"
+                ? LoginOutcome.Fail(LoginFailure.Disabled)
+                : LoginOutcome.Fail(LoginFailure.BadCredentials);
         }
     }
 }

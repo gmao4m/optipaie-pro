@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Security.Cryptography;
 using OptiPaie.Common.Validation;
@@ -14,15 +15,24 @@ namespace OptiPaie.Services
 {
     /// <summary>
     /// Local user accounts, roles and the optional login gate. Passwords are hashed with
-    /// PBKDF2 (SHA-256, 100k iterations) and a per-user salt — the clear password is never
-    /// stored. The gate stays off until explicitly enabled, so existing/demo installs run open.
+    /// PBKDF2 (SHA-256) and a per-user salt — the clear password is never stored. The iteration
+    /// count is stored WITH each hash ("iterations$hash") so an older hash is recognised and
+    /// transparently upgraded to the current cost on the next successful login. The gate stays off
+    /// until explicitly enabled, so existing/demo installs run open.
     /// </summary>
     public sealed class UserService : IUserService
     {
         private const string AuthEnabledKey = "Auth.Enabled";
-        private const int Iterations = 100000;
+
+        // Current PBKDF2 cost. Raised from 100k -> 600k (OWASP guidance for PBKDF2-SHA256). Hashes
+        // written before this carry their own (lower) count and are re-hashed on next login.
+        private const int CurrentIterations = 600000;
+        private const int LegacyIterations = 100000;
         private const int SaltBytes = 16;
         private const int HashBytes = 32;
+
+        /// <summary>Minimum password length (raised from 4 to 10).</summary>
+        public const int MinPasswordLength = 10;
 
         private readonly IUnitOfWorkFactory _unitOfWorkFactory;
         private readonly ISettingsService _settings;
@@ -36,16 +46,20 @@ namespace OptiPaie.Services
         /// <summary>Audit trail for user management + the login gate (security-relevant). Best-effort.</summary>
         public IAuditSink Audit { get; set; } = NullAuditSink.Instance;
 
-        public Result<long> Create(string username, string fullName, string password, UserRole role, string department)
+        private static string PasswordTooShortMessage =>
+            "Le mot de passe doit contenir au moins " + MinPasswordLength + " caractères.\n" +
+            "يجب أن تتكوّن كلمة السرّ من " + MinPasswordLength + " محارف على الأقلّ.";
+
+        public Result<long> Create(string username, string fullName, string password, UserRole role, string department, bool mustChangePassword = false)
         {
             if (string.IsNullOrWhiteSpace(username))
             {
                 return Result.Fail<long>("Le nom d'utilisateur est requis.", "User_UsernameRequired");
             }
 
-            if (string.IsNullOrEmpty(password) || password.Length < 4)
+            if (string.IsNullOrEmpty(password) || password.Length < MinPasswordLength)
             {
-                return Result.Fail<long>("Le mot de passe doit contenir au moins 4 caractères.", "User_PasswordTooShort");
+                return Result.Fail<long>(PasswordTooShortMessage, "User_PasswordTooShort");
             }
 
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
@@ -61,10 +75,11 @@ namespace OptiPaie.Services
                     Username = username.Trim(),
                     FullName = fullName,
                     Salt = salt,
-                    PasswordHash = Hash(password, salt),
+                    PasswordHash = HashEncoded(password, salt, CurrentIterations),
                     Role = role,
                     Department = department,
-                    IsActive = true
+                    IsActive = true,
+                    MustChangePassword = mustChangePassword
                 };
 
                 long id = uow.Users.Insert(user);
@@ -108,11 +123,11 @@ namespace OptiPaie.Services
             }
         }
 
-        public Result ChangePassword(long userId, string newPassword)
+        public Result ChangePassword(long userId, string newPassword, bool mustChangePassword = false)
         {
-            if (string.IsNullOrEmpty(newPassword) || newPassword.Length < 4)
+            if (string.IsNullOrEmpty(newPassword) || newPassword.Length < MinPasswordLength)
             {
-                return Result.Fail("Le mot de passe doit contenir au moins 4 caractères.", "User_PasswordTooShort");
+                return Result.Fail(PasswordTooShortMessage, "User_PasswordTooShort");
             }
 
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
@@ -124,9 +139,13 @@ namespace OptiPaie.Services
                 }
 
                 existing.Salt = NewSalt();
-                existing.PasswordHash = Hash(newPassword, existing.Salt);
+                existing.PasswordHash = HashEncoded(newPassword, existing.Salt, CurrentIterations);
+                existing.MustChangePassword = mustChangePassword;
                 uow.Users.Update(existing);
-                Audit.Record("User", userId, AuditAction.Updated, "Mot de passe réinitialisé : " + existing.Username);
+                Audit.Record("User", userId, AuditAction.Updated,
+                    mustChangePassword
+                        ? "Mot de passe réinitialisé (à changer à la prochaine connexion) : " + existing.Username
+                        : "Mot de passe modifié : " + existing.Username);
                 return Result.Ok();
             }
         }
@@ -190,6 +209,15 @@ namespace OptiPaie.Services
                     return Result.Fail<User>("Ce compte est désactivé.", "User_Disabled");
                 }
 
+                // Transparent upgrade: a hash written at an older (lower) cost is re-hashed at the
+                // current cost now that we hold the correct clear password. Never changes the flags.
+                if (NeedsRehash(user.PasswordHash))
+                {
+                    user.Salt = NewSalt();
+                    user.PasswordHash = HashEncoded(password, user.Salt, CurrentIterations);
+                    uow.Users.Update(user);
+                }
+
                 return Result.Ok(user);
             }
         }
@@ -246,26 +274,72 @@ namespace OptiPaie.Services
             return Convert.ToBase64String(bytes);
         }
 
-        private static string Hash(string password, string saltBase64)
+        /// <summary>Raw PBKDF2-SHA256 derivation to a Base64 hash.</summary>
+        private static string ComputeHash(string password, string saltBase64, int iterations)
         {
             byte[] salt = Convert.FromBase64String(saltBase64);
-            using (var pbkdf2 = new Rfc2898DeriveBytes(password, salt, Iterations, HashAlgorithmName.SHA256))
+            using (var pbkdf2 = new Rfc2898DeriveBytes(password, salt, iterations, HashAlgorithmName.SHA256))
             {
                 return Convert.ToBase64String(pbkdf2.GetBytes(HashBytes));
             }
         }
 
-        private static bool Verify(string password, string saltBase64, string expectedHashBase64)
+        /// <summary>Stored form: "iterations$hash" so the cost travels with the hash.</summary>
+        private static string HashEncoded(string password, string saltBase64, int iterations)
         {
-            if (string.IsNullOrEmpty(saltBase64) || string.IsNullOrEmpty(expectedHashBase64))
+            return iterations.ToString(CultureInfo.InvariantCulture) + "$" + ComputeHash(password, saltBase64, iterations);
+        }
+
+        /// <summary>
+        /// Splits a stored hash into its iteration count and Base64 hash. A legacy value with no
+        /// "iterations$" prefix is assumed to be the old 100k-iteration hash.
+        /// </summary>
+        private static void Decode(string stored, out int iterations, out string hashBase64)
+        {
+            iterations = LegacyIterations;
+            hashBase64 = stored ?? string.Empty;
+            if (string.IsNullOrEmpty(stored))
+            {
+                return;
+            }
+
+            int sep = stored.IndexOf('$');
+            if (sep > 0 &&
+                int.TryParse(stored.Substring(0, sep), NumberStyles.Integer, CultureInfo.InvariantCulture, out int parsed) &&
+                parsed > 0)
+            {
+                iterations = parsed;
+                hashBase64 = stored.Substring(sep + 1);
+            }
+        }
+
+        private static bool NeedsRehash(string storedHash)
+        {
+            Decode(storedHash, out int iterations, out _);
+            return iterations != CurrentIterations;
+        }
+
+        private static bool Verify(string password, string saltBase64, string storedHash)
+        {
+            if (string.IsNullOrEmpty(saltBase64) || string.IsNullOrEmpty(storedHash))
             {
                 return false;
             }
 
-            string actual = Hash(password, saltBase64);
+            Decode(storedHash, out int iterations, out string expectedHashBase64);
+            if (string.IsNullOrEmpty(expectedHashBase64))
+            {
+                return false;
+            }
+
+            string actual = ComputeHash(password, saltBase64, iterations);
+
             // Constant-time comparison.
             byte[] a = Convert.FromBase64String(actual);
-            byte[] b = Convert.FromBase64String(expectedHashBase64);
+            byte[] b;
+            try { b = Convert.FromBase64String(expectedHashBase64); }
+            catch (FormatException) { return false; }
+
             if (a.Length != b.Length)
             {
                 return false;

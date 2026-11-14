@@ -70,9 +70,9 @@ namespace OptiPaie.Tests
                 applied = new MigrationRunner(connection).Run();
             }
 
-            // 3. Exactly the pending migrations (0033..0037) applied — cleanly, no throw.
-            Assert.That(applied, Is.EqualTo(5), "expected exactly 0033 + 0034 + 0035 + 0036 + 0037 to apply on a v32 database");
-            Assert.That(AppliedVersions(), Does.Contain(33).And.Contain(34).And.Contain(35).And.Contain(36).And.Contain(37));
+            // 3. Exactly the pending migrations (0033..0038) applied — cleanly, no throw.
+            Assert.That(applied, Is.EqualTo(6), "expected exactly 0033..0038 to apply on a v32 database");
+            Assert.That(AppliedVersions(), Does.Contain(33).And.Contain(34).And.Contain(35).And.Contain(36).And.Contain(37).And.Contain(38));
 
             // 4. The new schema is present.
             Assert.That(ColumnExists("JobPostings", "ContractType"), Is.True, "0033 did not add JobPostings.ContractType");
@@ -107,6 +107,8 @@ namespace OptiPaie.Tests
             Assert.That(ColumnExists("LeaveRequests", "RowVersion"), Is.True, "0037 did not add LeaveRequests.RowVersion");
             Assert.That(ColumnExists("Loans", "RowVersion"), Is.True, "0037 did not add Loans.RowVersion");
             Assert.That(ColumnExists("AttendanceRecords", "RowVersion"), Is.True, "0037 did not add AttendanceRecords.RowVersion");
+            // 0038 adds the force-change-password flag to local users, additively (default 0).
+            Assert.That(ColumnExists("Users", "MustChangePassword"), Is.True, "0038 did not add Users.MustChangePassword");
 
             // 5. No data loss: every pre-update row survives untouched, and the new nullable column
             //    is NULL for rows written before the update (never back-filled with a guessed value).

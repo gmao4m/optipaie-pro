@@ -45,8 +45,8 @@ namespace OptiPaie.Data.Repositories
         {
             user.CreatedAtUtc = DateTime.UtcNow;
             const string sql =
-                "INSERT INTO Users (Username, FullName, PasswordHash, Salt, Role, Department, IsActive, CreatedAtUtc, UpdatedAtUtc, IsDeleted) " +
-                "VALUES (@Username, @FullName, @PasswordHash, @Salt, @Role, @Department, @IsActive, @CreatedAtUtc, @UpdatedAtUtc, @IsDeleted); " +
+                "INSERT INTO Users (Username, FullName, PasswordHash, Salt, Role, Department, IsActive, MustChangePassword, CreatedAtUtc, UpdatedAtUtc, IsDeleted) " +
+                "VALUES (@Username, @FullName, @PasswordHash, @Salt, @Role, @Department, @IsActive, @MustChangePassword, @CreatedAtUtc, @UpdatedAtUtc, @IsDeleted); " +
                 "SELECT last_insert_rowid();";
             long id = Connection.ExecuteScalar<long>(sql, user, Transaction);
             user.Id = id;
@@ -58,7 +58,8 @@ namespace OptiPaie.Data.Repositories
             user.UpdatedAtUtc = DateTime.UtcNow;
             const string sql =
                 "UPDATE Users SET Username = @Username, FullName = @FullName, PasswordHash = @PasswordHash, Salt = @Salt, " +
-                "Role = @Role, Department = @Department, IsActive = @IsActive, UpdatedAtUtc = @UpdatedAtUtc, IsDeleted = @IsDeleted " +
+                "Role = @Role, Department = @Department, IsActive = @IsActive, MustChangePassword = @MustChangePassword, " +
+                "UpdatedAtUtc = @UpdatedAtUtc, IsDeleted = @IsDeleted " +
                 "WHERE Id = @Id;";
             Connection.Execute(sql, user, Transaction);
         }

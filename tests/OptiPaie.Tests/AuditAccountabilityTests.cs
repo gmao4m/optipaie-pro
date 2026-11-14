@@ -139,7 +139,7 @@ namespace OptiPaie.Tests
         public void UserManagement_AndLoginGate_AreAudited()
         {
             _actor = "boss@corp.dz";
-            long a1 = _users.Create("admin", "Admin", "adminpass", UserRole.Admin, null).Value;
+            long a1 = _users.Create("admin", "Admin", "adminpass12", UserRole.Admin, null).Value;
             _users.Create("admin2", "Admin 2", "adminpas2", UserRole.Admin, null); // 2nd admin so a1 may go
 
             Assert.That(_users.Delete(a1).IsSuccess, Is.True);

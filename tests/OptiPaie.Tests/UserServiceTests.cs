@@ -50,31 +50,31 @@ namespace OptiPaie.Tests
         [Test]
         public void Create_HashesThePassword_AndAuthenticates()
         {
-            Result<long> created = _users.Create("drh", "Nadia Z.", "secret123", UserRole.Admin, null);
+            Result<long> created = _users.Create("drh", "Nadia Z.", "secret12345", UserRole.Admin, null);
             Assert.That(created.IsSuccess, Is.True, created.Error);
 
             User stored = _users.Get(created.Value);
-            Assert.That(stored.PasswordHash, Is.Not.EqualTo("secret123"), "the clear password is never stored");
+            Assert.That(stored.PasswordHash, Is.Not.EqualTo("secret12345"), "the clear password is never stored");
             Assert.That(stored.PasswordHash, Is.Not.Empty);
             Assert.That(stored.Salt, Is.Not.Empty);
 
-            Assert.That(_users.Authenticate("drh", "secret123").IsSuccess, Is.True);
+            Assert.That(_users.Authenticate("drh", "secret12345").IsSuccess, Is.True);
             Assert.That(_users.Authenticate("drh", "wrong").IsFailure, Is.True);
-            Assert.That(_users.Authenticate("unknown", "secret123").IsFailure, Is.True);
+            Assert.That(_users.Authenticate("unknown", "secret12345").IsFailure, Is.True);
         }
 
         [Test]
         public void Create_RejectsDuplicateUsername()
         {
-            Assert.That(_users.Create("chef", "A", "pass1", UserRole.Manager, "Production").IsSuccess, Is.True);
-            Assert.That(_users.Create("chef", "B", "pass2", UserRole.Manager, "Commercial").IsFailure, Is.True);
+            Assert.That(_users.Create("chef", "A", "password01", UserRole.Manager, "Production").IsSuccess, Is.True);
+            Assert.That(_users.Create("chef", "B", "password02", UserRole.Manager, "Commercial").IsFailure, Is.True);
         }
 
         [Test]
         public void LastAdmin_CannotBeDeletedOrDemoted()
         {
-            long adminId = _users.Create("admin", "Admin", "pass1", UserRole.Admin, null).Value;
-            _users.Create("chef", "Chef", "pass2", UserRole.Manager, "Production");
+            long adminId = _users.Create("admin", "Admin", "password01", UserRole.Admin, null).Value;
+            _users.Create("chef", "Chef", "password02", UserRole.Manager, "Production");
 
             Assert.That(_users.Delete(adminId).IsFailure, Is.True, "cannot delete the only admin");
 
@@ -83,7 +83,7 @@ namespace OptiPaie.Tests
             Assert.That(_users.Update(demote).IsFailure, Is.True, "cannot demote the only admin");
 
             // With a second admin, the first can be removed.
-            long admin2 = _users.Create("admin2", "Admin 2", "pass3", UserRole.Admin, null).Value;
+            long admin2 = _users.Create("admin2", "Admin 2", "password03", UserRole.Admin, null).Value;
             Assert.That(admin2, Is.GreaterThan(0));
             Assert.That(_users.Delete(adminId).IsSuccess, Is.True);
         }
@@ -93,7 +93,7 @@ namespace OptiPaie.Tests
         {
             Assert.That(_users.IsLoginRequired(), Is.False, "no users, gate off");
 
-            _users.Create("admin", "Admin", "pass1", UserRole.Admin, null);
+            _users.Create("admin", "Admin", "password01", UserRole.Admin, null);
             Assert.That(_users.IsLoginRequired(), Is.False, "user exists but the gate is still off by default");
 
             _users.SetLoginEnabled(true);
@@ -106,13 +106,13 @@ namespace OptiPaie.Tests
         [Test]
         public void Authenticate_DisabledAccount_CorrectPassword_ReportsDisabled_NotBadCredentials()
         {
-            _users.Create("admin", "Admin", "adminpass", UserRole.Admin, null); // keep an active admin
-            long id = _users.Create("old", "Old", "pass1234", UserRole.Manager, null).Value;
+            _users.Create("admin", "Admin", "adminpass12", UserRole.Admin, null); // keep an active admin
+            long id = _users.Create("old", "Old", "password1234", UserRole.Manager, null).Value;
             User u = _users.Get(id);
             u.IsActive = false;
             Assert.That(_users.Update(u).IsSuccess, Is.True);
 
-            Result<User> right = _users.Authenticate("old", "pass1234"); // correct password, disabled
+            Result<User> right = _users.Authenticate("old", "password1234"); // correct password, disabled
             Assert.That(right.IsFailure, Is.True);
             Assert.That(right.ErrorCode, Is.EqualTo("User_Disabled"));
 
@@ -124,14 +124,14 @@ namespace OptiPaie.Tests
         public void SetLoginEnabled_IsRefused_WhenNoActiveAdminExists()
         {
             // A manager alone is not enough — enabling the gate needs an active admin.
-            _users.Create("chef", "Chef", "pass1234", UserRole.Manager, "Production");
+            _users.Create("chef", "Chef", "password1234", UserRole.Manager, "Production");
             Assert.That(_users.HasActiveAdmin(), Is.False);
 
             _users.SetLoginEnabled(true);
             Assert.That(_users.IsLoginEnabled(), Is.False, "cannot enable login without an active admin (lock-out guard)");
 
             // Add an admin → enabling now works.
-            _users.Create("admin", "Admin", "adminpass", UserRole.Admin, null);
+            _users.Create("admin", "Admin", "adminpass12", UserRole.Admin, null);
             Assert.That(_users.HasActiveAdmin(), Is.True);
             _users.SetLoginEnabled(true);
             Assert.That(_users.IsLoginEnabled(), Is.True);
@@ -140,8 +140,8 @@ namespace OptiPaie.Tests
         [Test]
         public void LastActiveAdmin_CannotBeDisabled_SoTheClientIsNeverLockedOut()
         {
-            long a1 = _users.Create("admin", "Admin", "adminpass", UserRole.Admin, null).Value;
-            long a2 = _users.Create("admin2", "Admin2", "adminpas2", UserRole.Admin, null).Value;
+            long a1 = _users.Create("admin", "Admin", "adminpass12", UserRole.Admin, null).Value;
+            long a2 = _users.Create("admin2", "Admin2", "adminpass02", UserRole.Admin, null).Value;
 
             // Disabling one admin is fine while another stays active.
             User u1 = _users.Get(a1); u1.IsActive = false;
@@ -157,13 +157,13 @@ namespace OptiPaie.Tests
         [Test]
         public void ChangePassword_Rehashes_AndOldPasswordStopsWorking()
         {
-            long id = _users.Create("u", "U", "old12345", UserRole.Manager, null).Value;
+            long id = _users.Create("u", "U", "old12345678", UserRole.Manager, null).Value;
             string oldHash = _users.Get(id).PasswordHash;
 
-            Assert.That(_users.ChangePassword(id, "new12345").IsSuccess, Is.True);
+            Assert.That(_users.ChangePassword(id, "new12345678").IsSuccess, Is.True);
             Assert.That(_users.Get(id).PasswordHash, Is.Not.EqualTo(oldHash));
-            Assert.That(_users.Authenticate("u", "new12345").IsSuccess, Is.True);
-            Assert.That(_users.Authenticate("u", "old12345").IsFailure, Is.True);
+            Assert.That(_users.Authenticate("u", "new12345678").IsSuccess, Is.True);
+            Assert.That(_users.Authenticate("u", "old12345678").IsFailure, Is.True);
         }
     }
 }

@@ -27,6 +27,13 @@ namespace OptiPaie.Core.Entities
 
         public bool IsActive { get; set; } = true;
 
+        /// <summary>
+        /// When true, the user must set a new password at their next successful login before they
+        /// can continue. Set when an administrator resets a password (temporary password flow), so a
+        /// reset credential is never a lasting one. Cleared when the user chooses their own password.
+        /// </summary>
+        public bool MustChangePassword { get; set; }
+
         public DateTime? UpdatedAtUtc { get; set; }
 
         public bool IsDeleted { get; set; }

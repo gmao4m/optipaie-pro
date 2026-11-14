@@ -59,9 +59,9 @@ namespace OptiPaie.Tests
         [Test]
         public void Login_LocalUsername_CorrectPassword_SignsInAsLocalUser()
         {
-            _users.Create("chef", "Chef Prod", "pass1234", UserRole.Manager, "Production");
+            _users.Create("chef", "Chef Prod", "password1234", UserRole.Manager, "Production");
 
-            LoginOutcome outcome = _coordinator.Login("chef", "pass1234");
+            LoginOutcome outcome = _coordinator.Login("chef", "password1234");
 
             Assert.That(outcome.Success, Is.True);
             Assert.That(outcome.Principal, Is.EqualTo(LoginPrincipal.LocalUser));
@@ -92,7 +92,7 @@ namespace OptiPaie.Tests
 
             // A local admin exists and the gate is ON — the owner email is still its own path,
             // so a client who forgot every local password can always get back in.
-            _users.Create("admin", "Admin", "adminpass", UserRole.Admin, null);
+            _users.Create("admin", "Admin", "adminpass12", UserRole.Admin, null);
             _users.SetLoginEnabled(true);
 
             LoginOutcome outcome = _coordinator.Login("boss@corp.dz", "owner-pass");
@@ -106,13 +106,13 @@ namespace OptiPaie.Tests
         [Test]
         public void Login_DisabledLocalUser_CorrectPassword_ReportsDisabled_NotBadPassword()
         {
-            _users.Create("admin", "Admin", "adminpass", UserRole.Admin, null); // keep an active admin
-            long id = _users.Create("old", "Old User", "pass1234", UserRole.Manager, null).Value;
+            _users.Create("admin", "Admin", "adminpass12", UserRole.Admin, null); // keep an active admin
+            long id = _users.Create("old", "Old User", "password1234", UserRole.Manager, null).Value;
             User u = _users.Get(id);
             u.IsActive = false;
             _users.Update(u);
 
-            LoginOutcome outcome = _coordinator.Login("old", "pass1234"); // RIGHT password, disabled account
+            LoginOutcome outcome = _coordinator.Login("old", "password1234"); // RIGHT password, disabled account
             Assert.That(outcome.Success, Is.False);
             Assert.That(outcome.Failure, Is.EqualTo(LoginFailure.Disabled));
         }
@@ -120,7 +120,7 @@ namespace OptiPaie.Tests
         [Test]
         public void Login_WrongPassword_ReportsBadCredentials()
         {
-            _users.Create("chef", "Chef", "pass1234", UserRole.Manager, null);
+            _users.Create("chef", "Chef", "password1234", UserRole.Manager, null);
             Assert.That(_coordinator.Login("chef", "nope").Failure, Is.EqualTo(LoginFailure.BadCredentials));
         }
 
@@ -283,9 +283,9 @@ namespace OptiPaie.Tests
             public Result<User> Authenticate(string username, string password) =>
                 throw new InvalidOperationException("injected failure on the login path");
 
-            public Result<long> Create(string username, string fullName, string password, UserRole role, string department) => throw new NotSupportedException();
+            public Result<long> Create(string username, string fullName, string password, UserRole role, string department, bool mustChangePassword = false) => throw new NotSupportedException();
             public Result Update(User user) => throw new NotSupportedException();
-            public Result ChangePassword(long userId, string newPassword) => throw new NotSupportedException();
+            public Result ChangePassword(long userId, string newPassword, bool mustChangePassword = false) => throw new NotSupportedException();
             public Result Delete(long userId) => throw new NotSupportedException();
             public User Get(long id) => throw new NotSupportedException();
             public System.Collections.Generic.IReadOnlyList<User> GetAll() => throw new NotSupportedException();
