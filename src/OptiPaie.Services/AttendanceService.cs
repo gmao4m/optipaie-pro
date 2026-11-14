@@ -123,6 +123,7 @@ namespace OptiPaie.Services
 
         public Result SetDayStatus(long employeeId, DateTime workDate, AttendanceStatus status)
         {
+            RequireAttendance();
             return SetDayStatusBulk(new[] { new AttendanceDayStatus(employeeId, workDate, status) });
         }
 
@@ -207,6 +208,7 @@ namespace OptiPaie.Services
         /// </summary>
         public Result ClearDay(long employeeId, DateTime workDate)
         {
+            RequireAttendance();
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 AttendanceRecord rec = uow.Attendance.GetByEmployeeAndDate(employeeId, workDate.Date);

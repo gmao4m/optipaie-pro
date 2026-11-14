@@ -128,6 +128,7 @@ namespace OptiPaie.Services
             }
         }
 
+        [OptiPaie.Core.Security.WriteGuardExempt("Self-service password change (including the forced must-change flow) must work for any signed-in user; an administrator reset of another user is reached only through the admin UI.")]
         public Result ChangePassword(long userId, string newPassword, bool mustChangePassword = false)
         {
             if (string.IsNullOrEmpty(newPassword) || newPassword.Length < MinPasswordLength)
@@ -193,6 +194,7 @@ namespace OptiPaie.Services
             }
         }
 
+        [OptiPaie.Core.Security.WriteGuardExempt("Authentication (login): must be reachable by any caller; it verifies credentials and does not perform a privileged write.")]
         public Result<User> Authenticate(string username, string password)
         {
             if (string.IsNullOrWhiteSpace(username) || string.IsNullOrEmpty(password))

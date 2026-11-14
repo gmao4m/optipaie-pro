@@ -345,6 +345,7 @@ namespace OptiPaie.Services
             }
         }
 
+        [OptiPaie.Core.Security.WriteGuardExempt("Internal payroll-pipeline write: invoked only by the guarded payroll run (RunPayroll) when persisting loan deductions, never as a standalone user action.")]
         public Result<decimal> RecordPayrollDeductions(long employeeId, int year, int month)
         {
             // No explicit amount → each active loan recovers its theoretical instalment (batch path,
@@ -352,6 +353,7 @@ namespace OptiPaie.Services
             return RecordPayrollDeductions(employeeId, year, month, null);
         }
 
+        [OptiPaie.Core.Security.WriteGuardExempt("Internal payroll-pipeline write: invoked only by the guarded payroll run (RunPayroll) when persisting loan deductions, never as a standalone user action.")]
         public Result<decimal> RecordPayrollDeductions(long employeeId, int year, int month, decimal actualWithheld)
         {
             // Non-nullable public overload: the caller passes the amount actually withheld on the

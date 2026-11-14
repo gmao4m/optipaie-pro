@@ -107,6 +107,7 @@ namespace OptiPaie.Services
 
         public Result<long> CreateDraftFromEmployee(long employeeId)
         {
+            RequireContract();
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 Employee employee = uow.Employees.GetById(employeeId);

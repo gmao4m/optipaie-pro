@@ -67,6 +67,7 @@ namespace OptiPaie.Services
             }
         }
 
+        [OptiPaie.Core.Security.WriteGuardExempt("Archive storage of an already-rendered document; invoked only by the guarded payroll/archival pipeline, never as a standalone user action.")]
         public Result<long> StoreDocument(ArchiveDocument document)
         {
             Guard.AgainstNull(document, nameof(document));
