@@ -40,9 +40,9 @@ namespace OptiPaie.Tests
             using (var c = factory.CreateOpenConnection()) new MigrationRunner(c).Run();
             IUnitOfWorkFactory uow = new UnitOfWorkFactory(factory);
 
-            var companies = new CompanyService(uow, new CompanyValidator());
-            var employees = new EmployeeService(uow, new EmployeeValidator());
-            var attendance = new AttendanceService(uow);
+            var companies = new CompanyService(uow, new CompanyValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
+            var employees = new EmployeeService(uow, new EmployeeValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
+            var attendance = new AttendanceService(uow, OptiPaie.Core.Security.AccessContext.Unrestricted);
 
             long companyId = companies.Create(new Company { NameFr = "SARL Perf", Nif = "000000000000000" }).Value;
             var empIds = new List<long>();

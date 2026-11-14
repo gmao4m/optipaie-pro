@@ -40,7 +40,7 @@ namespace OptiPaie.Tests
             using (var c = factory.CreateOpenConnection()) new MigrationRunner(c).Run();
 
             _uowf = new UnitOfWorkFactory(factory);
-            _service = new AtsService(_uowf, new EmployeeValidator());
+            _service = new AtsService(_uowf, new EmployeeValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
 
             using (IUnitOfWork uow = _uowf.Create())
             {
@@ -131,7 +131,7 @@ namespace OptiPaie.Tests
 
             // A service whose posting-update throws mid-hire (after the employee + candidate +
             // contract writes) — the whole transaction must roll back.
-            var failing = new AtsService(new FailingAtsFactory(_uowf), new EmployeeValidator());
+            var failing = new AtsService(new FailingAtsFactory(_uowf), new EmployeeValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
 
             Assert.Throws<InvalidOperationException>(() => failing.Hire(cand));
 

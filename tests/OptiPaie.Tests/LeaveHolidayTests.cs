@@ -37,7 +37,7 @@ namespace OptiPaie.Tests
 
             _uow = new UnitOfWorkFactory(factory);
             _holidays = new HolidayService(_uow);
-            _leave = new LeaveService(_uow);
+            _leave = new LeaveService(_uow, OptiPaie.Core.Security.AccessContext.Unrestricted);
 
             using (IUnitOfWork uow = _uow.Create())
             {

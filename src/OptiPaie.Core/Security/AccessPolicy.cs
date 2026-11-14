@@ -53,13 +53,22 @@ namespace OptiPaie.Core.Security
         }
 
         /// <summary>
-        /// Enforces <paramref name="permission"/> for the given context. No-op when the context is
-        /// absent or the login gate is off (open install). Throws <see cref="AccessDeniedException"/>
-        /// when a login is enforced and the current role is not permitted.
+        /// Enforces <paramref name="permission"/> for the given context. <b>Fails closed:</b> a null
+        /// context is NOT "no enforcement" — it is a wiring omission and is DENIED. A caller that
+        /// legitimately means "no enforcement" must say so explicitly with
+        /// <see cref="AccessContext.Unrestricted"/>. When a context is present but not enforcing (the
+        /// login gate is off, an open install), everything is allowed; when it is enforcing, the
+        /// role must hold the permission.
         /// </summary>
         public static void Require(IAccessContext context, Permission permission)
         {
-            if (context == null || !context.IsEnforced)
+            if (context == null)
+            {
+                // Fail closed: never let a missing access context silently permit a write.
+                throw new AccessDeniedException(permission);
+            }
+
+            if (!context.IsEnforced)
             {
                 return;
             }

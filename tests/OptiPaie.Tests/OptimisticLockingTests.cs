@@ -40,10 +40,10 @@ namespace OptiPaie.Tests
             _factory = new SqliteConnectionFactory(Path.Combine(_dir, "test.db"));
             using (var c = _factory.CreateOpenConnection()) new MigrationRunner(c).Run();
             _uow = new UnitOfWorkFactory(_factory);
-            _companies = new CompanyService(_uow, new CompanyValidator());
-            _employees = new EmployeeService(_uow, new EmployeeValidator());
-            _loans = new LoanService(_uow);
-            _contracts = new ContractService(_uow);
+            _companies = new CompanyService(_uow, new CompanyValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _employees = new EmployeeService(_uow, new EmployeeValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _loans = new LoanService(_uow, OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _contracts = new ContractService(_uow, OptiPaie.Core.Security.AccessContext.Unrestricted);
         }
 
         [TearDown]

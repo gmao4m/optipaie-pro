@@ -49,16 +49,16 @@ namespace OptiPaie.Tests
             _factory = new SqliteConnectionFactory(Path.Combine(_dir, "test.db"));
             using (var c = _factory.CreateOpenConnection()) new MigrationRunner(c).Run();
             _uow = new UnitOfWorkFactory(_factory);
-            _companies = new CompanyService(_uow, new CompanyValidator());
-            _employees = new EmployeeService(_uow, new EmployeeValidator());
+            _companies = new CompanyService(_uow, new CompanyValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _employees = new EmployeeService(_uow, new EmployeeValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
             _config = new ConfigurationService(_uow);
-            _payroll = new PayrollService(_uow, _config, new PayrollCalculationEngine());
-            _loans = new LoanService(_uow);
+            _payroll = new PayrollService(_uow, _config, new PayrollCalculationEngine(), OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _loans = new LoanService(_uow, OptiPaie.Core.Security.AccessContext.Unrestricted);
             _archive = new ArchiveService(_uow);
-            _contracts = new ContractService(_uow);
-            _attendance = new AttendanceService(_uow);
+            _contracts = new ContractService(_uow, OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _attendance = new AttendanceService(_uow, OptiPaie.Core.Security.AccessContext.Unrestricted);
             _batch = new BatchPayrollService(
-                _employees, new PayrollElementService(_uow, new PayrollElementValidator()),
+                _employees, new PayrollElementService(_uow, new PayrollElementValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted),
                 _loans, _attendance, _payroll, _contracts, _archive, _ => true);
             _revision = new PayslipRevisionService(_uow, _payroll, _config, _loans);
         }

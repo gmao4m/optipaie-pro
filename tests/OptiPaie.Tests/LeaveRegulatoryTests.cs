@@ -43,8 +43,8 @@ namespace OptiPaie.Tests
             using (var c = factory.CreateOpenConnection()) new MigrationRunner(c).Run();
 
             _uow = new UnitOfWorkFactory(factory);
-            _leave = new LeaveService(_uow);
-            _attendance = new AttendanceService(_uow);
+            _leave = new LeaveService(_uow, OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _attendance = new AttendanceService(_uow, OptiPaie.Core.Security.AccessContext.Unrestricted);
 
             using (IUnitOfWork uow = _uow.Create())
             {

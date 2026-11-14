@@ -42,7 +42,7 @@ namespace OptiPaie.Tests
 
             _uowf = new UnitOfWorkFactory(factory);
             _settings = new SettingsService(_uowf);
-            _users = new UserService(_uowf, _settings);
+            _users = new UserService(_uowf, _settings, OptiPaie.Core.Security.AccessContext.Unrestricted);
             _owner = new CustomerAccountService(_settings, new PassThroughCipher(), new SilentLogger());
             _coordinator = new LoginCoordinator(_owner, _users);
         }

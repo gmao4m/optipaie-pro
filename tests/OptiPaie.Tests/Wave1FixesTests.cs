@@ -40,10 +40,10 @@ namespace OptiPaie.Tests
             using (var c = factory.CreateOpenConnection()) new MigrationRunner(c).Run();
 
             _uowf = new UnitOfWorkFactory(factory);
-            _companies = new CompanyService(_uowf, new CompanyValidator());
-            _employees = new EmployeeService(_uowf, new EmployeeValidator());
-            _loans = new LoanService(_uowf);
-            _attendance = new AttendanceService(_uowf);
+            _companies = new CompanyService(_uowf, new CompanyValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _employees = new EmployeeService(_uowf, new EmployeeValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _loans = new LoanService(_uowf, OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _attendance = new AttendanceService(_uowf, OptiPaie.Core.Security.AccessContext.Unrestricted);
 
             using (IUnitOfWork uow = _uowf.Create())
             {

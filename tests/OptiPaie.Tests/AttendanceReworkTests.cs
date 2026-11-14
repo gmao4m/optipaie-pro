@@ -42,9 +42,9 @@ namespace OptiPaie.Tests
             var factory = new SqliteConnectionFactory(Path.Combine(_dir, "test.db"));
             using (var c = factory.CreateOpenConnection()) new MigrationRunner(c).Run();
             _uow = new UnitOfWorkFactory(factory);
-            _companies = new CompanyService(_uow, new CompanyValidator());
-            _employees = new EmployeeService(_uow, new EmployeeValidator());
-            _attendance = new AttendanceService(_uow);
+            _companies = new CompanyService(_uow, new CompanyValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _employees = new EmployeeService(_uow, new EmployeeValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _attendance = new AttendanceService(_uow, OptiPaie.Core.Security.AccessContext.Unrestricted);
             _companyId = _companies.Create(new Company { NameFr = "SARL Att", Nif = "000000000000000" }).Value;
             _empId = _employees.Create(new Employee
             {
@@ -120,10 +120,10 @@ namespace OptiPaie.Tests
             var absents = new[] { 2, 3, 4 }.Select(d => new DateTime(Year, Month, d)).ToList();
             _attendance.SetDayStatusBulk(absents.Select(d => new AttendanceDayStatus(_empId, d, AttendanceStatus.Absent)).ToList());
 
-            var elements = new PayrollElementService(_uow, new PayrollElementValidator());
-            var batch = new BatchPayrollService(_employees, elements, new LoanService(_uow),
-                _attendance, new PayrollService(_uow, new ConfigurationService(_uow), new PayrollCalculationEngine()),
-                new ContractService(_uow), new ArchiveService(_uow), _ => true);
+            var elements = new PayrollElementService(_uow, new PayrollElementValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
+            var batch = new BatchPayrollService(_employees, elements, new LoanService(_uow, OptiPaie.Core.Security.AccessContext.Unrestricted),
+                _attendance, new PayrollService(_uow, new ConfigurationService(_uow), new PayrollCalculationEngine(), OptiPaie.Core.Security.AccessContext.Unrestricted),
+                new ContractService(_uow, OptiPaie.Core.Security.AccessContext.Unrestricted), new ArchiveService(_uow), _ => true);
 
             PayrollGenerationRequest single = batch.BuildRequest(_companyId, _empId, Year, Month, null);
             var cache = _attendance.GetCompanyMonthlySummary(_companyId, Year, Month)

@@ -55,16 +55,16 @@ namespace OptiPaie.Tests
             using (var c = factory.CreateOpenConnection()) new MigrationRunner(c).Run();
 
             _uow = new UnitOfWorkFactory(factory);
-            _companies = new CompanyService(_uow, new CompanyValidator());
-            _employees = new EmployeeService(_uow, new EmployeeValidator());
-            _contracts = new ContractService(_uow);
-            _attendance = new AttendanceService(_uow);
-            _leave = new LeaveService(_uow);
-            _loans = new LoanService(_uow);
-            _ats = new AtsService(_uow, new OptiPaie.Services.Validation.EmployeeValidator());
-            _assets = new AssetService(_uow);
-            _training = new TrainingService(_uow);
-            _payroll = new PayrollService(_uow, new ConfigurationService(_uow), new PayrollCalculationEngine());
+            _companies = new CompanyService(_uow, new CompanyValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _employees = new EmployeeService(_uow, new EmployeeValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _contracts = new ContractService(_uow, OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _attendance = new AttendanceService(_uow, OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _leave = new LeaveService(_uow, OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _loans = new LoanService(_uow, OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _ats = new AtsService(_uow, new OptiPaie.Services.Validation.EmployeeValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _assets = new AssetService(_uow, OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _training = new TrainingService(_uow, OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _payroll = new PayrollService(_uow, new ConfigurationService(_uow), new PayrollCalculationEngine(), OptiPaie.Core.Security.AccessContext.Unrestricted);
             _reports = new ReportService(_companies, _employees, _attendance, _leave, _loans, _ats, _assets, _training);
             _dashboard = new DashboardService(_companies, _employees, _contracts, _leave, _loans, _attendance, _ats, _assets, _training);
 

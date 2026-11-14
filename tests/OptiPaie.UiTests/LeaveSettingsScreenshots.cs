@@ -54,7 +54,7 @@ namespace OptiPaie.UiTests
             var factory = new SqliteConnectionFactory(Path.Combine(dbDir, "s.db"));
             using (var c = factory.CreateOpenConnection()) new MigrationRunner(c).Run();
             var uowf = new UnitOfWorkFactory(factory);
-            var leave = new LeaveService(uowf);
+            var leave = new LeaveService(uowf, OptiPaie.Core.Security.AccessContext.Unrestricted);
 
             long companyId;
             using (IUnitOfWork uow = uowf.Create())

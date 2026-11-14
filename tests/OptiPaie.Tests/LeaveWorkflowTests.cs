@@ -52,9 +52,9 @@ namespace OptiPaie.Tests
 
             _uow = new UnitOfWorkFactory(factory);
             _audit = new AuditService(_uow, new SilentLogger());
-            _leave = new LeaveService(_uow) { Audit = _audit };
-            _attendance = new AttendanceService(_uow);
-            _payroll = new PayrollService(_uow, new ConfigurationService(_uow), new PayrollCalculationEngine());
+            _leave = new LeaveService(_uow, OptiPaie.Core.Security.AccessContext.Unrestricted) { Audit = _audit };
+            _attendance = new AttendanceService(_uow, OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _payroll = new PayrollService(_uow, new ConfigurationService(_uow), new PayrollCalculationEngine(), OptiPaie.Core.Security.AccessContext.Unrestricted);
 
             using (IUnitOfWork uow = _uow.Create())
             {
@@ -269,7 +269,7 @@ namespace OptiPaie.Tests
 
             // A service whose 2nd attendance insert throws in the middle of the approval.
             var failingFactory = new FailingAttendanceFactory(_uow, failOnInsertNumber: 2);
-            var failingService = new LeaveService(failingFactory) { Audit = _audit };
+            var failingService = new LeaveService(failingFactory, OptiPaie.Core.Security.AccessContext.Unrestricted) { Audit = _audit };
 
             Assert.Throws<InvalidOperationException>(() => failingService.Approve(id, "OK"),
                 "the injected mid-approval failure propagates");

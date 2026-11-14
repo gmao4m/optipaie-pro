@@ -42,8 +42,8 @@ namespace OptiPaie.Tests
             using (var c = factory.CreateOpenConnection()) new MigrationRunner(c).Run();
 
             _uow = new UnitOfWorkFactory(factory);
-            _companies = new CompanyService(_uow, new CompanyValidator());
-            _employees = new EmployeeService(_uow, new EmployeeValidator());
+            _companies = new CompanyService(_uow, new CompanyValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _employees = new EmployeeService(_uow, new EmployeeValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
             _settings = new SettingsService(_uow);
             _io = new EmployeeImportExportService(_uow, new EmployeeValidator());
             _companyId = _companies.Create(new Company { NameFr = "SARL Map", Nif = "000000000000000" }).Value;

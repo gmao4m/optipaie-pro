@@ -47,15 +47,15 @@ namespace OptiPaie.Tests
         public void AfterLogin_AuditTrail_CarriesTheRealUser()
         {
             var settings = new SettingsService(_uow);
-            var users = new UserService(_uow, settings);               // gate off -> admin creation allowed
+            var users = new UserService(_uow, settings, OptiPaie.Core.Security.AccessContext.Unrestricted);               // gate off -> admin creation allowed
             var audit = new AuditService(_uow, NullLogger.Instance);
 
             // The signed-in user, resolved at record time (what SessionAccessContext/CompositionRoot wire).
             User signedIn = null;
             audit.ActorProvider = () => signedIn != null ? signedIn.Username : null;
 
-            var companies = new CompanyService(_uow, new CompanyValidator());
-            var employees = new EmployeeService(_uow, new EmployeeValidator()) { Audit = audit };
+            var companies = new CompanyService(_uow, new CompanyValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
+            var employees = new EmployeeService(_uow, new EmployeeValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted) { Audit = audit };
 
             long companyId = companies.Create(new Company { NameFr = "SARL Preuve", Nif = "000000000000000" }).Value;
 

@@ -51,15 +51,15 @@ namespace OptiPaie.Tests
             using (var c = factory.CreateOpenConnection()) new MigrationRunner(c).Run();
             _uowf = new UnitOfWorkFactory(factory);
 
-            _companies = new CompanyService(_uowf, new CompanyValidator());
-            _employees = new EmployeeService(_uowf, new EmployeeValidator());
-            _contracts = new ContractService(_uowf);
-            _leave = new LeaveService(_uowf);
-            _loans = new LoanService(_uowf);
-            _attendance = new AttendanceService(_uowf);
-            _ats = new AtsService(_uowf, new EmployeeValidator());
-            _assets = new AssetService(_uowf);
-            _training = new TrainingService(_uowf);
+            _companies = new CompanyService(_uowf, new CompanyValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _employees = new EmployeeService(_uowf, new EmployeeValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _contracts = new ContractService(_uowf, OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _leave = new LeaveService(_uowf, OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _loans = new LoanService(_uowf, OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _attendance = new AttendanceService(_uowf, OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _ats = new AtsService(_uowf, new EmployeeValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _assets = new AssetService(_uowf, OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _training = new TrainingService(_uowf, OptiPaie.Core.Security.AccessContext.Unrestricted);
             _dashboard = new DashboardService(_companies, _employees, _contracts, _leave, _loans, _attendance, _ats, _assets, _training);
         }
 

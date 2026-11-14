@@ -37,7 +37,7 @@ namespace OptiPaie.Tests
 
             _uowf = new UnitOfWorkFactory(factory);
             _settings = new SettingsService(_uowf);
-            _users = new UserService(_uowf, _settings);
+            _users = new UserService(_uowf, _settings, OptiPaie.Core.Security.AccessContext.Unrestricted);
         }
 
         [TearDown]

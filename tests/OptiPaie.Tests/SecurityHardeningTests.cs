@@ -37,7 +37,7 @@ namespace OptiPaie.Tests
             var factory = new SqliteConnectionFactory(Path.Combine(_directory, "test.db"));
             using (var c = factory.CreateOpenConnection()) new MigrationRunner(c).Run();
             _uowf = new UnitOfWorkFactory(factory);
-            _users = new UserService(_uowf, new SettingsService(_uowf));
+            _users = new UserService(_uowf, new SettingsService(_uowf), OptiPaie.Core.Security.AccessContext.Unrestricted);
         }
 
         [TearDown]

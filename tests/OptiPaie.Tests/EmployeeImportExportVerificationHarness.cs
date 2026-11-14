@@ -40,8 +40,8 @@ namespace OptiPaie.Tests
             using (var c = factory.CreateOpenConnection()) new MigrationRunner(c).Run();
             IUnitOfWorkFactory uow = new UnitOfWorkFactory(factory);
 
-            var companies = new CompanyService(uow, new CompanyValidator());
-            var employees = new EmployeeService(uow, new EmployeeValidator());
+            var companies = new CompanyService(uow, new CompanyValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
+            var employees = new EmployeeService(uow, new EmployeeValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
             var io = new EmployeeImportExportService(uow, new EmployeeValidator());
 
             long companyId = companies.Create(new Company { NameFr = "SARL Démo OptiPaie", Nif = "000000000000000" }).Value;
@@ -88,8 +88,8 @@ namespace OptiPaie.Tests
             var factory = new SqliteConnectionFactory(Path.Combine(db, "demo.db"));
             using (var c = factory.CreateOpenConnection()) new MigrationRunner(c).Run();
             IUnitOfWorkFactory uow = new UnitOfWorkFactory(factory);
-            var companies = new CompanyService(uow, new CompanyValidator());
-            var employees = new EmployeeService(uow, new EmployeeValidator());
+            var companies = new CompanyService(uow, new CompanyValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
+            var employees = new EmployeeService(uow, new EmployeeValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
             var io = new EmployeeImportExportService(uow, new EmployeeValidator());
             long companyId = companies.Create(new Company { NameFr = "SARL Démo", Nif = "000000000000000" }).Value;
 

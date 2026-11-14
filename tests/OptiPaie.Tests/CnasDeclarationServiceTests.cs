@@ -49,15 +49,15 @@ namespace OptiPaie.Tests
             using (var c = factory.CreateOpenConnection()) new MigrationRunner(c).Run();
 
             _uow = new UnitOfWorkFactory(factory);
-            _companies = new CompanyService(_uow, new CompanyValidator());
-            _employees = new EmployeeService(_uow, new EmployeeValidator());
-            _contracts = new ContractService(_uow);
+            _companies = new CompanyService(_uow, new CompanyValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _employees = new EmployeeService(_uow, new EmployeeValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _contracts = new ContractService(_uow, OptiPaie.Core.Security.AccessContext.Unrestricted);
             _archive = new ArchiveService(_uow);
             _config = new ConfigurationService(_uow);
-            _payroll = new PayrollService(_uow, _config, new PayrollCalculationEngine());
+            _payroll = new PayrollService(_uow, _config, new PayrollCalculationEngine(), OptiPaie.Core.Security.AccessContext.Unrestricted);
             _batch = new BatchPayrollService(
-                _employees, new PayrollElementService(_uow, new PayrollElementValidator()),
-                new LoanService(_uow), new AttendanceService(_uow), _payroll, _contracts, _archive, _ => true);
+                _employees, new PayrollElementService(_uow, new PayrollElementValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted),
+                new LoanService(_uow, OptiPaie.Core.Security.AccessContext.Unrestricted), new AttendanceService(_uow, OptiPaie.Core.Security.AccessContext.Unrestricted), _payroll, _contracts, _archive, _ => true);
             _service = new CnasDeclarationService(_companies, _employees, _archive, _config);
         }
 

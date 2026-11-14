@@ -39,8 +39,8 @@ namespace OptiPaie.Tests
             _factory = new SqliteConnectionFactory(Path.Combine(_dir, "test.db"));
             using (var c = _factory.CreateOpenConnection()) new MigrationRunner(c).Run();
             _uow = new UnitOfWorkFactory(_factory);
-            _companies = new CompanyService(_uow, new CompanyValidator());
-            _employees = new EmployeeService(_uow, new EmployeeValidator());
+            _companies = new CompanyService(_uow, new CompanyValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _employees = new EmployeeService(_uow, new EmployeeValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
             _companyId = _companies.Create(new Company { NameFr = "SARL Dash", Nif = "000000000000000" }).Value;
         }
 
@@ -95,9 +95,9 @@ namespace OptiPaie.Tests
 
             var periodStart = new DateTime(y, 1, 1);
             var periodEnd = new DateTime(y, 1, 31);
-            var dash = new DashboardService(_companies, _employees, new ContractService(_uow), new LeaveService(_uow),
-                new LoanService(_uow), new AttendanceService(_uow), new AtsService(_uow, new EmployeeValidator()),
-                new AssetService(_uow), new TrainingService(_uow));
+            var dash = new DashboardService(_companies, _employees, new ContractService(_uow, OptiPaie.Core.Security.AccessContext.Unrestricted), new LeaveService(_uow, OptiPaie.Core.Security.AccessContext.Unrestricted),
+                new LoanService(_uow, OptiPaie.Core.Security.AccessContext.Unrestricted), new AttendanceService(_uow, OptiPaie.Core.Security.AccessContext.Unrestricted), new AtsService(_uow, new EmployeeValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted),
+                new AssetService(_uow, OptiPaie.Core.Security.AccessContext.Unrestricted), new TrainingService(_uow, OptiPaie.Core.Security.AccessContext.Unrestricted));
 
             DashboardOverview ov = dash.BuildOverview(_companyId, periodStart, periodEnd);
             WorkforceAnalytics wf = ov.Workforce;

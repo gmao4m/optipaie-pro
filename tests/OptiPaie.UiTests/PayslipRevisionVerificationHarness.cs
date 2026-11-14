@@ -73,16 +73,16 @@ namespace OptiPaie.UiTests
             using (var c = factory.CreateOpenConnection()) new MigrationRunner(c).Run();
             IUnitOfWorkFactory uow = new UnitOfWorkFactory(factory);
 
-            var companies = new CompanyService(uow, new CompanyValidator());
-            var employees = new EmployeeService(uow, new EmployeeValidator());
-            var contracts = new ContractService(uow);
+            var companies = new CompanyService(uow, new CompanyValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
+            var employees = new EmployeeService(uow, new EmployeeValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
+            var contracts = new ContractService(uow, OptiPaie.Core.Security.AccessContext.Unrestricted);
             var archive = new ArchiveService(uow);
             var config = new ConfigurationService(uow);
-            var payroll = new PayrollService(uow, config, new PayrollCalculationEngine());
-            var loans = new LoanService(uow);
+            var payroll = new PayrollService(uow, config, new PayrollCalculationEngine(), OptiPaie.Core.Security.AccessContext.Unrestricted);
+            var loans = new LoanService(uow, OptiPaie.Core.Security.AccessContext.Unrestricted);
             var batch = new BatchPayrollService(
-                employees, new PayrollElementService(uow, new PayrollElementValidator()),
-                loans, new AttendanceService(uow), payroll, contracts, archive, _ => true);
+                employees, new PayrollElementService(uow, new PayrollElementValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted),
+                loans, new AttendanceService(uow, OptiPaie.Core.Security.AccessContext.Unrestricted), payroll, contracts, archive, _ => true);
             var cnas = new CnasDeclarationService(companies, employees, archive, config);
             var ats = new AtsDrtDocumentService(companies, employees, archive);
             var revision = new PayslipRevisionService(uow, payroll, config, loans);

@@ -48,7 +48,7 @@ namespace OptiPaie.Tests
             }
 
             _unitOfWorkFactory = new UnitOfWorkFactory(factory);
-            _service = new AttendanceService(_unitOfWorkFactory);
+            _service = new AttendanceService(_unitOfWorkFactory, OptiPaie.Core.Security.AccessContext.Unrestricted);
 
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {

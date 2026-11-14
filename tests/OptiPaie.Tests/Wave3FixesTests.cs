@@ -49,11 +49,11 @@ namespace OptiPaie.Tests
             using (var c = factory.CreateOpenConnection()) new MigrationRunner(c).Run();
 
             _uowf = new UnitOfWorkFactory(factory);
-            _leave = new LeaveService(_uowf);
-            _attendance = new AttendanceService(_uowf);
-            _assets = new AssetService(_uowf);
-            _employees = new EmployeeService(_uowf, new EmployeeValidator());
-            _perf = new PerformanceService(_uowf);
+            _leave = new LeaveService(_uowf, OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _attendance = new AttendanceService(_uowf, OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _assets = new AssetService(_uowf, OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _employees = new EmployeeService(_uowf, new EmployeeValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _perf = new PerformanceService(_uowf, OptiPaie.Core.Security.AccessContext.Unrestricted);
 
             using (IUnitOfWork uow = _uowf.Create())
             {

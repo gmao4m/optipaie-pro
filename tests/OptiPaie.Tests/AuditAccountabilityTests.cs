@@ -46,10 +46,10 @@ namespace OptiPaie.Tests
             _audit = new AuditService(_uow, new SilentLogger());       // fallback actor = "Utilisateur"
             _audit.ActorProvider = () => _actor;                       // driven by the test
 
-            _companies = new CompanyService(_uow, new CompanyValidator());
-            _employees = new EmployeeService(_uow, new EmployeeValidator()) { Audit = _audit };
-            _elements = new PayrollElementService(_uow, new PayrollElementValidator());
-            _users = new UserService(_uow, new SettingsService(_uow)) { Audit = _audit };
+            _companies = new CompanyService(_uow, new CompanyValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _employees = new EmployeeService(_uow, new EmployeeValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted) { Audit = _audit };
+            _elements = new PayrollElementService(_uow, new PayrollElementValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _users = new UserService(_uow, new SettingsService(_uow), OptiPaie.Core.Security.AccessContext.Unrestricted) { Audit = _audit };
 
             _companyId = _companies.Create(new Company { NameFr = "SARL Audit", Nif = "000000000000000" }).Value;
         }

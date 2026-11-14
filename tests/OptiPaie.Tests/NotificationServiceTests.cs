@@ -46,13 +46,13 @@ namespace OptiPaie.Tests
             using (var c = factory.CreateOpenConnection()) new MigrationRunner(c).Run();
 
             _uow = new UnitOfWorkFactory(factory);
-            _companies = new CompanyService(_uow, new CompanyValidator());
-            _employees = new EmployeeService(_uow, new EmployeeValidator());
-            _contracts = new ContractService(_uow);
-            _leave = new LeaveService(_uow);
-            _training = new TrainingService(_uow);
+            _companies = new CompanyService(_uow, new CompanyValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _employees = new EmployeeService(_uow, new EmployeeValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _contracts = new ContractService(_uow, OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _leave = new LeaveService(_uow, OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _training = new TrainingService(_uow, OptiPaie.Core.Security.AccessContext.Unrestricted);
             _notifications = new NotificationService(_companies, _employees, _contracts, _leave, _training,
-                new PerformanceService(_uow));
+                new PerformanceService(_uow, OptiPaie.Core.Security.AccessContext.Unrestricted));
 
             _companyId = _companies.Create(new Company { NameFr = "SARL Test", Nif = "000000000000000" }).Value;
             _employeeId = _employees.Create(new Employee

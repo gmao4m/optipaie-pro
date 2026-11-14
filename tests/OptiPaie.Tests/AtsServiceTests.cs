@@ -45,7 +45,7 @@ namespace OptiPaie.Tests
             }
 
             _unitOfWorkFactory = new UnitOfWorkFactory(factory);
-            _service = new AtsService(_unitOfWorkFactory, new EmployeeValidator());
+            _service = new AtsService(_unitOfWorkFactory, new EmployeeValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
 
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {

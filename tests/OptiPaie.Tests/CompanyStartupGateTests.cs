@@ -60,7 +60,7 @@ namespace OptiPaie.Tests
                 using (var c = factory.CreateOpenConnection()) new MigrationRunner(c).Run();
 
                 IUnitOfWorkFactory uowf = new UnitOfWorkFactory(factory);
-                var companies = new CompanyService(uowf, new CompanyValidator());
+                var companies = new CompanyService(uowf, new CompanyValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
 
                 // Empty database → create the first.
                 Assert.That(CompanySelectionPolicy.Decide(companies.GetAll().Count),

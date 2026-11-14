@@ -77,9 +77,9 @@ namespace OptiPaie.Tests
         [Test]
         public void LeaveApproval_WiredToTheSink_RecordsHistory_WithoutCtorChange()
         {
-            var companies = new CompanyService(_uow, new CompanyValidator());
-            var employees = new EmployeeService(_uow, new EmployeeValidator());
-            var leave = new LeaveService(_uow) { Audit = _audit }; // optional property, not a ctor arg
+            var companies = new CompanyService(_uow, new CompanyValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
+            var employees = new EmployeeService(_uow, new EmployeeValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
+            var leave = new LeaveService(_uow, OptiPaie.Core.Security.AccessContext.Unrestricted) { Audit = _audit }; // optional property, not a ctor arg
 
             long companyId = companies.Create(new Company { NameFr = "SARL Test", Nif = "000000000000000" }).Value;
             long employeeId = employees.Create(new Employee
@@ -103,9 +103,9 @@ namespace OptiPaie.Tests
         [Test]
         public void UnwiredService_UsesNoOpSink_AndDoesNotRecord()
         {
-            var companies = new CompanyService(_uow, new CompanyValidator());
-            var employees = new EmployeeService(_uow, new EmployeeValidator());
-            var leave = new LeaveService(_uow); // no Audit set → NullAuditSink
+            var companies = new CompanyService(_uow, new CompanyValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
+            var employees = new EmployeeService(_uow, new EmployeeValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
+            var leave = new LeaveService(_uow, OptiPaie.Core.Security.AccessContext.Unrestricted); // no Audit set → NullAuditSink
 
             long companyId = companies.Create(new Company { NameFr = "SARL Test", Nif = "000000000000000" }).Value;
             long employeeId = employees.Create(new Employee

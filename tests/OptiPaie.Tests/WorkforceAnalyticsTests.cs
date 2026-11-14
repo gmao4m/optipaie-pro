@@ -38,11 +38,11 @@ namespace OptiPaie.Tests
             using (var c = factory.CreateOpenConnection()) new MigrationRunner(c).Run();
             _uowf = new UnitOfWorkFactory(factory);
 
-            var employees = new EmployeeService(_uowf, new EmployeeValidator());
+            var employees = new EmployeeService(_uowf, new EmployeeValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
             _dashboard = new DashboardService(
-                new CompanyService(_uowf, new CompanyValidator()), employees, new ContractService(_uowf),
-                new LeaveService(_uowf), new LoanService(_uowf), new AttendanceService(_uowf),
-                new AtsService(_uowf, new EmployeeValidator()), new AssetService(_uowf), new TrainingService(_uowf));
+                new CompanyService(_uowf, new CompanyValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted), employees, new ContractService(_uowf, OptiPaie.Core.Security.AccessContext.Unrestricted),
+                new LeaveService(_uowf, OptiPaie.Core.Security.AccessContext.Unrestricted), new LoanService(_uowf, OptiPaie.Core.Security.AccessContext.Unrestricted), new AttendanceService(_uowf, OptiPaie.Core.Security.AccessContext.Unrestricted),
+                new AtsService(_uowf, new EmployeeValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted), new AssetService(_uowf, OptiPaie.Core.Security.AccessContext.Unrestricted), new TrainingService(_uowf, OptiPaie.Core.Security.AccessContext.Unrestricted));
 
             using (IUnitOfWork uow = _uowf.Create())
             {

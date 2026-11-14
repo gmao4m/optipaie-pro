@@ -58,16 +58,16 @@ namespace OptiPaie.Tests
             }
 
             _uowf = new UnitOfWorkFactory(factory);
-            _companies = new CompanyService(_uowf, new CompanyValidator());
-            _employees = new EmployeeService(_uowf, new EmployeeValidator());
-            _contracts = new ContractService(_uowf);
-            _attendance = new AttendanceService(_uowf);
-            _leave = new LeaveService(_uowf);
-            _loans = new LoanService(_uowf);
-            _assets = new AssetService(_uowf);
-            _training = new TrainingService(_uowf);
-            _certificates = new WorkCertificateService(_uowf);
-            _performance = new PerformanceService(_uowf);
+            _companies = new CompanyService(_uowf, new CompanyValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _employees = new EmployeeService(_uowf, new EmployeeValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _contracts = new ContractService(_uowf, OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _attendance = new AttendanceService(_uowf, OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _leave = new LeaveService(_uowf, OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _loans = new LoanService(_uowf, OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _assets = new AssetService(_uowf, OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _training = new TrainingService(_uowf, OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _certificates = new WorkCertificateService(_uowf, OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _performance = new PerformanceService(_uowf, OptiPaie.Core.Security.AccessContext.Unrestricted);
 
             _seeder = new DemoDataSeeder(_companies, _employees, _contracts, _attendance, _leave,
                 _loans, _assets, _training, _certificates, _performance);

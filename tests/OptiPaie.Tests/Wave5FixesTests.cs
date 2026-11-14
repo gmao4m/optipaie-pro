@@ -37,9 +37,9 @@ namespace OptiPaie.Tests
             using (var c = factory.CreateOpenConnection()) new MigrationRunner(c).Run();
 
             _uowf = new UnitOfWorkFactory(factory);
-            _attendance = new AttendanceService(_uowf);
-            _leave = new LeaveService(_uowf);
-            _loans = new LoanService(_uowf);
+            _attendance = new AttendanceService(_uowf, OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _leave = new LeaveService(_uowf, OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _loans = new LoanService(_uowf, OptiPaie.Core.Security.AccessContext.Unrestricted);
 
             using (IUnitOfWork uow = _uowf.Create())
             {
@@ -135,7 +135,7 @@ namespace OptiPaie.Tests
         public void LoanLifecycle_IsAudited()
         {
             var audit = new AuditService(_uowf, new NullLog()) { ActorProvider = () => "nadia" };
-            var loans = new LoanService(_uowf) { Audit = audit };
+            var loans = new LoanService(_uowf, OptiPaie.Core.Security.AccessContext.Unrestricted) { Audit = audit };
 
             long id = loans.Save(new Loan
             {

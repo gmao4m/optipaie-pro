@@ -43,7 +43,7 @@ namespace OptiPaie.UiTests
             using (var c = factory.CreateOpenConnection()) new MigrationRunner(c).Run();
 
             _uow = new UnitOfWorkFactory(factory);
-            _leave = new LeaveService(_uow);
+            _leave = new LeaveService(_uow, OptiPaie.Core.Security.AccessContext.Unrestricted);
             _companyA = InsertCompany("SARL A", "000000000000000");
             _companyB = InsertCompany("SARL B", "000000000000001");
         }

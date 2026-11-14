@@ -60,16 +60,16 @@ namespace OptiPaie.Tests
                 CompanyProvider = () => _activeCompany > 0 ? _activeCompany : (long?)null
             };
 
-            _companies = new CompanyService(_uowf, new CompanyValidator());
-            _employees = new EmployeeService(_uowf, new EmployeeValidator()) { Audit = _audit };
-            _contracts = new ContractService(_uowf) { Audit = _audit };
-            _attendance = new AttendanceService(_uowf);
-            _leave = new LeaveService(_uowf) { Audit = _audit };
-            _loans = new LoanService(_uowf) { Audit = _audit };
-            _assets = new AssetService(_uowf) { Audit = _audit };
-            _training = new TrainingService(_uowf);
-            _certificates = new WorkCertificateService(_uowf);
-            _performance = new PerformanceService(_uowf);
+            _companies = new CompanyService(_uowf, new CompanyValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _employees = new EmployeeService(_uowf, new EmployeeValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted) { Audit = _audit };
+            _contracts = new ContractService(_uowf, OptiPaie.Core.Security.AccessContext.Unrestricted) { Audit = _audit };
+            _attendance = new AttendanceService(_uowf, OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _leave = new LeaveService(_uowf, OptiPaie.Core.Security.AccessContext.Unrestricted) { Audit = _audit };
+            _loans = new LoanService(_uowf, OptiPaie.Core.Security.AccessContext.Unrestricted) { Audit = _audit };
+            _assets = new AssetService(_uowf, OptiPaie.Core.Security.AccessContext.Unrestricted) { Audit = _audit };
+            _training = new TrainingService(_uowf, OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _certificates = new WorkCertificateService(_uowf, OptiPaie.Core.Security.AccessContext.Unrestricted);
+            _performance = new PerformanceService(_uowf, OptiPaie.Core.Security.AccessContext.Unrestricted);
         }
 
         [TearDown]
