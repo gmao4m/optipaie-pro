@@ -4,7 +4,6 @@ using OptiPaie.Common.Validation;
 using OptiPaie.Core.Entities;
 using OptiPaie.Core.Interfaces.Repositories;
 using OptiPaie.Core.Interfaces.Services;
-using OptiPaie.Core.Primitives;
 using OptiPaie.Core.Security;
 
 namespace OptiPaie.Services
@@ -102,18 +101,6 @@ namespace OptiPaie.Services
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 return uow.Payslips.GetByEmployee(employeeId).ToList();
-            }
-        }
-
-        [OptiPaie.Core.Security.WriteGuardExempt("Archive storage of an already-rendered document; invoked only by the guarded payroll/archival pipeline, never as a standalone user action.")]
-        public Result<long> StoreDocument(ArchiveDocument document)
-        {
-            Guard.AgainstNull(document, nameof(document));
-
-            using (IUnitOfWork uow = _unitOfWorkFactory.Create())
-            {
-                long id = uow.ArchiveDocuments.Insert(document);
-                return Result.Ok(id);
             }
         }
 

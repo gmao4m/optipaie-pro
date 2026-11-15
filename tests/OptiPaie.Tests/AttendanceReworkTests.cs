@@ -123,7 +123,7 @@ namespace OptiPaie.Tests
             var elements = new PayrollElementService(_uow, new PayrollElementValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted);
             var batch = new BatchPayrollService(_employees, elements, new LoanService(_uow, OptiPaie.Core.Security.AccessContext.Unrestricted),
                 _attendance, new PayrollService(_uow, new ConfigurationService(_uow), new PayrollCalculationEngine(), OptiPaie.Core.Security.AccessContext.Unrestricted),
-                new ContractService(_uow, OptiPaie.Core.Security.AccessContext.Unrestricted), new ArchiveService(_uow), _ => true);
+                new ContractService(_uow, OptiPaie.Core.Security.AccessContext.Unrestricted), new ArchiveService(_uow), _ => true, OptiPaie.Core.Security.AccessContext.Unrestricted);
 
             PayrollGenerationRequest single = batch.BuildRequest(_companyId, _empId, Year, Month, null);
             var cache = _attendance.GetCompanyMonthlySummary(_companyId, Year, Month)

@@ -60,7 +60,7 @@ namespace OptiPaie.Tests
             _attendance = new AttendanceService(_uow, OptiPaie.Core.Security.AccessContext.Unrestricted);
             _archive = new ArchiveService(_uow);
             _payroll = new PayrollService(_uow, new ConfigurationService(_uow), new PayrollCalculationEngine(), OptiPaie.Core.Security.AccessContext.Unrestricted);
-            _batch = new BatchPayrollService(_employees, _elements, _loans, _attendance, _payroll, _contracts, _archive, _ => true);
+            _batch = new BatchPayrollService(_employees, _elements, _loans, _attendance, _payroll, _contracts, _archive, _ => true, OptiPaie.Core.Security.AccessContext.Unrestricted);
 
             _companyId = _companies.Create(new Company { NameFr = "SARL Batch", Nif = "000000000000000" }).Value;
         }

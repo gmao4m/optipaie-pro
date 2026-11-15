@@ -22,9 +22,6 @@ namespace OptiPaie.Core.Interfaces.Services
         /// <summary>Returns the payslips of an employee, newest first.</summary>
         IReadOnlyList<Payslip> GetPayslipsByEmployee(long employeeId);
 
-        /// <summary>Stores a frozen archive document (PDF + snapshot) for a payslip.</summary>
-        Result<long> StoreDocument(ArchiveDocument document);
-
         /// <summary>Returns the archived document for a payslip in a given language, or null.</summary>
         ArchiveDocument GetDocument(long payslipId, string languageCode);
     }

@@ -35,6 +35,7 @@ namespace OptiPaie.Services
         private readonly IContractService _contracts;
         private readonly IArchiveService _archive;
         private readonly Func<string, bool> _isModuleEnabled;
+        private readonly OptiPaie.Core.Security.IAccessContext _access;
 
         public BatchPayrollService(
             IEmployeeService employees,
@@ -44,7 +45,8 @@ namespace OptiPaie.Services
             IPayrollService payroll,
             IContractService contracts,
             IArchiveService archive,
-            Func<string, bool> isModuleEnabled)
+            Func<string, bool> isModuleEnabled,
+            OptiPaie.Core.Security.IAccessContext access = null)
         {
             _employees = Guard.AgainstNull(employees, nameof(employees));
             _elements = Guard.AgainstNull(elements, nameof(elements));
@@ -54,6 +56,7 @@ namespace OptiPaie.Services
             _contracts = Guard.AgainstNull(contracts, nameof(contracts));
             _archive = Guard.AgainstNull(archive, nameof(archive));
             _isModuleEnabled = isModuleEnabled ?? (_ => true);
+            _access = access;
         }
 
         // ------------------------------------------------------------------ plan
@@ -112,6 +115,10 @@ namespace OptiPaie.Services
 
         public BatchPayrollResult Run(long companyId, int year, int month, IProgress<BatchProgress> progress = null)
         {
+            // The batch run is a first-class WRITE entry point (it persists a payslip per employee),
+            // so it is guarded in its own right — not merely "transitively" via the services it calls.
+            OptiPaie.Core.Security.AccessPolicy.Require(_access, OptiPaie.Core.Security.Permission.RunPayroll);
+
             BatchPayrollPlan plan = Plan(companyId, year, month);
             var results = new List<BatchEmployeeResult>();
             int total = plan.Employees.Count;

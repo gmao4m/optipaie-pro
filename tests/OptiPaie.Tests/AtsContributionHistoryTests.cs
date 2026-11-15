@@ -58,7 +58,7 @@ namespace OptiPaie.Tests
             _payroll = new PayrollService(_uow, _config, new PayrollCalculationEngine(), OptiPaie.Core.Security.AccessContext.Unrestricted);
             _batch = new BatchPayrollService(
                 _employees, new PayrollElementService(_uow, new PayrollElementValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted),
-                new LoanService(_uow, OptiPaie.Core.Security.AccessContext.Unrestricted), new AttendanceService(_uow, OptiPaie.Core.Security.AccessContext.Unrestricted), _payroll, _contracts, _archive, _ => true);
+                new LoanService(_uow, OptiPaie.Core.Security.AccessContext.Unrestricted), new AttendanceService(_uow, OptiPaie.Core.Security.AccessContext.Unrestricted), _payroll, _contracts, _archive, _ => true, OptiPaie.Core.Security.AccessContext.Unrestricted);
             _cnas = new CnasDeclarationService(_companies, _employees, _archive, _config);
             _ats = new AtsDrtDocumentService(_companies, _employees, _archive);
         }

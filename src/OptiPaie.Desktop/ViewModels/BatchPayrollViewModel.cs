@@ -73,7 +73,8 @@ namespace OptiPaie.Desktop.ViewModels
 
             _batch = new BatchPayrollService(
                 services.Employees, services.PayrollElements, services.Loans, services.Attendance,
-                services.Payroll, services.Contracts, services.Archive, services.LicenseGate.IsEnabled);
+                services.Payroll, services.Contracts, services.Archive, services.LicenseGate.IsEnabled,
+                services.Authorization);
 
             for (int y = DateTime.Today.Year - 3; y <= DateTime.Today.Year + 1; y++) Years.Add(y);
             for (int m = 1; m <= 12; m++) Months.Add(new MonthOption(m, Fr.DateTimeFormat.GetMonthName(m)));

@@ -67,7 +67,7 @@ namespace OptiPaie.Tests
             _loans = new LoanService(_uow, OptiPaie.Core.Security.AccessContext.Unrestricted);
             _batch = new BatchPayrollService(
                 _employees, new PayrollElementService(_uow, new PayrollElementValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted),
-                _loans, new AttendanceService(_uow, OptiPaie.Core.Security.AccessContext.Unrestricted), _payroll, _contracts, _archive, _ => true);
+                _loans, new AttendanceService(_uow, OptiPaie.Core.Security.AccessContext.Unrestricted), _payroll, _contracts, _archive, _ => true, OptiPaie.Core.Security.AccessContext.Unrestricted);
             _cnas = new CnasDeclarationService(_companies, _employees, _archive, _config);
             _revision = new PayslipRevisionService(_uow, _payroll, _config, _loans, OptiPaie.Core.Security.AccessContext.Unrestricted);
         }

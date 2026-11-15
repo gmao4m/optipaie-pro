@@ -82,7 +82,7 @@ namespace OptiPaie.UiTests
             var loans = new LoanService(uow, OptiPaie.Core.Security.AccessContext.Unrestricted);
             var batch = new BatchPayrollService(
                 employees, new PayrollElementService(uow, new PayrollElementValidator(), OptiPaie.Core.Security.AccessContext.Unrestricted),
-                loans, new AttendanceService(uow, OptiPaie.Core.Security.AccessContext.Unrestricted), payroll, contracts, archive, _ => true);
+                loans, new AttendanceService(uow, OptiPaie.Core.Security.AccessContext.Unrestricted), payroll, contracts, archive, _ => true, OptiPaie.Core.Security.AccessContext.Unrestricted);
             var cnas = new CnasDeclarationService(companies, employees, archive, config);
             var ats = new AtsDrtDocumentService(companies, employees, archive);
             var revision = new PayslipRevisionService(uow, payroll, config, loans, OptiPaie.Core.Security.AccessContext.Unrestricted);

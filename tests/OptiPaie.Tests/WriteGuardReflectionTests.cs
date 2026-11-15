@@ -47,8 +47,20 @@ namespace OptiPaie.Tests
                 { "TrialService", "trial cipher + store (device-bound)" },
                 { "AtsDrtDocumentService", "renders onto pre-printed form assets on disk (not a DB write service)" },
                 { "AuditService", "audit sink (void Record; optional string actor ctor param); no Result methods" },
-                { "BatchPayrollService", "takes a delegate predicate; no Result methods; transitively guarded via the guarded PayrollService.Generate it calls" },
                 { "UpdateService", "auto-update release channel (network); no DB-write Result methods" },
+            };
+
+        /// <summary>
+        /// Write entry points that DO NOT return <see cref="Result"/> and so would escape a
+        /// return-type-only scope. Scoping by SERVICE ROLE, these are verified explicitly: each must
+        /// reject a no-permission caller (throw <see cref="AccessDeniedException"/>). A new non-Result
+        /// write entry point must be registered here (or guard-tested some other way) — this is the
+        /// gap that previously let <c>BatchPayrollService.Run</c> slip through.
+        /// </summary>
+        private static readonly Dictionary<string, string[]> NonResultWriteEntryPoints =
+            new Dictionary<string, string[]>(StringComparer.Ordinal)
+            {
+                { "BatchPayrollService", new[] { "Run" } }, // persists a payslip per employee
             };
 
         [SetUp]
@@ -79,7 +91,7 @@ namespace OptiPaie.Tests
         }
 
         [Test]
-        public void EveryResultReturningServiceMethod_IsGuarded_OrExplicitlyExempt()
+        public void EveryServiceWriteEntryPoint_IsGuarded_OrExplicitlyExempt()
         {
             Assembly asm = typeof(EmployeeService).Assembly;
             Type[] services = asm.GetTypes()
@@ -111,9 +123,26 @@ namespace OptiPaie.Tests
                     continue;
                 }
 
+                // Scope by SERVICE ROLE: a write entry point is in scope whatever it returns. The
+                // return-type scan catches every Result-returning write; explicitly-registered
+                // non-Result write entry points (e.g. BatchPayrollService.Run) are added alongside.
+                NonResultWriteEntryPoints.TryGetValue(svc.Name, out string[] extraWriteNames);
+                var extraWrites = new HashSet<string>(extraWriteNames ?? new string[0], StringComparer.Ordinal);
+
                 MethodInfo[] methods = svc.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
-                    .Where(m => !m.IsSpecialName && ReturnsResult(m.ReturnType))
+                    .Where(m => !m.IsSpecialName && (ReturnsResult(m.ReturnType) || extraWrites.Contains(m.Name)))
                     .OrderBy(m => m.Name).ToArray();
+
+                // A registered non-Result write entry point that no longer exists (renamed/removed)
+                // must fail loudly, not silently stop being checked.
+                foreach (string name in extraWrites)
+                {
+                    if (!methods.Any(m => m.Name == name))
+                    {
+                        failures.Add("Registered non-Result write entry point " + svc.Name + "." + name +
+                            " no longer exists — update NonResultWriteEntryPoints.");
+                    }
+                }
 
                 foreach (MethodInfo m in methods)
                 {
@@ -193,6 +222,7 @@ namespace OptiPaie.Tests
         private object Make(Type t)
         {
             if (t == typeof(IAccessContext)) return new NoPermAccess();
+            if (t == typeof(Func<string, bool>)) return (Func<string, bool>)(_ => true); // module-enabled predicate
             if (t == typeof(OptiPaie.Core.Interfaces.Repositories.IUnitOfWorkFactory)) return _uow;
             if (t == typeof(AppConfiguration)) return _config;
             if (t == typeof(ILogger)) return NullLogger.Instance;
