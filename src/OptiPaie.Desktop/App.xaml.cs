@@ -182,6 +182,10 @@ namespace OptiPaie.Desktop
             {
                 if (AuthenticateIfNeeded())
                 {
+                    // Recovery backfill: an owner account created before the recovery screen existed
+                    // has no code — issue one and show it ONCE, now that the owner just signed in.
+                    OfferRecoveryBackfill();
+
                     // Company gate: pick / create the active company BEFORE any data screen. A
                     // multi-company install never auto-opens one silently; nothing is loaded until
                     // a company is chosen. Closing the gate without a choice does not open the app.
@@ -498,6 +502,47 @@ namespace OptiPaie.Desktop
             return setup.IsOwnerEstablished;
         }
 
+        /// <summary>
+        /// Backfills and shows the one-time recovery code when the OWNER just signed in and has none
+        /// yet (an account created before the recovery screen existed). Shown ONLY to the owner
+        /// principal (owner signed in, no local user seated) — a local user must never see the
+        /// owner's code. Never throws; a failure is a breadcrumb, never a crash.
+        /// </summary>
+        private void OfferRecoveryBackfill()
+        {
+            try
+            {
+                if (Services.OwnerSetup == null)
+                {
+                    return;
+                }
+
+                bool ownerIsPrincipal =
+                    Services.CustomerAccount != null && Services.CustomerAccount.IsSignedIn &&
+                    (Services.Session == null || !Services.Session.IsAuthenticated);
+                if (!ownerIsPrincipal)
+                {
+                    return;
+                }
+
+                string code = Services.OwnerSetup.BackfillRecoveryCodeIfMissing();
+                if (string.IsNullOrEmpty(code))
+                {
+                    return;
+                }
+
+                var viewModel = new ViewModels.RecoveryCodeViewModel(code);
+                var window = new RecoveryCodeWindow { DataContext = viewModel };
+                ApplyFlowDirection(window);
+                viewModel.CloseRequested = () => { try { window.DialogResult = true; } catch { window.Close(); } };
+                window.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                CrashLog.Breadcrumb("Recovery backfill skipped: " + ex.Message);
+            }
+        }
+
         private static string OwnerSetupErrorText()
         {
             return "تعذّر إعداد حساب المالك. لم يتمّ تعديل بياناتك. التفاصيل في:\n" + CrashLog.Directory +
@@ -579,6 +624,8 @@ namespace OptiPaie.Desktop
             {
                 if (AuthenticateIfNeeded() && (Services.Access.Evaluate().CanUseApp || EnsureAccess()))
                 {
+                    OfferRecoveryBackfill();
+
                     // Re-run the company gate on a fresh sign-in: a different user must not inherit
                     // the previous session's company, and a multi-company install re-picks explicitly.
                     if (!EnsureCompanySelected())

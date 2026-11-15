@@ -19,9 +19,19 @@
 5. **كل محاولة** (نجاح أو فشل أو قفل) **تُسجَّل في سجلّ التدقيق**.
 6. **بلا شبكة**: كل ما سبق محلّي بالكامل.
 
-**ملاحظة تنفيذ:** منطق الخدمة مكتمل ومختبَر (`OwnerRecoveryTests`، 6 اختبارات). **الربط بالواجهة**
-(عرض الرمز عند الإنشاء مع تأكيد الحفظ، وشاشة الاسترجاع) هو السطح المتبقّي في WPF — الخدمة جاهزة:
-`IssueRecoveryCode()` يعيد النصّ لعرضه، و`RecoverWithCode(code, newPassword)` يقود الشاشة.
+**ملاحظة تنفيذ:** منطق الخدمة مكتمل ومختبَر (`OwnerRecoveryTests`، 6 اختبارات)، و**الربط بالواجهة
+صار مُنفَّذًا** (Commit B):
+- **عرض الرمز عند إنشاء المالك** مع تأكيد الحفظ: [`OwnerSetupWindow`](../../src/OptiPaie.Desktop/Views/OwnerSetupWindow.xaml) (الخطوة ٢).
+- **شاشة الاسترجاع** (رمز + كلمة سرّ جديدة، ثمّ عرض الرمز الجديد، ثمّ بديل «فقدتُ الاثنين»):
+  [`RecoveryWindow`](../../src/OptiPaie.Desktop/Views/RecoveryWindow.xaml) — تُفتح من زرّ «نسيت كلمة السرّ»
+  في شاشة الدخول ([`LoginViewModel.OpenRecovery`](../../src/OptiPaie.Desktop/ViewModels/LoginViewModel.cs)).
+- **الرتق عند الدخول** (Backfill): حساب مالك قديم بلا رمز يحصل على واحد ويُعرض مرّة عند أوّل دخول ناجح —
+  [`App.OfferRecoveryBackfill`](../../src/OptiPaie.Desktop/App.xaml.cs) + [`RecoveryCodeWindow`](../../src/OptiPaie.Desktop/Views/RecoveryCodeWindow.xaml)،
+  ويُعرض **للمالك فقط** (لا مستخدم محلّي يرى رمز المالك).
+- **فقدان الاثنين**: الشاشة تعرض **بصمة التثبيت** (`IDeviceIdentity.GetDeviceId`) وتوجّه لإجراء البائع أدناه.
+
+لقطات الشاشات (FR + AR، مرتّبة) في [`docs/screenshots-recovery/`](../screenshots-recovery/) — مولَّدة بواسطة
+`RecoveryScreensScreenshots` ([Explicit]).
 
 ## إن ضاع **الاثنان** (كلمة السرّ **والرمز**) — إجراء الدعم
 

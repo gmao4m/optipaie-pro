@@ -125,6 +125,13 @@ namespace OptiPaie.Desktop.Composition
         /// </summary>
         public OptiPaie.Services.Startup.OwnerSetupService OwnerSetup { get; set; }
 
+        /// <summary>
+        /// Stable device identity — used by the recovery screen to show the install fingerprint when
+        /// the customer has lost BOTH the password and the recovery code (the vendor procedure). Set
+        /// by composition.
+        /// </summary>
+        public OptiPaie.Core.Licensing.IDeviceIdentity DeviceIdentity { get; set; }
+
         private CompanyContext _companyContext;
 
         /// <summary>

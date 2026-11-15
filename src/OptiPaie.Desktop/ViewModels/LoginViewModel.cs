@@ -38,7 +38,7 @@ namespace OptiPaie.Desktop.ViewModels
             _services = services;
             _coordinator = new LoginCoordinator(services.CustomerAccount, services.Users);
             LoginCommand = new RelayCommand(Login);
-            ForgotPasswordCommand = new RelayCommand(ShowForgotPasswordHelp);
+            ForgotPasswordCommand = new RelayCommand(OpenRecovery);
             UseLicenseCommand = new RelayCommand(RequestActivation);
             CheckUpdatesCommand = new RelayCommand(CheckUpdates);
 
@@ -117,9 +117,23 @@ namespace OptiPaie.Desktop.ViewModels
             CloseRequested?.Invoke(true);
         }
 
-        private void ShowForgotPasswordHelp()
+        /// <summary>
+        /// Opens the owner password-recovery screen: reset with the one-time code, or the lost-both
+        /// fingerprint fallback. On a successful recovery the owner is already signed in, so the
+        /// login screen closes as success. This is the human-reachable end of the recovery service.
+        /// </summary>
+        private void OpenRecovery()
         {
-            Dialogs.Info(L("Login_ForgotHelp"));
+            var vm = new RecoveryViewModel(_services);
+            var window = new OptiPaie.Desktop.Views.RecoveryWindow { DataContext = vm };
+            OptiPaie.Desktop.App.ApplyFlowDirection(window);
+            vm.CloseRequested = ok => { try { window.DialogResult = ok; } catch { window.Close(); } };
+            window.ShowDialog();
+
+            if (_services.CustomerAccount != null && _services.CustomerAccount.IsSignedIn)
+            {
+                CloseRequested?.Invoke(true);
+            }
         }
 
         /// <summary>

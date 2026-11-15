@@ -232,6 +232,7 @@ namespace OptiPaie.Desktop.Composition
                 settingsService, customerAccount, companyService, logger);
             ownerSetup.Audit = auditService;
             appServices.OwnerSetup = ownerSetup;
+            appServices.DeviceIdentity = deviceIdentity; // recovery screen shows the install fingerprint
 
             // Attribute every audit entry to WHO performed it. Evaluated at record time so it
             // always reflects the CURRENT session: the signed-in local user (username), else the
