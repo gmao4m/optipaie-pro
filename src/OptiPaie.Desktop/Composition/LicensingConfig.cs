@@ -1,6 +1,5 @@
 using System;
 using System.Configuration;
-using System.Reflection;
 using OptiPaie.Core.Licensing;
 
 namespace OptiPaie.Desktop.Composition
@@ -74,15 +73,10 @@ namespace OptiPaie.Desktop.Composition
 
         private static string ResolveAppVersion()
         {
-            try
-            {
-                Version version = Assembly.GetExecutingAssembly().GetName().Version;
-                return version != null ? version.ToString() : "1.0.0";
-            }
-            catch
-            {
-                return "1.0.0";
-            }
+            // The PRODUCT version (InformationalVersion, e.g. "1.41.0") — the SAME field the updater
+            // compares — NOT GetName().Version. Reading the assembly version here reported every
+            // device's app version to the licensing backend as the frozen placeholder.
+            return OptiPaie.Core.Updates.AppVersion.CurrentProduct();
         }
     }
 }

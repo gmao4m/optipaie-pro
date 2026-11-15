@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using System.Windows;
 using System.Windows.Input;
@@ -224,8 +223,9 @@ namespace OptiPaie.Desktop.ViewModels
 
         private async void CheckUpdates()
         {
-            System.Version version = Assembly.GetExecutingAssembly().GetName().Version;
-            string current = version != null ? version.ToString(3) : "1.0.0";
+            // The PRODUCT version (InformationalVersion) — the SAME field the updater uses — NOT
+            // GetName().Version, which was frozen at the 1.8.0.0 placeholder.
+            string current = OptiPaie.Core.Updates.AppVersion.CurrentProduct();
 
             if (_services.Update == null || !_services.Update.IsSupported)
             {

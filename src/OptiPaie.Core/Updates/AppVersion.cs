@@ -100,11 +100,12 @@ namespace OptiPaie.Core.Updates
         }
 
         /// <summary>
-        /// The running application's PRODUCT version (e.g. "1.14.0"), read from the entry
-        /// assembly's InformationalVersion — which mirrors &lt;Version&gt; in Directory.Build.props,
-        /// the single place to bump per release. AssemblyVersion/FileVersion are intentionally
-        /// frozen (binding stability) and must NOT be used for update comparison. Any
-        /// "+build"/"-pre" suffix (e.g. SourceLink commit hash) is stripped.
+        /// The running application's PRODUCT version (e.g. "1.41.0"), read from the entry assembly's
+        /// InformationalVersion — which mirrors &lt;Version&gt; in Directory.Build.props, the single
+        /// place to bump per release. FileVersion and AssemblyVersion now DERIVE from the same
+        /// &lt;Version&gt; (they used to be frozen at 1.8.0.0 — the "version trap"), so every field
+        /// agrees; InformationalVersion is still the one used for update comparison because it carries
+        /// the full semver. Any "+build"/"-pre" suffix (e.g. SourceLink commit hash) is stripped.
         /// </summary>
         public static string CurrentProduct()
         {

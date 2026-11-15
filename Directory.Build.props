@@ -12,9 +12,17 @@
     <Product>OptiPaie PRO</Product>
     <Authors>OptiPaie</Authors>
     <Copyright>© 2026 OptiPaie. Tous droits réservés.</Copyright>
+    <!--
+      ONE version, bumped here per release. FileVersion and AssemblyVersion DERIVE from it, so the
+      exe's FileVersion/ProductVersion/InformationalVersion can never again diverge (they were
+      frozen at 1.8.0.0 while the product was 1.40.x — a trap: anything reading FileVersion /
+      GetName().Version concluded the install was older than it was). $(Version) is always numeric
+      (the release process never ships a pre-release suffix), so "$(Version).0" is a valid 4-part
+      file/assembly version. Guarded by VersionConsistencyTests.
+    -->
     <Version>1.41.0</Version>
-    <FileVersion>1.8.0.0</FileVersion>
-    <AssemblyVersion>1.8.0.0</AssemblyVersion>
+    <FileVersion>$(Version).0</FileVersion>
+    <AssemblyVersion>$(Version).0</AssemblyVersion>
 
     <!-- Target platform: .NET Framework 4.8 (Windows 7 SP1 -> Windows 11) -->
     <TargetFramework>net48</TargetFramework>
