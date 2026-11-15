@@ -151,6 +151,7 @@ namespace OptiPaie.Desktop.ViewModels
         public EmployeeProfileViewModel(AppServices services, long employeeId, Action<string> navigate)
         {
             _services = services;
+            _fiche.Access = services.Authorization; // payslip print/export follows the role
             _employeeId = employeeId;
             _navigate = navigate;
 

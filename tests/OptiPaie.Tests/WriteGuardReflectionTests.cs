@@ -43,6 +43,7 @@ namespace OptiPaie.Tests
             {
                 { "LicensingService", "Supabase/network license backend + device identity" },
                 { "CustomerAccountService", "DPAPI-wrapped owner account over settings (sign-in flow)" },
+                { "OwnerSetupService", "depends on the DPAPI-wrapped owner account (ILocalCipher); its only Result method is the first-run owner bootstrap, exempt by attribute (chicken-and-egg: it creates the first owner before any role exists)" },
                 { "TrialService", "trial cipher + store (device-bound)" },
                 { "AtsDrtDocumentService", "renders onto pre-printed form assets on disk (not a DB write service)" },
                 { "AuditService", "audit sink (void Record; optional string actor ctor param); no Result methods" },
@@ -74,6 +75,7 @@ namespace OptiPaie.Tests
             public bool IsEnforced => true;
             public OptiPaie.Core.Enums.UserRole CurrentRole => OptiPaie.Core.Enums.UserRole.ReadOnly;
             public bool IsOwner => false;
+            public long? CurrentUserId => null;
         }
 
         [Test]

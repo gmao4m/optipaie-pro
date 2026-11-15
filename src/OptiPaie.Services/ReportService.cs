@@ -44,6 +44,7 @@ namespace OptiPaie.Services
         private readonly IAtsService _ats;
         private readonly IAssetService _assets;
         private readonly ITrainingService _training;
+        private readonly OptiPaie.Core.Security.IAccessContext _access;
 
         public ReportService(
             ICompanyService companies,
@@ -53,7 +54,8 @@ namespace OptiPaie.Services
             ILoanService loans,
             IAtsService ats,
             IAssetService assets,
-            ITrainingService training)
+            ITrainingService training,
+            OptiPaie.Core.Security.IAccessContext access = null)
         {
             _companies = Guard.AgainstNull(companies, nameof(companies));
             _employees = Guard.AgainstNull(employees, nameof(employees));
@@ -63,11 +65,46 @@ namespace OptiPaie.Services
             _ats = Guard.AgainstNull(ats, nameof(ats));
             _assets = Guard.AgainstNull(assets, nameof(assets));
             _training = Guard.AgainstNull(training, nameof(training));
+            _access = access;
+        }
+
+        /// <summary>
+        /// The module a report belongs to — used to gate it by the SAME view rule the navigation and
+        /// services use (<see cref="AccessPolicy.CanOpen"/>). The CACOBATPH salary declarations are
+        /// payroll data, so they follow the payroll view rule (read-only never sees them).
+        /// </summary>
+        private static string ModuleKeyFor(string reportKey)
+        {
+            switch (reportKey)
+            {
+                case Headcount:
+                case Turnover: return "employees";
+                case Attendance: return "attendance";
+                case LeaveLiability: return "leave";
+                case Loans: return "loans";
+                case Training: return "training";
+                case Assets: return "assets";
+                case Recruitment: return "recruitment";
+                case DasCacobatph:
+                case DacCacobatph: return "payroll"; // salary declarations — payroll-domain
+                default: return "payroll";           // unknown ⇒ the most restrictive (fail safe)
+            }
+        }
+
+        /// <summary>Whether the signed-in role may run/see a report. Gate off / no context ⇒ true.</summary>
+        private bool MayRun(string reportKey)
+        {
+            if (_access == null || !_access.IsEnforced)
+            {
+                return true;
+            }
+
+            return OptiPaie.Core.Security.AccessPolicy.CanOpen(_access.CurrentRole, ModuleKeyFor(reportKey));
         }
 
         public IReadOnlyList<ReportDescriptor> GetReports()
         {
-            return new List<ReportDescriptor>
+            var all = new List<ReportDescriptor>
             {
                 new ReportDescriptor(Headcount, "Effectif (roster)", "Effectif", false),
                 new ReportDescriptor(Turnover, "Mouvements du personnel (turnover)", "Effectif", false),
@@ -78,6 +115,10 @@ namespace OptiPaie.Services
                 new ReportDescriptor(Assets, "Inventaire du matériel", "Matériel", false),
                 new ReportDescriptor(Recruitment, "Entonnoir de recrutement", "Recrutement", false)
             };
+
+            // The reports library offers ONLY the reports the signed-in role may run — not an
+            // all-or-nothing permission. A role that cannot view a module never sees its report.
+            return all.Where(r => MayRun(r.Key)).ToList();
         }
 
         public IReadOnlyList<ReportDescriptor> GetReports(long companyId)
@@ -86,9 +127,11 @@ namespace OptiPaie.Services
 
             // The CACOBATPH declarations are a separate section shown only for a BTPH
             // company that has switched the caisse on — never mixed in with the CNAS
-            // declarations or the general HR reports.
+            // declarations or the general HR reports. They are salary data, so they are also
+            // offered only to a role that may view payroll.
             Company company = _companies.Get(companyId);
-            if (company != null && company.BtphSector && company.CacobatphEnabled)
+            if (company != null && company.BtphSector && company.CacobatphEnabled &&
+                MayRun(DasCacobatph))
             {
                 reports.Add(new ReportDescriptor(DasCacobatph, "DAS-CACOBATPH — déclaration des salaires", "Déclarations CACOBATPH", false));
                 reports.Add(new ReportDescriptor(DacCacobatph, "DAC-CACOBATPH — déclaration des cotisations", "Déclarations CACOBATPH", false));
@@ -101,6 +144,13 @@ namespace OptiPaie.Services
         {
             Company company = _companies.Get(companyId);
             string companyName = company != null ? company.NameFr : "—";
+
+            // Building (and therefore exporting) a report is gated exactly as strictly as listing it:
+            // a role that may not run this report gets an empty table, never its data.
+            if (!MayRun(reportKey))
+            {
+                return new ReportTable { Title = "Accès refusé", Subtitle = companyName };
+            }
 
             switch (reportKey)
             {

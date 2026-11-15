@@ -54,10 +54,11 @@ namespace OptiPaie.Tests
         }
 
         [Test]
-        public void ReadOnly_SeesEverything_Except_Admin()
+        public void ReadOnly_SeesEverything_Except_Admin_Payroll_And_Cnas()
         {
+            // Corrected matrix (Commit C): read-only loses payroll (payslips/salary) AND CNAS entirely.
             Assert.That(OpenableFor(UserRole.ReadOnly), Is.EquivalentTo(
-                AllKeys.Except(new[] { "companies", "settings" })));
+                AllKeys.Except(new[] { "companies", "settings", "payroll", "cnas" })));
         }
 
         [Test]

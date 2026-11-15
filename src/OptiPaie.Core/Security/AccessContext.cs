@@ -27,5 +27,7 @@ namespace OptiPaie.Core.Security
         public UserRole CurrentRole => UserRole.Admin;
 
         public bool IsOwner => true;
+
+        public long? CurrentUserId => null;
     }
 }

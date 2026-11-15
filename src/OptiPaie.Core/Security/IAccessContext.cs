@@ -21,5 +21,11 @@ namespace OptiPaie.Core.Security
         /// an administrator user. Gates the few owner-only operations (e.g. database restore).
         /// </summary>
         bool IsOwner { get; }
+
+        /// <summary>
+        /// The signed-in LOCAL user's id, or null when the principal is the owner / no local user is
+        /// seated. Used to forbid an account from changing its OWN role.
+        /// </summary>
+        long? CurrentUserId { get; }
     }
 }

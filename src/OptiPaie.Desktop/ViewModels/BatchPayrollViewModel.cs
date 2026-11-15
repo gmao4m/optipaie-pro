@@ -68,6 +68,7 @@ namespace OptiPaie.Desktop.ViewModels
         public BatchPayrollViewModel(AppServices services)
         {
             _services = services;
+            _fiche.Access = services.Authorization; // payslip print/export follows the role
             _company = services.CompanyContext.Active;
 
             _batch = new BatchPayrollService(

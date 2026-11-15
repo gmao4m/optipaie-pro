@@ -64,7 +64,7 @@ namespace OptiPaie.Desktop.Composition
             var elementService = new PayrollElementService(unitOfWorkFactory, new PayrollElementValidator(), access);
             var configurationService = new ConfigurationService(unitOfWorkFactory);
             var settingsService = new SettingsService(unitOfWorkFactory);
-            var archiveService = new ArchiveService(unitOfWorkFactory);
+            var archiveService = new ArchiveService(unitOfWorkFactory, access);
             var attendanceService = new AttendanceService(unitOfWorkFactory, access);
             var leaveService = new LeaveService(unitOfWorkFactory, access);
             var loanService = new LoanService(unitOfWorkFactory, access);
@@ -80,13 +80,13 @@ namespace OptiPaie.Desktop.Composition
                 attendanceService, atsService, assetService, trainingService);
             var reportService = new ReportService(
                 companyService, employeeService, attendanceService, leaveService, loanService,
-                atsService, assetService, trainingService);
+                atsService, assetService, trainingService, access);
             var notificationService = new NotificationService(
                 companyService, employeeService, contractService, leaveService, trainingService, performanceService);
 
             // CNAS declarations (DAC/DAS) — read-only over persisted payroll + identity data.
             var cnasDeclarationService = new CnasDeclarationService(
-                companyService, employeeService, archiveService, configurationService);
+                companyService, employeeService, archiveService, configurationService, access);
 
             // ATS/DRT official attestations — auto-fill the CNAS .docx templates from employee files.
             var atsDrtDocumentService = new AtsDrtDocumentService(companyService, employeeService, archiveService);

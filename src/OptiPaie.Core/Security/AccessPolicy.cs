@@ -107,9 +107,15 @@ namespace OptiPaie.Core.Security
                 case "users":
                     return false;
 
-                // CNAS declarations: not HR.
+                // Payroll / payslips & salary data: visible to payroll and accountant, VIEW-only to
+                // HR — but NEVER to read-only (it loses payroll entirely).
+                case "payroll":
+                    return role != UserRole.ReadOnly;
+
+                // CNAS declarations: payroll & accountant only. Not HR, and NOT read-only (which
+                // loses CNAS entirely).
                 case "cnas":
-                    return role != UserRole.Hr;
+                    return role == UserRole.Payroll || role == UserRole.Accountant;
 
                 // Performance & recruitment: HR domain + read-only; not payroll/accountant.
                 case "performance":
@@ -123,10 +129,27 @@ namespace OptiPaie.Core.Security
                     return role != UserRole.Payroll;
 
                 default:
-                    return true; // viewable by every role (dashboard, employees, payroll, attendance,
+                    return true; // viewable by every role (dashboard, employees, attendance,
                                  // leave, loans, contracts, attestations, work_certificate, archive, reports)
             }
         }
+
+        /// <summary>
+        /// Whether a role may PRINT or EXPORT payslip / payroll (salary) data — the "P" column of the
+        /// payroll row. Export is guarded exactly as strictly as viewing: a role that cannot see a
+        /// payslip can never export it. HR may VIEW payroll (<see cref="CanOpen"/>) but may NOT export
+        /// it; read-only sees no payroll at all. Administrators, payroll and accountant may export.
+        /// </summary>
+        public static bool CanExportPayroll(UserRole role) =>
+            role == UserRole.Admin || role == UserRole.Payroll || role == UserRole.Accountant;
+
+        /// <summary>
+        /// Whether a role may PRINT or EXPORT CNAS declaration files — the "P" column of the CNAS row,
+        /// identical to the set that may view CNAS (administrators, payroll, accountant). HR and
+        /// read-only can neither see nor export CNAS.
+        /// </summary>
+        public static bool CanExportCnas(UserRole role) =>
+            role == UserRole.Admin || role == UserRole.Payroll || role == UserRole.Accountant;
 
         /// <summary>
         /// Enforces an OWNER-only operation (e.g. database restore). Fails closed on a null context;

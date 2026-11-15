@@ -99,6 +99,11 @@ namespace OptiPaie.Services.Startup
         /// installation exactly as it was. The business data is never touched by this method.
         /// </summary>
         /// <returns>Ok(recoveryCode) on success; Fail(bilingual message) otherwise.</returns>
+        [OptiPaie.Core.Security.WriteGuardExempt(
+            "First-run owner bootstrap: creates the VERY FIRST owner account before any user, role " +
+            "or owner exists — it cannot require a permission that it is itself the prerequisite for " +
+            "(chicken-and-egg). It is reachable only from the App startup owner-setup gate, which runs " +
+            "it exactly once and only when OwnerSetupPolicy says an owner must be created.")]
         public Result<string> CreateOwner(string email, string company, string password)
         {
             if (string.IsNullOrWhiteSpace(email))

@@ -225,6 +225,7 @@ namespace OptiPaie.Tests
             public bool IsEnforced => true;                 // worst case: enforcement fully on
             public UserRole CurrentRole => UserRole.Admin;  // owner with no local user seated
             public bool IsOwner => true;
+            public long? CurrentUserId => null;             // the owner has no local user id
         }
 
         // ---- fixture construction (same technique as UpgradePathTests) ----

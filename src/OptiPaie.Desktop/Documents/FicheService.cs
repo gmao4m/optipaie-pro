@@ -5,6 +5,7 @@ using System.IO;
 using OptiPaie.Core.Dtos;
 using OptiPaie.Core.Entities;
 using OptiPaie.Core.Enums;
+using OptiPaie.Core.Security;
 using QuestPDF.Fluent;
 
 namespace OptiPaie.Desktop.Documents
@@ -13,6 +14,31 @@ namespace OptiPaie.Desktop.Documents
     public sealed class FicheService
     {
         private static readonly CultureInfo Fr = CultureInfo.GetCultureInfo("fr-FR");
+
+        /// <summary>
+        /// The single chokepoint for every payslip PDF (archive reprint, payroll screen, employee
+        /// profile, batch). The authorization context is set by the hosting view model so that
+        /// VIEWING the fiche is gated as the payroll screen is, and PRINTING / EXPORTING it is gated
+        /// exactly as strictly as viewing payslip data — HR may view payroll but never export it, and
+        /// read-only sees no payslip at all. Null / gate off ⇒ unrestricted (legacy behaviour).
+        /// </summary>
+        public IAccessContext Access { get; set; }
+
+        private void RequireView()
+        {
+            if (Access != null && Access.IsEnforced && !AccessPolicy.CanOpen(Access.CurrentRole, "payroll"))
+            {
+                throw new AccessDeniedException(Permission.RunPayroll);
+            }
+        }
+
+        private void RequireExport()
+        {
+            if (Access != null && Access.IsEnforced && !AccessPolicy.CanExportPayroll(Access.CurrentRole))
+            {
+                throw new AccessDeniedException(Permission.RunPayroll);
+            }
+        }
 
         public FichePaieModel FromResult(Company company, Employee employee, int year, int month, PayrollResult result, bool isArabic, decimal workedDays, decimal cnasEmployeeRate)
         {
@@ -100,18 +126,21 @@ namespace OptiPaie.Desktop.Documents
 
         public void Preview(FichePaieModel model)
         {
+            RequireView(); // viewing a payslip is gated as the payroll screen is (not read-only)
             string path = WriteTemp(model);
             Open(path, null);
         }
 
         public void Print(FichePaieModel model)
         {
+            RequireExport(); // printing a payslip is gated exactly as strictly as viewing it
             string path = WriteTemp(model);
             Open(path, "print");
         }
 
         public void ExportPdf(FichePaieModel model, string path)
         {
+            RequireExport(); // exporting a payslip PDF is gated exactly as strictly as viewing it
             Render(model, path);
         }
 

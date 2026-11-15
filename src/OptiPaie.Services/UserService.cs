@@ -49,6 +49,12 @@ namespace OptiPaie.Services
         /// <summary>Audit trail for user management + the login gate (security-relevant). Best-effort.</summary>
         public IAuditSink Audit { get; set; } = NullAuditSink.Instance;
 
+        /// <summary>
+        /// True when the caller is the account OWNER — or when enforcement is off / there is no
+        /// context (owner setup, demo, tests). Only the owner may create or promote administrators.
+        /// </summary>
+        private bool IsOwnerCaller() => _access == null || !_access.IsEnforced || _access.IsOwner;
+
         private static string PasswordTooShortMessage =>
             "Le mot de passe doit contenir au moins " + MinPasswordLength + " caractères.\n" +
             "يجب أن تتكوّن كلمة السرّ من " + MinPasswordLength + " محارف على الأقلّ.";
@@ -56,6 +62,16 @@ namespace OptiPaie.Services
         public Result<long> Create(string username, string fullName, string password, UserRole role, string department, bool mustChangePassword = false)
         {
             AccessPolicy.Require(_access, Permission.ManageUsers);
+
+            // Admins cannot mint admins: creating an ADMINISTRATOR account is OWNER-only. An
+            // administrator may create and manage every NON-admin role.
+            if (role == UserRole.Admin && !IsOwnerCaller())
+            {
+                return Result.Fail<long>(
+                    "Seul le propriétaire peut créer un administrateur.\nوحده المالك يمكنه إنشاء مدير.",
+                    "User_AdminOwnerOnly");
+            }
+
             if (string.IsNullOrWhiteSpace(username))
             {
                 return Result.Fail<long>("Le nom d'utilisateur est requis.", "User_UsernameRequired");
@@ -106,6 +122,24 @@ namespace OptiPaie.Services
                 if (existing == null)
                 {
                     return Result.Fail("Utilisateur introuvable.", "User_NotFound");
+                }
+
+                // An account may never change its OWN role (no self-promotion, no self-demotion).
+                if (_access != null && _access.CurrentUserId.HasValue &&
+                    _access.CurrentUserId.Value == existing.Id && user.Role != existing.Role)
+                {
+                    return Result.Fail(
+                        "Vous ne pouvez pas modifier votre propre rôle.\nلا يمكنك تغيير دورك بنفسك.",
+                        "User_SelfRoleChange");
+                }
+
+                // Admins cannot mint admins: ELEVATING an account to ADMINISTRATOR is OWNER-only.
+                if (user.Role == UserRole.Admin && existing.Role != UserRole.Admin && !IsOwnerCaller())
+                {
+                    return Result.Fail(
+                        "Seul le propriétaire peut élever un compte au rôle d'administrateur.\n" +
+                        "وحده المالك يمكنه ترقية حساب إلى مدير.",
+                        "User_AdminOwnerOnly");
                 }
 
                 // Never leave the system without an active administrator.

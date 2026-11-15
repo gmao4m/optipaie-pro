@@ -35,5 +35,8 @@ namespace OptiPaie.Desktop.Composition
         // is not the owner.
         public bool IsOwner =>
             (_session == null || _session.Current == null) && _owner != null && _owner.IsSignedIn;
+
+        public long? CurrentUserId =>
+            _session != null && _session.Current != null ? _session.Current.Id : (long?)null;
     }
 }

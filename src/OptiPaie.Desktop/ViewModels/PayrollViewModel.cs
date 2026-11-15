@@ -45,6 +45,7 @@ namespace OptiPaie.Desktop.ViewModels
         public PayrollViewModel(AppServices services)
         {
             _services = services;
+            _fiche.Access = services.Authorization; // payslip print/export follows the role
 
             Companies = new ObservableCollection<Company>();
             Employees = new ObservableCollection<Employee>();

@@ -41,6 +41,7 @@ namespace OptiPaie.Desktop.ViewModels
         public ArchiveViewModel(AppServices services)
         {
             _services = services;
+            _fiche.Access = services.Authorization; // payslip reprint/export follows the role
 
             Companies = new ObservableCollection<Company>();
             Rows = new ObservableCollection<ArchiveRow>();

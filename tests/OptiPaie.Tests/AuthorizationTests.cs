@@ -247,6 +247,7 @@ namespace OptiPaie.Tests
             public bool IsEnforced { get; set; }
             public UserRole CurrentRole { get; set; }
             public bool IsOwner { get; set; }
+            public long? CurrentUserId { get; set; }
         }
     }
 }

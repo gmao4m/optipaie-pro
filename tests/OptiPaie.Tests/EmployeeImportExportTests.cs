@@ -102,6 +102,7 @@ namespace OptiPaie.Tests
             public bool IsEnforced => true;
             public OptiPaie.Core.Enums.UserRole CurrentRole => OptiPaie.Core.Enums.UserRole.ReadOnly;
             public bool IsOwner => false;
+            public long? CurrentUserId => null;
         }
 
         private ImportTable Table(params IDictionary<string, string>[] people)

@@ -45,21 +45,51 @@ namespace OptiPaie.Services
         private readonly IEmployeeService _employees;
         private readonly IArchiveService _archive;
         private readonly IConfigurationService _configuration;
+        private readonly OptiPaie.Core.Security.IAccessContext _access;
 
         public CnasDeclarationService(
             ICompanyService companies,
             IEmployeeService employees,
             IArchiveService archive,
-            IConfigurationService configuration)
+            IConfigurationService configuration,
+            OptiPaie.Core.Security.IAccessContext access = null)
         {
             _companies = Guard.AgainstNull(companies, nameof(companies));
             _employees = Guard.AgainstNull(employees, nameof(employees));
             _archive = Guard.AgainstNull(archive, nameof(archive));
             _configuration = Guard.AgainstNull(configuration, nameof(configuration));
+            _access = access;
+        }
+
+        /// <summary>
+        /// Guards reading a CNAS declaration: only roles that may VIEW CNAS (administrators, payroll,
+        /// accountant) may build one. Gate off / no context ⇒ allowed (legacy behaviour).
+        /// </summary>
+        private void RequireView()
+        {
+            if (_access != null && _access.IsEnforced &&
+                !OptiPaie.Core.Security.AccessPolicy.CanOpen(_access.CurrentRole, "cnas"))
+            {
+                throw new OptiPaie.Core.Security.AccessDeniedException(OptiPaie.Core.Security.Permission.ManageCnas);
+            }
+        }
+
+        /// <summary>
+        /// Guards EXPORTING CNAS files — guarded exactly as strictly as viewing them (same role set):
+        /// a role that cannot see a declaration may not write its file. Gate off ⇒ allowed.
+        /// </summary>
+        private void RequireExport()
+        {
+            if (_access != null && _access.IsEnforced &&
+                !OptiPaie.Core.Security.AccessPolicy.CanExportCnas(_access.CurrentRole))
+            {
+                throw new OptiPaie.Core.Security.AccessDeniedException(OptiPaie.Core.Security.Permission.ManageCnas);
+            }
         }
 
         public CnasReadinessReport CheckReadiness(long companyId, int year)
         {
+            RequireView();
             // RISK #1 — a declaration must never read across companies: no default, no null.
             if (companyId <= 0)
             {
@@ -121,6 +151,7 @@ namespace OptiPaie.Services
 
         public CnasDacReport BuildDac(long companyId, int year, IReadOnlyList<int> months)
         {
+            RequireView();
             // RISK #1 — a declaration must never read across companies: no default, no null.
             if (companyId <= 0)
             {
@@ -165,6 +196,7 @@ namespace OptiPaie.Services
 
         public IReadOnlyList<CnasMovementRow> BuildMovements(long companyId, int year, IReadOnlyList<int> months)
         {
+            RequireView();
             // RISK #1 — a declaration must never read across companies: no default, no null.
             if (companyId <= 0)
             {
@@ -204,6 +236,7 @@ namespace OptiPaie.Services
 
         public CnasDasReport BuildDas(long companyId, int year)
         {
+            RequireView();
             // RISK #1 — a declaration must never read across companies: no default, no null.
             if (companyId <= 0)
             {
@@ -291,6 +324,7 @@ namespace OptiPaie.Services
 
         public DasExportValidation ValidateDasForExport(long companyId, int year)
         {
+            RequireExport(); // writing the DAS file is guarded as strictly as viewing CNAS
             if (companyId <= 0)
             {
                 throw new ArgumentException(
