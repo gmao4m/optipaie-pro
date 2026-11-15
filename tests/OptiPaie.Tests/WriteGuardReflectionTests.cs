@@ -41,13 +41,15 @@ namespace OptiPaie.Tests
         private static readonly Dictionary<string, string> Unbuildable =
             new Dictionary<string, string>(StringComparer.Ordinal)
             {
-                { "LicensingService", "Supabase/network license backend + device identity" },
-                { "CustomerAccountService", "DPAPI-wrapped owner account over settings (sign-in flow)" },
-                { "OwnerSetupService", "depends on the DPAPI-wrapped owner account (ILocalCipher); its only Result method is the first-run owner bootstrap, exempt by attribute (chicken-and-egg: it creates the first owner before any role exists)" },
-                { "TrialService", "trial cipher + store (device-bound)" },
-                { "AtsDrtDocumentService", "renders onto pre-printed form assets on disk (not a DB write service)" },
-                { "AuditService", "audit sink (void Record; optional string actor ctor param); no Result methods" },
-                { "UpdateService", "auto-update release channel (network); no DB-write Result methods" },
+                // GENUINELY out of scope (not laziness): these three are licensing/trial/update
+                // INFRA. Their state changes gate on the license, the trial, or the device — NEVER on
+                // a user role — so there is no role-guarded mutation for THIS test to verify. They
+                // also need network/crypto/device seams to construct; building them would add zero
+                // write-guard coverage. (AtsDrtDocumentService and AuditService were formerly excluded
+                // too, but they ARE buildable and role-neutral — they are now constructed below, G.4.)
+                { "LicensingService", "licensing infra: activation/sync gate on the license + device identity, never on a user role; needs a network backend + Ed25519 verifier seam to build" },
+                { "TrialService", "trial infra: device-bound trial state, gated on the trial/license, never on a user role; needs an ITrialStore seam to build" },
+                { "UpdateService", "auto-update infra: a network release channel, no role-guarded DB write; needs an IReleaseChannel seam to build" },
             };
 
         /// <summary>
@@ -88,6 +90,12 @@ namespace OptiPaie.Tests
             public OptiPaie.Core.Enums.UserRole CurrentRole => OptiPaie.Core.Enums.UserRole.ReadOnly;
             public bool IsOwner => false;
             public long? CurrentUserId => null;
+        }
+
+        private sealed class PassthroughCipher : OptiPaie.Core.Licensing.ILocalCipher
+        {
+            public string Protect(string plaintext) => plaintext;
+            public string Unprotect(string ciphertext) => ciphertext;
         }
 
         [Test]
@@ -223,6 +231,7 @@ namespace OptiPaie.Tests
         {
             if (t == typeof(IAccessContext)) return new NoPermAccess();
             if (t == typeof(Func<string, bool>)) return (Func<string, bool>)(_ => true); // module-enabled predicate
+            if (t == typeof(OptiPaie.Core.Licensing.ILocalCipher)) return new PassthroughCipher(); // test seam: no DPAPI needed
             if (t == typeof(OptiPaie.Core.Interfaces.Repositories.IUnitOfWorkFactory)) return _uow;
             if (t == typeof(AppConfiguration)) return _config;
             if (t == typeof(ILogger)) return NullLogger.Instance;
@@ -247,7 +256,13 @@ namespace OptiPaie.Tests
                     .OrderByDescending(c => c.GetParameters().Length).FirstOrDefault();
                 if (ctor != null)
                 {
-                    object[] args = ctor.GetParameters().Select(p => Resolve(p.ParameterType)).ToArray();
+                    object[] args = ctor.GetParameters().Select(p =>
+                    {
+                        // Honour optional parameters (e.g. an optional "string actor"): if the type
+                        // cannot be resolved but the parameter has a default, use the default.
+                        try { return Resolve(p.ParameterType); }
+                        catch when (p.IsOptional) { return p.DefaultValue; }
+                    }).ToArray();
                     return ctor.Invoke(args);
                 }
             }

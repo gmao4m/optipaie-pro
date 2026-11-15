@@ -102,10 +102,25 @@ namespace OptiPaie.Services.Startup
         [OptiPaie.Core.Security.WriteGuardExempt(
             "First-run owner bootstrap: creates the VERY FIRST owner account before any user, role " +
             "or owner exists — it cannot require a permission that it is itself the prerequisite for " +
-            "(chicken-and-egg). It is reachable only from the App startup owner-setup gate, which runs " +
-            "it exactly once and only when OwnerSetupPolicy says an owner must be created.")]
+            "(chicken-and-egg). It is self-limiting: it REFUSES when an owner already exists (there is " +
+            "exactly one owner, ever), so it cannot be used to replace or escalate an account, and the " +
+            "App startup gate only calls it when OwnerSetupPolicy reports no owner. Proven by " +
+            "OwnerBootstrapTests.")]
         public Result<string> CreateOwner(string email, string company, string password)
         {
+            // There is exactly ONE owner, ever. If an account already exists it must NOT be replaced
+            // here — only the recovery path changes that account's password. Refusing first means a
+            // failed/duplicate call writes nothing (no account change, no recovery re-issue, no audit,
+            // no "established" marker). This also makes the bootstrap unreachable once an owner exists.
+            if (_account.HasAccount)
+            {
+                _logger.Warn("Owner setup: CreateOwner refused — an owner already exists.");
+                return Result.Fail<string>(
+                    "Un compte propriétaire existe déjà. Utilisez la récupération pour changer son mot de passe.\n" +
+                    "يوجد حساب مالك بالفعل. استعمل الاسترجاع لتغيير كلمة سرّه.",
+                    "Owner_AlreadyExists");
+            }
+
             if (string.IsNullOrWhiteSpace(email))
             {
                 return Result.Fail<string>(
