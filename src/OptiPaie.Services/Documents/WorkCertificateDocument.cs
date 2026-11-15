@@ -124,7 +124,7 @@ namespace OptiPaie.Services.Documents
                         Field(card, "Ancienneté", sfr, "الأقدمية");
 
                     if (certificate.Type == CertificateType.SalaryCertificate)
-                        Field(card, "Salaire mensuel de base", _model.MonthlySalary.ToString("N2", Fr) + " DA", "الأجر الشهري القاعدي");
+                        Field(card, "Salaire mensuel de base", SalaryText(_model), "الأجر الشهري القاعدي");
                 });
 
                 // ── bilingual closing (fixed text) ──
@@ -240,6 +240,12 @@ namespace OptiPaie.Services.Documents
             if (_model.SeniorityMonths > 0) parts.Add(_model.SeniorityMonths + " mois");
             return string.Join(" et ", parts);
         }
+
+        /// <summary>The EXACT salary string drawn on the certificate — the figure, or the masked
+        /// placeholder for a role without ViewSalary. Public so the salary-exposure sweep can assert
+        /// on the rendered content, not a flag.</summary>
+        public static string SalaryText(CertificateRenderModel model) =>
+            model.ShowSalary ? model.MonthlySalary.ToString("N2", Fr) + " DA" : OptiPaie.Core.Security.SalaryVisibility.Masked;
 
         private static string D(DateTime d) => d.ToString("dd/MM/yyyy", Fr);
 

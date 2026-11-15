@@ -25,10 +25,13 @@ namespace OptiPaie.Desktop.ViewModels
     {
         private static readonly CultureInfo Fr = CultureInfo.GetCultureInfo("fr-FR");
 
-        public ContractRowViewModel(ContractSummary summary, string employeeName)
+        private readonly bool _canSeeSalary;
+
+        public ContractRowViewModel(ContractSummary summary, string employeeName, bool canSeeSalary = true)
         {
             Summary = summary;
             EmployeeName = employeeName;
+            _canSeeSalary = canSeeSalary;
         }
 
         public ContractSummary Summary { get; }
@@ -37,7 +40,7 @@ namespace OptiPaie.Desktop.ViewModels
         public string TypeLabel => EnumLabels.ContractLabel(Summary.Type);
         public string StatusLabel => ContractLabels.Status(Summary.Status);
         public string Position => Summary.Position;
-        public string SalaryText => Summary.BaseSalary.ToString("N2", Fr);
+        public string SalaryText => OptiPaie.Core.Security.SalaryVisibility.Text(Summary.BaseSalary, _canSeeSalary, Fr);
         public string StartText => Summary.StartDate.ToString("dd/MM/yyyy", Fr);
         public string EndText => Summary.EndDate.HasValue ? Summary.EndDate.Value.ToString("dd/MM/yyyy", Fr) : "—";
 
@@ -202,7 +205,8 @@ namespace OptiPaie.Desktop.ViewModels
             foreach (ContractSummary summary in _services.Contracts.GetByCompany(_selectedCompany.Id))
             {
                 _employeeNames.TryGetValue(summary.EmployeeId, out string name);
-                Contracts.Add(new ContractRowViewModel(summary, name ?? "—"));
+                Contracts.Add(new ContractRowViewModel(summary, name ?? "—",
+                    OptiPaie.Core.Security.SalaryVisibility.CanSee(_services.Authorization)));
                 if (summary.Status == ContractStatus.Active) active++;
             }
 
@@ -346,7 +350,8 @@ namespace OptiPaie.Desktop.ViewModels
                 {
                     Company = _selectedCompany,
                     Employee = employee,
-                    Contract = contract
+                    Contract = contract,
+                    ShowSalary = OptiPaie.Core.Security.SalaryVisibility.CanSee(_services.Authorization)
                 });
 
                 Document.Create(document.Compose).GeneratePdf(dialog.FileName);

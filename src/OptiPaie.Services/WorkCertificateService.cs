@@ -122,6 +122,7 @@ namespace OptiPaie.Services
                     Employee = employee,
                     Company = company,
                     MonthlySalary = employee.BaseSalary,
+                    ShowSalary = OptiPaie.Core.Security.SalaryVisibility.CanSee(_access),
                     SeniorityYears = months / 12,
                     SeniorityMonths = months % 12
                 };

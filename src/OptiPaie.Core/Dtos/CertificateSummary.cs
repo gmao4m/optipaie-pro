@@ -29,6 +29,10 @@ namespace OptiPaie.Core.Dtos
         /// <summary>The employee's current monthly base salary (shared record).</summary>
         public decimal MonthlySalary { get; set; }
 
+        /// <summary>When false (a role without ViewSalary), the salary field is produced WITHOUT the
+        /// figure (masked) rather than the certificate being blocked.</summary>
+        public bool ShowSalary { get; set; } = true;
+
         /// <summary>Seniority in whole years and months, computed at the issue date.</summary>
         public int SeniorityYears { get; set; }
         public int SeniorityMonths { get; set; }

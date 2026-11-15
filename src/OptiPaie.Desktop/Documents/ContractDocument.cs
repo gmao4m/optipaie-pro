@@ -14,6 +14,10 @@ namespace OptiPaie.Desktop.Documents
         public Company Company { get; set; }
         public Employee Employee { get; set; }
         public EmploymentContract Contract { get; set; }
+
+        /// <summary>When false (a role without ViewSalary), Article 5 is produced WITHOUT the figure
+        /// (the amount is masked), rather than the document being blocked.</summary>
+        public bool ShowSalary { get; set; } = true;
     }
 
     /// <summary>
@@ -95,8 +99,8 @@ namespace OptiPaie.Desktop.Documents
                     }
 
                     Article(col, "Article 5 — Rémunération",
-                        "Le salarié percevra un salaire de base mensuel de " +
-                        contract.BaseSalary.ToString("N2", Fr) + " DA, payable selon la réglementation en vigueur.");
+                        "Le salarié percevra un salaire de base mensuel de " + SalaryText(contract.BaseSalary, _model.ShowSalary) +
+                        ", payable selon la réglementation en vigueur.");
 
                     if (!string.IsNullOrWhiteSpace(contract.Reference))
                     {
@@ -141,6 +145,11 @@ namespace OptiPaie.Desktop.Documents
                 ? "CONTRAT DE TRAVAIL À DURÉE DÉTERMINÉE"
                 : "CONTRAT DE TRAVAIL À DURÉE INDÉTERMINÉE";
         }
+
+        /// <summary>The EXACT salary string drawn in Article 5 — the figure (+ " DA"), or the masked
+        /// placeholder for a role without ViewSalary. Public for the salary-exposure sweep.</summary>
+        public static string SalaryText(decimal amount, bool showSalary) =>
+            showSalary ? amount.ToString("N2", Fr) + " DA" : OptiPaie.Core.Security.SalaryVisibility.Masked;
 
         private static string Date(DateTime value) => value.ToString("dd/MM/yyyy", Fr);
     }

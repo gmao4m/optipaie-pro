@@ -194,10 +194,10 @@ namespace OptiPaie.Services.Documents
                     LeaveDoc.Line(col, "Droit acquis (prorata) / المكتسب :", Num(_s.Acquired) + " jours");
                     LeaveDoc.Line(col, "Déjà pris / المستهلك :", Num(_s.Taken) + " jours");
                     LeaveDoc.Line(col, "Jours dus / الأيام المستحقة :", Num(_s.RemainingDays) + " jours");
-                    LeaveDoc.Line(col, "Salaire mensuel / الأجر الشهري :", Num(_s.MonthlySalary));
-                    LeaveDoc.Line(col, "Taux journalier / الأجر اليومي :", Num(_s.DailyRate));
+                    LeaveDoc.Line(col, "Salaire mensuel / الأجر الشهري :", Pay(_s.MonthlySalary));
+                    LeaveDoc.Line(col, "Taux journalier / الأجر اليومي :", Pay(_s.DailyRate));
                     col.Item().PaddingTop(8);
-                    LeaveDoc.Line(col, "Montant du reliquat / مبلغ التصفية :", Num(_s.Amount), 14f);
+                    LeaveDoc.Line(col, "Montant du reliquat / مبلغ التصفية :", Pay(_s.Amount), 14f);
                     col.Item().PaddingTop(40);
                     LeaveDoc.RightPair(col, "Signature et cachet", "التوقيع والختم");
                 });
@@ -208,5 +208,12 @@ namespace OptiPaie.Services.Documents
 
         private static string D(DateTime d) => d.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
         private static string Num(decimal v) => v.ToString("0.##", CultureInfo.InvariantCulture);
+
+        private string Pay(decimal v) => PayText(v, _s.ShowSalary);
+
+        /// <summary>The EXACT salary-derived string drawn on the settlement — the figure, or the
+        /// masked placeholder for a role without ViewSalary. Public for the salary-exposure sweep.</summary>
+        public static string PayText(decimal v, bool showSalary) =>
+            OptiPaie.Core.Security.SalaryVisibility.Text(v, showSalary, CultureInfo.InvariantCulture, "0.##");
     }
 }

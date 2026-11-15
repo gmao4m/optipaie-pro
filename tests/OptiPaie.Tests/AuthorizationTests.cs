@@ -124,12 +124,19 @@ namespace OptiPaie.Tests
             Assert.That(AccessPolicy.IsAllowed(UserRole.Hr, Permission.ManageAttendance), Is.True);
             Assert.That(AccessPolicy.IsAllowed(UserRole.Payroll, Permission.ManageAttendance), Is.True);
 
-            // Accountant and read-only never write.
+            // Accountant and read-only never WRITE. (ViewSalary is a READ permission — the one
+            // door-independent salary gate — so it is excluded here and covered by its own sweep;
+            // the accountant legitimately holds it, read-only does not.)
             foreach (Permission p in Enum.GetValues(typeof(Permission)))
             {
+                if (p == Permission.ViewSalary) continue;
                 Assert.That(AccessPolicy.IsAllowed(UserRole.Accountant, p), Is.False, "accountant must not write: " + p);
                 Assert.That(AccessPolicy.IsAllowed(UserRole.ReadOnly, p), Is.False, "read-only must not write: " + p);
             }
+
+            // The salary gate: every role except read-only may see pay.
+            Assert.That(AccessPolicy.IsAllowed(UserRole.Accountant, Permission.ViewSalary), Is.True);
+            Assert.That(AccessPolicy.IsAllowed(UserRole.ReadOnly, Permission.ViewSalary), Is.False);
         }
 
         // ---- service-layer enforcement, per role --------------------------------

@@ -116,7 +116,7 @@
                                     </StackPanel>
                                     <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                                         <TextBlock VerticalAlignment="Center" Margin="0,0,4,0" Foreground="{DynamicResource TextSecondary}" FontSize="12.5"
-                                                   Text="{Binding BaseSalary, StringFormat={}{0:N2} DA}" />
+                                                   Text="{Binding BaseSalary, Converter={StaticResource SalaryMask}}" />
                                         <Button Style="{StaticResource RowIconButton}" Content="⋯" ToolTip="{loc:Loc Common_MoreActions}"
                                                 beh:RowActions.SelectRow="True" beh:RowActions.OpenMenuOnClick="True"
                                                 Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ListBox}}">
@@ -210,7 +210,7 @@
                             </StackPanel>
                             <StackPanel Margin="0,0,16,16">
                                 <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Employee_BaseSalary}" />
-                                <TextBlock Margin="0,3,0,0" FontWeight="SemiBold" Foreground="{DynamicResource Salary}" Text="{Binding BaseSalary, StringFormat={}{0:N2} DA}" />
+                                <TextBlock Margin="0,3,0,0" FontWeight="SemiBold" Foreground="{DynamicResource Salary}" Text="{Binding BaseSalary, Converter={StaticResource SalaryMask}}" />
                             </StackPanel>
                             <StackPanel Margin="0,0,0,16">
                                 <TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Employee_PaymentMode}" />

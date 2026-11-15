@@ -22,7 +22,8 @@ namespace OptiPaie.Desktop.ViewModels
     public sealed class ProfileContractRow
     {
         private static readonly CultureInfo Fr = CultureInfo.GetCultureInfo("fr-FR");
-        public ProfileContractRow(ContractSummary s) { S = s; }
+        private readonly bool _canSeeSalary;
+        public ProfileContractRow(ContractSummary s, bool canSeeSalary = true) { S = s; _canSeeSalary = canSeeSalary; }
         public ContractSummary S { get; }
         public string TypeLabel => EnumLabels.ContractLabel(S.Type);
         public string TypeKind => S.Type == ContractType.Cdi ? "accent" : S.Type == ContractType.Cdd ? "pending" : "neutral";
@@ -32,7 +33,7 @@ namespace OptiPaie.Desktop.ViewModels
             S.Status == ContractStatus.Expired ? "danger" :
             S.Status == ContractStatus.Renewed ? "accent" : "neutral";
         public string Position => S.Position;
-        public string SalaryText => S.BaseSalary.ToString("N2", Fr);
+        public string SalaryText => OptiPaie.Core.Security.SalaryVisibility.Text(S.BaseSalary, _canSeeSalary, Fr);
         public string PeriodText => S.StartDate.ToString("dd/MM/yyyy", Fr) + " → " +
                                     (S.EndDate.HasValue ? S.EndDate.Value.ToString("dd/MM/yyyy", Fr) : "—");
         public bool IsCurrent => S.Status == ContractStatus.Active;
@@ -279,7 +280,8 @@ namespace OptiPaie.Desktop.ViewModels
             foreach (ContractSummary c in _services.Contracts.GetByEmployee(_employeeId)
                          .OrderByDescending(x => x.StartDate))
             {
-                Contracts.Add(new ProfileContractRow(c));
+                Contracts.Add(new ProfileContractRow(c,
+                    OptiPaie.Core.Security.SalaryVisibility.CanSee(_services.Authorization)));
             }
         }
 

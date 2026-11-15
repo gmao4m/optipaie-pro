@@ -128,5 +128,9 @@ namespace OptiPaie.Core.Dtos
         public decimal MonthlySalary { get; set; }
         public decimal DailyRate { get; set; }
         public decimal Amount { get; set; }
+
+        /// <summary>When false (a role without ViewSalary), the salary-derived figures (monthly
+        /// salary, daily rate, settlement amount) are produced masked instead of as numbers.</summary>
+        public bool ShowSalary { get; set; } = true;
     }
 }

@@ -54,12 +54,20 @@ namespace OptiPaie.Services.ImportExport
 
         public void Export(long companyId, string path, ImportFileFormat format)
         {
+            // Salary is the ONE door-independent gate: an export produced by a role without
+            // ViewSalary carries the masked placeholder in the « Salaire de base » column, never
+            // the figure. Every other column is unchanged.
+            bool showSalary = OptiPaie.Core.Security.SalaryVisibility.CanSee(_access);
+
             var rows = new List<IReadOnlyList<string>>();
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 foreach (Employee e in uow.Employees.GetByCompany(companyId, includeInactive: true))
                 {
-                    rows.Add(EmployeeImportColumns.All.Select(c => EmployeeImportColumns.Cell(e, c.Key) ?? string.Empty).ToList());
+                    rows.Add(EmployeeImportColumns.All.Select(c =>
+                        c.Key == EmployeeImportColumns.BaseSalary && !showSalary
+                            ? OptiPaie.Core.Security.SalaryVisibility.Masked
+                            : EmployeeImportColumns.Cell(e, c.Key) ?? string.Empty).ToList());
                 }
             }
             Write(path, format, new ImportTable(HeaderRow(), rows));

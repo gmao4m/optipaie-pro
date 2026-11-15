@@ -54,6 +54,11 @@ namespace OptiPaie.Core.Security
                 case Permission.ManageAttendance:
                     return role == UserRole.Hr || role == UserRole.Payroll;
 
+                // Seeing an identified employee's pay: every role EXCEPT read-only (Admin already
+                // returned true above). This is the single door-independent salary gate.
+                case Permission.ViewSalary:
+                    return role != UserRole.ReadOnly;
+
                 default:
                     return false; // Accountant / ReadOnly: no write permissions
             }
@@ -150,6 +155,12 @@ namespace OptiPaie.Core.Security
         /// </summary>
         public static bool CanExportCnas(UserRole role) =>
             role == UserRole.Admin || role == UserRole.Payroll || role == UserRole.Accountant;
+
+        /// <summary>
+        /// Whether a role may see an identified employee's PAY, through any door — the single salary
+        /// gate (<see cref="Permission.ViewSalary"/>). Every role except read-only holds it.
+        /// </summary>
+        public static bool CanSeeSalary(UserRole role) => IsAllowed(role, Permission.ViewSalary);
 
         /// <summary>
         /// The write permission that governs a module's create/edit/delete actions, or null for a

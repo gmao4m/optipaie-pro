@@ -464,7 +464,8 @@ namespace OptiPaie.Services
                     RemainingDays = remaining,
                     MonthlySalary = monthly,
                     DailyRate = daily,
-                    Amount = decimal.Round(remaining * daily, 2, MidpointRounding.AwayFromZero)
+                    Amount = decimal.Round(remaining * daily, 2, MidpointRounding.AwayFromZero),
+                    ShowSalary = OptiPaie.Core.Security.SalaryVisibility.CanSee(_access)
                 };
             }
         }

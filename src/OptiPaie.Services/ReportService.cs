@@ -183,7 +183,9 @@ namespace OptiPaie.Services
                     Blank(e.Poste),
                     ContractLabel(e.ContractType),
                     e.HireDate.ToString("dd/MM/yyyy", Fr),
-                    e.BaseSalary.ToString("N2", Fr)
+                    // Salary is the ONE door-independent gate: a role without ViewSalary (read-only)
+                    // sees the roster but no pay figure.
+                    OptiPaie.Core.Security.SalaryVisibility.Text(e.BaseSalary, _access, Fr)
                 });
             }
 
