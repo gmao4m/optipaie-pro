@@ -98,6 +98,9 @@ namespace OptiPaie.Desktop.ViewModels
 
         private readonly AppServices _services;
 
+        /// <summary>The role may create/edit/delete assets (hides New/Edit/Delete buttons).</summary>
+        public bool CanManage => OptiPaie.Desktop.Composition.ScreenAccess.CanEdit(_services, "assets");
+
         private Company _selectedCompany;
         private AssetRowViewModel _selectedAsset;
         private string _availableText = "0";

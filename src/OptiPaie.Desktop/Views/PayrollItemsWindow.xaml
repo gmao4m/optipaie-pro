@@ -16,9 +16,9 @@
         <TextBlock Grid.Row="0" Style="{StaticResource H2}" Text="{loc:Loc PayItem_Title}" />
 
         <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,14,0,12">
-            <Button Style="{StaticResource PrimaryButton}" Height="34" Content="{loc:Loc Common_Add}" Command="{Binding NewCommand}" />
-            <Button Style="{StaticResource SecondaryButton}" Height="34" Margin="8,0,0,0" Content="{loc:Loc Common_Edit}" Command="{Binding EditCommand}" />
-            <Button Style="{StaticResource SecondaryButton}" Height="34" Margin="8,0,0,0" Content="{loc:Loc Common_Delete}" Foreground="{DynamicResource Deduction}" Command="{Binding DeleteCommand}" />
+            <Button Style="{StaticResource PrimaryButton}" Height="34" Content="{loc:Loc Common_Add}" Command="{Binding NewCommand}" Visibility="{Binding CanManage, Converter={StaticResource BoolToVis}}" />
+            <Button Style="{StaticResource SecondaryButton}" Height="34" Margin="8,0,0,0" Content="{loc:Loc Common_Edit}" Command="{Binding EditCommand}" Visibility="{Binding CanManage, Converter={StaticResource BoolToVis}}" />
+            <Button Style="{StaticResource SecondaryButton}" Height="34" Margin="8,0,0,0" Content="{loc:Loc Common_Delete}" Foreground="{DynamicResource Deduction}" Command="{Binding DeleteCommand}" Visibility="{Binding CanManage, Converter={StaticResource BoolToVis}}" />
             <Button Style="{StaticResource SecondaryButton}" Height="34" Margin="8,0,0,0" Content="{loc:Loc Common_Close}" Command="{Binding CloseCommand}" />
         </StackPanel>
 

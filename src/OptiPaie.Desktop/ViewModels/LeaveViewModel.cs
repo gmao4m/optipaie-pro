@@ -178,6 +178,9 @@ namespace OptiPaie.Desktop.ViewModels
     public sealed class LeaveViewModel : ObservableObject, IActivable
     {
         private readonly AppServices _services;
+
+        /// <summary>The role may create/edit/delete leave (hides New/Edit/Delete buttons).</summary>
+        public bool CanManage => OptiPaie.Desktop.Composition.ScreenAccess.CanEdit(_services, "leave");
         private readonly Dictionary<long, string> _employeeNames = new Dictionary<long, string>();
         private readonly List<LeaveRowViewModel> _allRows = new List<LeaveRowViewModel>();
         private readonly Dictionary<long, LeaveTypeDefinition> _types = new Dictionary<long, LeaveTypeDefinition>();

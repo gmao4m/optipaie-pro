@@ -20,11 +20,13 @@
                 <Button Style="{StaticResource SecondaryButton}" Command="{Binding DownloadTemplateCommand}"
                         Content="{loc:Loc Employees_Template}" ToolTip="{loc:Loc Employees_TemplateTip}" />
                 <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Command="{Binding ImportCommand}"
-                        Content="{loc:Loc Employees_Import}" ToolTip="{loc:Loc Employees_ImportTip}" />
+                        Content="{loc:Loc Employees_Import}" ToolTip="{loc:Loc Employees_ImportTip}"
+                        Visibility="{Binding CanEditEmployees, Converter={StaticResource BoolToVis}}" />
                 <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Command="{Binding ExportCommand}"
                         Content="{loc:Loc Employees_Export}" ToolTip="{loc:Loc Employees_ExportTip}" />
                 <Button Style="{StaticResource PrimaryButton}" Margin="12,0,0,0" Command="{Binding NewCommand}"
-                        Content="{loc:Loc Employees_New}" />
+                        Content="{loc:Loc Employees_New}"
+                        Visibility="{Binding CanEditEmployees, Converter={StaticResource BoolToVis}}" />
             </StackPanel>
         </Grid>
 
@@ -63,9 +65,11 @@
                         <ListBox.ContextMenu>
                             <ContextMenu DataContext="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
                                 <MenuItem Header="{loc:Loc Employees_OpenFile}" Command="{Binding OpenProfileCommand}" />
-                                <MenuItem Header="{loc:Loc Employees_EditRow}" Command="{Binding EditCommand}" />
-                                <Separator />
-                                <MenuItem Header="{loc:Loc Employees_DeleteRow}" Command="{Binding DeleteCommand}" />
+                                <MenuItem Header="{loc:Loc Employees_EditRow}" Command="{Binding EditCommand}"
+                                          Visibility="{Binding CanEditEmployees, Converter={StaticResource BoolToVis}}" />
+                                <Separator Visibility="{Binding CanEditEmployees, Converter={StaticResource BoolToVis}}" />
+                                <MenuItem Header="{loc:Loc Employees_DeleteRow}" Command="{Binding DeleteCommand}"
+                                          Visibility="{Binding CanEditEmployees, Converter={StaticResource BoolToVis}}" />
                             </ContextMenu>
                         </ListBox.ContextMenu>
                         <ListBox.ItemContainerStyle>
@@ -119,9 +123,11 @@
                                             <Button.ContextMenu>
                                                 <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
                                                     <MenuItem Header="{loc:Loc Employees_OpenFile}" Command="{Binding OpenProfileCommand}" />
-                                                    <MenuItem Header="{loc:Loc Employees_EditRow}" Command="{Binding EditCommand}" />
-                                                    <Separator />
-                                                    <MenuItem Header="{loc:Loc Employees_DeleteRow}" Command="{Binding DeleteCommand}" />
+                                                    <MenuItem Header="{loc:Loc Employees_EditRow}" Command="{Binding EditCommand}"
+                                                              Visibility="{Binding CanEditEmployees, Converter={StaticResource BoolToVis}}" />
+                                                    <Separator Visibility="{Binding CanEditEmployees, Converter={StaticResource BoolToVis}}" />
+                                                    <MenuItem Header="{loc:Loc Employees_DeleteRow}" Command="{Binding DeleteCommand}"
+                                                              Visibility="{Binding CanEditEmployees, Converter={StaticResource BoolToVis}}" />
                                                 </ContextMenu>
                                             </Button.ContextMenu>
                                         </Button>

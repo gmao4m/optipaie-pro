@@ -164,6 +164,12 @@ namespace OptiPaie.Desktop.ViewModels
         public ICommand ManageItemsCommand { get; }
         public ICommand BatchCommand { get; }
 
+        /// <summary>The role may run/save payroll (hides Batch, Add line and Save).</summary>
+        public bool CanEditPayroll => Composition.ScreenAccess.CanEdit(_services, "payroll");
+
+        /// <summary>The role may print/export a payslip (hides Print and Export PDF).</summary>
+        public bool CanExportPayslips => Composition.ScreenAccess.CanExport(_services, "payroll");
+
         public void OnActivated()
         {
             Catalog.Clear();

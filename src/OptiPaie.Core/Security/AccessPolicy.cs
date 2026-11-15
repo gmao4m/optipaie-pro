@@ -152,6 +152,63 @@ namespace OptiPaie.Core.Security
             role == UserRole.Admin || role == UserRole.Payroll || role == UserRole.Accountant;
 
         /// <summary>
+        /// The write permission that governs a module's create/edit/delete actions, or null for a
+        /// read-only module (dashboard, archive, reports, attestations). The single map the UI uses to
+        /// decide whether to show the create/edit/delete buttons on a screen — the SAME permissions the
+        /// services enforce.
+        /// </summary>
+        public static Permission? EditPermissionFor(string moduleKey)
+        {
+            switch (moduleKey)
+            {
+                case "companies": return Permission.ManageCompanies;
+                case "settings": return Permission.ManageSettings;
+                case "users": return Permission.ManageUsers;
+                case "employees": return Permission.EditEmployees;
+                case "payroll-elements": return Permission.ManagePayrollElements;
+                case "payroll": return Permission.RunPayroll;
+                case "cnas": return Permission.ManageCnas;
+                case "attendance": return Permission.ManageAttendance;
+                case "leave": return Permission.ManageLeave;
+                case "loans": return Permission.ManageLoans;
+                case "performance": return Permission.ManagePerformance;
+                case "contracts": return Permission.ManageContracts;
+                case "training": return Permission.ManageTraining;
+                case "assets": return Permission.ManageAssets;
+                case "work_certificate": return Permission.ManageCertificates;
+                case "ats":
+                case "recruitment": return Permission.ManageRecruitment;
+                default: return null; // dashboard, archive, reports, attestations — read-only screens
+            }
+        }
+
+        /// <summary>
+        /// Whether a role may CREATE / EDIT / DELETE on a module — the single source the UI uses to
+        /// show or hide those buttons, identical to what the service layer enforces. A read-only
+        /// module (no edit permission) is never editable by anyone through this path.
+        /// </summary>
+        public static bool CanEdit(UserRole role, string moduleKey)
+        {
+            Permission? p = EditPermissionFor(moduleKey);
+            return p.HasValue && IsAllowed(role, p.Value);
+        }
+
+        /// <summary>
+        /// Whether a role may PRINT / EXPORT a module's documents — the single source the UI uses to
+        /// show or hide the print/export buttons. Payslip (salary) and CNAS exports follow their strict
+        /// rule; every other module's documents are readable (printable) by any role that can open it.
+        /// </summary>
+        public static bool CanExport(UserRole role, string moduleKey)
+        {
+            switch (moduleKey)
+            {
+                case "payroll": return CanExportPayroll(role);
+                case "cnas": return CanExportCnas(role);
+                default: return CanOpen(role, moduleKey); // reads/prints follow view for every other module
+            }
+        }
+
+        /// <summary>
         /// Enforces an OWNER-only operation (e.g. database restore). Fails closed on a null context;
         /// allows an unenforced (open) install; otherwise requires <see cref="IAccessContext.IsOwner"/>
         /// — an administrator user is NOT the owner.

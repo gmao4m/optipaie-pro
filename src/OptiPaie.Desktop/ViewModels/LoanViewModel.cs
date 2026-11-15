@@ -88,6 +88,9 @@ namespace OptiPaie.Desktop.ViewModels
         private static readonly CultureInfo Fr = CultureInfo.GetCultureInfo("fr-FR");
 
         private readonly AppServices _services;
+
+        /// <summary>The role may create/edit/delete loans (hides New/Edit/Delete buttons).</summary>
+        public bool CanManage => OptiPaie.Desktop.Composition.ScreenAccess.CanEdit(_services, "loans");
         private readonly Dictionary<long, string> _employeeNames = new Dictionary<long, string>();
 
         private Company _selectedCompany;

@@ -65,6 +65,9 @@ namespace OptiPaie.Desktop.ViewModels
     {
         private readonly AppServices _services;
 
+        /// <summary>The role may create/edit/delete work certificates (hides New/Edit/Delete buttons).</summary>
+        public bool CanManage => OptiPaie.Desktop.Composition.ScreenAccess.CanEdit(_services, "work_certificate");
+
         private Company _selectedCompany;
         private CertificateRowViewModel _selectedCertificate;
         private string _countText = "0";

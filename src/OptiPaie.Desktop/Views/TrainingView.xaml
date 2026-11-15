@@ -53,7 +53,7 @@
                 <!-- Company selection is global (header selector) -->
 
                 <Button Style="{StaticResource PrimaryButton}" Height="32" Margin="10,0,0,0"
-                        Content="{loc:Loc Training_New}" Command="{Binding NewCommand}" />
+                        Content="{loc:Loc Training_New}" Command="{Binding NewCommand}" Visibility="{Binding CanManage, Converter={StaticResource BoolToVis}}" />
             </StackPanel>
         </Grid>
 
@@ -90,14 +90,14 @@
             </DataGrid.InputBindings>
             <DataGrid.ContextMenu>
                 <ContextMenu DataContext="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
-                    <MenuItem Header="{loc:Loc Common_Edit}" Command="{Binding EditCommand}" />
+                    <MenuItem Header="{loc:Loc Common_Edit}" Command="{Binding EditCommand}" Visibility="{Binding CanManage, Converter={StaticResource BoolToVis}}" />
                     <MenuItem Header="{loc:Loc Training_ParticipantsRow}" Command="{Binding ParticipantsCommand}" />
                     <Separator />
                     <MenuItem Header="{loc:Loc Training_Start}" Command="{Binding OngoingCommand}" />
                     <MenuItem Header="{loc:Loc Training_Complete}" Command="{Binding CompleteCommand}" />
                     <MenuItem Header="{loc:Loc Common_Cancel}" Command="{Binding CancelSessionCommand}" />
                     <Separator />
-                    <MenuItem Header="{loc:Loc Common_Delete}" Command="{Binding DeleteCommand}" />
+                    <MenuItem Header="{loc:Loc Common_Delete}" Command="{Binding DeleteCommand}" Visibility="{Binding CanManage, Converter={StaticResource BoolToVis}}" />
                 </ContextMenu>
             </DataGrid.ContextMenu>
             <DataGrid.Columns>
@@ -132,14 +132,14 @@
                                         Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=DataGrid}}">
                                     <Button.ContextMenu>
                                         <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
-                                            <MenuItem Header="{loc:Loc Common_Edit}" Command="{Binding EditCommand}" />
+                                            <MenuItem Header="{loc:Loc Common_Edit}" Command="{Binding EditCommand}" Visibility="{Binding CanManage, Converter={StaticResource BoolToVis}}" />
                                             <MenuItem Header="{loc:Loc Training_ParticipantsRow}" Command="{Binding ParticipantsCommand}" />
                                             <Separator />
                                             <MenuItem Header="{loc:Loc Training_Start}" Command="{Binding OngoingCommand}" />
                                             <MenuItem Header="{loc:Loc Training_Complete}" Command="{Binding CompleteCommand}" />
                                             <MenuItem Header="{loc:Loc Common_Cancel}" Command="{Binding CancelSessionCommand}" />
                                             <Separator />
-                                            <MenuItem Header="{loc:Loc Common_Delete}" Command="{Binding DeleteCommand}" />
+                                            <MenuItem Header="{loc:Loc Common_Delete}" Command="{Binding DeleteCommand}" Visibility="{Binding CanManage, Converter={StaticResource BoolToVis}}" />
                                         </ContextMenu>
                                     </Button.ContextMenu>
                                 </Button>

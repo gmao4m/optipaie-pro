@@ -71,6 +71,9 @@ namespace OptiPaie.Desktop.ViewModels
         public ICommand ExportCommand { get; }
         public ICommand DownloadTemplateCommand { get; }
 
+        /// <summary>The signed-in role may create/edit/delete employees (hides New/Import/Edit/Delete).</summary>
+        public bool CanEditEmployees => Composition.ScreenAccess.CanEdit(_services, "employees");
+
         private void OpenProfile()
         {
             if (_selectedEmployee == null) return;

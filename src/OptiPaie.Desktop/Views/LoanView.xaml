@@ -54,7 +54,7 @@
                 <!-- Company selection is global (header selector) -->
 
                 <Button Style="{StaticResource PrimaryButton}" Height="32" Margin="10,0,0,0"
-                        Content="{loc:Loc Loan_New}" Command="{Binding NewCommand}" />
+                        Content="{loc:Loc Loan_New}" Command="{Binding NewCommand}" Visibility="{Binding CanManage, Converter={StaticResource BoolToVis}}" />
             </StackPanel>
         </Grid>
 
@@ -94,12 +94,12 @@
             <DataGrid.ContextMenu>
                 <ContextMenu DataContext="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
                     <MenuItem Header="{loc:Loc Loan_OpenDetail}" Command="{Binding DetailCommand}" />
-                    <MenuItem Header="{loc:Loc Common_Edit}" Command="{Binding EditCommand}" />
+                    <MenuItem Header="{loc:Loc Common_Edit}" Command="{Binding EditCommand}" Visibility="{Binding CanManage, Converter={StaticResource BoolToVis}}" />
                     <MenuItem Header="{loc:Loc Loan_Suspend}" Command="{Binding SuspendCommand}" />
                     <MenuItem Header="{loc:Loc Loan_Resume}" Command="{Binding ResumeCommand}" />
                     <MenuItem Header="{loc:Loc Common_Cancel}" Command="{Binding CancelCommand}" />
                     <Separator />
-                    <MenuItem Header="{loc:Loc Common_Delete}" Command="{Binding DeleteCommand}" />
+                    <MenuItem Header="{loc:Loc Common_Delete}" Command="{Binding DeleteCommand}" Visibility="{Binding CanManage, Converter={StaticResource BoolToVis}}" />
                 </ContextMenu>
             </DataGrid.ContextMenu>
             <DataGrid.Columns>
@@ -129,12 +129,12 @@
                                     <Button.ContextMenu>
                                         <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
                                             <MenuItem Header="{loc:Loc Loan_OpenDetail}" Command="{Binding DetailCommand}" />
-                                            <MenuItem Header="{loc:Loc Common_Edit}" Command="{Binding EditCommand}" />
+                                            <MenuItem Header="{loc:Loc Common_Edit}" Command="{Binding EditCommand}" Visibility="{Binding CanManage, Converter={StaticResource BoolToVis}}" />
                                             <MenuItem Header="{loc:Loc Loan_Suspend}" Command="{Binding SuspendCommand}" />
                                             <MenuItem Header="{loc:Loc Loan_Resume}" Command="{Binding ResumeCommand}" />
                                             <MenuItem Header="{loc:Loc Common_Cancel}" Command="{Binding CancelCommand}" />
                                             <Separator />
-                                            <MenuItem Header="{loc:Loc Common_Delete}" Command="{Binding DeleteCommand}" />
+                                            <MenuItem Header="{loc:Loc Common_Delete}" Command="{Binding DeleteCommand}" Visibility="{Binding CanManage, Converter={StaticResource BoolToVis}}" />
                                         </ContextMenu>
                                     </Button.ContextMenu>
                                 </Button>

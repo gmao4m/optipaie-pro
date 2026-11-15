@@ -93,6 +93,9 @@ namespace OptiPaie.Desktop.ViewModels
 
         private readonly AppServices _services;
 
+        /// <summary>The role may create/edit/delete training (hides New/Edit/Delete buttons).</summary>
+        public bool CanManage => OptiPaie.Desktop.Composition.ScreenAccess.CanEdit(_services, "training");
+
         private Company _selectedCompany;
         private TrainingRowViewModel _selectedSession;
         private string _plannedText = "0";

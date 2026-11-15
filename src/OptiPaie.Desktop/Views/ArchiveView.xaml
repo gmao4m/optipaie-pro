@@ -50,10 +50,13 @@
                     <ListBox.ContextMenu>
                         <ContextMenu DataContext="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
                             <MenuItem Header="{loc:Loc Archive_PreviewRow}" Command="{Binding PreviewCommand}" />
-                            <MenuItem Header="{loc:Loc Archive_PrintRow}" Command="{Binding PrintCommand}" />
-                            <Separator />
-                            <MenuItem Header="{loc:Loc Archive_CorrectRow}" Command="{Binding CorrectCommand}" />
-                            <MenuItem Header="{loc:Loc Archive_DeleteRow}" Command="{Binding DeleteCommand}" />
+                            <MenuItem Header="{loc:Loc Archive_PrintRow}" Command="{Binding PrintCommand}"
+                                      Visibility="{Binding CanExportPayslips, Converter={StaticResource BoolToVis}}" />
+                            <Separator Visibility="{Binding CanEditPayslips, Converter={StaticResource BoolToVis}}" />
+                            <MenuItem Header="{loc:Loc Archive_CorrectRow}" Command="{Binding CorrectCommand}"
+                                      Visibility="{Binding CanEditPayslips, Converter={StaticResource BoolToVis}}" />
+                            <MenuItem Header="{loc:Loc Archive_DeleteRow}" Command="{Binding DeleteCommand}"
+                                      Visibility="{Binding CanEditPayslips, Converter={StaticResource BoolToVis}}" />
                         </ContextMenu>
                     </ListBox.ContextMenu>
                     <ListBox.ItemContainerStyle>
@@ -103,10 +106,13 @@
                                         <Button.ContextMenu>
                                             <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
                                                 <MenuItem Header="{loc:Loc Archive_PreviewRow}" Command="{Binding PreviewCommand}" />
-                                                <MenuItem Header="{loc:Loc Archive_PrintRow}" Command="{Binding PrintCommand}" />
-                                                <Separator />
-                                                <MenuItem Header="{loc:Loc Archive_CorrectRow}" Command="{Binding CorrectCommand}" />
-                                                <MenuItem Header="{loc:Loc Archive_DeleteRow}" Command="{Binding DeleteCommand}" />
+                                                <MenuItem Header="{loc:Loc Archive_PrintRow}" Command="{Binding PrintCommand}"
+                                                          Visibility="{Binding CanExportPayslips, Converter={StaticResource BoolToVis}}" />
+                                                <Separator Visibility="{Binding CanEditPayslips, Converter={StaticResource BoolToVis}}" />
+                                                <MenuItem Header="{loc:Loc Archive_CorrectRow}" Command="{Binding CorrectCommand}"
+                                                          Visibility="{Binding CanEditPayslips, Converter={StaticResource BoolToVis}}" />
+                                                <MenuItem Header="{loc:Loc Archive_DeleteRow}" Command="{Binding DeleteCommand}"
+                                                          Visibility="{Binding CanEditPayslips, Converter={StaticResource BoolToVis}}" />
                                             </ContextMenu>
                                         </Button.ContextMenu>
                                     </Button>

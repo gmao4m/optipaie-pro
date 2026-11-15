@@ -46,7 +46,8 @@
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <!-- Company selection is global (header selector) -->
 
-                <Button Style="{StaticResource PrimaryButton}" Height="32" Content="{loc:Loc Batch_Title}" Command="{Binding BatchCommand}" />
+                <Button Style="{StaticResource PrimaryButton}" Height="32" Content="{loc:Loc Batch_Title}" Command="{Binding BatchCommand}"
+                        Visibility="{Binding CanEditPayroll, Converter={StaticResource BoolToVis}}" />
 
                 <TextBlock Text="{loc:Loc Payroll_Employee}" VerticalAlignment="Center" Foreground="{DynamicResource TextMuted}" FontSize="12" Margin="14,0,6,0" />
                 <ComboBox Style="{StaticResource AppComboBox}" Width="170" Height="32" ItemsSource="{Binding Employees}" SelectedItem="{Binding SelectedEmployee}">
@@ -83,7 +84,8 @@
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Visibility="{Binding HasEmployee, Converter={StaticResource BoolToVis}}">
                 <ComboBox Style="{StaticResource AppComboBox}" Width="200" Height="32" ItemsSource="{Binding Catalog}" SelectedItem="{Binding SelectedCatalogElement}" DisplayMemberPath="NameFr" />
-                <Button Style="{StaticResource SecondaryButton}" Height="32" Margin="8,0,0,0" Content="{loc:Loc Common_Add}" Command="{Binding AddElementCommand}" />
+                <Button Style="{StaticResource SecondaryButton}" Height="32" Margin="8,0,0,0" Content="{loc:Loc Common_Add}" Command="{Binding AddElementCommand}"
+                        Visibility="{Binding CanEditPayroll, Converter={StaticResource BoolToVis}}" />
                 <Button Style="{StaticResource SecondaryButton}" Height="32" Margin="8,0,0,0" Content="{loc:Loc Payroll_ManageItems}" Command="{Binding ManageItemsCommand}" />
             </StackPanel>
         </Grid>
@@ -166,9 +168,12 @@
                     <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Center" HorizontalAlignment="Left" Text="{Binding Status}" />
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button Style="{StaticResource SecondaryButton}" Height="36" Content="{loc:Loc Common_Preview}" Command="{Binding PreviewCommand}" />
-                        <Button Style="{StaticResource SecondaryButton}" Height="36" Margin="8,0,0,0" Content="{loc:Loc Common_Print}" Command="{Binding PrintCommand}" />
-                        <Button Style="{StaticResource SecondaryButton}" Height="36" Margin="8,0,0,0" Content="{loc:Loc Common_ExportPdf}" Command="{Binding ExportPdfCommand}" />
-                        <Button Style="{StaticResource PrimaryButton}" Height="36" Margin="8,0,0,0" Content="{loc:Loc Payroll_Save}" Command="{Binding SaveCommand}" />
+                        <Button Style="{StaticResource SecondaryButton}" Height="36" Margin="8,0,0,0" Content="{loc:Loc Common_Print}" Command="{Binding PrintCommand}"
+                                Visibility="{Binding CanExportPayslips, Converter={StaticResource BoolToVis}}" />
+                        <Button Style="{StaticResource SecondaryButton}" Height="36" Margin="8,0,0,0" Content="{loc:Loc Common_ExportPdf}" Command="{Binding ExportPdfCommand}"
+                                Visibility="{Binding CanExportPayslips, Converter={StaticResource BoolToVis}}" />
+                        <Button Style="{StaticResource PrimaryButton}" Height="36" Margin="8,0,0,0" Content="{loc:Loc Payroll_Save}" Command="{Binding SaveCommand}"
+                                Visibility="{Binding CanEditPayroll, Converter={StaticResource BoolToVis}}" />
                     </StackPanel>
                 </Grid>
             </StackPanel>

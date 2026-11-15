@@ -96,6 +96,12 @@ namespace OptiPaie.Desktop.ViewModels
         public ICommand DeleteCommand { get; }
         public ICommand HistoryCommand { get; }
 
+        /// <summary>The role may correct/delete a payslip (hides Correct and Delete).</summary>
+        public bool CanEditPayslips => Composition.ScreenAccess.CanEdit(_services, "payroll");
+
+        /// <summary>The role may reprint/export a payslip (hides Print).</summary>
+        public bool CanExportPayslips => Composition.ScreenAccess.CanExport(_services, "payroll");
+
         public void OnActivated()
         {
             // The active company comes from the single global selector in the header.

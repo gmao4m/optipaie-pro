@@ -37,7 +37,7 @@
                 <!-- Company selection is global (header selector) -->
 
                 <Button Style="{StaticResource PrimaryButton}" Height="32" Margin="10,0,0,0"
-                        Content="{loc:Loc Cert_New}" Command="{Binding NewCommand}" />
+                        Content="{loc:Loc Cert_New}" Command="{Binding NewCommand}" Visibility="{Binding CanManage, Converter={StaticResource BoolToVis}}" />
             </StackPanel>
         </Grid>
 
@@ -59,10 +59,10 @@
             </DataGrid.InputBindings>
             <DataGrid.ContextMenu>
                 <ContextMenu DataContext="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
-                    <MenuItem Header="{loc:Loc Common_Edit}" Command="{Binding EditCommand}" />
+                    <MenuItem Header="{loc:Loc Common_Edit}" Command="{Binding EditCommand}" Visibility="{Binding CanManage, Converter={StaticResource BoolToVis}}" />
                     <MenuItem Header="{loc:Loc Common_ExportPdf}" Command="{Binding PdfCommand}" />
                     <Separator />
-                    <MenuItem Header="{loc:Loc Common_Delete}" Command="{Binding DeleteCommand}" />
+                    <MenuItem Header="{loc:Loc Common_Delete}" Command="{Binding DeleteCommand}" Visibility="{Binding CanManage, Converter={StaticResource BoolToVis}}" />
                 </ContextMenu>
             </DataGrid.ContextMenu>
             <DataGrid.Columns>
@@ -80,10 +80,10 @@
                                         Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=DataGrid}}">
                                     <Button.ContextMenu>
                                         <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
-                                            <MenuItem Header="{loc:Loc Common_Edit}" Command="{Binding EditCommand}" />
+                                            <MenuItem Header="{loc:Loc Common_Edit}" Command="{Binding EditCommand}" Visibility="{Binding CanManage, Converter={StaticResource BoolToVis}}" />
                                             <MenuItem Header="{loc:Loc Common_ExportPdf}" Command="{Binding PdfCommand}" />
                                             <Separator />
-                                            <MenuItem Header="{loc:Loc Common_Delete}" Command="{Binding DeleteCommand}" />
+                                            <MenuItem Header="{loc:Loc Common_Delete}" Command="{Binding DeleteCommand}" Visibility="{Binding CanManage, Converter={StaticResource BoolToVis}}" />
                                         </ContextMenu>
                                     </Button.ContextMenu>
                                 </Button>

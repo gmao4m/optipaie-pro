@@ -49,7 +49,7 @@
                 <ComboBox Style="{StaticResource AppComboBox}" Width="90" Height="32" Margin="10,0,0,0" VerticalAlignment="Center"
                           ItemsSource="{Binding Years}" SelectedItem="{Binding SelectedYear}" />
                 <Button Style="{StaticResource PrimaryButton}" Height="32" Margin="10,0,0,0"
-                        Content="{loc:Loc Leave_NewRequest}" Command="{Binding NewCommand}"
+                        Content="{loc:Loc Leave_NewRequest}" Command="{Binding NewCommand}" Visibility="{Binding CanManage, Converter={StaticResource BoolToVis}}"
                         ToolTip="{Binding CreateHint}" />
                 <Menu Background="Transparent" VerticalAlignment="Center" Margin="6,0,0,0">
                     <MenuItem Header="{loc:Loc Common_More}" Height="32" Padding="8,0" VerticalContentAlignment="Center">
@@ -208,7 +208,7 @@
                                             <Separator />
                                             <MenuItem Header="{loc:Loc Leave_Accrual}" Command="{Binding AccrualCommand}" />
                                             <Separator />
-                                            <MenuItem Header="{loc:Loc Common_Delete}" Command="{Binding DeleteCommand}" />
+                                            <MenuItem Header="{loc:Loc Common_Delete}" Command="{Binding DeleteCommand}" Visibility="{Binding CanManage, Converter={StaticResource BoolToVis}}" />
                                         </ContextMenu>
                                     </Button.ContextMenu>
                                 </Button>

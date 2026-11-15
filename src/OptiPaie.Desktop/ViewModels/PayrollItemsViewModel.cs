@@ -12,6 +12,9 @@ namespace OptiPaie.Desktop.ViewModels
     public sealed class PayrollItemsViewModel : ObservableObject
     {
         private readonly AppServices _services;
+
+        /// <summary>The role may create/edit/delete payroll elements (hides New/Edit/Delete buttons).</summary>
+        public bool CanManage => OptiPaie.Desktop.Composition.ScreenAccess.CanEdit(_services, "payroll-elements");
         private PayrollElement _selected;
 
         public PayrollItemsViewModel(AppServices services)
