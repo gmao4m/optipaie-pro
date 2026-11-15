@@ -153,14 +153,31 @@ if ($vcsig.Status -ne 'Valid' -or ($vcsig.SignerCertificate.Subject -notmatch 'M
 }
 Write-Host ("    OK - VC++ x86 redist verified ({0:N0} MB, signed by Microsoft)." -f ((Get-Item $vcredist).Length/1MB)) -ForegroundColor Green
 
-Write-Host "==> Building Setup.exe bootstrapper (embeds offline .NET 4.8 + VC++ x86 runtime)..." -ForegroundColor Cyan
+Write-Host "==> Building FULL Setup.exe bootstrapper (embeds offline .NET 4.8 + VC++ x86 runtime)..." -ForegroundColor Cyan
 & $wix build (Join-Path $PSScriptRoot "Bundle.wxs") `
     -d "AppVersion=$wixVersion" -b $PSScriptRoot `
     -ext WixToolset.BootstrapperApplications.wixext `
     -ext WixToolset.Netfx.wixext `
     -ext WixToolset.Util.wixext `
     -o (Join-Path $outDir "OptiPaie PRO Setup.exe")
-if ($LASTEXITCODE -ne 0) { throw "Setup.exe build failed." }
+if ($LASTEXITCODE -ne 0) { throw "Setup.exe (full) build failed." }
+
+# ---------------------------------------------------------------------------
+# LIGHT update bootstrapper - SAME Burn bundle, prerequisites REFERENCED for download
+# (DownloadUrl, Compressed="no") instead of embedded. The MSI stays embedded, so the light
+# package carries the app (~23 MB) but not the ~130 MB of runtimes. This is what the in-app
+# auto-updater serves to the 300 existing installs (which already have .NET 4.8 + VC++, so
+# the prerequisites are detected-present and skipped - nothing is downloaded). A new customer
+# downloads the FULL Setup.exe above. The redist files are still present locally for build-time
+# hashing (the DownloadUrl's expected payload), but are NOT embedded into this exe.
+Write-Host "==> Building LIGHT Update.exe bootstrapper (prerequisites referenced for download)..." -ForegroundColor Cyan
+& $wix build (Join-Path $PSScriptRoot "Bundle.wxs") `
+    -d "AppVersion=$wixVersion" -d "Light=yes" -b $PSScriptRoot `
+    -ext WixToolset.BootstrapperApplications.wixext `
+    -ext WixToolset.Netfx.wixext `
+    -ext WixToolset.Util.wixext `
+    -o (Join-Path $outDir "OptiPaie PRO Update.exe")
+if ($LASTEXITCODE -ne 0) { throw "Update.exe (light) build failed." }
 
 # ---------------------------------------------------------------------------
 # RELEASE GUARD - Windows 7 SP1 compatibility.
@@ -170,14 +187,16 @@ if ($LASTEXITCODE -ne 0) { throw "Setup.exe build failed." }
 # return. NOTE: we check ONLY "GetDpiForSystem". GetDpiForMonitor / GetDpiForWindow
 # legitimately appear in the WiX/thmutil bootstrapper as GetProcAddress-resolved
 # strings with a graceful fallback and are Windows 7-safe - do not guard on those.
-$setupExe = Join-Path $outDir "OptiPaie PRO Setup.exe"
-Write-Host "==> Release guard: checking $setupExe for a GetDpiForSystem import..." -ForegroundColor Cyan
 $latin1  = [System.Text.Encoding]::GetEncoding("ISO-8859-1")   # 1 byte -> 1 char (binary-safe scan)
-$content = [System.IO.File]::ReadAllText($setupExe, $latin1)
-if ($content.IndexOf("GetDpiForSystem", [System.StringComparison]::Ordinal) -ge 0) {
-    throw "RELEASE GUARD FAILED: '$setupExe' references GetDpiForSystem - this installer will NOT launch on Windows 7 SP1. Refusing to ship. (This is the exact defect that retired the Velopack rail; see release/README.md and docs/WIN7-VERIFICATION.md.)"
+foreach ($exeName in @("OptiPaie PRO Setup.exe","OptiPaie PRO Update.exe")) {
+    $guardExe = Join-Path $outDir $exeName
+    Write-Host "==> Release guard: checking $guardExe for a GetDpiForSystem import..." -ForegroundColor Cyan
+    $content = [System.IO.File]::ReadAllText($guardExe, $latin1)
+    if ($content.IndexOf("GetDpiForSystem", [System.StringComparison]::Ordinal) -ge 0) {
+        throw "RELEASE GUARD FAILED: '$guardExe' references GetDpiForSystem - this installer will NOT launch on Windows 7 SP1. Refusing to ship. (This is the exact defect that retired the Velopack rail; see release/README.md and docs/WIN7-VERIFICATION.md.)"
+    }
+    Write-Host "    OK - no GetDpiForSystem import; Windows 7 SP1-safe." -ForegroundColor Green
 }
-Write-Host "    OK - no GetDpiForSystem import; Windows 7 SP1-safe." -ForegroundColor Green
 # ---------------------------------------------------------------------------
 
 Remove-Item (Join-Path $outDir "*.wixpdb") -Force -ErrorAction SilentlyContinue

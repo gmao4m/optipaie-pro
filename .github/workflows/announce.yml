@@ -110,7 +110,8 @@ jobs:
           # file exists. A HEAD/existence check can pass while the real download is broken
           # (redirect loop, expired signed URL, CDN 403). So we do an unauthenticated GET and
           # require real content back. No GH_TOKEN here on purpose: this must mimic a client.
-          $url = "https://github.com/${{ github.repository }}/releases/download/${{ steps.ver.outputs.tag }}/OptiPaie-PRO-Setup.exe"
+          # The auto-updater serves the LIGHT package, so this is the asset we must prove reachable.
+          $url = "https://github.com/${{ github.repository }}/releases/download/${{ steps.ver.outputs.tag }}/OptiPaie-PRO-Update.exe"
           $tmp = Join-Path $env:RUNNER_TEMP "announce-dl-probe.bin"
           $ok = $false
           for ($i = 1; $i -le 8; $i++) {
@@ -133,7 +134,7 @@ jobs:
           }
           Remove-Item $tmp -ErrorAction SilentlyContinue
           if (-not $ok) {
-            Write-Host "::error::Anonymous download of OptiPaie-PRO-Setup.exe for ${{ steps.ver.outputs.tag }} did NOT return a valid installer — refusing to announce (clients must never be pointed at a broken/dead link)."
+            Write-Host "::error::Anonymous download of OptiPaie-PRO-Update.exe (the asset the auto-updater serves) for ${{ steps.ver.outputs.tag }} did NOT return a valid installer — refusing to announce (clients must never be pointed at a broken/dead link)."
             exit 1
           }
           Write-Host "Anonymous public download verified (>=1 MiB, valid PE/MZ installer)."
@@ -155,9 +156,13 @@ jobs:
           }
           $notes = (($plain | Where-Object { $_ -ne '' }) -join "`n")
 
+          # The in-app auto-updater downloads this URL — point it at the LIGHT update package
+          # (~MSI size; prerequisites referenced, not embedded). Existing installs already have the
+          # runtime, so the update stays small and avoids the interrupted-download risk. A NEW
+          # customer, by contrast, downloads the full OptiPaie-PRO-Setup.exe from the release page.
           $manifest = [ordered]@{
             latest_version = $v
-            download_url   = "https://github.com/${{ github.repository }}/releases/latest/download/OptiPaie-PRO-Setup.exe"
+            download_url   = "https://github.com/${{ github.repository }}/releases/latest/download/OptiPaie-PRO-Update.exe"
             release_notes  = $notes
             mandatory      = $false
           }
