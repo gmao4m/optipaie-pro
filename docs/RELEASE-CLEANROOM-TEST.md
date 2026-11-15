@@ -53,6 +53,7 @@ Exécuter **les deux** scénarios (celui qui a cassé est la mise à jour) :
 |---|----------|--------|------------------|
 | A | **Installation fraîche** | Installer `OptiPaie-PRO-Setup.exe` de la nouvelle version sur une VM vierge, puis **lancer** l'app | La fenêtre de connexion / tableau de bord s'ouvre. **Aucune** boîte « Erreur d'initialisation ». |
 | B | **Mise à jour par‑dessus la version précédente + ouvrir CHAQUE écran** | Installer d'abord la **version publiée actuelle** (celle des clients), la lancer, puis installer la nouvelle **par‑dessus**, **relancer**, et **ouvrir un par un tous les écrans de premier niveau** (chaque entrée du menu latéral + les fenêtres qu'elles ouvrent) | L'app démarre ; toutes les DLL (dont `Newtonsoft.Json.dll`, `SQLite.Interop.dll`) sont présentes ; **chaque écran se rend sans la boîte « ...reste ouverte / ولم يُغلق البرنامج »** ni écran blanc/cassé. |
+| C | **Mise à jour d'une base PRÉ‑PERMISSIONS avec de vraies données** (le chemin du propriétaire) | Sur une VM portant la **version publiée actuelle** avec une base **réelle et peuplée** (société, employés, contrats, bulletins), installer la nouvelle **par‑dessus** et **relancer** | Au premier lancement : soit le compte existant est **adopté en propriétaire sans aucun écran** et se connecte avec **son mot de passe actuel** ; soit (base sans compte) l'assistant **« Création du compte propriétaire »** bilingue s'affiche, impose un mot de passe ≥ 10, montre le **code de récupération en grand** avec case à cocher. Dans **tous** les cas : **aucune donnée perdue ni modifiée**, et toutes les entrées du menu sont accessibles au propriétaire. En cas d'échec, message bilingue + **base inchangée**, jamais une vue vide/restreinte. |
 
 **Vérifications à chaque scénario :**
 - L'application **atteint son écran** (connexion / activation / tableau de bord) — pas une boîte de dialogue d'erreur.
@@ -80,6 +81,11 @@ Diffusion autorisée uniquement si **tous** ces contrôles sont **verts** :
 - **scénario B** sur VM propre **vert** — non seulement l'app démarre par‑dessus la version publiée,
   mais **chaque écran de premier niveau a été ouvert et s'est rendu** sans la boîte « reste
   ouverte / ولم يُغلق البرنامج » (gate **bloquant**) ;
+- **scénario C** sur VM propre **vert** (gate **bloquant**) — une base **pré‑permissions peuplée**
+  a été mise à jour : le propriétaire est établi (adopté ou créé), **aucune donnée perdue**, tous
+  les écrans accessibles. Doublé en automatique par
+  [`PrePermissionUpgradeTests`](../tests/OptiPaie.Tests/PrePermissionUpgradeTests.cs), qui doit être
+  **vert** en CI ; voir [[multiuser/07-upgrade]] ;
 - [[RELEASE-ISOLATION-CHECK]] **vert**.
 
 Consigner « test machine propre (fraîche + mise à jour + **chaque écran ouvert**) : OK » dans les

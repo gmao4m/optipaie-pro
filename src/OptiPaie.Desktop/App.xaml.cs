@@ -14,6 +14,7 @@ using OptiPaie.Desktop.Shell;
 using OptiPaie.Desktop.ViewModels;
 using OptiPaie.Desktop.Views;
 using OptiPaie.Services.Auth;
+using OptiPaie.Services.Startup;
 using OptiPaie.Services.Updates;
 
 namespace OptiPaie.Desktop
@@ -152,6 +153,20 @@ namespace OptiPaie.Desktop
             if (!EnsureAccess())
             {
                 CrashLog.Breadcrumb("access/activation gate not passed at startup -> exit");
+                Shutdown();
+                return;
+            }
+
+            // First launch after the permission system: make sure an OWNER is established BEFORE
+            // anything else. An activated install from before this update has its existing account
+            // adopted in place (password preserved); an install with real data but no account walks
+            // through creating one. The business data is never touched. Runs AFTER the activation
+            // gate (so a freshly-activated account exists to adopt) and BEFORE demo seeding (so a
+            // trial is never forced to create an owner). If it cannot complete, the app refuses to
+            // open with a restricted view — it shows a bilingual error and leaves the DB unchanged.
+            if (!EnsureOwnerEstablished())
+            {
+                CrashLog.Breadcrumb("owner setup not completed at startup -> exit (database left unchanged)");
                 Shutdown();
                 return;
             }
@@ -427,6 +442,66 @@ namespace OptiPaie.Desktop
             {
                 _rebuildingShell = false;
             }
+        }
+
+        /// <summary>
+        /// First-launch-after-upgrade OWNER establishment. Classifies the installation and either
+        /// adopts the existing account as owner (silently, password preserved), walks the customer
+        /// through creating one (the data-but-no-account case), or does nothing. Returns true to
+        /// proceed. Returns FALSE only when the owner could not be established — the caller then
+        /// exits WITHOUT opening a restricted view; the business data is never touched either way.
+        /// </summary>
+        private bool EnsureOwnerEstablished()
+        {
+            OwnerSetupService setup = Services.OwnerSetup;
+            if (setup == null)
+            {
+                return true; // defensive: never block startup on a wiring gap
+            }
+
+            try
+            {
+                switch (setup.DecideAction())
+                {
+                    case OwnerSetupAction.AdoptExistingAccount:
+                        setup.AdoptExistingAccount(); // silent: the existing account IS the owner
+                        return true;
+
+                    case OwnerSetupAction.CreateOwnerRequired:
+                        return RunOwnerSetupWizard(setup);
+
+                    default:
+                        return true; // None
+                }
+            }
+            catch (Exception ex)
+            {
+                // Never open with an empty or restricted view of existing data on a setup failure.
+                CrashLog.Fatal("Owner setup (first launch after update)", ex);
+                MessageBox.Show(OwnerSetupErrorText(), "OptiPaie PRO", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Shows the blocking owner-creation wizard. Returns true only once the owner has actually
+        /// been created (and the recovery code acknowledged) — a cancelled wizard leaves the install
+        /// unchanged and returns false, so the app exits rather than opening unprotected data.
+        /// </summary>
+        private bool RunOwnerSetupWizard(OwnerSetupService setup)
+        {
+            var viewModel = new OwnerSetupViewModel(Services);
+            var window = new OwnerSetupWindow { DataContext = viewModel };
+            ApplyFlowDirection(window);
+            viewModel.CloseRequested = ok => { try { window.DialogResult = ok; } catch { window.Close(); } };
+            window.ShowDialog();
+            return setup.IsOwnerEstablished;
+        }
+
+        private static string OwnerSetupErrorText()
+        {
+            return "تعذّر إعداد حساب المالك. لم يتمّ تعديل بياناتك. التفاصيل في:\n" + CrashLog.Directory +
+                   "\n\nLa configuration du compte propriétaire a échoué. Vos données n'ont pas été modifiées.";
         }
 
         /// <summary>

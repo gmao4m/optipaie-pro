@@ -226,6 +226,13 @@ namespace OptiPaie.Desktop.Composition
             access.Bind(appServices.Session, userService, customerAccount);
             appServices.Authorization = access; // the UI gates navigation/actions from the same context
 
+            // First-launch-after-upgrade owner setup: establishes the OWNER (adopt the existing
+            // account in place, or create one) without ever touching the business data. Audited.
+            var ownerSetup = new OptiPaie.Services.Startup.OwnerSetupService(
+                settingsService, customerAccount, companyService, logger);
+            ownerSetup.Audit = auditService;
+            appServices.OwnerSetup = ownerSetup;
+
             // Attribute every audit entry to WHO performed it. Evaluated at record time so it
             // always reflects the CURRENT session: the signed-in local user (username), else the
             // owner account (email), else null → AuditService falls back to a generic actor.

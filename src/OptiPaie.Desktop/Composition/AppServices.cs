@@ -119,6 +119,12 @@ namespace OptiPaie.Desktop.Composition
         /// </summary>
         public OptiPaie.Core.Security.IAccessContext Authorization { get; set; }
 
+        /// <summary>
+        /// The first-launch-after-upgrade owner-setup path (adopt an existing account as owner, or
+        /// create one, and backfill the recovery code). Set by composition.
+        /// </summary>
+        public OptiPaie.Services.Startup.OwnerSetupService OwnerSetup { get; set; }
+
         private CompanyContext _companyContext;
 
         /// <summary>
