@@ -63,6 +63,11 @@ Exécuter **tous** les scénarios (celui qui a cassé est la mise à jour) :
 | D | **Mise à jour LÉGÈRE d'une install existante** (ce que l'updater sert) | Sur une VM portant la **version publiée actuelle** (donc **avec** .NET 4.8 + VC++ déjà présents), installer `OptiPaie-PRO-Update.exe` (le paquet léger de la Release) **par‑dessus**, puis **relancer** | L'installation est **rapide** et **ne télécharge AUCUN framework** (.NET/VC++ détectés présents → ignorés). L'app démarre, données intactes. **STOP si** l'installation tente de télécharger un framework de ~116 Mo, ou se bloque/échoue à moitié. |
 
 **Contrôles BLOQUANTS du scénario C** (la plupart des 300 clients prennent le chemin « compte adopté ») :
+- **C.0 — recensement des données AVANT / APRÈS (aucune perte).** AVANT la mise à jour, sur la
+  version publiée actuelle, **noter trois chiffres** : nombre d'employés, nombre de sociétés, et
+  **le dernier bulletin de paie** (employé + mois + net). APRÈS la mise à jour, **rouvrir et
+  confirmer que les trois sont identiques** (mêmes compteurs, même dernier bulletin au centime).
+  **STOP si** l'un des trois a changé — c'est une perte/altération de données, jamais tolérée.
 - **C.1 — établissement du propriétaire.** Au premier lancement : soit le compte existant est
   **adopté en propriétaire sans aucun écran** et se connecte avec **son mot de passe actuel** ; soit
   (base sans compte) l'assistant **« Création du compte propriétaire »** bilingue s'affiche, impose un
@@ -81,6 +86,15 @@ Exécuter **tous** les scénarios (celui qui a cassé est la mise à jour) :
 - L'application **atteint son écran** (connexion / activation / tableau de bord) — pas une boîte de dialogue d'erreur.
 - Ouvrir le dossier d'installation (clic droit sur le raccourci → « Ouvrir l'emplacement du fichier ») et confirmer la présence de `OptiPaie PRO.exe`, `Newtonsoft.Json.dll`, `System.Data.SQLite.dll`, `SQLite.Interop.dll`, `libSkiaSharp.dll`.
 - Faire une action qui touche la base (ouvrir un employé) et une fiche de paie (PDF) — prouve SQLite + Skia chargés.
+- **Scénarios B / C / D — vérifier la version remontée dans la CONSOLE ADMIN (bloquant).** Après la
+  mise à jour, une fois l'app lancée et connectée au backend, ouvrir la **console d'administration des
+  licences** et retrouver cet appareil : il doit afficher **v1.41.0** (le `VersionDisplay` du device),
+  pas l'ancienne 1.8.0.0. C'est la **seule** preuve de bout en bout du correctif du piège de version
+  (`FileVersion`/`AssemblyVersion` figés à 1.8.0.0) : l'analyse statique a confirmé que `app_version`
+  est un champ texte libre que le device remonte et que l'admin **affiche** sans contrainte ni
+  comparaison, mais la boucle réelle *device → backend → admin* ne se prouve qu'ici, car la production
+  (clients payants) ne se teste pas depuis la machine de build. **STOP si** la console affiche encore
+  1.8.0.0 après mise à jour — le correctif de version n'a pas pris.
 - **Scénario B — ouvrir CHAQUE écran de premier niveau (bloquant).** Parcourir **toutes** les entrées du menu latéral (Tableau de bord, Employés, Paie, Présence, Congés, Prêts, Contrats, Performance, Actifs, Formation, Recrutement, Déclarations, Paramètres, …) et ouvrir les fenêtres secondaires principales (fiche employé, édition société/employé, profil 360°). Chaque écran doit **s'afficher** — aucune boîte « reste ouverte / ولم يُغلق البرنامج », aucun écran blanc. C'est **exactement** la classe de panne 1.38.0 : une clé `{StaticResource}` introuvable ne se voit qu'au rendu de l'écran concerné. Lancer l'app **ne prouve rien** ; seul l'affichage de chaque écran le prouve.
 
 ## 3. Pré‑contrôle local rapide (proxy — ne remplace PAS la VM)
@@ -104,7 +118,8 @@ Diffusion autorisée uniquement si **tous** ces contrôles sont **verts** :
   mais **chaque écran de premier niveau a été ouvert et s'est rendu** sans la boîte « reste
   ouverte / ولم يُغلق البرنامج » (gate **bloquant**) ;
 - **scénario C** sur VM propre **vert** (gate **bloquant**) — une base **pré‑permissions peuplée**
-  a été mise à jour : le propriétaire est établi (adopté ou créé), **aucune donnée perdue**, tous
+  a été mise à jour : **C.0 le recensement AVANT/APRÈS (employés, sociétés, dernier bulletin) est
+  identique**, le propriétaire est établi (adopté ou créé), **aucune donnée perdue**, tous
   les écrans accessibles, **ET C.2 le code de récupération est proposé/affiché au premier login du
   compte adopté, ET C.3 ce code réinitialise le mot de passe et un nouveau code est émis**. Doublé
   en automatique par [`PrePermissionUpgradeTests`](../tests/OptiPaie.Tests/PrePermissionUpgradeTests.cs)
@@ -113,7 +128,10 @@ Diffusion autorisée uniquement si **tous** ces contrôles sont **verts** :
 - **scénario D** sur VM propre **vert** (gate **bloquant**) — le paquet **léger**
   `OptiPaie-PRO-Update.exe` met à jour une install existante **sans télécharger de framework** et
   l'app démarre, données intactes ;
+- **console admin** sur les scénarios B/C/D **verte** (gate **bloquant**) — l'appareil mis à jour
+  **remonte v1.41.0** dans la console d'administration des licences (plus 1.8.0.0) ;
 - [[RELEASE-ISOLATION-CHECK]] **vert**.
 
-Consigner « test machine propre (A fraîche + B mise à jour + **chaque écran ouvert** + C propriétaire
-& récupération + D paquet léger) : OK » dans les notes de release **avant** `gh release create`.
+Consigner « test machine propre (A fraîche + B mise à jour + **chaque écran ouvert** + **version
+v1.41.0 vue dans la console admin** + C propriétaire & récupération & **recensement données
+identique** + D paquet léger) : OK » dans les notes de release **avant** `gh release create`.
