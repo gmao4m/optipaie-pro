@@ -100,6 +100,11 @@ namespace OptiPaie.Desktop.ViewModels
         public string AssetsAssigned { get => _assetsAssigned; private set => Set(ref _assetsAssigned, value); }
         public string TrainingUpcoming { get => _trainingUpcoming; private set => Set(ref _trainingUpcoming, value); }
 
+        private bool _canSeeMoney = true;
+        /// <summary>False for a role without ViewSalary: the money cards (payroll mass, average
+        /// salary, evolution, loan outstanding) are HIDDEN — never shown as zero.</summary>
+        public bool CanSeeMoney { get => _canSeeMoney; private set => Set(ref _canSeeMoney, value); }
+
         // ── payroll trend ──
         public PointCollection MasseTrendPoints { get => _masseTrendPoints; private set => Set(ref _masseTrendPoints, value); }
         public string MasseTrendCaption { get => _masseTrendCaption; private set => Set(ref _masseTrendCaption, value); }
@@ -209,6 +214,9 @@ namespace OptiPaie.Desktop.ViewModels
 
         private void ApplyOverview(DashboardOverview o, IReadOnlyList<Core.Entities.AuditEntry> activity)
         {
+            // Money cards follow ViewSalary: hidden (not zeroed) for a role that may not see pay.
+            CanSeeMoney = o.ShowSalaryFigures;
+
             // Hero.
             MasseSalariale = FormatDa(o.MasseSalariale);
             Employees = o.Workforce.Headcount.ToString(Fr);

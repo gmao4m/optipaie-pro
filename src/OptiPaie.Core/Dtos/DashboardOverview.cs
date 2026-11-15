@@ -15,11 +15,19 @@ namespace OptiPaie.Core.Dtos
         public DateTime PeriodStart { get; set; }
         public DateTime PeriodEnd { get; set; }
 
-        // ── payroll (base salary mass, never the engine) ──
+        /// <summary>
+        /// False for a role without ViewSalary: the money-valued cards (payroll mass, average salary,
+        /// payroll evolution, loan outstanding) are not computed and must be HIDDEN by the UI — never
+        /// shown as zero. The non-money indicators (headcount, attendance, expiries, counts) stay.
+        /// </summary>
+        public bool ShowSalaryFigures { get; set; } = true;
+
+        // ── payroll (base salary mass, never the engine) — only when ShowSalaryFigures ──
         public decimal MasseSalariale { get; set; }
         public decimal SalaireMoyen { get; set; }
 
-        /// <summary>Reconstructed base-salary mass for each of the last 6 months (oldest first).</summary>
+        /// <summary>Reconstructed base-salary mass for each of the last 6 months (oldest first). Empty
+        /// when the role may not see pay.</summary>
         public IReadOnlyList<MonthlyMass> MasseTrend { get; set; } = new List<MonthlyMass>();
 
         // ── module KPIs ──

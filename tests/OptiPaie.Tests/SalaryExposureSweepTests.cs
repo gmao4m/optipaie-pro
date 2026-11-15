@@ -169,6 +169,39 @@ namespace OptiPaie.Tests
         }
 
         [Test]
+        public void Surface_DashboardMoneyCards_AreHiddenAndUncomputed_ForReadOnly()
+        {
+            // Money-valued cards (payroll mass, average salary, evolution, loan outstanding) follow
+            // ViewSalary: for read-only they are NOT computed (flag off → UI hides them, not zeroes).
+            DashboardOverview ro = Dashboard(ReadOnly).BuildOverview(_companyId, DateTime.Today, DateTime.Today, 30, null);
+            Assert.That(ro.ShowSalaryFigures, Is.False, "read-only: money cards hidden");
+            Assert.That(ContainsSalary(ro.MasseSalariale.ToString(System.Globalization.CultureInfo.InvariantCulture)), Is.False);
+            Assert.That(ro.MasseSalariale, Is.EqualTo(0m), "the mass is not computed for read-only");
+            Assert.That(ro.MasseTrend, Is.Empty);
+            Assert.That(ro.Workforce.Headcount, Is.GreaterThan(0), "non-money indicators stay (headcount)");
+
+            // Positive control: a payroll role gets the real mass (the sentinel salary).
+            DashboardOverview pay = Dashboard(Payroll).BuildOverview(_companyId, DateTime.Today, DateTime.Today, 30, null);
+            Assert.That(pay.ShowSalaryFigures, Is.True);
+            Assert.That(ContainsSalary(pay.MasseSalariale.ToString(System.Globalization.CultureInfo.InvariantCulture)), Is.True,
+                "positive control: payroll sees the payroll mass");
+        }
+
+        private IDashboardService Dashboard(IAccessContext ctx)
+        {
+            var companies = new CompanyService(_uow, new CompanyValidator(), AccessContext.Unrestricted);
+            var employees = new EmployeeService(_uow, new EmployeeValidator(), AccessContext.Unrestricted);
+            var contracts = new ContractService(_uow, AccessContext.Unrestricted);
+            var leave = new LeaveService(_uow, AccessContext.Unrestricted);
+            var loans = new LoanService(_uow, AccessContext.Unrestricted);
+            var attendance = new AttendanceService(_uow, AccessContext.Unrestricted);
+            var ats = new AtsService(_uow, new EmployeeValidator(), AccessContext.Unrestricted);
+            var assets = new AssetService(_uow, AccessContext.Unrestricted);
+            var training = new TrainingService(_uow, AccessContext.Unrestricted);
+            return new DashboardService(companies, employees, contracts, leave, loans, attendance, ats, assets, training, ctx);
+        }
+
+        [Test]
         public void Surface_ContractList_SalaryText()
         {
             // The contract-list salary cell routes through the same gate (ContractSummary.BaseSalary).

@@ -77,7 +77,7 @@ namespace OptiPaie.Desktop.Composition
             var certificateService = new WorkCertificateService(unitOfWorkFactory, access);
             var dashboardService = new DashboardService(
                 companyService, employeeService, contractService, leaveService, loanService,
-                attendanceService, atsService, assetService, trainingService);
+                attendanceService, atsService, assetService, trainingService, access);
             var reportService = new ReportService(
                 companyService, employeeService, attendanceService, leaveService, loanService,
                 atsService, assetService, trainingService, access);

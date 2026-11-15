@@ -121,7 +121,8 @@
                     <!-- Hero: the five figures a manager checks first (each drills through) -->
                     <UniformGrid Rows="1" Columns="5">
                         <!-- Masse salariale → paie -->
-                        <Border Style="{StaticResource HeroCard}">
+                        <Border Style="{StaticResource HeroCard}"
+                                Visibility="{Binding CanSeeMoney, Converter={StaticResource BoolToVis}}">
                             <Border.InputBindings><MouseBinding MouseAction="LeftClick" Command="{Binding OpenCommand}" CommandParameter="payroll" /></Border.InputBindings>
                             <Grid>
                                 <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
@@ -273,7 +274,8 @@
                         </Grid.ColumnDefinitions>
 
                         <!-- Masse salariale trend: line + a caption that describes the whole window -->
-                        <Border Grid.Column="0" Style="{StaticResource Card}" Padding="18,16">
+                        <Border Grid.Column="0" Style="{StaticResource Card}" Padding="18,16"
+                                Visibility="{Binding CanSeeMoney, Converter={StaticResource BoolToVis}}">
                             <StackPanel>
                                 <TextBlock Style="{StaticResource H2}" FontSize="15" Text="{loc:Loc Dashboard_MasseTrend}" />
                                 <TextBlock Style="{StaticResource Caption}" Margin="0,2,0,0" Text="{loc:Loc Dashboard_Last6Months}" />
@@ -291,9 +293,11 @@
                         <!-- Secondary indicators in NAMED groups -->
                         <Border Grid.Column="2" Style="{StaticResource Card}" Padding="18,16">
                             <StackPanel>
-                                <!-- Finances -->
-                                <TextBlock Style="{StaticResource SectionTitle}" Margin="0,0,0,10" Text="{loc:Loc Dashboard_Group_Finance}" />
-                                <UniformGrid Columns="3">
+                                <!-- Finances — money cards: hidden for a role without ViewSalary -->
+                                <TextBlock Style="{StaticResource SectionTitle}" Margin="0,0,0,10" Text="{loc:Loc Dashboard_Group_Finance}"
+                                           Visibility="{Binding CanSeeMoney, Converter={StaticResource BoolToVis}}" />
+                                <UniformGrid Columns="3"
+                                             Visibility="{Binding CanSeeMoney, Converter={StaticResource BoolToVis}}">
                                     <Border Style="{StaticResource StatChip}"><Border.InputBindings><MouseBinding MouseAction="LeftClick" Command="{Binding OpenCommand}" CommandParameter="payroll" /></Border.InputBindings><StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_AvgSalary}" /><TextBlock Style="{StaticResource StatChipValue}" Foreground="{DynamicResource Salary}" Text="{Binding SalaireMoyen}" /></StackPanel></Border>
                                     <Border Style="{StaticResource StatChip}"><Border.InputBindings><MouseBinding MouseAction="LeftClick" Command="{Binding OpenCommand}" CommandParameter="loans" /></Border.InputBindings><StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_LoanOutstanding}" /><TextBlock Style="{StaticResource StatChipValue}" Foreground="{DynamicResource Deduction}" Text="{Binding LoanOutstanding}" /></StackPanel></Border>
                                     <Border Background="Transparent" />

@@ -30,6 +30,7 @@ namespace OptiPaie.Services
         private readonly IAtsService _ats;
         private readonly IAssetService _assets;
         private readonly ITrainingService _training;
+        private readonly OptiPaie.Core.Security.IAccessContext _access;
 
         public DashboardService(
             ICompanyService companies,
@@ -40,8 +41,10 @@ namespace OptiPaie.Services
             IAttendanceService attendance,
             IAtsService ats,
             IAssetService assets,
-            ITrainingService training)
+            ITrainingService training,
+            OptiPaie.Core.Security.IAccessContext access = null)
         {
+            _access = access;
             _companies = Guard.AgainstNull(companies, nameof(companies));
             _employees = Guard.AgainstNull(employees, nameof(employees));
             _contracts = Guard.AgainstNull(contracts, nameof(contracts));
@@ -101,19 +104,28 @@ namespace OptiPaie.Services
 
             var o = new DashboardOverview { AsOf = today, PeriodStart = start, PeriodEnd = end };
 
+            // ── money-valued cards: ONLY for a role that may see pay (ViewSalary). A role without it
+            //    gets no figure at all (left at 0 / empty) and the card is HIDDEN by the UI, never
+            //    shown as a misleading zero. In a 5-person company the average IS an individual salary.
+            bool showMoney = OptiPaie.Core.Security.SalaryVisibility.CanSee(_access);
+            o.ShowSalaryFigures = showMoney;
+
             // ── payroll (base salary only — never the engine) ──
-            decimal masse = active.Sum(e => e.BaseSalary);
-            o.MasseSalariale = masse;
-            o.SalaireMoyen = active.Count > 0 ? Math.Round(masse / active.Count) : 0m;
-            o.MasseTrend = BuildMasseTrend(roster, today);
+            if (showMoney)
+            {
+                decimal masse = active.Sum(e => e.BaseSalary);
+                o.MasseSalariale = masse;
+                o.SalaireMoyen = active.Count > 0 ? Math.Round(masse / active.Count) : 0m;
+                o.MasseTrend = BuildMasseTrend(roster, today);
+            }
 
             // ── workforce analytics (from the already-loaded lists) ──
             o.Workforce = BuildWorkforceCore(active, roster, start, end, today, retirement ?? RetirementPolicy.Default);
 
             // ── module KPIs via single SQL aggregates (no N+1) ──
             LoanPortfolio loans = _loans.GetActivePortfolio(companyId);
-            o.ActiveLoans = loans.ActiveCount;
-            o.LoanOutstanding = loans.TotalOutstanding;
+            o.ActiveLoans = loans.ActiveCount;               // a count — always shown
+            o.LoanOutstanding = showMoney ? loans.TotalOutstanding : 0m; // a money amount — gated
 
             RecruitmentCounts rec = _ats.GetRecruitmentCounts(companyId);
             o.OpenPostings = rec.OpenPostings;
