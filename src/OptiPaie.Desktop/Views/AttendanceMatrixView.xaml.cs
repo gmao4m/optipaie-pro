@@ -17,6 +17,17 @@ namespace OptiPaie.Desktop.Views
     public partial class AttendanceMatrixView : UserControl
     {
         private static readonly CultureInfo Fr = CultureInfo.GetCultureInfo("fr-FR");
+
+        // Parse each runtime DataTemplate ONCE per process and reuse it. A day-column template
+        // binds to Cells[index]; the binding is identical for a given index across months and
+        // view instances, so the cache is keyed by index. This removes the repeated
+        // XamlReader.Parse on every open/month-change (the identity templates are parsed once).
+        // Templates are UI-thread objects reused read-only, which DataTemplates support by design.
+        private static readonly System.Collections.Generic.Dictionary<int, DataTemplate> DayTemplateCache =
+            new System.Collections.Generic.Dictionary<int, DataTemplate>();
+        private static DataTemplate _nameTemplate;
+        private static DataTemplate _selectTemplate;
+
         private AttendanceMatrixViewModel _vm;
         // Remember what the columns were last built for: rebuilding them runs XamlReader.Parse once per
         // day column (the dominant open cost). The day columns only change when the month/year changes;
@@ -102,7 +113,7 @@ namespace OptiPaie.Desktop.Views
             {
                 Header = L("Payroll_Employee"),
                 Width = new DataGridLength(190),
-                CellTemplate = (DataTemplate)XamlReader.Parse(xaml)
+                CellTemplate = _nameTemplate ?? (_nameTemplate = (DataTemplate)XamlReader.Parse(xaml))
             };
         }
 
@@ -121,7 +132,7 @@ namespace OptiPaie.Desktop.Views
                 Header = "✓",
                 Width = new DataGridLength(34),
                 CanUserResize = false,
-                CellTemplate = (DataTemplate)XamlReader.Parse(xaml)
+                CellTemplate = _selectTemplate ?? (_selectTemplate = (DataTemplate)XamlReader.Parse(xaml))
             };
         }
 
@@ -132,6 +143,23 @@ namespace OptiPaie.Desktop.Views
             var date = new DateTime(_vm.SelectedYear, _vm.SelectedMonth, day);
             bool weekend = date.DayOfWeek == DayOfWeek.Friday || date.DayOfWeek == DayOfWeek.Saturday;
             int index = day - 1;
+
+            return new DataGridTemplateColumn
+            {
+                Header = DayHeader(day, date, weekend),
+                Width = new DataGridLength(30),
+                CanUserResize = false,
+                CellTemplate = DayCellTemplate(index)
+            };
+        }
+
+        /// <summary>The cached day-cell template for a column index (parsed once per index per process).</summary>
+        private static DataTemplate DayCellTemplate(int index)
+        {
+            if (DayTemplateCache.TryGetValue(index, out DataTemplate cached))
+            {
+                return cached;
+            }
 
             string tmpl =
                 "<DataTemplate xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation' " +
@@ -146,13 +174,9 @@ namespace OptiPaie.Desktop.Views
                 "FontSize='10.5' FontWeight='SemiBold' Foreground='{Binding Cells[I].Ink}' /></Border></DataTemplate>";
             tmpl = tmpl.Replace("Cells[I]", "Cells[" + index.ToString(CultureInfo.InvariantCulture) + "]");
 
-            return new DataGridTemplateColumn
-            {
-                Header = DayHeader(day, date, weekend),
-                Width = new DataGridLength(30),
-                CanUserResize = false,
-                CellTemplate = (DataTemplate)XamlReader.Parse(tmpl)
-            };
+            var template = (DataTemplate)XamlReader.Parse(tmpl);
+            DayTemplateCache[index] = template;
+            return template;
         }
 
         /// <summary>Clickable day header: click fills that day for every visible employee.</summary>

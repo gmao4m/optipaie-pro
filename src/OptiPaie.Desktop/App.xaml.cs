@@ -234,7 +234,41 @@ namespace OptiPaie.Desktop
                 StartBackgroundLicenseSync();
                 StartUpdateChecks();
                 StartTrialWatchdog();
+                WarmAttendanceScreen();
             }
+        }
+
+        /// <summary>
+        /// Absorbs the one-time realization cost of the attendance matrix (its visual tree + resources,
+        /// the per-day DataTemplate parse, and the first DataGrid/render JIT) by rendering the real view
+        /// ONCE off-screen at idle, right after the shell appears — so the user's first open is WARM
+        /// (~20 ms) instead of paying ~0.6 s then. Pure startup/screen layer: it uses a BARE view model
+        /// (no <c>OnActivated</c>, so NO data is read and NO number is computed), renders to a throwaway
+        /// bitmap and discards everything. Best-effort; a failure is a breadcrumb, never a crash.
+        /// </summary>
+        private void WarmAttendanceScreen()
+        {
+            Dispatcher.BeginInvoke(
+                System.Windows.Threading.DispatcherPriority.ApplicationIdle,
+                new Action(() =>
+                {
+                    try
+                    {
+                        if (Services == null) return;
+                        var vm = new ViewModels.Attendance.AttendanceMatrixViewModel(Services);
+                        var view = new Views.AttendanceMatrixView { DataContext = vm }; // triggers BuildColumns (parse+cache)
+                        view.Measure(new Size(1400, 850));
+                        view.Arrange(new Rect(0, 0, 1400, 850));
+                        view.UpdateLayout();
+                        var rtb = new System.Windows.Media.Imaging.RenderTargetBitmap(
+                            1400, 850, 96, 96, System.Windows.Media.PixelFormats.Pbgra32);
+                        rtb.Render(view); // JITs the DataGrid/template-column realization + first render
+                    }
+                    catch (Exception ex)
+                    {
+                        CrashLog.Breadcrumb("Attendance warm skipped: " + ex.Message);
+                    }
+                }));
         }
 
         private void Shell_Closed(object sender, EventArgs e)

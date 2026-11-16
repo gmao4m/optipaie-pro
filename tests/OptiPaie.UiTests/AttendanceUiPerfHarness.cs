@@ -52,11 +52,19 @@ namespace OptiPaie.UiTests
 
         private static void WarmUpWpf()
         {
-            var dg = new DataGrid { ItemsSource = new[] { new { A = 1 }, new { A = 2 } } };
-            var w = new Window { Content = dg, Width = 400, Height = 300, WindowStyle = WindowStyle.None, ShowInTaskbar = false };
-            w.Measure(new Size(400, 300)); w.Arrange(new Rect(0, 0, 400, 300)); w.UpdateLayout();
-            Render(w, 400, 300);
-            w.Content = null;
+            // Mirror the app exactly: App.WarmAttendanceScreen() renders the REAL AttendanceMatrixView once
+            // off-screen at idle after the shell shows (bare VM, no data), paying the one-time realization +
+            // template-parse + render JIT. So the first MeasureOne reflects the WARM state the user gets.
+            try
+            {
+                var warmVm = new AttendanceMatrixViewModel(ComposeEmpty());
+                var warmView = new AttendanceMatrixView { DataContext = warmVm };
+                warmView.Measure(new Size(1400, 850));
+                warmView.Arrange(new Rect(0, 0, 1400, 850));
+                warmView.UpdateLayout();
+                new RenderTargetBitmap(1400, 850, 96, 96, PixelFormats.Pbgra32).Render(warmView);
+            }
+            catch { /* best effort, same as the app */ }
         }
 
         private void MeasureOne(int employeeCount)
@@ -160,6 +168,13 @@ namespace OptiPaie.UiTests
                 if (hit != null) return hit;
             }
             return null;
+        }
+
+        /// <summary>An all-null AppServices — enough to construct the VM and build its columns (no OnActivated).</summary>
+        private static AppServices ComposeEmpty()
+        {
+            ConstructorInfo ctor = typeof(AppServices).GetConstructors().Single();
+            return (AppServices)ctor.Invoke(new object[ctor.GetParameters().Length]);
         }
 
         /// <summary>Builds an AppServices with only the three services the matrix uses; everything else null.</summary>
