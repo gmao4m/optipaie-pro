@@ -6,9 +6,11 @@ using OptiPaie.Core.Constants;
 using OptiPaie.Core.Dtos;
 using OptiPaie.Core.Entities;
 using OptiPaie.Core.Enums;
+using OptiPaie.Core.Auditing;
 using OptiPaie.Core.Interfaces.Engine;
 using OptiPaie.Core.Interfaces.Repositories;
 using OptiPaie.Core.Interfaces.Services;
+using OptiPaie.Core.Payroll;
 using OptiPaie.Core.Primitives;
 using OptiPaie.PayrollEngine;
 
@@ -26,17 +28,23 @@ namespace OptiPaie.Services
         private readonly IConfigurationService _configurationService;
         private readonly IPayrollEngine _engine;
         private readonly OptiPaie.Core.Security.IAccessContext _access;
+        private readonly IPayslipSanityService _sanity;
+        private readonly IAuditSink _audit;
 
         public PayrollService(
             IUnitOfWorkFactory unitOfWorkFactory,
             IConfigurationService configurationService,
             IPayrollEngine engine,
-            OptiPaie.Core.Security.IAccessContext access = null)
+            OptiPaie.Core.Security.IAccessContext access = null,
+            IPayslipSanityService sanity = null,
+            IAuditSink audit = null)
         {
             _unitOfWorkFactory = Guard.AgainstNull(unitOfWorkFactory, nameof(unitOfWorkFactory));
             _configurationService = Guard.AgainstNull(configurationService, nameof(configurationService));
             _engine = Guard.AgainstNull(engine, nameof(engine));
             _access = access;
+            _sanity = sanity ?? new PayslipSanityService();
+            _audit = audit ?? NullAuditSink.Instance;
         }
 
         public PayrollResult Preview(PayrollGenerationRequest request)
@@ -46,6 +54,11 @@ namespace OptiPaie.Services
         }
 
         public Result<long> Generate(PayrollGenerationRequest request)
+        {
+            return Generate(request, acknowledgeWarnings: false);
+        }
+
+        public Result<long> Generate(PayrollGenerationRequest request, bool acknowledgeWarnings)
         {
             OptiPaie.Core.Security.AccessPolicy.Require(_access, OptiPaie.Core.Security.Permission.RunPayroll);
             BuildOutcome outcome = BuildContext(request);
@@ -60,7 +73,50 @@ namespace OptiPaie.Services
                 return ToFailure(result);
             }
 
-            return Persist(request, outcome, result);
+            // PART 2 — the pre-issue guard. A suspicious payslip is never issued in
+            // silence: generation is blocked until the operator deliberately acknowledges,
+            // and the acknowledgement is audited. The engine's numbers are untouched.
+            PayslipSanityReport report = _sanity.Inspect(result, outcome.Snapshot.Snmg, IsFullTime(outcome.Context));
+            if (report.HasWarnings && !acknowledgeWarnings)
+            {
+                return Result.Fail<long>(
+                    "Paie suspecte, émission bloquée :" + Environment.NewLine + report.SummaryFr,
+                    PayrollErrorCodes.SanityBlocked);
+            }
+
+            Result<long> persisted = Persist(request, outcome, result);
+            if (persisted.IsSuccess && report.HasWarnings && acknowledgeWarnings)
+            {
+                _audit.Record(
+                    "Payslip", persisted.Value, AuditAction.Approved,
+                    "Paie émise malgré " + report.Warnings.Count + " alerte(s) de contrôle / أُصدِرت الأجرة رغم "
+                        + report.Warnings.Count + " تنبيه(ات) للمراقبة",
+                    null, report.CodeList);
+            }
+
+            return persisted;
+        }
+
+        public PayslipSanityReport Inspect(PayrollGenerationRequest request)
+        {
+            BuildOutcome outcome = BuildContext(request);
+            if (outcome.Failure != null)
+            {
+                return PayslipSanityReport.Clean;
+            }
+
+            PayrollResult result = _engine.Calculate(outcome.Context);
+            if (!result.IsSuccess)
+            {
+                return PayslipSanityReport.Clean;
+            }
+
+            return _sanity.Inspect(result, outcome.Snapshot.Snmg, IsFullTime(outcome.Context));
+        }
+
+        private static bool IsFullTime(PayrollContext context)
+        {
+            return context.WorkableDays > 0m && context.WorkedDays >= context.WorkableDays;
         }
 
         // -- Context building & pre-checks ---------------------------------------

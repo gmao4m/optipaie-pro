@@ -30,5 +30,8 @@ namespace OptiPaie.Core.Constants
         public const string EmployeeNotActive = "Payroll_EmployeeNotActive";
         public const string PersistFailed = "Payroll_PersistFailed";
         public const string RequestMissing = "Payroll_RequestMissing";
+
+        /// <summary>The pre-issue sanity guard found a suspicious payslip; issuing requires a deliberate acknowledgement.</summary>
+        public const string SanityBlocked = "Payroll_SanityBlocked";
     }
 }

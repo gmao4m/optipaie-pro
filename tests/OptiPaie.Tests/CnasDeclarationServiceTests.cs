@@ -150,7 +150,10 @@ namespace OptiPaie.Tests
             long companyId = AddCompany("SARL Bas Salaire", "1234567890");
             long empId = AddEmployee(companyId, "BASSALAIRE", "012345678901", new DateTime(1990, 1, 1), 20000m); // < SNMG 24000
 
-            _payroll.Generate(_batch.BuildRequest(companyId, empId, Year, Month));
+            // This payslip is deliberately below the SNMG (that is the point of the test),
+            // so the PART-2 pre-issue guard flags it — issuing it is a conscious act here,
+            // exactly as an operator acknowledging the warning would do.
+            _payroll.Generate(_batch.BuildRequest(companyId, empId, Year, Month), acknowledgeWarnings: true);
 
             CnasReadinessReport report = _service.CheckReadiness(companyId, Year);
             CnasEmployeeReadiness row = report.Employees.Single(e => e.EmployeeId == empId);

@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Windows.Input;
 using OptiPaie.Core.Dtos;
 using OptiPaie.Core.Entities;
+using OptiPaie.Core.Payroll;
 using OptiPaie.Desktop.Common;
 using OptiPaie.Desktop.Composition;
 using OptiPaie.Desktop.Mvvm;
@@ -43,6 +45,15 @@ namespace OptiPaie.Desktop.ViewModels
 
         /// <summary>Only the employees with at least one blocking issue (the work-list).</summary>
         public ObservableCollection<CnasReadinessRow> Rows { get; } = new ObservableCollection<CnasReadinessRow>();
+
+        /// <summary>
+        /// PART 3 — the read-only exposure diagnostic: catalog elements exempt from a base
+        /// (no enforced cap) and any element carrying an unenforced ceiling. Lets the user
+        /// see their own risk without anyone reading their database.
+        /// </summary>
+        public ObservableCollection<ExposureRow> ExposureRows { get; } = new ObservableCollection<ExposureRow>();
+
+        public bool HasExposure => ExposureRows.Count > 0;
 
         public int SelectedYear
         {
@@ -92,6 +103,33 @@ namespace OptiPaie.Desktop.ViewModels
             AllReady = report.IsReady;
             StatusMessage = string.Format(L("Cnas_Summary"), report.ReadyCount, withIssues.Count);
             Raise(nameof(HasIssues));
+
+            LoadExposure();
+        }
+
+        private void LoadExposure()
+        {
+            ExposureRows.Clear();
+            bool ar = string.Equals(_services.Localization.CurrentLanguage, "ar", StringComparison.OrdinalIgnoreCase);
+            PayrollExposureReport exposure = _services.PayrollExposure.BuildCatalogExposure();
+
+            foreach (ExemptElementInfo x in exposure.ExemptElements)
+            {
+                string amount = x.FixedMonthlyAmount.HasValue
+                    ? x.FixedMonthlyAmount.Value.ToString("0.##", CultureInfo.InvariantCulture) + " DA"
+                    : (ar ? "متغيّر" : "variable");
+                ExposureRows.Add(new ExposureRow(x.Name, amount, ar ? x.NoteAr : x.NoteFr));
+            }
+
+            foreach (CeilingElementInfo c in exposure.CeilingElements)
+            {
+                ExposureRows.Add(new ExposureRow(
+                    c.Name,
+                    c.Ceiling.ToString("0.##", CultureInfo.InvariantCulture) + " DA",
+                    ar ? c.NoteAr : c.NoteFr));
+            }
+
+            Raise(nameof(HasExposure));
         }
 
         private string BuildIssues(CnasEmployeeReadiness e)
@@ -124,5 +162,20 @@ namespace OptiPaie.Desktop.ViewModels
         public long EmployeeId { get; }
         public string Employee { get; }
         public string Issues { get; }
+    }
+
+    /// <summary>One row of the read-only exposure diagnostic: an element, its amount/ceiling and a note.</summary>
+    public sealed class ExposureRow
+    {
+        public ExposureRow(string element, string amount, string note)
+        {
+            Element = element;
+            Amount = amount;
+            Note = note;
+        }
+
+        public string Element { get; }
+        public string Amount { get; }
+        public string Note { get; }
     }
 }

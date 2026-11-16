@@ -72,42 +72,81 @@
             </Border>
         </StackPanel>
 
-        <!-- Work-list: employees with blocking issues — clic sur une ligne = fiche -->
-        <DataGrid Grid.Row="2" Margin="0,16,0,0" ItemsSource="{Binding Rows}"
-                  beh:RowActions.OpenItemCommand="{Binding OpenFicheCommand}"
-                  Visibility="{Binding HasIssues, Converter={StaticResource BoolToVis}}"
-                  AutoGenerateColumns="False" HeadersVisibility="Column" IsReadOnly="True"
-                  CanUserAddRows="False" CanUserResizeRows="False" GridLinesVisibility="All"
-                  RowHeight="34" FontFamily="{StaticResource AppFont}" FontSize="12.5" Background="{DynamicResource Surface}"
-                  RowBackground="{DynamicResource Surface}" AlternatingRowBackground="{DynamicResource SurfaceMuted}"
-                  BorderBrush="{DynamicResource Border}" BorderThickness="1"
-                  HorizontalGridLinesBrush="{DynamicResource Border}" VerticalGridLinesBrush="{DynamicResource Border}"
-                  ColumnHeaderStyle="{StaticResource GridHeader}">
-            <DataGrid.RowStyle>
-                <Style TargetType="DataGridRow">
-                    <Setter Property="Cursor" Value="Hand" />
-                </Style>
-            </DataGrid.RowStyle>
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="{loc:Loc Payroll_Employee}" Binding="{Binding Employee}" Width="260">
-                    <DataGridTextColumn.ElementStyle>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="VerticalAlignment" Value="Center" />
-                            <Setter Property="Margin" Value="10,0,0,0" />
-                            <Setter Property="FontWeight" Value="SemiBold" />
-                        </Style>
-                    </DataGridTextColumn.ElementStyle>
-                </DataGridTextColumn>
-                <DataGridTextColumn Header="{loc:Loc Cnas_Col_Issues}" Binding="{Binding Issues}" Width="*">
-                    <DataGridTextColumn.ElementStyle>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="VerticalAlignment" Value="Center" />
-                            <Setter Property="Margin" Value="10,0,0,0" />
-                            <Setter Property="Foreground" Value="{DynamicResource StatusDangerText}" />
-                        </Style>
-                    </DataGridTextColumn.ElementStyle>
-                </DataGridTextColumn>
-            </DataGrid.Columns>
-        </DataGrid>
+        <!-- Work-list (top) + read-only exposure diagnostic (bottom) -->
+        <Grid Grid.Row="2" Margin="0,16,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!-- Work-list: employees with blocking issues — clic sur une ligne = fiche -->
+            <DataGrid Grid.Row="0" ItemsSource="{Binding Rows}"
+                      beh:RowActions.OpenItemCommand="{Binding OpenFicheCommand}"
+                      Visibility="{Binding HasIssues, Converter={StaticResource BoolToVis}}"
+                      AutoGenerateColumns="False" HeadersVisibility="Column" IsReadOnly="True"
+                      CanUserAddRows="False" CanUserResizeRows="False" GridLinesVisibility="All"
+                      RowHeight="34" FontFamily="{StaticResource AppFont}" FontSize="12.5" Background="{DynamicResource Surface}"
+                      RowBackground="{DynamicResource Surface}" AlternatingRowBackground="{DynamicResource SurfaceMuted}"
+                      BorderBrush="{DynamicResource Border}" BorderThickness="1"
+                      HorizontalGridLinesBrush="{DynamicResource Border}" VerticalGridLinesBrush="{DynamicResource Border}"
+                      ColumnHeaderStyle="{StaticResource GridHeader}">
+                <DataGrid.RowStyle>
+                    <Style TargetType="DataGridRow">
+                        <Setter Property="Cursor" Value="Hand" />
+                    </Style>
+                </DataGrid.RowStyle>
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="{loc:Loc Payroll_Employee}" Binding="{Binding Employee}" Width="260">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="VerticalAlignment" Value="Center" />
+                                <Setter Property="Margin" Value="10,0,0,0" />
+                                <Setter Property="FontWeight" Value="SemiBold" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Header="{loc:Loc Cnas_Col_Issues}" Binding="{Binding Issues}" Width="*">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="VerticalAlignment" Value="Center" />
+                                <Setter Property="Margin" Value="10,0,0,0" />
+                                <Setter Property="Foreground" Value="{DynamicResource StatusDangerText}" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <!-- PART 3 — read-only exposure: exempt allowances with no enforced cap -->
+            <Border Grid.Row="1" Margin="0,16,0,8" CornerRadius="10" Padding="16,12"
+                    Background="{DynamicResource SurfaceMuted}" BorderBrush="{DynamicResource Border}" BorderThickness="1"
+                    Visibility="{Binding HasExposure, Converter={StaticResource BoolToVis}}">
+                <StackPanel>
+                    <TextBlock FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondary}"
+                               Text="Éléments exonérés sans plafond appliqué  ·  عناصر معفاة دون سقف مطبَّق" />
+                    <TextBlock Margin="0,2,0,8" FontSize="11.5" Foreground="{DynamicResource TextMuted}" TextWrapping="Wrap"
+                               Text="Information (lecture seule) : la part au-dessus d'un plafond légal n'est pas remise dans l'assiette. / معلومة للقراءة فقط: الجزء فوق السقف القانوني لا يُعاد إلى الوعاء." />
+                    <ItemsControl ItemsSource="{Binding ExposureRows}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="220" />
+                                        <ColumnDefinition Width="110" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="{Binding Element}" FontWeight="SemiBold"
+                                               FontSize="12.5" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Grid.Column="1" Text="{Binding Amount}" FontSize="12.5"
+                                               VerticalAlignment="Center" Foreground="{DynamicResource TextSecondary}" />
+                                    <TextBlock Grid.Column="2" Text="{Binding Note}" FontSize="11.5" TextWrapping="Wrap"
+                                               VerticalAlignment="Center" Foreground="{DynamicResource TextMuted}" />
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+        </Grid>
     </Grid>
 </UserControl>

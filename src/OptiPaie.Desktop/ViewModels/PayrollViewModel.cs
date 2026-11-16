@@ -9,6 +9,7 @@ using OptiPaie.Core.Dtos;
 using OptiPaie.Core.Entities;
 using OptiPaie.Core.Enums;
 using OptiPaie.Core.Licensing;
+using OptiPaie.Core.Payroll;
 using OptiPaie.Core.Primitives;
 using OptiPaie.Desktop.Common;
 using OptiPaie.Desktop.Composition;
@@ -493,7 +494,29 @@ namespace OptiPaie.Desktop.ViewModels
                 return;
             }
 
-            Result<long> result = _services.Payroll.Generate(_lastRequest);
+            // PART 2 — the pre-issue guard. If the payslip tripped any sanity rule, the
+            // user must deliberately acknowledge a bilingual warning before it is issued;
+            // the acknowledgement is recorded in the audit log by the service. A clean
+            // payslip goes straight through.
+            PayslipSanityReport sanity = _services.Payroll.Inspect(_lastRequest);
+            bool acknowledged = false;
+            if (sanity.HasWarnings)
+            {
+                string msg =
+                    "Ce bulletin a déclenché " + sanity.Warnings.Count + " alerte(s) de contrôle :" + Environment.NewLine
+                    + sanity.SummaryFr + Environment.NewLine + Environment.NewLine
+                    + "أثار هذا الكشف " + sanity.Warnings.Count + " تنبيه(ات) للمراقبة:" + Environment.NewLine
+                    + sanity.SummaryAr + Environment.NewLine + Environment.NewLine
+                    + "Émettre quand même ? / أتريد إصداره رغم ذلك؟";
+                if (!Dialogs.Confirm(msg))
+                {
+                    Status = "Émission annulée";
+                    return;
+                }
+                acknowledged = true;
+            }
+
+            Result<long> result = _services.Payroll.Generate(_lastRequest, acknowledged);
             if (!result.IsSuccess)
             {
                 Dialogs.Error(result.Error);

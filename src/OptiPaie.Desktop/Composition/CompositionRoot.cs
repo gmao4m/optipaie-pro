@@ -106,7 +106,10 @@ namespace OptiPaie.Desktop.Composition
             userService.Audit = auditService;        // user management + login-gate changes
 
             IPayrollEngine engine = new PayrollCalculationEngine();
-            var payrollService = new PayrollService(unitOfWorkFactory, configurationService, engine, access);
+            // PART 2 — the pre-issue sanity guard, with the audit sink so an acknowledged
+            // suspicious payslip records WHO issued it. Sanity service defaults inside.
+            var payrollService = new PayrollService(
+                unitOfWorkFactory, configurationService, engine, access, new PayslipSanityService(), auditService);
 
             // Payslip correction / deletion / restore. Re-runs the SAME engine (via Preview) and
             // persists the result; the payslip status change and the loan reversal/re-application
@@ -176,6 +179,9 @@ namespace OptiPaie.Desktop.Composition
             }
             IUpdateService updateService = new UpdateService(releaseChannel, updateMetadata, updateOptions, logger);
 
+            // PART 3 — read-only exposure diagnostic (exempt allowances / unenforced ceilings).
+            var payrollExposureService = new PayrollExposureService(unitOfWorkFactory);
+
             AppServices appServices = new AppServices(
                 configuration,
                 logger,
@@ -214,7 +220,8 @@ namespace OptiPaie.Desktop.Composition
                 cnasDeclarationService,
                 atsDrtDocumentService,
                 customerAccount,
-                activationState);
+                activationState,
+                payrollExposureService);
 
             // Configurable-types + holidays services (post-construction, like leaveService.Audit above).
             appServices.LeaveTypes = new LeaveTypeService(unitOfWorkFactory, access);
