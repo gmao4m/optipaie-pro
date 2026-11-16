@@ -1910,6 +1910,11 @@ Les colonnes ne correspondent pas au modèle. Colonnes obligatoires manquantes :
   <data name="Loan_SavedMsg" xml:space="preserve"><value>تم حفظ القرض.</value></data>
   <data name="Loan_SuspendedMsg" xml:space="preserve"><value>تم تعليق القرض.</value></data>
   <data name="Loan_ResumedMsg" xml:space="preserve"><value>تمت إعادة تنشيط القرض.</value></data>
+  <data name="Loan_Report" xml:space="preserve"><value>تقرير PDF</value></data>
+  <data name="Loan_Report_Empty" xml:space="preserve"><value>لا توجد قروض لإدراجها في هذه الفترة.</value></data>
+  <data name="Loan_LateHeader" xml:space="preserve"><value>التأخّر</value></data>
+  <data name="Loan_Filter_Year" xml:space="preserve"><value>السنة</value></data>
+  <data name="Loan_State_Late" xml:space="preserve"><value>متأخّر</value></data>
   <data name="Loan_ConfirmCancel" xml:space="preserve"><value>إلغاء هذا القرض؟ لن يُقتطع بعد الآن من الأجور.</value></data>
   <data name="Loan_CancelledMsg" xml:space="preserve"><value>تم إلغاء القرض.</value></data>
   <data name="Loan_ConfirmDelete" xml:space="preserve"><value>حذف هذا القرض وسجل سداده نهائيًا؟</value></data>

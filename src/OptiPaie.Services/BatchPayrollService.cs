@@ -168,7 +168,7 @@ namespace OptiPaie.Services
                                 .Where(d => d.ElementType == ElementType.Deduction &&
                                             string.Equals(d.LabelFr, LoanLineLabel, StringComparison.Ordinal))
                                 .Sum(d => d.Amount);
-                            _loans.RecordPayrollDeductions(check.EmployeeId, year, month, withheld);
+                            _loans.RecordPayrollDeductions(check.EmployeeId, year, month, withheld, generated.Value);
                         }
                     }
                     else

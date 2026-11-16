@@ -554,7 +554,7 @@ namespace OptiPaie.Desktop.ViewModels
             // the instalment shown on this payslip is deducted from the balance exactly
             // once. Recording is idempotent per period, so re-saving is safe. The payroll
             // engine is untouched: this runs entirely in the Loans module.
-            string loanNote = RecordLoanRecovery();
+            string loanNote = RecordLoanRecovery(result.Value);
 
             // When the run went straight through (nothing worth reviewing), tell the user the
             // attendance check still happened and found nothing to flag.
@@ -569,7 +569,7 @@ namespace OptiPaie.Desktop.ViewModels
         /// automatic "Remboursement prêt" line. Returns a short note for the dialog, or
         /// an empty string when nothing was recorded.
         /// </summary>
-        private string RecordLoanRecovery()
+        private string RecordLoanRecovery(long payslipId)
         {
             if (!_services.LicenseGate.IsEnabled(ModuleKeys.Loans)) return string.Empty;
             if (!Lines.Any(l => l.IsLoan)) return string.Empty;
@@ -586,7 +586,7 @@ namespace OptiPaie.Desktop.ViewModels
                 : Lines.Where(l => l.IsLoan).Sum(l => l.Amount);
 
             Result<decimal> recorded =
-                _services.Loans.RecordPayrollDeductions(SelectedEmployee.Id, SelectedYear, SelectedMonth, withheld);
+                _services.Loans.RecordPayrollDeductions(SelectedEmployee.Id, SelectedYear, SelectedMonth, withheld, payslipId);
 
             if (recorded.IsFailure || recorded.Value <= 0m) return string.Empty;
 

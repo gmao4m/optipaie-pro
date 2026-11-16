@@ -44,5 +44,11 @@ namespace OptiPaie.Core.Interfaces.Repositories
         long InsertRepayment(LoanRepayment repayment);
 
         void SoftDeleteRepayment(long id);
+
+        /// <summary>
+        /// Packed periods (<c>year*12 + month-1</c>) for which the employee has a LIVE (Active)
+        /// payslip — the only months in which a missing instalment counts as late.
+        /// </summary>
+        IReadOnlyCollection<int> GetIssuedPeriods(long employeeId);
     }
 }

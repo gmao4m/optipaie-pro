@@ -416,6 +416,12 @@ namespace OptiPaie.Tests
                 return _inner.ApplyPayrollRepayment(uow, employeeId, year, month, withheld);
             }
 
+            public decimal ApplyPayrollRepayment(IUnitOfWork uow, long employeeId, int year, int month, decimal withheld, long payslipId)
+            {
+                if (_onApply) throw new InvalidOperationException("sabotage: apply");
+                return _inner.ApplyPayrollRepayment(uow, employeeId, year, month, withheld, payslipId);
+            }
+
             // -- straight delegation --
             public Result<long> Save(Loan loan) => _inner.Save(loan);
             public Result SetStatus(long id, LoanStatus status) => _inner.SetStatus(id, status);
@@ -431,6 +437,8 @@ namespace OptiPaie.Tests
             public decimal GetMonthlyDeduction(long employeeId, int year, int month) => _inner.GetMonthlyDeduction(employeeId, year, month);
             public Result<decimal> RecordPayrollDeductions(long employeeId, int year, int month) => _inner.RecordPayrollDeductions(employeeId, year, month);
             public Result<decimal> RecordPayrollDeductions(long employeeId, int year, int month, decimal actualWithheld) => _inner.RecordPayrollDeductions(employeeId, year, month, actualWithheld);
+            public Result<decimal> RecordPayrollDeductions(long employeeId, int year, int month, decimal actualWithheld, long payslipId) => _inner.RecordPayrollDeductions(employeeId, year, month, actualWithheld, payslipId);
+            public LoanLedgerReport BuildLedger(long companyId, long? employeeId, int fromYear, int fromMonth, int toYear, int toMonth) => _inner.BuildLedger(companyId, employeeId, fromYear, fromMonth, toYear, toMonth);
             public decimal GetOutstanding(long employeeId) => _inner.GetOutstanding(employeeId);
         }
     }

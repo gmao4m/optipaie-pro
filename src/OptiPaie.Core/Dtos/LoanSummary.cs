@@ -26,5 +26,18 @@ namespace OptiPaie.Core.Dtos
 
         /// <summary>Whole instalments still to run (the last one may be smaller).</summary>
         public int RemainingInstallments { get; set; }
+
+        /// <summary>
+        /// True when an instalment was due in a month whose payroll was ALREADY ISSUED and it was
+        /// not deducted — money that should have been recovered and was not. Only an Active loan
+        /// with a positive balance can be late.
+        /// </summary>
+        public bool IsLate { get; set; }
+
+        /// <summary>How many issued-payroll months skipped this loan's instalment.</summary>
+        public int MissedInstallments { get; set; }
+
+        /// <summary>Approximate amount not yet recovered because of those misses (capped at the balance).</summary>
+        public decimal MissedAmount { get; set; }
     }
 }

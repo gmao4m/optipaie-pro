@@ -158,8 +158,8 @@ namespace OptiPaie.Data.Repositories
             repayment.CreatedAtUtc = DateTime.UtcNow;
 
             const string sql =
-                "INSERT INTO LoanRepayments (LoanId, Year, Month, Amount, IsManual, CreatedAtUtc, IsDeleted) " +
-                "VALUES (@LoanId, @Year, @Month, @Amount, @IsManual, @CreatedAtUtc, @IsDeleted); " +
+                "INSERT INTO LoanRepayments (LoanId, Year, Month, Amount, IsManual, PayslipId, CreatedAtUtc, IsDeleted) " +
+                "VALUES (@LoanId, @Year, @Month, @Amount, @IsManual, @PayslipId, @CreatedAtUtc, @IsDeleted); " +
                 "SELECT last_insert_rowid();";
 
             long id = Connection.ExecuteScalar<long>(sql, repayment, Transaction);
@@ -172,6 +172,31 @@ namespace OptiPaie.Data.Repositories
             Connection.Execute(
                 "UPDATE LoanRepayments SET IsDeleted = 1 WHERE Id = @id;",
                 new { id }, Transaction);
+        }
+
+        public IReadOnlyCollection<int> GetIssuedPeriods(long employeeId)
+        {
+            // Periods (packed year*12 + month-1) for which this employee has a LIVE bulletin.
+            // These are the only months where a missed instalment counts as "late" — the payroll
+            // for that month was actually issued, so the deduction had its chance and didn't happen.
+            var set = new HashSet<int>();
+            foreach (PeriodRow row in Connection.Query<PeriodRow>(
+                "SELECT r.PeriodYear AS Year, r.PeriodMonth AS Month " +
+                "FROM Payslips p " +
+                "INNER JOIN PayrollRuns r ON r.Id = p.RunId " +
+                "WHERE p.EmployeeId = @employeeId AND p.Status = 1;",
+                new { employeeId }, Transaction))
+            {
+                set.Add((row.Year * 12) + (row.Month - 1));
+            }
+
+            return set;
+        }
+
+        private sealed class PeriodRow
+        {
+            public int Year { get; set; }
+            public int Month { get; set; }
         }
     }
 }

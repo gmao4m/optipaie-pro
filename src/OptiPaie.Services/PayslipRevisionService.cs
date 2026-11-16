@@ -158,7 +158,7 @@ namespace OptiPaie.Services
                     decimal withheld = LoanWithheld(result.Lines);
                     if (withheld > 0m)
                     {
-                        _loans.ApplyPayrollRepayment(uow, original.EmployeeId, run.PeriodYear, run.PeriodMonth, withheld);
+                        _loans.ApplyPayrollRepayment(uow, original.EmployeeId, run.PeriodYear, run.PeriodMonth, withheld, newId);
                     }
 
                     uow.Commit();
@@ -297,7 +297,7 @@ namespace OptiPaie.Services
 
                     if (withheld > 0m)
                     {
-                        _loans.ApplyPayrollRepayment(uow, payslip.EmployeeId, run.PeriodYear, run.PeriodMonth, withheld);
+                        _loans.ApplyPayrollRepayment(uow, payslip.EmployeeId, run.PeriodYear, run.PeriodMonth, withheld, payslip.Id);
                     }
 
                     uow.Commit();

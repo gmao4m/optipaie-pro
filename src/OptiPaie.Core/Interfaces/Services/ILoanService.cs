@@ -36,6 +36,14 @@ namespace OptiPaie.Core.Interfaces.Services
         /// (for the dashboard — no per-loan repayment lookups).</summary>
         LoanPortfolio GetActivePortfolio(long companyId);
 
+        /// <summary>
+        /// Builds a printable loan ledger over a period for one employee (<paramref name="employeeId"/>
+        /// set) or the whole company: principal lent, recovered within the window, recovered all-time,
+        /// still outstanding, and which loans are late. Every figure is derived from the recorded
+        /// repayments. Company-isolated.
+        /// </summary>
+        LoanLedgerReport BuildLedger(long companyId, long? employeeId, int fromYear, int fromMonth, int toYear, int toMonth);
+
         /// <summary>Recorded and manual repayments of one loan, oldest first.</summary>
         IReadOnlyList<LoanRepayment> GetRepayments(long loanId);
 
@@ -69,6 +77,13 @@ namespace OptiPaie.Core.Interfaces.Services
         /// </summary>
         Result<decimal> RecordPayrollDeductions(long employeeId, int year, int month, decimal actualWithheld);
 
+        /// <summary>
+        /// Same as the <paramref name="actualWithheld"/> overload, plus the id of the payslip that
+        /// deducted the recovery — each repayment it records is hard-linked to that bulletin (0042),
+        /// so "which payslip deducted this instalment?" is answerable from the data.
+        /// </summary>
+        Result<decimal> RecordPayrollDeductions(long employeeId, int year, int month, decimal actualWithheld, long payslipId);
+
         /// <summary>Amount an employee still owes across every active loan.</summary>
         decimal GetOutstanding(long employeeId);
 
@@ -90,5 +105,11 @@ namespace OptiPaie.Core.Interfaces.Services
         /// Used by payslip correction (re-apply after reversal) and restore.
         /// </summary>
         decimal ApplyPayrollRepayment(IUnitOfWork uow, long employeeId, int year, int month, decimal withheld);
+
+        /// <summary>
+        /// Same as the overload above, plus the id of the payslip being (re)applied, so the restored
+        /// or corrected repayment carries its bulletin link. Enlists in the caller's transaction.
+        /// </summary>
+        decimal ApplyPayrollRepayment(IUnitOfWork uow, long employeeId, int year, int month, decimal withheld, long payslipId);
     }
 }

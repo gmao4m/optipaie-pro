@@ -181,7 +181,7 @@ namespace OptiPaie.Services
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 Loan loan = uow.Loans.GetById(loanId);
-                return loan == null ? null : Summarise(uow, loan);
+                return loan == null ? null : Summarise(uow, loan, uow.Loans.GetIssuedPeriods(loan.EmployeeId));
             }
         }
 
@@ -189,7 +189,8 @@ namespace OptiPaie.Services
         {
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
-                return uow.Loans.GetByEmployee(employeeId).Select(l => Summarise(uow, l)).ToList();
+                IReadOnlyCollection<int> issued = uow.Loans.GetIssuedPeriods(employeeId);
+                return uow.Loans.GetByEmployee(employeeId).Select(l => Summarise(uow, l, issued)).ToList();
             }
         }
 
@@ -200,10 +201,17 @@ namespace OptiPaie.Services
                 var names = uow.Employees.GetByCompany(companyId)
                     .ToDictionary(e => e.Id, e => (e.LastNameFr + " " + e.FirstNameFr).Trim());
 
+                var issuedByEmployee = new Dictionary<long, IReadOnlyCollection<int>>();
                 var result = new List<LoanSummary>();
                 foreach (Loan loan in uow.Loans.GetByCompany(companyId))
                 {
-                    LoanSummary summary = Summarise(uow, loan);
+                    if (!issuedByEmployee.TryGetValue(loan.EmployeeId, out IReadOnlyCollection<int> issued))
+                    {
+                        issued = uow.Loans.GetIssuedPeriods(loan.EmployeeId);
+                        issuedByEmployee[loan.EmployeeId] = issued;
+                    }
+
+                    LoanSummary summary = Summarise(uow, loan, issued);
                     names.TryGetValue(loan.EmployeeId, out string name);
                     summary.EmployeeName = name;
                     result.Add(summary);
@@ -218,6 +226,95 @@ namespace OptiPaie.Services
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 return uow.Loans.GetActivePortfolio(companyId);
+            }
+        }
+
+        public LoanLedgerReport BuildLedger(long companyId, long? employeeId, int fromYear, int fromMonth, int toYear, int toMonth)
+        {
+            using (IUnitOfWork uow = _unitOfWorkFactory.Create())
+            {
+                Company company = uow.Companies.GetById(companyId);
+                var names = uow.Employees.GetByCompany(companyId)
+                    .ToDictionary(e => e.Id, e => (e.LastNameFr + " " + e.FirstNameFr).Trim());
+
+                int from = Period(fromYear, fromMonth);
+                int to = Period(toYear, toMonth);
+
+                var report = new LoanLedgerReport
+                {
+                    CompanyId = companyId,
+                    CompanyName = company?.NameFr,
+                    EmployeeName = employeeId.HasValue && names.TryGetValue(employeeId.Value, out string en) ? en : null,
+                    FromYear = fromYear,
+                    FromMonth = fromMonth,
+                    ToYear = toYear,
+                    ToMonth = toMonth
+                };
+
+                IEnumerable<Loan> loans = employeeId.HasValue
+                    ? uow.Loans.GetByEmployee(employeeId.Value)
+                    : uow.Loans.GetByCompany(companyId);
+
+                var issuedCache = new Dictionary<long, IReadOnlyCollection<int>>();
+                var lines = new List<LoanLedgerLine>();
+
+                foreach (Loan loan in loans)
+                {
+                    // Company isolation: an employee-scoped query must still belong to this company.
+                    if (!names.ContainsKey(loan.EmployeeId)) continue;
+
+                    // Not yet granted by the end of the window — nothing to report.
+                    if (Period(loan.StartYear, loan.StartMonth) > to) continue;
+
+                    List<LoanRepayment> repayments = uow.Loans.GetRepayments(loan.Id).ToList();
+                    decimal recoveredTotal = repayments.Sum(r => r.Amount);
+                    decimal recoveredInPeriod = repayments
+                        .Where(r => { int p = Period(r.Year, r.Month); return p >= from && p <= to; })
+                        .Sum(r => r.Amount);
+                    decimal outstanding = Math.Max(0m, loan.Principal - recoveredTotal);
+
+                    bool grantedInWindow = Period(loan.StartYear, loan.StartMonth) >= from;
+                    bool relevant = outstanding > 0m || recoveredInPeriod > 0m || grantedInWindow;
+                    if (!relevant) continue;
+
+                    if (!issuedCache.TryGetValue(loan.EmployeeId, out IReadOnlyCollection<int> issued))
+                    {
+                        issued = uow.Loans.GetIssuedPeriods(loan.EmployeeId);
+                        issuedCache[loan.EmployeeId] = issued;
+                    }
+
+                    int missed = MissedInstallments(loan, repayments, outstanding, issued);
+                    names.TryGetValue(loan.EmployeeId, out string name);
+
+                    lines.Add(new LoanLedgerLine
+                    {
+                        LoanId = loan.Id,
+                        EmployeeName = name,
+                        Type = loan.Type,
+                        Status = loan.Status,
+                        Lent = loan.Principal,
+                        RecoveredInPeriod = recoveredInPeriod,
+                        RecoveredTotal = recoveredTotal,
+                        Remaining = outstanding,
+                        IsLate = missed > 0,
+                        MissedInstallments = missed
+                    });
+                }
+
+                // Stable, readable order: late first, then by employee, then newest loan.
+                report.Lines = lines
+                    .OrderByDescending(l => l.IsLate)
+                    .ThenBy(l => l.EmployeeName, StringComparer.CurrentCultureIgnoreCase)
+                    .ThenByDescending(l => l.LoanId)
+                    .ToList();
+
+                report.TotalLent = lines.Sum(l => l.Lent);
+                report.TotalRecoveredInPeriod = lines.Sum(l => l.RecoveredInPeriod);
+                report.TotalRecovered = lines.Sum(l => l.RecoveredTotal);
+                report.TotalRemaining = lines.Sum(l => l.Remaining);
+                report.LateCount = lines.Count(l => l.IsLate);
+
+                return report;
             }
         }
 
@@ -350,7 +447,7 @@ namespace OptiPaie.Services
         {
             // No explicit amount → each active loan recovers its theoretical instalment (batch path,
             // where the recovery line is never edited so theoretical == actually withheld).
-            return RecordPayrollDeductions(employeeId, year, month, null);
+            return RecordPayrollDeductions(employeeId, year, month, null, null);
         }
 
         [OptiPaie.Core.Security.WriteGuardExempt("Internal payroll-pipeline write: invoked only by the guarded payroll run (RunPayroll) when persisting loan deductions, never as a standalone user action.")]
@@ -358,17 +455,25 @@ namespace OptiPaie.Services
         {
             // Non-nullable public overload: the caller passes the amount actually withheld on the
             // payslip, which is then distributed across the loans (capped at each outstanding).
-            return RecordPayrollDeductions(employeeId, year, month, (decimal?)actualWithheld);
+            return RecordPayrollDeductions(employeeId, year, month, (decimal?)actualWithheld, null);
         }
 
-        private Result<decimal> RecordPayrollDeductions(long employeeId, int year, int month, decimal? actualWithheld)
+        [OptiPaie.Core.Security.WriteGuardExempt("Internal payroll-pipeline write: invoked only by the guarded payroll run (RunPayroll) when persisting loan deductions, never as a standalone user action.")]
+        public Result<decimal> RecordPayrollDeductions(long employeeId, int year, int month, decimal actualWithheld, long payslipId)
+        {
+            // Same as above, plus the id of the payslip that deducted the recovery, so each new
+            // repayment row carries a hard link to its bulletin (migration 0042).
+            return RecordPayrollDeductions(employeeId, year, month, (decimal?)actualWithheld, payslipId > 0 ? (long?)payslipId : null);
+        }
+
+        private Result<decimal> RecordPayrollDeductions(long employeeId, int year, int month, decimal? actualWithheld, long? payslipId)
         {
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
             {
                 uow.BeginTransaction();
                 try
                 {
-                    decimal total = ApplyCore(uow, employeeId, year, month, actualWithheld);
+                    decimal total = ApplyCore(uow, employeeId, year, month, actualWithheld, payslipId);
                     uow.Commit();
                     return Result.Ok(total);
                 }
@@ -391,7 +496,13 @@ namespace OptiPaie.Services
             Guard.AgainstNull(uow, nameof(uow));
             // Always an explicit amount here (the corrected/restored payslip's recovery line), so the
             // loan schedule is credited exactly what that payslip deducts — never the theoretical one.
-            return ApplyCore(uow, employeeId, year, month, Math.Max(0m, withheld));
+            return ApplyCore(uow, employeeId, year, month, Math.Max(0m, withheld), null);
+        }
+
+        public decimal ApplyPayrollRepayment(IUnitOfWork uow, long employeeId, int year, int month, decimal withheld, long payslipId)
+        {
+            Guard.AgainstNull(uow, nameof(uow));
+            return ApplyCore(uow, employeeId, year, month, Math.Max(0m, withheld), payslipId > 0 ? (long?)payslipId : null);
         }
 
         /// <summary>
@@ -401,7 +512,7 @@ namespace OptiPaie.Services
         /// in order, each capped at its outstanding — so the schedule is credited exactly what the
         /// payslip deducted. Idempotent per (loan, period). Returns the total applied.
         /// </summary>
-        private static decimal ApplyCore(IUnitOfWork uow, long employeeId, int year, int month, decimal? actualWithheld)
+        private static decimal ApplyCore(IUnitOfWork uow, long employeeId, int year, int month, decimal? actualWithheld, long? payslipId)
         {
             int period = Period(year, month);
             List<Loan> loans = uow.Loans.GetByEmployee(employeeId).ToList();
@@ -435,7 +546,8 @@ namespace OptiPaie.Services
                     Year = year,
                     Month = month,
                     Amount = amount,
-                    IsManual = false
+                    IsManual = false,
+                    PayslipId = payslipId
                 });
 
                 total += amount;
@@ -480,9 +592,10 @@ namespace OptiPaie.Services
 
         // -- internals ---------------------------------------------------------
 
-        private static LoanSummary Summarise(IUnitOfWork uow, Loan loan)
+        private static LoanSummary Summarise(IUnitOfWork uow, Loan loan, IReadOnlyCollection<int> issuedPeriods)
         {
-            decimal repaid = Repaid(uow, loan.Id);
+            List<LoanRepayment> repayments = uow.Loans.GetRepayments(loan.Id).ToList();
+            decimal repaid = repayments.Sum(r => r.Amount);
             decimal outstanding = Math.Max(0m, loan.Principal - repaid);
 
             int remaining = 0;
@@ -491,7 +604,7 @@ namespace OptiPaie.Services
                 remaining = (int)Math.Ceiling(outstanding / loan.MonthlyInstallment);
             }
 
-            return new LoanSummary
+            var summary = new LoanSummary
             {
                 LoanId = loan.Id,
                 EmployeeId = loan.EmployeeId,
@@ -502,6 +615,54 @@ namespace OptiPaie.Services
                 Outstanding = outstanding,
                 RemainingInstallments = remaining
             };
+
+            ApplyLate(summary, loan, repayments, outstanding, issuedPeriods);
+            return summary;
+        }
+
+        /// <summary>
+        /// Flags the loan as late when an instalment was due in a month whose payroll was already
+        /// ISSUED and nothing was deducted. A month counts as missed when a live payslip exists for
+        /// the employee in that month (<paramref name="issuedPeriods"/>), the month is on or after the
+        /// loan's start, and the loan has no repayment recorded for it. Only an Active loan with a
+        /// positive balance can be late — a suspended, cancelled or settled loan owes nothing now.
+        /// </summary>
+        private static void ApplyLate(
+            LoanSummary summary, Loan loan, List<LoanRepayment> repayments, decimal outstanding,
+            IReadOnlyCollection<int> issuedPeriods)
+        {
+            int missed = MissedInstallments(loan, repayments, outstanding, issuedPeriods);
+            if (missed <= 0) return;
+
+            summary.MissedInstallments = missed;
+            summary.MissedAmount = Math.Min(outstanding, missed * loan.MonthlyInstallment);
+            summary.IsLate = true;
+        }
+
+        /// <summary>
+        /// Number of ISSUED-payroll months, on or after the loan's start, that carry no repayment for
+        /// this loan — i.e. instalments the payroll could have taken and did not. Zero unless the loan
+        /// is Active with a positive balance and a positive instalment.
+        /// </summary>
+        private static int MissedInstallments(
+            Loan loan, List<LoanRepayment> repayments, decimal outstanding, IReadOnlyCollection<int> issuedPeriods)
+        {
+            if (loan.Status != LoanStatus.Active || outstanding <= 0m || loan.MonthlyInstallment <= 0m) return 0;
+            if (issuedPeriods == null || issuedPeriods.Count == 0) return 0;
+
+            int start = Period(loan.StartYear, loan.StartMonth);
+            var paid = new HashSet<int>();
+            foreach (LoanRepayment r in repayments) paid.Add(Period(r.Year, r.Month));
+
+            int missed = 0;
+            foreach (int p in issuedPeriods)
+            {
+                if (p < start) continue;
+                if (paid.Contains(p)) continue;
+                missed++;
+            }
+
+            return missed;
         }
 
         private static decimal Repaid(IUnitOfWork uow, long loanId)

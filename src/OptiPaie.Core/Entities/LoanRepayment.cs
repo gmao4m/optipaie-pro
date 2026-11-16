@@ -23,6 +23,13 @@ namespace OptiPaie.Core.Entities
         /// <summary>True for a repayment entered by hand rather than by a payroll run.</summary>
         public bool IsManual { get; set; }
 
+        /// <summary>
+        /// The payslip that actually deducted this instalment, or null. Set by a payroll run
+        /// (migration 0042 back-fills historical rows from the issued bulletins); always null for
+        /// a manual repayment, which was never tied to a run.
+        /// </summary>
+        public long? PayslipId { get; set; }
+
         public bool IsDeleted { get; set; }
     }
 }

@@ -1910,6 +1910,11 @@
   <data name="Loan_SavedMsg" xml:space="preserve"><value>Prêt enregistré.</value></data>
   <data name="Loan_SuspendedMsg" xml:space="preserve"><value>Prêt suspendu.</value></data>
   <data name="Loan_ResumedMsg" xml:space="preserve"><value>Prêt réactivé.</value></data>
+  <data name="Loan_Report" xml:space="preserve"><value>Rapport PDF</value></data>
+  <data name="Loan_Report_Empty" xml:space="preserve"><value>Aucun prêt à reporter pour cette période.</value></data>
+  <data name="Loan_LateHeader" xml:space="preserve"><value>Retard</value></data>
+  <data name="Loan_Filter_Year" xml:space="preserve"><value>Année</value></data>
+  <data name="Loan_State_Late" xml:space="preserve"><value>En retard</value></data>
   <data name="Loan_ConfirmCancel" xml:space="preserve"><value>Annuler ce prêt ? Il ne sera plus déduit des salaires.</value></data>
   <data name="Loan_CancelledMsg" xml:space="preserve"><value>Prêt annulé.</value></data>
   <data name="Loan_ConfirmDelete" xml:space="preserve"><value>Supprimer définitivement ce prêt et son historique de remboursement ?</value></data>

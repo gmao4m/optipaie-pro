@@ -335,6 +335,167 @@ namespace OptiPaie.Tests
                 "the principal cannot fall below what was already recovered");
         }
 
+        // ---------------------------------------------------------------- payslip link (0042)
+
+        [Test]
+        public void RecordPayrollDeductions_WithPayslipId_LinksTheRepaymentToTheBulletin()
+        {
+            long id = _service.Save(NewLoan(100000m, 20000m, 2026, 1)).Value;
+            long payslipId = IssuePayslip(2026, 1);
+
+            _service.RecordPayrollDeductions(_employeeId, 2026, 1, 20000m, payslipId);
+
+            LoanRepayment repayment = _service.GetRepayments(id).Single();
+            Assert.That(repayment.PayslipId, Is.EqualTo(payslipId),
+                "the deducted instalment is hard-linked to the payslip that took it");
+            Assert.That(repayment.IsManual, Is.False);
+        }
+
+        [Test]
+        public void AddManualRepayment_HasNoPayslipLink()
+        {
+            long id = _service.Save(NewLoan(100000m, 20000m, 2026, 1)).Value;
+            _service.AddManualRepayment(id, 2026, 1, 10000m);
+
+            LoanRepayment repayment = _service.GetRepayments(id).Single();
+            Assert.That(repayment.PayslipId, Is.Null, "a manual repayment was never tied to a run");
+        }
+
+        // ---------------------------------------------------------------- late detection
+
+        [Test]
+        public void Late_IssuedMonthWithNoDeduction_FlagsTheLoan()
+        {
+            long id = _service.Save(NewLoan(100000m, 20000m, 2026, 1)).Value;
+            // Payroll for 2026-01 and 2026-02 was ISSUED, but no loan recovery was recorded.
+            IssuePayslip(2026, 1);
+            IssuePayslip(2026, 2);
+
+            LoanSummary summary = _service.GetSummary(id);
+
+            Assert.That(summary.IsLate, Is.True, "two issued months skipped the instalment");
+            Assert.That(summary.MissedInstallments, Is.EqualTo(2));
+            Assert.That(summary.MissedAmount, Is.EqualTo(40000m));
+        }
+
+        [Test]
+        public void Late_WhenEveryIssuedMonthWasDeducted_IsNotLate()
+        {
+            long id = _service.Save(NewLoan(100000m, 20000m, 2026, 1)).Value;
+            long p1 = IssuePayslip(2026, 1);
+            _service.RecordPayrollDeductions(_employeeId, 2026, 1, 20000m, p1);
+
+            LoanSummary summary = _service.GetSummary(id);
+
+            Assert.That(summary.IsLate, Is.False, "the only issued month was deducted");
+            Assert.That(summary.MissedInstallments, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void Late_WithNoIssuedPayroll_IsNotLate()
+        {
+            long id = _service.Save(NewLoan(100000m, 20000m, 2026, 1)).Value;
+
+            LoanSummary summary = _service.GetSummary(id);
+
+            Assert.That(summary.IsLate, Is.False, "no payroll was issued, so nothing was skipped");
+        }
+
+        [Test]
+        public void Late_SettledLoan_IsNeverLate()
+        {
+            long id = _service.Save(NewLoan(20000m, 20000m, 2026, 1)).Value;
+            long p1 = IssuePayslip(2026, 1);
+            _service.RecordPayrollDeductions(_employeeId, 2026, 1, 20000m, p1);
+            IssuePayslip(2026, 2); // a later issued month, but the loan is already settled
+
+            LoanSummary summary = _service.GetSummary(id);
+
+            Assert.That(_service.Get(id).Status, Is.EqualTo(LoanStatus.Settled));
+            Assert.That(summary.IsLate, Is.False, "a settled loan owes nothing and cannot be late");
+        }
+
+        // ---------------------------------------------------------------- ledger report
+
+        [Test]
+        public void BuildLedger_ForEmployee_ReportsLentRecoveredAndRemaining()
+        {
+            long id = _service.Save(NewLoan(100000m, 20000m, 2026, 1)).Value;
+            long p1 = IssuePayslip(2026, 1);
+            _service.RecordPayrollDeductions(_employeeId, 2026, 1, 20000m, p1);
+
+            LoanLedgerReport report = _service.BuildLedger(_companyId, _employeeId, 2026, 1, 2026, 12);
+
+            Assert.That(report.Lines.Count, Is.EqualTo(1));
+            LoanLedgerLine line = report.Lines.Single();
+            Assert.That(line.Lent, Is.EqualTo(100000m));
+            Assert.That(line.RecoveredInPeriod, Is.EqualTo(20000m));
+            Assert.That(line.Remaining, Is.EqualTo(80000m));
+            Assert.That(report.TotalLent, Is.EqualTo(100000m));
+            Assert.That(report.TotalRemaining, Is.EqualTo(80000m));
+            Assert.That(report.EmployeeName, Is.EqualTo("BENALI Karim"));
+        }
+
+        [Test]
+        public void BuildLedger_RecoveredInPeriod_ExcludesRepaymentsOutsideTheWindow()
+        {
+            long id = _service.Save(NewLoan(100000m, 20000m, 2026, 1)).Value;
+            long p1 = IssuePayslip(2026, 1);
+            long p2 = IssuePayslip(2026, 2);
+            _service.RecordPayrollDeductions(_employeeId, 2026, 1, 20000m, p1);
+            _service.RecordPayrollDeductions(_employeeId, 2026, 2, 20000m, p2);
+
+            // Window is February only.
+            LoanLedgerReport report = _service.BuildLedger(_companyId, _employeeId, 2026, 2, 2026, 2);
+
+            LoanLedgerLine line = report.Lines.Single();
+            Assert.That(line.RecoveredInPeriod, Is.EqualTo(20000m), "only February's recovery counts");
+            Assert.That(line.RecoveredTotal, Is.EqualTo(40000m), "all-time total still includes January");
+            Assert.That(line.Remaining, Is.EqualTo(60000m));
+        }
+
+        [Test]
+        public void BuildLedger_Company_SurfacesLateLoans()
+        {
+            _service.Save(NewLoan(100000m, 20000m, 2026, 1));
+            IssuePayslip(2026, 1); // issued, not deducted → late
+
+            LoanLedgerReport report = _service.BuildLedger(_companyId, null, 2026, 1, 2026, 12);
+
+            Assert.That(report.LateCount, Is.EqualTo(1));
+            Assert.That(report.Lines.Single().IsLate, Is.True);
+        }
+
+        /// <summary>Inserts a payroll run and one Active payslip for the test employee, returning its id.</summary>
+        private long IssuePayslip(int year, int month)
+        {
+            using (IUnitOfWork uow = _unitOfWorkFactory.Create())
+            {
+                uow.BeginTransaction();
+                PayrollRun run = uow.PayrollRuns.GetByCompanyAndPeriod(_companyId, year, month);
+                long runId = run?.Id ?? uow.PayrollRuns.Insert(new PayrollRun
+                {
+                    CompanyId = _companyId,
+                    PeriodYear = year,
+                    PeriodMonth = month,
+                    RunStatus = (RunStatus)1,
+                    GeneratedAtUtc = DateTime.UtcNow
+                });
+
+                long payslipId = uow.Payslips.Insert(new Payslip
+                {
+                    RunId = runId,
+                    EmployeeId = _employeeId,
+                    NetSalaire = 60000m,
+                    GeneratedAtUtc = DateTime.UtcNow,
+                    Status = PayslipStatus.Active
+                });
+
+                uow.Commit();
+                return payslipId;
+            }
+        }
+
         private Loan NewLoan(decimal principal, decimal installment, int year, int month)
         {
             return new Loan
