@@ -32,6 +32,6 @@ namespace OptiPaie.Core.Interfaces.Services
         decimal Deduction(decimal baseSalary, decimal absentDays, decimal denominator);
 
         /// <summary>A live worked example (real employee + absent days) of the deduction under all three bases.</summary>
-        ProrationExample BuildExample(long employeeId, int year, int month, int absentDays);
+        ProrationExample BuildExample(long employeeId, int year, int month, decimal absentDays);
     }
 }

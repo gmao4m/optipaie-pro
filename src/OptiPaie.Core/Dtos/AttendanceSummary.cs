@@ -15,16 +15,19 @@ namespace OptiPaie.Core.Dtos
         public int Year { get; set; }
         public int Month { get; set; }
 
-        public int PresentDays { get; set; }
-        public int AbsentDays { get; set; }
-        public int LeaveDays { get; set; }
-        public int HolidayDays { get; set; }
-        public int RestDays { get; set; }
+        // Day counters are DECIMAL (Commit 3): a day can be a half (0.5). A whole day stays an exact
+        // integer value (3m == 3), so existing data is unchanged. These flow to payroll — truncating any
+        // of them to int would silently over/under-pay, which every Commit-3 test is aimed at.
+        public decimal PresentDays { get; set; }
+        public decimal AbsentDays { get; set; }
+        public decimal LeaveDays { get; set; }
+        public decimal HolidayDays { get; set; }
+        public decimal RestDays { get; set; }
 
-        /// <summary>Number of days flagged late.</summary>
+        /// <summary>Number of days flagged late (a whole-day flag — not fractional).</summary>
         public int LateCount { get; set; }
 
-        /// <summary>Total minutes late over the month.</summary>
+        /// <summary>Total minutes late over the month (minutes, not a day count).</summary>
         public int LateMinutes { get; set; }
 
         public decimal WorkedHours { get; set; }
@@ -33,18 +36,18 @@ namespace OptiPaie.Core.Dtos
         public decimal OvertimeHours { get; set; }
 
         /// <summary>Days with a recorded attendance row.</summary>
-        public int RecordedDays { get; set; }
+        public decimal RecordedDays { get; set; }
 
         /// <summary>Days actually PAID by payroll — mirrors the engine gate (monthDays − AbsentDays when
         /// any day was recorded, else the full month). Derived, never stored; reconciles the Synthèse with
-        /// what the payslip pays in the exception-only pointage flow.</summary>
-        public int PaidDays
+        /// what the payslip pays in the exception-only pointage flow. Decimal, so a half day is exact.</summary>
+        public decimal PaidDays
         {
             get
             {
-                if (Year <= 0 || Month < 1 || Month > 12) return 0;
-                int monthDays = System.DateTime.DaysInMonth(Year, Month);
-                return RecordedDays > 0 ? System.Math.Max(0, monthDays - AbsentDays) : monthDays;
+                if (Year <= 0 || Month < 1 || Month > 12) return 0m;
+                decimal monthDays = System.DateTime.DaysInMonth(Year, Month);
+                return RecordedDays > 0m ? System.Math.Max(0m, monthDays - AbsentDays) : monthDays;
             }
         }
     }

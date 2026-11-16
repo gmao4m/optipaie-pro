@@ -11,7 +11,7 @@ namespace OptiPaie.Core.Dtos
     {
         public string EmployeeName { get; set; }
         public decimal BaseSalary { get; set; }
-        public int AbsentDays { get; set; }
+        public decimal AbsentDays { get; set; }
         public int Year { get; set; }
         public int Month { get; set; }
 

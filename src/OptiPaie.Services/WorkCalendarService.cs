@@ -109,10 +109,10 @@ namespace OptiPaie.Services
             return Math.Round(baseSalary * absentDays / denominator, 2, MidpointRounding.AwayFromZero);
         }
 
-        public ProrationExample BuildExample(long employeeId, int year, int month, int absentDays)
+        public ProrationExample BuildExample(long employeeId, int year, int month, decimal absentDays)
         {
             AccessPolicy.Require(_access, Permission.ViewSalary); // the example reveals the salary
-            if (absentDays < 0) absentDays = 0;
+            if (absentDays < 0m) absentDays = 0m;
 
             Employee e;
             using (IUnitOfWork uow = _unitOfWorkFactory.Create())
