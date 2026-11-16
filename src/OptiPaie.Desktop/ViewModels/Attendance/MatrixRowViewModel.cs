@@ -8,12 +8,10 @@ namespace OptiPaie.Desktop.ViewModels.Attendance
 {
     /// <summary>
     /// One employee row of the matrix: the frozen identity columns plus the day cells
-    /// (index 0 = day 1). Selection is bound so bulk operations act on the checked rows.
+    /// (index 0 = day 1).
     /// </summary>
     public sealed class MatrixRowViewModel : ObservableObject
     {
-        private bool _isSelected;
-
         public MatrixRowViewModel(Employee employee, IReadOnlyList<MatrixCellViewModel> cells)
         {
             EmployeeId = employee.Id;
@@ -38,11 +36,5 @@ namespace OptiPaie.Desktop.ViewModels.Attendance
 
         /// <summary>Day cells for the selected month (Cells[d-1] is day d).</summary>
         public IReadOnlyList<MatrixCellViewModel> Cells { get; }
-
-        public bool IsSelected
-        {
-            get => _isSelected;
-            set => Set(ref _isSelected, value);
-        }
     }
 }

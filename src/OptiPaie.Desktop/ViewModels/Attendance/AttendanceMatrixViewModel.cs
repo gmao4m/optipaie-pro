@@ -70,12 +70,7 @@ namespace OptiPaie.Desktop.ViewModels.Attendance
 
             SelectBrushCommand = new RelayCommand(p => SelectBrush(p as StatusBrushViewModel));
             PaintCellCommand = new RelayCommand(p => PaintCell(p as MatrixCellViewModel));
-            PaintDayCommand = new RelayCommand(PaintDay);
-            ApplyMonthToSelectionCommand = new RelayCommand(ApplyMonthToSelection);
-            SelectAllCommand = new RelayCommand(() => SetAllSelected(true));
-            ClearSelectionCommand = new RelayCommand(() => SetAllSelected(false));
             EmployeeDetailCommand = new RelayCommand(p => OpenEmployeeDetail(p as MatrixRowViewModel));
-            MonthSummaryCommand = new RelayCommand(OpenMonthSummary);
             SettingsCommand = new RelayCommand(OpenSettings);
             WorkCalendarCommand = new RelayCommand(OpenWorkCalendar);
             RefreshCommand = new RelayCommand(Load);
@@ -161,12 +156,7 @@ namespace OptiPaie.Desktop.ViewModels.Attendance
 
         public ICommand SelectBrushCommand { get; }
         public ICommand PaintCellCommand { get; }
-        public ICommand PaintDayCommand { get; }
-        public ICommand ApplyMonthToSelectionCommand { get; }
-        public ICommand SelectAllCommand { get; }
-        public ICommand ClearSelectionCommand { get; }
         public ICommand EmployeeDetailCommand { get; }
-        public ICommand MonthSummaryCommand { get; }
         public ICommand SettingsCommand { get; }
         public ICommand WorkCalendarCommand { get; }
         public ICommand RefreshCommand { get; }
@@ -365,95 +355,6 @@ namespace OptiPaie.Desktop.ViewModels.Attendance
             StatusMessage = note;
         }
 
-        private void PaintDay(object parameter)
-        {
-            if (SelectedBrush == null || !TryDay(parameter, out int day)) return;
-
-            if (SelectedBrush.IsEraser)
-            {
-                EraseCells(Rows.Select(r => r.Cells[day - 1]).ToList(), "Jour " + day);
-                return;
-            }
-
-            var entries = new List<AttendanceDayStatus>();
-            int protectedLeave = 0;
-            foreach (MatrixRowViewModel row in Rows)
-            {
-                MatrixCellViewModel cell = row.Cells[day - 1];
-                if (cell.IsLeaveLinked) { protectedLeave++; continue; } // never overwrite a synced leave in bulk
-                if (cell.Paint(SelectedBrush.Status))
-                {
-                    entries.Add(new AttendanceDayStatus(cell.EmployeeId, cell.Date, SelectedBrush.Status));
-                }
-            }
-
-            string note = "Jour " + day + " : " + AttendanceAppearance.Label(SelectedBrush.Status) + " (" + entries.Count + ")";
-            if (protectedLeave > 0) note += " — " + protectedLeave + " congé(s) protégé(s)";
-            Persist(entries, note);
-        }
-
-        private void ApplyMonthToSelection()
-        {
-            if (SelectedBrush == null) return;
-            List<MatrixRowViewModel> selected = Rows.Where(r => r.IsSelected).ToList();
-            if (selected.Count == 0)
-            {
-                StatusMessage = "Cochez d'abord des employés pour l'action groupée.";
-                return;
-            }
-
-            if (SelectedBrush.IsEraser)
-            {
-                EraseCells(selected.SelectMany(r => r.Cells).ToList(), selected.Count + " employé(s) · mois");
-                return;
-            }
-
-            var entries = new List<AttendanceDayStatus>();
-            int protectedLeave = 0;
-            foreach (MatrixRowViewModel row in selected)
-            {
-                foreach (MatrixCellViewModel cell in row.Cells)
-                {
-                    if (cell.IsFuture || cell.IsWeekend) continue; // fill working days only
-                    if (cell.IsLeaveLinked) { protectedLeave++; continue; } // never overwrite a synced leave in bulk
-                    if (cell.Paint(SelectedBrush.Status))
-                    {
-                        entries.Add(new AttendanceDayStatus(cell.EmployeeId, cell.Date, SelectedBrush.Status));
-                    }
-                }
-            }
-
-            string note = selected.Count + " employé(s) · " + AttendanceAppearance.Label(SelectedBrush.Status) +
-                          " appliqué au mois (" + entries.Count + " jours)";
-            if (protectedLeave > 0)
-                note += " — " + protectedLeave + " jour(s) de congé protégé(s) (annulez le congé dans le module Congés)";
-            Persist(entries, note);
-        }
-
-        private void Persist(List<AttendanceDayStatus> entries, string message)
-        {
-            if (entries.Count == 0)
-            {
-                StatusMessage = "Aucune modification.";
-                return;
-            }
-
-            Result result = _services.Attendance.SetDayStatusBulk(entries);
-            if (result.IsFailure)
-            {
-                Dialogs.Error(result.Error);
-                return;
-            }
-
-            RecomputeKpis();
-            StatusMessage = message;
-        }
-
-        private void SetAllSelected(bool selected)
-        {
-            foreach (MatrixRowViewModel row in Rows) row.IsSelected = selected;
-        }
-
         // ---------------------------------------------------------------- KPIs
 
         private void RecomputeKpis()
@@ -548,16 +449,6 @@ namespace OptiPaie.Desktop.ViewModels.Attendance
             Load();
         }
 
-        private void OpenMonthSummary()
-        {
-            if (_selectedCompany == null) { Dialogs.Info("Sélectionnez une entreprise."); return; }
-            var vm = new AttendanceMonthViewModel(_services, _selectedCompany, _selectedYear, _selectedMonth);
-            var window = new AttendanceMonthWindow { DataContext = vm, Owner = Application.Current.MainWindow };
-            App.ApplyFlowDirection(window);
-            vm.RequestClose = () => window.Close();
-            window.ShowDialog();
-        }
-
         private void OpenSettings()
         {
             var vm = new AttendanceSettingsViewModel(_services.Attendance);
@@ -581,13 +472,6 @@ namespace OptiPaie.Desktop.ViewModels.Attendance
         {
             SelectedYear = DateTime.Today.Year;
             SelectedMonth = DateTime.Today.Month;
-        }
-
-        private static bool TryDay(object parameter, out int day)
-        {
-            day = 0;
-            if (parameter is int i) { day = i; return true; }
-            return parameter != null && int.TryParse(parameter.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out day);
         }
     }
 

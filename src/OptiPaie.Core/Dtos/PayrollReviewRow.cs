@@ -35,5 +35,13 @@ namespace OptiPaie.Core.Dtos
 
         /// <summary>True when the employee has NO attendance record this month (full month, said plainly, not silently).</summary>
         public bool NoAttendance { get; set; }
+
+        /// <summary>
+        /// True when this row is worth stopping the run for: a number would actually change the
+        /// payslip (unjustified absence or a half day → a deduction), or attendance is missing for
+        /// the employee. A clean, fully-present month is NOT noteworthy — the run goes straight
+        /// through rather than showing a table of zeros.
+        /// </summary>
+        public bool Noteworthy => NoAttendance || Absent > 0m || Half > 0m || Deduction > 0m;
     }
 }

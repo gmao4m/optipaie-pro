@@ -501,20 +501,25 @@ namespace OptiPaie.Desktop.ViewModels
                 return;
             }
 
-            // Payroll shows the truth before it runs: the user confirms the review (days due / worked /
-            // absent / leave / half / deduction + basis & divisor) before the payslip is issued.
+            // Payroll shows the truth before it runs — but only when there is truth worth seeing.
+            // If nothing on the attendance would change this payslip (no unjustified absence, no
+            // half day) and attendance is on file, the review is a table of zeros: run straight
+            // through, exactly as before, and simply note below that the check happened.
             Core.Dtos.PayrollReviewRow reviewRow =
                 _services.Batch.BuildReviewRow(SelectedCompany.Id, SelectedEmployee.Id, SelectedYear, SelectedMonth);
-            var reviewVm = new PayrollReviewViewModel("Revue avant émission  ·  مراجعة قبل الإصدار", new[] { reviewRow });
-            var reviewWin = new OptiPaie.Desktop.Views.PayrollReviewWindow
+            if (reviewRow.Noteworthy)
             {
-                DataContext = reviewVm, Owner = System.Windows.Application.Current.MainWindow
-            };
-            App.ApplyFlowDirection(reviewWin);
-            reviewVm.RequestClose = ok => { try { reviewWin.DialogResult = ok; } catch { reviewWin.Close(); } };
-            if (reviewWin.ShowDialog() != true) { Status = "Émission annulée"; return; }
-            _services.Audit.Record("Payslip", 0, OptiPaie.Core.Auditing.AuditAction.Approved,
-                "Paie émise après revue : " + reviewRow.Employee + " (" + reviewRow.Basis + ", ÷" + reviewRow.Divisor + ").");
+                var reviewVm = new PayrollReviewViewModel("Revue avant émission  ·  مراجعة قبل الإصدار", new[] { reviewRow });
+                var reviewWin = new OptiPaie.Desktop.Views.PayrollReviewWindow
+                {
+                    DataContext = reviewVm, Owner = System.Windows.Application.Current.MainWindow
+                };
+                App.ApplyFlowDirection(reviewWin);
+                reviewVm.RequestClose = ok => { try { reviewWin.DialogResult = ok; } catch { reviewWin.Close(); } };
+                if (reviewWin.ShowDialog() != true) { Status = "Émission annulée"; return; }
+                _services.Audit.Record("Payslip", 0, OptiPaie.Core.Auditing.AuditAction.Approved,
+                    "Paie émise après revue : " + reviewRow.Employee + " (" + reviewRow.Basis + ", ÷" + reviewRow.Divisor + ").");
+            }
 
             // PART 2 — the pre-issue guard. If the payslip tripped any sanity rule, the
             // user must deliberately acknowledge a bilingual warning before it is issued;
@@ -551,7 +556,11 @@ namespace OptiPaie.Desktop.ViewModels
             // engine is untouched: this runs entirely in the Loans module.
             string loanNote = RecordLoanRecovery();
 
-            Status = "Paie enregistrée";
+            // When the run went straight through (nothing worth reviewing), tell the user the
+            // attendance check still happened and found nothing to flag.
+            Status = reviewRow.Noteworthy
+                ? "Paie enregistrée"
+                : "Paie enregistrée  ·  Présence vérifiée : rien à signaler · تم التحقق من الحضور: لا شيء يستدعي الانتباه";
             Dialogs.Info("La paie a été enregistrée dans l'archive." + loanNote);
         }
 

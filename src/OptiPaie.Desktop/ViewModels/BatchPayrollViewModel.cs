@@ -179,20 +179,29 @@ namespace OptiPaie.Desktop.ViewModels
         {
             if (!CanRun) return;
 
-            // Payroll shows the truth before it runs: the user confirms the review (days due / worked /
-            // absent / leave / half / deduction + basis & divisor; "no attendance" flagged plainly).
+            // Payroll shows the truth before it runs — but only when there is truth worth seeing.
+            // Stop for the review only if at least one employee has something that changes a payslip
+            // (unjustified absence or a half day) or is missing attendance. When the whole month is
+            // clean, run straight through, exactly as before — no table of zeros — and say below that
+            // the attendance check happened and found nothing.
             System.Collections.Generic.IReadOnlyList<Core.Dtos.PayrollReviewRow> review =
                 _batch.BuildReview(_company.Id, _selectedYear, _selectedMonth);
-            var reviewVm = new PayrollReviewViewModel("Revue avant émission — paie du mois (lot)  ·  مراجعة قبل الإصدار", review);
-            var reviewWin = new OptiPaie.Desktop.Views.PayrollReviewWindow
+            int noteworthy = review.Count(r => r.Noteworthy);
+            int noData = review.Count(r => r.NoAttendance);
+            bool reviewed = noteworthy > 0;
+            if (reviewed)
             {
-                DataContext = reviewVm, Owner = System.Windows.Application.Current.MainWindow
-            };
-            App.ApplyFlowDirection(reviewWin);
-            reviewVm.RequestClose = ok => { try { reviewWin.DialogResult = ok; } catch { reviewWin.Close(); } };
-            if (reviewWin.ShowDialog() != true) { StatusMessage = "Émission annulée."; return; }
-            _services.Audit.Record("PayrollRun", 0, OptiPaie.Core.Auditing.AuditAction.Approved,
-                "Paie du mois (lot) émise après revue : " + review.Count + " employé(s), " + reviewVm.NoDataCount + " sans pointage.");
+                var reviewVm = new PayrollReviewViewModel("Revue avant émission — paie du mois (lot)  ·  مراجعة قبل الإصدار", review);
+                var reviewWin = new OptiPaie.Desktop.Views.PayrollReviewWindow
+                {
+                    DataContext = reviewVm, Owner = System.Windows.Application.Current.MainWindow
+                };
+                App.ApplyFlowDirection(reviewWin);
+                reviewVm.RequestClose = ok => { try { reviewWin.DialogResult = ok; } catch { reviewWin.Close(); } };
+                if (reviewWin.ShowDialog() != true) { StatusMessage = "Émission annulée."; return; }
+                _services.Audit.Record("PayrollRun", 0, OptiPaie.Core.Auditing.AuditAction.Approved,
+                    "Paie du mois (lot) émise après revue : " + review.Count + " employé(s), " + noteworthy + " à vérifier, " + noData + " sans pointage.");
+            }
 
             IsRunning = true;
             HasResults = false;
@@ -242,7 +251,8 @@ namespace OptiPaie.Desktop.ViewModels
             IsRunning = false;
             HasResults = true;
             StatusMessage = string.Format(Fr, "{0} réussi(s) · {1} ignoré(s) · {2} échoué(s)",
-                result.Succeeded, result.Skipped, result.Failed);
+                result.Succeeded, result.Skipped, result.Failed)
+                + (reviewed ? string.Empty : "  ·  Présence vérifiée : rien à signaler · تم التحقق من الحضور: لا شيء يستدعي الانتباه");
             RaiseResults();
         }
 
