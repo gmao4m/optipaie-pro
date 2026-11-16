@@ -507,7 +507,8 @@ namespace OptiPaie.Desktop.ViewModels
             // through, exactly as before, and simply note below that the check happened.
             Core.Dtos.PayrollReviewRow reviewRow =
                 _services.Batch.BuildReviewRow(SelectedCompany.Id, SelectedEmployee.Id, SelectedYear, SelectedMonth);
-            if (reviewRow.Noteworthy)
+            bool reviewed = OptiPaie.Core.Payroll.PayrollReviewPolicy.NeedsReview(new[] { reviewRow });
+            if (reviewed)
             {
                 var reviewVm = new PayrollReviewViewModel("Revue avant émission  ·  مراجعة قبل الإصدار", new[] { reviewRow });
                 var reviewWin = new OptiPaie.Desktop.Views.PayrollReviewWindow
@@ -558,7 +559,7 @@ namespace OptiPaie.Desktop.ViewModels
 
             // When the run went straight through (nothing worth reviewing), tell the user the
             // attendance check still happened and found nothing to flag.
-            Status = reviewRow.Noteworthy
+            Status = reviewed
                 ? "Paie enregistrée"
                 : "Paie enregistrée  ·  Présence vérifiée : rien à signaler · تم التحقق من الحضور: لا شيء يستدعي الانتباه";
             Dialogs.Info("La paie a été enregistrée dans l'archive." + loanNote);

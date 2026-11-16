@@ -188,7 +188,7 @@ namespace OptiPaie.Desktop.ViewModels
                 _batch.BuildReview(_company.Id, _selectedYear, _selectedMonth);
             int noteworthy = review.Count(r => r.Noteworthy);
             int noData = review.Count(r => r.NoAttendance);
-            bool reviewed = noteworthy > 0;
+            bool reviewed = OptiPaie.Core.Payroll.PayrollReviewPolicy.NeedsReview(review);
             if (reviewed)
             {
                 var reviewVm = new PayrollReviewViewModel("Revue avant émission — paie du mois (lot)  ·  مراجعة قبل الإصدار", review);
