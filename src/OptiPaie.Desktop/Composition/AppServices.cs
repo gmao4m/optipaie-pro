@@ -234,6 +234,9 @@ namespace OptiPaie.Desktop.Composition
         public IPayrollExposureService PayrollExposure { get; }
         public IWorkCalendarService WorkCalendar { get; }
 
+        /// <summary>Company-wide payroll + the pre-run review table. Set post-construction (needs the license gate).</summary>
+        public IBatchPayrollService Batch { get; set; }
+
         /// <summary>ATS/DRT official attestations — fills the CNAS .docx templates from employee files.</summary>
         public IAtsDrtDocumentService AtsDrtDocuments { get; }
     }

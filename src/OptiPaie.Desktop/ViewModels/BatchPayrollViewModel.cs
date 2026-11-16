@@ -74,7 +74,7 @@ namespace OptiPaie.Desktop.ViewModels
             _batch = new BatchPayrollService(
                 services.Employees, services.PayrollElements, services.Loans, services.Attendance,
                 services.Payroll, services.Contracts, services.Archive, services.LicenseGate.IsEnabled,
-                services.Authorization);
+                services.Authorization, services.WorkCalendar);
 
             for (int y = DateTime.Today.Year - 3; y <= DateTime.Today.Year + 1; y++) Years.Add(y);
             for (int m = 1; m <= 12; m++) Months.Add(new MonthOption(m, Fr.DateTimeFormat.GetMonthName(m)));
@@ -178,6 +178,21 @@ namespace OptiPaie.Desktop.ViewModels
         private async Task RunAsync()
         {
             if (!CanRun) return;
+
+            // Payroll shows the truth before it runs: the user confirms the review (days due / worked /
+            // absent / leave / half / deduction + basis & divisor; "no attendance" flagged plainly).
+            System.Collections.Generic.IReadOnlyList<Core.Dtos.PayrollReviewRow> review =
+                _batch.BuildReview(_company.Id, _selectedYear, _selectedMonth);
+            var reviewVm = new PayrollReviewViewModel("Revue avant émission — paie du mois (lot)  ·  مراجعة قبل الإصدار", review);
+            var reviewWin = new OptiPaie.Desktop.Views.PayrollReviewWindow
+            {
+                DataContext = reviewVm, Owner = System.Windows.Application.Current.MainWindow
+            };
+            App.ApplyFlowDirection(reviewWin);
+            reviewVm.RequestClose = ok => { try { reviewWin.DialogResult = ok; } catch { reviewWin.Close(); } };
+            if (reviewWin.ShowDialog() != true) { StatusMessage = "Émission annulée."; return; }
+            _services.Audit.Record("PayrollRun", 0, OptiPaie.Core.Auditing.AuditAction.Approved,
+                "Paie du mois (lot) émise après revue : " + review.Count + " employé(s), " + reviewVm.NoDataCount + " sans pointage.");
 
             IsRunning = true;
             HasResults = false;

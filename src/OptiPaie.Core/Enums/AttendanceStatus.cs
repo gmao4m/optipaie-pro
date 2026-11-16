@@ -22,6 +22,15 @@ namespace OptiPaie.Core.Enums
         Rest = 6,
 
         /// <summary>Mission — en déplacement / mission professionnelle (worked, paid).</summary>
-        Mission = 7
+        Mission = 7,
+
+        /// <summary>Absence justifiée — justified absence (does NOT reduce pay).</summary>
+        JustifiedAbsence = 8,
+
+        /// <summary>Demi-journée — half day worked (reduces pay by 0.5 day).</summary>
+        HalfDay = 9,
+
+        /// <summary>Travail un jour de repos / férié — worked a rest day or holiday (paid).</summary>
+        RestWorked = 10
     }
 }

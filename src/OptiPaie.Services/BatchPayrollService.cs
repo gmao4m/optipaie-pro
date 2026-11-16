@@ -36,6 +36,7 @@ namespace OptiPaie.Services
         private readonly IArchiveService _archive;
         private readonly Func<string, bool> _isModuleEnabled;
         private readonly OptiPaie.Core.Security.IAccessContext _access;
+        private readonly IWorkCalendarService _workCalendar;
 
         public BatchPayrollService(
             IEmployeeService employees,
@@ -46,7 +47,8 @@ namespace OptiPaie.Services
             IContractService contracts,
             IArchiveService archive,
             Func<string, bool> isModuleEnabled,
-            OptiPaie.Core.Security.IAccessContext access = null)
+            OptiPaie.Core.Security.IAccessContext access = null,
+            IWorkCalendarService workCalendar = null)
         {
             _employees = Guard.AgainstNull(employees, nameof(employees));
             _elements = Guard.AgainstNull(elements, nameof(elements));
@@ -57,6 +59,7 @@ namespace OptiPaie.Services
             _archive = Guard.AgainstNull(archive, nameof(archive));
             _isModuleEnabled = isModuleEnabled ?? (_ => true);
             _access = access;
+            _workCalendar = workCalendar; // null = historical behaviour (MonthDays, today)
         }
 
         // ------------------------------------------------------------------ plan
@@ -249,6 +252,7 @@ namespace OptiPaie.Services
 
             // Automatic attendance worked-days — mirrors PayrollViewModel.BuildRequest.
             decimal workedDays = monthDays;
+            decimal workableDays = monthDays;
             decimal workedHours = 0m;
             if (_isModuleEnabled(ModuleKeys.Attendance))
             {
@@ -259,10 +263,19 @@ namespace OptiPaie.Services
                 if (attendanceCache == null) summary = _attendance.GetMonthlySummary(employeeId, year, month);
                 else attendanceCache.TryGetValue(employeeId, out summary);
 
-                if (summary != null && summary.RecordedDays > 0)
+                if (summary != null && summary.RecordedDays > 0) workedHours = summary.WorkedHours;
+
+                if (_workCalendar != null)
                 {
-                    workedDays = Math.Max(0m, monthDays - summary.AbsentDays);
-                    workedHours = summary.WorkedHours;
+                    // The company's proration basis drives worked/workable days. Default basis
+                    // (MonthDays) reproduces the historical computation exactly.
+                    ProrationResult pr = _workCalendar.ResolveForPayroll(companyId, employeeId, year, month, summary, true);
+                    workedDays = pr.WorkedDays;
+                    workableDays = pr.WorkableDays;
+                }
+                else if (summary != null && summary.RecordedDays > 0)
+                {
+                    workedDays = Math.Max(0m, monthDays - summary.AbsentDays); // historical fallback (no calendar wired)
                 }
             }
 
@@ -273,10 +286,71 @@ namespace OptiPaie.Services
                 Year = year,
                 Month = month,
                 WorkedDays = workedDays,
-                WorkableDays = monthDays,
+                WorkableDays = workableDays,
                 WorkedHours = workedHours,
                 BaseSalaryOverride = employee.BaseSalary,
                 Elements = elements
+            };
+        }
+
+        public IReadOnlyList<PayrollReviewRow> BuildReview(long companyId, int year, int month)
+        {
+            BatchPayrollPlan plan = Plan(companyId, year, month);
+            IReadOnlyDictionary<long, AttendanceSummary> cache = _isModuleEnabled(ModuleKeys.Attendance)
+                ? _attendance.GetCompanyMonthlySummary(companyId, year, month)
+                    .GroupBy(s => s.EmployeeId).ToDictionary(g => g.Key, g => g.First())
+                : null;
+
+            var rows = new List<PayrollReviewRow>();
+            foreach (BatchEmployeeCheck check in plan.Employees)
+            {
+                AttendanceSummary summary = null;
+                cache?.TryGetValue(check.EmployeeId, out summary);
+                rows.Add(BuildReviewRow(companyId, check.EmployeeId, year, month, summary));
+            }
+            return rows;
+        }
+
+        public PayrollReviewRow BuildReviewRow(long companyId, long employeeId, int year, int month, AttendanceSummary summary = null)
+        {
+            Employee e = _employees.Get(employeeId);
+            bool attEnabled = _isModuleEnabled(ModuleKeys.Attendance);
+            if (attEnabled && summary == null) summary = _attendance.GetMonthlySummary(employeeId, year, month);
+            int monthDays = DateTime.DaysInMonth(year, month);
+
+            OptiPaie.Core.Enums.ProrationBasis basis;
+            decimal divisor, worked, deductDays;
+            if (_workCalendar != null)
+            {
+                ProrationResult pr = _workCalendar.ResolveForPayroll(companyId, employeeId, year, month, summary, attEnabled);
+                basis = pr.Basis; divisor = pr.WorkableDays; worked = pr.WorkedDays; deductDays = pr.DeductibleDays;
+            }
+            else
+            {
+                basis = OptiPaie.Core.Enums.ProrationBasis.MonthDays;
+                divisor = monthDays;
+                bool has0 = attEnabled && summary != null && summary.RecordedDays > 0m;
+                deductDays = has0 ? summary.DeductibleAbsenceDays : 0m;
+                worked = Math.Max(0m, divisor - deductDays);
+            }
+
+            decimal baseSalary = e?.BaseSalary ?? 0m;
+            decimal deduction = divisor > 0m ? Math.Round(baseSalary * deductDays / divisor, 2, MidpointRounding.AwayFromZero) : 0m;
+            bool noAtt = !(attEnabled && summary != null && summary.RecordedDays > 0m);
+
+            return new PayrollReviewRow
+            {
+                EmployeeId = employeeId,
+                Employee = e == null ? "#" + employeeId : (e.LastNameFr + " " + e.FirstNameFr).Trim(),
+                DaysDue = divisor,
+                Worked = worked,
+                Absent = summary?.AbsentDays ?? 0m,
+                Leave = (summary?.LeaveDays ?? 0m) + (summary?.JustifiedAbsenceDays ?? 0m),
+                Half = summary?.HalfDays ?? 0m,
+                Deduction = deduction,
+                Basis = basis,
+                Divisor = divisor,
+                NoAttendance = noAtt
             };
         }
 

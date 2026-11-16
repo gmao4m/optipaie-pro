@@ -231,6 +231,10 @@ namespace OptiPaie.Desktop.Composition
             // Configurable-types + holidays services (post-construction, like leaveService.Audit above).
             appServices.LeaveTypes = new LeaveTypeService(unitOfWorkFactory, access);
             appServices.Holidays = holidayService;
+            // Commit 4 — company-wide payroll + the pre-run review (shared by the single and batch screens).
+            appServices.Batch = new BatchPayrollService(
+                employeeService, elementService, loanService, attendanceService, payrollService,
+                contractService, archiveService, licenseGate.IsEnabled, access, workCalendarService);
 
             // Bind the service-layer authorization choke point to the real session now that it exists.
             // Enforcement activates only while the login gate is on AND a user exists; the signed-in

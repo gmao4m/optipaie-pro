@@ -26,7 +26,6 @@ namespace OptiPaie.Desktop.Views
         private static readonly System.Collections.Generic.Dictionary<int, DataTemplate> DayTemplateCache =
             new System.Collections.Generic.Dictionary<int, DataTemplate>();
         private static DataTemplate _nameTemplate;
-        private static DataTemplate _selectTemplate;
 
         private AttendanceMatrixViewModel _vm;
         // Remember what the columns were last built for: rebuilding them runs XamlReader.Parse once per
@@ -70,12 +69,11 @@ namespace OptiPaie.Desktop.Views
             _builtDays = _vm.DayCount;
 
             Grid.Columns.Clear();
-            Grid.Columns.Add(SelectColumn());
             Grid.Columns.Add(TextColumn("N°", "Number", 56));
             Grid.Columns.Add(NameColumn());
             Grid.Columns.Add(TextColumn(L("Att_Col_Department"), "Department", 130));
             Grid.Columns.Add(TextColumn(L("Employee_Poste"), "Position", 190));
-            Grid.FrozenColumnCount = 5;
+            Grid.FrozenColumnCount = 4;
 
             for (int day = 1; day <= _vm.DayCount; day++)
             {
@@ -118,23 +116,6 @@ namespace OptiPaie.Desktop.Views
         }
 
         private static string L(string key) => OptiPaie.Desktop.Localization.TranslationSource.Instance[key];
-
-        private static DataGridTemplateColumn SelectColumn()
-        {
-            const string xaml =
-                "<DataTemplate xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation'>" +
-                "<CheckBox HorizontalAlignment='Center' VerticalAlignment='Center' " +
-                "IsChecked='{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}' />" +
-                "</DataTemplate>";
-
-            return new DataGridTemplateColumn
-            {
-                Header = "✓",
-                Width = new DataGridLength(34),
-                CanUserResize = false,
-                CellTemplate = _selectTemplate ?? (_selectTemplate = (DataTemplate)XamlReader.Parse(xaml))
-            };
-        }
 
         // -- one colour column per day ----------------------------------------
 
@@ -179,7 +160,7 @@ namespace OptiPaie.Desktop.Views
             return template;
         }
 
-        /// <summary>Clickable day header: click fills that day for every visible employee.</summary>
+        /// <summary>Plain day header: the day number and its weekday letter. No bulk action.</summary>
         private object DayHeader(int day, DateTime date, bool weekend)
         {
             var panel = new StackPanel { HorizontalAlignment = HorizontalAlignment.Center };
@@ -198,19 +179,7 @@ namespace OptiPaie.Desktop.Views
                 Foreground = weekend ? Brushes.Firebrick : (Brush)new SolidColorBrush(Color.FromRgb(0x8A, 0x94, 0xA2))
             });
 
-            var button = new Button
-            {
-                Content = panel,
-                Command = _vm.PaintDayCommand,
-                CommandParameter = day,
-                BorderThickness = new Thickness(0),
-                Background = weekend ? new SolidColorBrush(Color.FromRgb(0xEC, 0xEF, 0xF1)) : Brushes.Transparent,
-                Padding = new Thickness(0, 2, 0, 2),
-                Cursor = System.Windows.Input.Cursors.Hand,
-                ToolTip = "Cliquer : appliquer le statut choisi à tous les employés affichés, jour " + day
-            };
-
-            return button;
+            return panel;
         }
     }
 }

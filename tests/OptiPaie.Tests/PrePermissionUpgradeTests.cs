@@ -143,7 +143,7 @@ namespace OptiPaie.Tests
             using (SQLiteConnection connection = new SqliteConnectionFactory(_dbPath).CreateOpenConnection())
             {
                 int applied = new MigrationRunner(connection).Run();
-                Assert.That(applied, Is.EqualTo(4), "exactly 0037..0040 must apply on a v36 database");
+                Assert.That(applied, Is.EqualTo(5), "exactly 0037..0041 must apply on a v36 database");
             }
             // After the real migration the new RowVersion columns exist: the schema is current.
             Assert.That(ColumnExists("Employees", "RowVersion"), Is.True);

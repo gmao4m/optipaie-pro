@@ -19,10 +19,25 @@ namespace OptiPaie.Core.Dtos
         // integer value (3m == 3), so existing data is unchanged. These flow to payroll — truncating any
         // of them to int would silently over/under-pay, which every Commit-3 test is aimed at.
         public decimal PresentDays { get; set; }
+
+        /// <summary>Unjustified absence days — the ONLY status that reduces pay (plus half of <see cref="HalfDays"/>).</summary>
         public decimal AbsentDays { get; set; }
+
         public decimal LeaveDays { get; set; }
         public decimal HolidayDays { get; set; }
         public decimal RestDays { get; set; }
+
+        /// <summary>Justified absence days — recorded, but do NOT reduce pay.</summary>
+        public decimal JustifiedAbsenceDays { get; set; }
+
+        /// <summary>Half days worked — each reduces pay by 0.5 day.</summary>
+        public decimal HalfDays { get; set; }
+
+        /// <summary>Days worked on a rest day/holiday — paid, do not reduce pay.</summary>
+        public decimal RestWorkedDays { get; set; }
+
+        /// <summary>The days that actually reduce pay: unjustified absence + half of the half-days. Nothing else.</summary>
+        public decimal DeductibleAbsenceDays => AbsentDays + (0.5m * HalfDays);
 
         /// <summary>Number of days flagged late (a whole-day flag — not fractional).</summary>
         public int LateCount { get; set; }
@@ -47,7 +62,7 @@ namespace OptiPaie.Core.Dtos
             {
                 if (Year <= 0 || Month < 1 || Month > 12) return 0m;
                 decimal monthDays = System.DateTime.DaysInMonth(Year, Month);
-                return RecordedDays > 0m ? System.Math.Max(0m, monthDays - AbsentDays) : monthDays;
+                return RecordedDays > 0m ? System.Math.Max(0m, monthDays - DeductibleAbsenceDays) : monthDays;
             }
         }
     }

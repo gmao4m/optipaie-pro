@@ -525,10 +525,13 @@ namespace OptiPaie.Services
                     case AttendanceStatus.Present: summary.PresentDays++; break;
                     case AttendanceStatus.Late: summary.PresentDays++; break;
                     case AttendanceStatus.Mission: summary.PresentDays++; break;
-                    case AttendanceStatus.Absent: summary.AbsentDays++; break;
+                    case AttendanceStatus.Absent: summary.AbsentDays++; break;              // unjustified → deducts
                     case AttendanceStatus.Leave: summary.LeaveDays++; break;
                     case AttendanceStatus.Holiday: summary.HolidayDays++; break;
                     case AttendanceStatus.Rest: summary.RestDays++; break;
+                    case AttendanceStatus.JustifiedAbsence: summary.JustifiedAbsenceDays++; break; // does NOT deduct
+                    case AttendanceStatus.HalfDay: summary.HalfDays++; break;                // deducts 0.5
+                    case AttendanceStatus.RestWorked: summary.RestWorkedDays++; break;       // paid, no deduct
                 }
             }
 

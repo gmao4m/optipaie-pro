@@ -422,18 +422,25 @@ namespace OptiPaie.Desktop.ViewModels
             // records the behaviour is byte-for-byte the previous one. This only changes
             // the ENGINE INPUTS: no formula, rate or legal rule is touched.
             AttendanceNote = null;
+            decimal workableDays = monthDays;
             if (_services.LicenseGate.IsEnabled(ModuleKeys.Attendance))
             {
                 AttendanceSummary summary =
                     _services.Attendance.GetMonthlySummary(SelectedEmployee.Id, SelectedYear, SelectedMonth);
                 if (summary != null && summary.RecordedDays > 0)
                 {
-                    workedDays = Math.Max(0m, monthDays - summary.AbsentDays);
                     workedHours = summary.WorkedHours;
-                    AttendanceNote = "Présence : " + summary.AbsentDays + " absence(s) · "
+                    AttendanceNote = "Présence : " + summary.AbsentDays + " absence(s) injustifiée(s) · "
+                        + summary.HalfDays + " demi-journée(s) · "
                         + summary.WorkedHours.ToString("0.##", Fr) + " h travaillées · "
                         + summary.OvertimeHours.ToString("0.##", Fr) + " h supplémentaires";
                 }
+
+                // The company's proration basis drives worked/workable days (default = today).
+                ProrationResult pr = _services.WorkCalendar.ResolveForPayroll(
+                    SelectedCompany.Id, SelectedEmployee.Id, SelectedYear, SelectedMonth, summary, true);
+                workedDays = pr.WorkedDays;
+                workableDays = pr.WorkableDays;
             }
 
             return new PayrollGenerationRequest
@@ -443,7 +450,7 @@ namespace OptiPaie.Desktop.ViewModels
                 Year = SelectedYear,
                 Month = SelectedMonth,
                 WorkedDays = workedDays,
-                WorkableDays = monthDays,
+                WorkableDays = workableDays,
                 WorkedHours = workedHours,
                 BaseSalaryOverride = baseOverride,
                 Elements = elements
@@ -493,6 +500,21 @@ namespace OptiPaie.Desktop.ViewModels
             {
                 return;
             }
+
+            // Payroll shows the truth before it runs: the user confirms the review (days due / worked /
+            // absent / leave / half / deduction + basis & divisor) before the payslip is issued.
+            Core.Dtos.PayrollReviewRow reviewRow =
+                _services.Batch.BuildReviewRow(SelectedCompany.Id, SelectedEmployee.Id, SelectedYear, SelectedMonth);
+            var reviewVm = new PayrollReviewViewModel("Revue avant émission  ·  مراجعة قبل الإصدار", new[] { reviewRow });
+            var reviewWin = new OptiPaie.Desktop.Views.PayrollReviewWindow
+            {
+                DataContext = reviewVm, Owner = System.Windows.Application.Current.MainWindow
+            };
+            App.ApplyFlowDirection(reviewWin);
+            reviewVm.RequestClose = ok => { try { reviewWin.DialogResult = ok; } catch { reviewWin.Close(); } };
+            if (reviewWin.ShowDialog() != true) { Status = "Émission annulée"; return; }
+            _services.Audit.Record("Payslip", 0, OptiPaie.Core.Auditing.AuditAction.Approved,
+                "Paie émise après revue : " + reviewRow.Employee + " (" + reviewRow.Basis + ", ÷" + reviewRow.Divisor + ").");
 
             // PART 2 — the pre-issue guard. If the payslip tripped any sanity rule, the
             // user must deliberately acknowledge a bilingual warning before it is issued;

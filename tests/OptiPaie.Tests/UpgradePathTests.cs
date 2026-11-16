@@ -71,7 +71,7 @@ namespace OptiPaie.Tests
             }
 
             // 3. Exactly the pending migrations (0033..0039) applied — cleanly, no throw.
-            Assert.That(applied, Is.EqualTo(8), "expected exactly 0033..0040 to apply on a v32 database");
+            Assert.That(applied, Is.EqualTo(9), "expected exactly 0033..0041 to apply on a v32 database");
             Assert.That(AppliedVersions(), Does.Contain(33).And.Contain(34).And.Contain(35).And.Contain(36).And.Contain(37).And.Contain(38).And.Contain(39));
 
             // 4. The new schema is present.

@@ -33,5 +33,13 @@ namespace OptiPaie.Core.Interfaces.Services
 
         /// <summary>A live worked example (real employee + absent days) of the deduction under all three bases.</summary>
         ProrationExample BuildExample(long employeeId, int year, int month, decimal absentDays);
+
+        /// <summary>
+        /// Resolves the worked/workable days the engine should receive for this employee/month under the
+        /// company's basis. For the default basis this reproduces today's computation exactly
+        /// (workable = month days; worked = month days − deductible days; full month when no attendance).
+        /// </summary>
+        ProrationResult ResolveForPayroll(long companyId, long employeeId, int year, int month,
+            AttendanceSummary summary, bool attendanceEnabled);
     }
 }

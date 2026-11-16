@@ -74,9 +74,16 @@ namespace OptiPaie.Desktop.ViewModels.Attendance
                 case AttendanceStatus.Leave: return LeaveFill;
                 case AttendanceStatus.Holiday: return HolidayFill;
                 case AttendanceStatus.Rest: return WeekendFill;
+                case AttendanceStatus.JustifiedAbsence: return JustifiedFill;
+                case AttendanceStatus.HalfDay: return HalfDayFill;
+                case AttendanceStatus.RestWorked: return RestWorkedFill;
                 default: return EmptyFill;
             }
         }
+
+        public static readonly Brush JustifiedFill  = Frozen(0x80, 0xCB, 0xC4); // teal — justified absence (no deduct)
+        public static readonly Brush HalfDayFill     = Frozen(0xFF, 0xE0, 0x82); // amber — half day (0.5 deduct)
+        public static readonly Brush RestWorkedFill  = Frozen(0x9F, 0xA8, 0xDA); // indigo — worked a rest day
 
         /// <summary>One-letter code shown inside a cell.</summary>
         public static string Letter(AttendanceStatus? status, bool isWeekend)
@@ -92,6 +99,9 @@ namespace OptiPaie.Desktop.ViewModels.Attendance
                     case AttendanceStatus.Leave: return "C";
                     case AttendanceStatus.Holiday: return "F";
                     case AttendanceStatus.Rest: return "W";
+                    case AttendanceStatus.JustifiedAbsence: return "J";
+                    case AttendanceStatus.HalfDay: return "½";
+                    case AttendanceStatus.RestWorked: return "T";
                 }
             }
 
@@ -109,6 +119,9 @@ namespace OptiPaie.Desktop.ViewModels.Attendance
                 case AttendanceStatus.Leave: return L("Att_St_Leave");
                 case AttendanceStatus.Holiday: return L("Att_St_Holiday");
                 case AttendanceStatus.Rest: return L("Att_St_Rest");
+                case AttendanceStatus.JustifiedAbsence: return "Absence justifiée · مبرَّر";
+                case AttendanceStatus.HalfDay: return "Demi-journée · نصف يوم";
+                case AttendanceStatus.RestWorked: return "Repos travaillé · عمل بالراحة";
                 default: return string.Empty;
             }
         }
@@ -119,10 +132,13 @@ namespace OptiPaie.Desktop.ViewModels.Attendance
         public static IReadOnlyList<AttendanceStatus> Palette { get; } = new[]
         {
             AttendanceStatus.Present,
-            AttendanceStatus.Absent,
+            AttendanceStatus.Absent,          // unjustified — the only status that deducts
+            AttendanceStatus.JustifiedAbsence,
+            AttendanceStatus.HalfDay,
+            AttendanceStatus.Leave,
+            AttendanceStatus.RestWorked,
             AttendanceStatus.Late,
             AttendanceStatus.Mission,
-            AttendanceStatus.Leave,
             AttendanceStatus.Holiday,
             AttendanceStatus.Rest
         };

@@ -37,5 +37,16 @@ namespace OptiPaie.Core.Interfaces.Services
         /// </summary>
         PayrollGenerationRequest BuildRequest(long companyId, long employeeId, int year, int month,
             IReadOnlyDictionary<long, AttendanceSummary> attendanceCache = null);
+
+        /// <summary>
+        /// The pre-run review the user confirms before any payslip is issued: per employee, the days
+        /// due, worked, absent, leave, half days, the deduction, and the basis/divisor used. A missing
+        /// attendance is flagged plainly (never a silent full month). No side effects.
+        /// </summary>
+        IReadOnlyList<PayrollReviewRow> BuildReview(long companyId, int year, int month);
+
+        /// <summary>The single-employee review row (same computation as <see cref="BuildReview"/>).</summary>
+        PayrollReviewRow BuildReviewRow(long companyId, long employeeId, int year, int month,
+            AttendanceSummary summary = null);
     }
 }

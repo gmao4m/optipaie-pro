@@ -150,6 +150,31 @@ namespace OptiPaie.Services
             };
         }
 
+        public ProrationResult ResolveForPayroll(long companyId, long employeeId, int year, int month,
+            AttendanceSummary summary, bool attendanceEnabled)
+        {
+            ProrationBasis basis = GetSettings(companyId).ProrationBasis;
+
+            // Divisor per basis. GetWorkableDays is only needed for the WorkingDays basis (a per-employee
+            // query), so the default path (MonthDays) stays a pure calendar calculation — exactly today.
+            int workableCalendar = basis == ProrationBasis.WorkingDays ? GetWorkableDays(employeeId, year, month) : 0;
+            decimal divisor = Denominator(basis, year, month, workableCalendar);
+
+            bool hasAttendance = attendanceEnabled && summary != null && summary.RecordedDays > 0m;
+            decimal deduct = hasAttendance ? summary.DeductibleAbsenceDays : 0m;
+            decimal workedDays = Math.Max(0m, divisor - deduct);
+
+            return new ProrationResult
+            {
+                WorkedDays = workedDays,
+                WorkableDays = divisor,
+                Basis = basis,
+                Divisor = divisor,
+                DeductibleDays = deduct,
+                HasAttendance = hasAttendance
+            };
+        }
+
         private HashSet<DateTime> HolidaysForMonth(long companyId, int year, int month)
         {
             var set = new HashSet<DateTime>();
