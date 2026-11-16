@@ -77,6 +77,7 @@ namespace OptiPaie.Desktop.ViewModels.Attendance
             EmployeeDetailCommand = new RelayCommand(p => OpenEmployeeDetail(p as MatrixRowViewModel));
             MonthSummaryCommand = new RelayCommand(OpenMonthSummary);
             SettingsCommand = new RelayCommand(OpenSettings);
+            WorkCalendarCommand = new RelayCommand(OpenWorkCalendar);
             RefreshCommand = new RelayCommand(Load);
             TodayCommand = new RelayCommand(GoToday);
         }
@@ -167,6 +168,7 @@ namespace OptiPaie.Desktop.ViewModels.Attendance
         public ICommand EmployeeDetailCommand { get; }
         public ICommand MonthSummaryCommand { get; }
         public ICommand SettingsCommand { get; }
+        public ICommand WorkCalendarCommand { get; }
         public ICommand RefreshCommand { get; }
         public ICommand TodayCommand { get; }
 
@@ -563,6 +565,16 @@ namespace OptiPaie.Desktop.ViewModels.Attendance
             App.ApplyFlowDirection(window);
             vm.RequestClose = ok => window.DialogResult = ok;
             if (window.ShowDialog() == true) Load();
+        }
+
+        /// <summary>Opens the per-company work calendar (weekly pattern + proration basis). Future runs only.</summary>
+        private void OpenWorkCalendar()
+        {
+            var vm = new OptiPaie.Desktop.ViewModels.WorkCalendarViewModel(_services);
+            var window = new OptiPaie.Desktop.Views.WorkCalendarWindow { DataContext = vm, Owner = Application.Current.MainWindow };
+            App.ApplyFlowDirection(window);
+            vm.RequestClose = ok => { try { window.DialogResult = ok; } catch { window.Close(); } };
+            window.ShowDialog();
         }
 
         private void GoToday()

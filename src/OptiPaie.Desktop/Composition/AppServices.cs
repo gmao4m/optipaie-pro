@@ -53,7 +53,8 @@ namespace OptiPaie.Desktop.Composition
             IAtsDrtDocumentService atsDrtDocuments,
             ICustomerAccountService customerAccount,
             IActivationState activationState,
-            IPayrollExposureService payrollExposure)
+            IPayrollExposureService payrollExposure,
+            IWorkCalendarService workCalendar)
         {
             Configuration = configuration;
             Logger = logger;
@@ -91,6 +92,7 @@ namespace OptiPaie.Desktop.Composition
             Users = users;
             CnasDeclarations = cnasDeclarations;
             PayrollExposure = payrollExposure;
+            WorkCalendar = workCalendar;
             AtsDrtDocuments = atsDrtDocuments;
             CustomerAccount = customerAccount;
             ActivationState = activationState;
@@ -230,6 +232,7 @@ namespace OptiPaie.Desktop.Composition
         /// <summary>CNAS declarations (DAC/DAS) — read-only over persisted payroll, company-scoped.</summary>
         public ICnasDeclarationService CnasDeclarations { get; }
         public IPayrollExposureService PayrollExposure { get; }
+        public IWorkCalendarService WorkCalendar { get; }
 
         /// <summary>ATS/DRT official attestations — fills the CNAS .docx templates from employee files.</summary>
         public IAtsDrtDocumentService AtsDrtDocuments { get; }

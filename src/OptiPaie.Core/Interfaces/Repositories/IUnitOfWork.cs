@@ -56,6 +56,7 @@ namespace OptiPaie.Core.Interfaces.Repositories
 
         /// <summary>Public-holidays calendar (national + per-company).</summary>
         IHolidayRepository Holidays { get; }
+        IWorkCalendarRepository WorkCalendar { get; }
 
         /// <summary>Loan repository (premium module, shares Employees).</summary>
         ILoanRepository Loans { get; }

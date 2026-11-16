@@ -411,6 +411,7 @@ namespace OptiPaie.Tests
             public ILeaveRepository Leave => _inner.Leave;
             public ILeaveTypeRepository LeaveTypes => _inner.LeaveTypes;
             public IHolidayRepository Holidays => _inner.Holidays;
+            public IWorkCalendarRepository WorkCalendar => _inner.WorkCalendar;
             public ILoanRepository Loans => _inner.Loans;
             public IContractRepository Contracts => _inner.Contracts;
             public IPerformanceRepository Performance => _inner.Performance;

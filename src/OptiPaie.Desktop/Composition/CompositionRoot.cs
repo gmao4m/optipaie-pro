@@ -182,6 +182,10 @@ namespace OptiPaie.Desktop.Composition
             // PART 3 — read-only exposure diagnostic (exempt allowances / unenforced ceilings).
             var payrollExposureService = new PayrollExposureService(unitOfWorkFactory);
 
+            // Commit 2 — per-company work calendar (weekly pattern, holidays reuse, proration basis).
+            var holidayService = new HolidayService(unitOfWorkFactory, access);
+            var workCalendarService = new WorkCalendarService(unitOfWorkFactory, holidayService, access);
+
             AppServices appServices = new AppServices(
                 configuration,
                 logger,
@@ -221,11 +225,12 @@ namespace OptiPaie.Desktop.Composition
                 atsDrtDocumentService,
                 customerAccount,
                 activationState,
-                payrollExposureService);
+                payrollExposureService,
+                workCalendarService);
 
             // Configurable-types + holidays services (post-construction, like leaveService.Audit above).
             appServices.LeaveTypes = new LeaveTypeService(unitOfWorkFactory, access);
-            appServices.Holidays = new HolidayService(unitOfWorkFactory, access);
+            appServices.Holidays = holidayService;
 
             // Bind the service-layer authorization choke point to the real session now that it exists.
             // Enforcement activates only while the login gate is on AND a user exists; the signed-in

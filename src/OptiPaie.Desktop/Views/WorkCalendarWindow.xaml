@@ -1,0 +1,67 @@
+<Window x:Class="OptiPaie.Desktop.Views.WorkCalendarWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Calendrier de travail  ·  تقويم العمل" Height="560" Width="560"
+        ResizeMode="NoResize" WindowStartupLocation="CenterOwner" Background="{DynamicResource Canvas}">
+    <Grid Margin="24,20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0">
+            <TextBlock Style="{StaticResource H2}" Text="Calendrier de travail" />
+            <TextBlock Style="{StaticResource Caption}" Margin="0,4,0,0" TextWrapping="Wrap"
+                       Text="Jours de travail de la semaine, base de proratisation d'un mois partiel, et travail un jour de repos. Les jours fériés se gèrent dans « Jours fériés »." />
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,16,0,0" Padding="0,0,6,0">
+            <StackPanel>
+                <!-- Weekly pattern -->
+                <TextBlock Style="{StaticResource Caption}" FontWeight="SemiBold" Text="Jours ouvrés de la semaine  ·  أيام العمل في الأسبوع" />
+                <WrapPanel Orientation="Horizontal" Margin="0,6,0,0">
+                    <CheckBox Content="Lun" Margin="0,0,12,6" IsChecked="{Binding WorkMon}" />
+                    <CheckBox Content="Mar" Margin="0,0,12,6" IsChecked="{Binding WorkTue}" />
+                    <CheckBox Content="Mer" Margin="0,0,12,6" IsChecked="{Binding WorkWed}" />
+                    <CheckBox Content="Jeu" Margin="0,0,12,6" IsChecked="{Binding WorkThu}" />
+                    <CheckBox Content="Ven" Margin="0,0,12,6" IsChecked="{Binding WorkFri}" />
+                    <CheckBox Content="Sam" Margin="0,0,12,6" IsChecked="{Binding WorkSat}" />
+                    <CheckBox Content="Dim" Margin="0,0,12,6" IsChecked="{Binding WorkSun}" />
+                </WrapPanel>
+
+                <!-- Proration basis -->
+                <TextBlock Style="{StaticResource Caption}" FontWeight="SemiBold" Margin="0,16,0,0"
+                           Text="Base de proratisation d'un mois partiel  ·  أساس احتساب الشهر الجزئي" />
+                <RadioButton GroupName="Basis" Margin="0,8,0,0" IsChecked="{Binding IsMonthDays}" Content="{Binding MonthDaysLabel}" />
+                <RadioButton GroupName="Basis" Margin="0,6,0,0" IsChecked="{Binding IsFixedThirtieths}" Content="{Binding FixedThirtiethsLabel}" />
+                <RadioButton GroupName="Basis" Margin="0,6,0,0" IsChecked="{Binding IsWorkingDays}" Content="{Binding WorkingDaysLabel}" />
+
+                <Border Background="{DynamicResource SurfaceMuted}" BorderBrush="{DynamicResource BorderStrong}" BorderThickness="1"
+                        CornerRadius="8" Padding="12,9" Margin="0,10,0,0">
+                    <TextBlock Style="{StaticResource Caption}" TextWrapping="Wrap" Text="{Binding FutureOnlyNote}" />
+                </Border>
+
+                <!-- Live worked example -->
+                <Border Background="{DynamicResource SurfaceMuted}" BorderBrush="{DynamicResource Border}" BorderThickness="1"
+                        CornerRadius="8" Padding="12,10" Margin="0,12,0,0"
+                        Visibility="{Binding ExampleText, Converter={StaticResource NonEmptyToVis}}">
+                    <TextBlock FontFamily="Consolas" FontSize="12" TextWrapping="Wrap"
+                               Foreground="{DynamicResource TextSecondary}" Text="{Binding ExampleText}" />
+                </Border>
+
+                <!-- Rest-day rate + half day -->
+                <TextBlock Style="{StaticResource Caption}" FontWeight="SemiBold" Margin="0,16,0,0" Text="Travail un jour de repos / férié — multiplicateur  ·  معامل العمل يوم راحة/عطلة" />
+                <TextBox Style="{StaticResource AppTextBox}" Width="120" HorizontalAlignment="Left" Margin="0,4,0,0" Text="{Binding RestDayRate, UpdateSourceTrigger=PropertyChanged}" />
+
+                <TextBlock Style="{StaticResource Caption}" FontWeight="SemiBold" Margin="0,12,0,0" Text="Heures d'une demi-journée  ·  ساعات نصف اليوم" />
+                <TextBox Style="{StaticResource AppTextBox}" Width="120" HorizontalAlignment="Left" Margin="0,4,0,0" Text="{Binding HalfDayHours, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+        </ScrollViewer>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+            <Button Style="{StaticResource SecondaryButton}" Content="Annuler" Command="{Binding CancelCommand}" />
+            <Button Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Content="Enregistrer" Command="{Binding SaveCommand}" />
+        </StackPanel>
+    </Grid>
+</Window>

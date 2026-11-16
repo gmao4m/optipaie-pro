@@ -33,6 +33,7 @@ namespace OptiPaie.Data.Context
         private ILeaveRepository _leave;
         private ILeaveTypeRepository _leaveTypes;
         private IHolidayRepository _holidays;
+        private IWorkCalendarRepository _workCalendar;
         private ILoanRepository _loans;
         private IContractRepository _contracts;
         private IPerformanceRepository _performance;
@@ -72,6 +73,7 @@ namespace OptiPaie.Data.Context
         public ILeaveRepository Leave => _leave ?? (_leave = new LeaveRepository(this));
         public ILeaveTypeRepository LeaveTypes => _leaveTypes ?? (_leaveTypes = new LeaveTypeRepository(this));
         public IHolidayRepository Holidays => _holidays ?? (_holidays = new HolidayRepository(this));
+        public IWorkCalendarRepository WorkCalendar => _workCalendar ?? (_workCalendar = new WorkCalendarRepository(this));
 
         public ILoanRepository Loans => _loans ?? (_loans = new LoanRepository(this));
 

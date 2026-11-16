@@ -137,6 +137,7 @@
                         <MenuItem Header="{loc:Loc Common_Refresh}" Command="{Binding RefreshCommand}" />
                         <Separator />
                         <MenuItem Header="{loc:Loc Shell_Nav_Settings}" Command="{Binding SettingsCommand}" />
+                        <MenuItem Header="Calendrier de travail  ·  تقويم العمل" Command="{Binding WorkCalendarCommand}" />
                     </MenuItem>
                 </Menu>
             </WrapPanel>
