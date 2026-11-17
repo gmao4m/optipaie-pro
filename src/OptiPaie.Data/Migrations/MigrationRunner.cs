@@ -33,11 +33,23 @@ namespace OptiPaie.Data.Migrations
         /// <returns>The number of migrations applied.</returns>
         public int Run()
         {
+            return Run(int.MaxValue);
+        }
+
+        /// <summary>
+        /// Applies pending migrations whose version is ≤ <paramref name="throughVersionInclusive"/>,
+        /// in ascending order. <see cref="Run()"/> passes <see cref="int.MaxValue"/> to apply them all.
+        /// Stopping at a chosen version lets an upgrade be exercised on a database frozen at an earlier
+        /// (e.g. published) schema, then stepped forward — the automated proof that a migration
+        /// preserves existing customer data. Purely additive: the all-versions behaviour is unchanged.
+        /// </summary>
+        public int Run(int throughVersionInclusive)
+        {
             EnsureMigrationsTable();
 
             HashSet<int> applied = GetAppliedVersions();
             List<MigrationScript> pending = LoadEmbeddedScripts()
-                .Where(script => !applied.Contains(script.Version))
+                .Where(script => !applied.Contains(script.Version) && script.Version <= throughVersionInclusive)
                 .OrderBy(script => script.Version)
                 .ToList();
 
