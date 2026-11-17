@@ -1052,6 +1052,19 @@
   <data name="Att_WorkingDays" xml:space="preserve"><value>Jours ouvrés</value></data>
   <data name="Att_StatusLabel" xml:space="preserve"><value>Statut :</value></data>
   <data name="Att_St_Present" xml:space="preserve"><value>Présent</value></data>
+  <data name="Att_Today_Title" xml:space="preserve"><value>Présence du jour</value></data>
+  <data name="Att_Today_Subtitle" xml:space="preserve"><value>Tout le monde est présent par défaut — ne touchez que les exceptions. L'enregistrement est automatique.</value></data>
+  <data name="Att_Today_RestDay" xml:space="preserve"><value>Jour de repos — rien à saisir.</value></data>
+  <data name="Att_Today_Holiday" xml:space="preserve"><value>Jour férié</value></data>
+  <data name="Att_Today_Present" xml:space="preserve"><value>Présents</value></data>
+  <data name="Att_Today_Absent" xml:space="preserve"><value>Absents</value></data>
+  <data name="Att_Today_Leave" xml:space="preserve"><value>Congé</value></data>
+  <data name="Att_Today_Half" xml:space="preserve"><value>½ journée</value></data>
+  <data name="Att_Today_Empty" xml:space="preserve"><value>Aucun employé dans cette entreprise. Ajoutez un employé pour commencer.</value></data>
+  <data name="Att_Today_MonthSection" xml:space="preserve"><value>Révision du mois (matrice)</value></data>
+  <data name="Att_Today_Reports" xml:space="preserve"><value>Rapports</value></data>
+  <data name="Att_Today_PrevDay" xml:space="preserve"><value>Jour précédent</value></data>
+  <data name="Att_Today_NextDay" xml:space="preserve"><value>Jour suivant</value></data>
   <data name="Att_St_Absent" xml:space="preserve"><value>Absent</value></data>
   <data name="Att_St_Late" xml:space="preserve"><value>Retard</value></data>
   <data name="Att_St_Mission" xml:space="preserve"><value>Mission</value></data>

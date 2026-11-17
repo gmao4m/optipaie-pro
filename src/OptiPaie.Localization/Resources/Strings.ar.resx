@@ -1052,6 +1052,19 @@ Les colonnes ne correspondent pas au modèle. Colonnes obligatoires manquantes :
   <data name="Att_WorkingDays" xml:space="preserve"><value>أيام العمل</value></data>
   <data name="Att_StatusLabel" xml:space="preserve"><value>الحالة:</value></data>
   <data name="Att_St_Present" xml:space="preserve"><value>حاضر</value></data>
+  <data name="Att_Today_Title" xml:space="preserve"><value>حضور اليوم</value></data>
+  <data name="Att_Today_Subtitle" xml:space="preserve"><value>الجميع حاضر افتراضيًا — لا تلمس إلّا الاستثناءات. الحفظ تلقائي.</value></data>
+  <data name="Att_Today_RestDay" xml:space="preserve"><value>يوم راحة — لا شيء لإدخاله.</value></data>
+  <data name="Att_Today_Holiday" xml:space="preserve"><value>عطلة رسمية</value></data>
+  <data name="Att_Today_Present" xml:space="preserve"><value>حاضرون</value></data>
+  <data name="Att_Today_Absent" xml:space="preserve"><value>غائبون</value></data>
+  <data name="Att_Today_Leave" xml:space="preserve"><value>عطلة</value></data>
+  <data name="Att_Today_Half" xml:space="preserve"><value>نصف يوم</value></data>
+  <data name="Att_Today_Empty" xml:space="preserve"><value>لا يوجد موظفون في هذه المؤسسة. أضف موظفًا للبدء.</value></data>
+  <data name="Att_Today_MonthSection" xml:space="preserve"><value>مراجعة الشهر (المصفوفة)</value></data>
+  <data name="Att_Today_Reports" xml:space="preserve"><value>التقارير</value></data>
+  <data name="Att_Today_PrevDay" xml:space="preserve"><value>اليوم السابق</value></data>
+  <data name="Att_Today_NextDay" xml:space="preserve"><value>اليوم التالي</value></data>
   <data name="Att_St_Absent" xml:space="preserve"><value>غائب</value></data>
   <data name="Att_St_Late" xml:space="preserve"><value>متأخر</value></data>
   <data name="Att_St_Mission" xml:space="preserve"><value>مهمة</value></data>

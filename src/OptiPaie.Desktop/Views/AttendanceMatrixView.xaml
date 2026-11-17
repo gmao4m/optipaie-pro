@@ -15,7 +15,7 @@
             <Setter Property="FontSize" Value="18" />
             <Setter Property="FontWeight" Value="SemiBold" />
         </Style>
-        <!-- Status brush button: highlights when selected -->
+        <!-- Status brush button: highlights when selected (month palette) -->
         <Style x:Key="BrushButton" TargetType="Button">
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="Background" Value="Transparent" />
@@ -39,125 +39,231 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <!-- Daily entry chip: one click sets the status; the active one is ringed. -->
+        <Style x:Key="DailyChip" TargetType="Button">
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Margin" Value="0,0,6,0" />
+            <Setter Property="ToolTip" Value="{Binding Label}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="b" CornerRadius="7" BorderBrush="{DynamicResource BorderStrong}" BorderThickness="1"
+                                Background="{Binding Fill}" MinWidth="34" Height="30" Padding="8,0">
+                            <TextBlock Text="{Binding Letter}" FontSize="13" FontWeight="SemiBold" Foreground="#1B2430"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <DataTrigger Binding="{Binding IsActive}" Value="True">
+                                <Setter TargetName="b" Property="BorderBrush" Value="{DynamicResource TextPrimary}" />
+                                <Setter TargetName="b" Property="BorderThickness" Value="2.5" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsActive}" Value="False">
+                                <Setter TargetName="b" Property="Opacity" Value="0.55" />
+                            </DataTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </UserControl.Resources>
 
     <Grid Margin="18,14">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <!-- Title + filters -->
+        <!-- ============ TODAY (primary) ============ -->
         <Grid Grid.Row="0">
             <StackPanel HorizontalAlignment="Left">
-                <TextBlock Style="{StaticResource H1}" Text="{loc:Loc Dashboard_AttendanceMatrix}" />
-                <TextBlock Style="{StaticResource Caption}" Margin="0,4,0,0"
-                           Text="{loc:Loc Att_Subtitle}" />
+                <TextBlock Style="{StaticResource H1}" Text="{loc:Loc Att_Today_Title}" />
+                <TextBlock Style="{StaticResource Caption}" Margin="0,4,0,0" Text="{loc:Loc Att_Today_Subtitle}" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
+                <Button Style="{StaticResource SecondaryButton}" Height="34" Padding="13,0" Content="&lt;" FontWeight="Bold" FontSize="14"
+                        ToolTip="{loc:Loc Att_Today_PrevDay}" Command="{Binding Daily.PrevDayCommand}" />
+                <Border Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="1"
+                        CornerRadius="8" Padding="14,0" Margin="6,0" MinWidth="230">
+                    <TextBlock Text="{Binding Daily.DateText}" FontSize="15" FontWeight="SemiBold"
+                               VerticalAlignment="Center" HorizontalAlignment="Center" />
+                </Border>
+                <Button Style="{StaticResource SecondaryButton}" Height="34" Padding="13,0" Content="&gt;" FontWeight="Bold" FontSize="14"
+                        ToolTip="{loc:Loc Att_Today_NextDay}" Command="{Binding Daily.NextDayCommand}" />
+                <DatePicker SelectedDate="{Binding Daily.Date, Mode=TwoWay}" Height="34" Width="46" Margin="6,0,0,0" VerticalContentAlignment="Center" />
+                <Button Style="{StaticResource SecondaryButton}" Height="34" Margin="6,0,0,0"
+                        Content="{loc:Loc Att_CurrentMonth}" Command="{Binding Daily.TodayCommand}" />
+                <Button Style="{StaticResource PrimaryButton}" Height="34" Margin="10,0,0,0"
+                        Content="{loc:Loc Att_Today_Reports}" Command="{Binding ReportsCommand}" />
             </StackPanel>
         </Grid>
 
-        <!-- Filter bar -->
-        <Border Grid.Row="1" Style="{StaticResource Card}" Padding="12,10" Margin="0,14,0,0">
-            <WrapPanel Orientation="Horizontal">
-                <!-- Company selection is global (header selector) -->
-
-                <ComboBox Style="{StaticResource AppComboBox}" Width="180" Height="32" Margin="0,0,8,0"
-                          ItemsSource="{Binding Departments}" SelectedItem="{Binding SelectedDepartment}" />
-                <ComboBox Style="{StaticResource AppComboBox}" Width="120" Height="32" Margin="0,0,8,0"
-                          ItemsSource="{Binding Months}" SelectedValue="{Binding SelectedMonth}"
-                          SelectedValuePath="Value" DisplayMemberPath="Label" />
-                <ComboBox Style="{StaticResource AppComboBox}" Width="90" Height="32" Margin="0,0,8,0"
-                          ItemsSource="{Binding Years}" SelectedItem="{Binding SelectedYear}" />
-                <TextBox Style="{StaticResource AppTextBox}" Width="180" Height="32" Margin="0,0,8,0"
-                         Text="{Binding Search, UpdateSourceTrigger=PropertyChanged}" />
-                <Button Style="{StaticResource SecondaryButton}" Height="32" Margin="0,0,8,0" Content="{loc:Loc Att_CurrentMonth}" Command="{Binding TodayCommand}" />
-                <Button Style="{StaticResource SecondaryButton}" Height="32" Content="Calendrier de travail  ·  تقويم العمل" Command="{Binding WorkCalendarCommand}" />
-            </WrapPanel>
-        </Border>
-
-        <!-- KPI strip -->
-        <WrapPanel Grid.Row="2" Orientation="Horizontal" Margin="0,12,0,0">
-            <Border Style="{StaticResource Kpi}">
-                <StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Att_RatePresence}" />
-                    <TextBlock Style="{StaticResource KpiValue}" Foreground="{DynamicResource Salary}" Text="{Binding KpiAttendance}" /></StackPanel>
+        <!-- Live summary + rest-day banner -->
+        <Grid Grid.Row="1" Margin="0,12,0,0">
+            <Border Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="1"
+                    CornerRadius="10" Padding="16,11" Visibility="{Binding Daily.IsRestDay, Converter={StaticResource InverseBoolToVis}}">
+                <TextBlock Text="{Binding Daily.SummaryLine}" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center" />
             </Border>
-            <Border Style="{StaticResource Kpi}">
-                <StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Att_RateAbsence}" />
-                    <TextBlock Style="{StaticResource KpiValue}" Foreground="{DynamicResource Deduction}" Text="{Binding KpiAbsence}" /></StackPanel>
+            <Border Background="{DynamicResource SurfaceMuted}" BorderBrush="{DynamicResource Warning}" BorderThickness="1.5"
+                    CornerRadius="10" Padding="16,11" Visibility="{Binding Daily.IsRestDay, Converter={StaticResource BoolToVis}}">
+                <TextBlock Text="{Binding Daily.RestDayText}" FontSize="15" FontWeight="SemiBold"
+                           Foreground="{DynamicResource Warning}" VerticalAlignment="Center" />
             </Border>
-            <Border Style="{StaticResource Kpi}">
-                <StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Att_RateLate}" />
-                    <TextBlock Style="{StaticResource KpiValue}" Foreground="{DynamicResource Warning}" Text="{Binding KpiLate}" /></StackPanel>
-            </Border>
-            <Border Style="{StaticResource Kpi}">
-                <StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Att_WorkingDays}" />
-                    <TextBlock Style="{StaticResource KpiValue}" Text="{Binding KpiWorkingDays}" /></StackPanel>
-            </Border>
-            <!-- The "today" figures (present/on-leave/on-mission today) live on the Dashboard;
-                 this is a whole-MONTH editing screen, so it shows the month's rates only. -->
-            <Border Style="{StaticResource Kpi}">
-                <StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_Headcount}" />
-                    <TextBlock Style="{StaticResource KpiValue}" Text="{Binding KpiEmployees}" /></StackPanel>
-            </Border>
-        </WrapPanel>
-
-        <!-- Palette + bulk toolbar -->
-        <Border Grid.Row="3" Style="{StaticResource Card}" Padding="12,10" Margin="0,12,0,0">
-            <WrapPanel Orientation="Horizontal" VerticalAlignment="Center">
-                <TextBlock Text="{loc:Loc Att_StatusLabel}" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{DynamicResource TextSecondary}" FontWeight="SemiBold" />
-                <ItemsControl ItemsSource="{Binding Palette}" VerticalAlignment="Center">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Button Style="{StaticResource BrushButton}"
-                                    Command="{Binding DataContext.SelectBrushCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                    CommandParameter="{Binding}" />
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-                <Border Width="1" Background="{DynamicResource Border}" Margin="10,2" />
-                <TextBlock VerticalAlignment="Center" FontSize="11.5" Foreground="{DynamicResource TextMuted}"
-                           Text="Choisissez un statut puis cliquez un jour · اختر حالة ثمّ انقر يوماً. Double-clic sur un nom = son mois." />
-                <Border Width="1" Background="{DynamicResource Border}" Margin="10,2" />
-                <Button Style="{StaticResource SecondaryButton}" Height="32" Content="{loc:Loc Shell_Nav_Settings}" Command="{Binding SettingsCommand}" />
-            </WrapPanel>
-        </Border>
-
-        <!-- Matrix -->
-        <DataGrid x:Name="Grid" Grid.Row="4" Margin="0,12,0,0" ItemsSource="{Binding Rows}"
-                  AutoGenerateColumns="False" HeadersVisibility="Column" CanUserAddRows="False" CanUserDeleteRows="False"
-                  CanUserReorderColumns="False" CanUserResizeRows="False" SelectionMode="Single" IsReadOnly="True"
-                  EnableRowVirtualization="True" EnableColumnVirtualization="True"
-                  VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"
-                  VirtualizingPanel.ScrollUnit="Pixel" ColumnWidth="Auto"
-                  RowHeight="28" FontFamily="{StaticResource AppFont}" FontSize="12" Background="{DynamicResource Surface}"
-                  RowBackground="{DynamicResource Surface}" AlternatingRowBackground="{DynamicResource SurfaceMuted}"
-                  BorderBrush="{DynamicResource Border}" BorderThickness="1"
-                  HorizontalGridLinesBrush="{DynamicResource Border}" VerticalGridLinesBrush="{DynamicResource Border}"
-                  ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.CanContentScroll="True" />
-
-        <!-- Legend + status -->
-        <Grid Grid.Row="5" Margin="0,10,0,0">
-            <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Center" HorizontalAlignment="Left" FlowDirection="LeftToRight" Text="{Binding StatusMessage}" />
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <ItemsControl ItemsSource="{Binding Palette}">
-                    <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <StackPanel Orientation="Horizontal" Margin="0,0,10,0" VerticalAlignment="Center">
-                                <Border Width="14" Height="14" CornerRadius="3" Background="{Binding Fill}" BorderBrush="{DynamicResource BorderStrong}" BorderThickness="1" />
-                                <TextBlock Text="{Binding Label}" Margin="4,0,0,0" FontSize="11" Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Center" />
-                            </StackPanel>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </StackPanel>
         </Grid>
+
+        <!-- Daily list -->
+        <Border Grid.Row="2" Style="{StaticResource Card}" Margin="0,12,0,0" Padding="0">
+            <Grid>
+                <ScrollViewer VerticalScrollBarVisibility="Auto"
+                              Visibility="{Binding Daily.HasEmployees, Converter={StaticResource BoolToVis}}">
+                    <ItemsControl ItemsSource="{Binding Daily.Rows}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border BorderBrush="{DynamicResource Border}" BorderThickness="0,0,0,1" Padding="16,8">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Name}" FontSize="13.5" FontWeight="SemiBold" />
+                                            <TextBlock Text="{Binding Department}" FontSize="11" Foreground="{DynamicResource TextMuted}" />
+                                        </StackPanel>
+                                        <ItemsControl Grid.Column="1" ItemsSource="{Binding Chips}" VerticalAlignment="Center">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Button Style="{StaticResource DailyChip}" Command="{Binding PickCommand}" />
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+                <TextBlock Style="{StaticResource EmptyStateMessage}" Text="{loc:Loc Att_Today_Empty}"
+                           Visibility="{Binding Daily.HasEmployees, Converter={StaticResource InverseBoolToVis}}" />
+            </Grid>
+        </Border>
+
+        <!-- Feedback -->
+        <TextBlock Grid.Row="3" Margin="2,8,0,0" Style="{StaticResource Caption}" FlowDirection="LeftToRight"
+                   HorizontalAlignment="Left" Text="{Binding Daily.StatusMessage}" />
+
+        <!-- ============ THE MONTH (secondary — review & correct) ============ -->
+        <Expander Grid.Row="4" Margin="0,12,0,0" IsExpanded="False" Header="{loc:Loc Att_Today_MonthSection}"
+                  FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondary}">
+            <Grid Margin="0,10,0,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="520" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <!-- Filter bar -->
+                <Border Grid.Row="0" Style="{StaticResource Card}" Padding="12,10">
+                    <WrapPanel Orientation="Horizontal">
+                        <ComboBox Style="{StaticResource AppComboBox}" Width="180" Height="32" Margin="0,0,8,0"
+                                  ItemsSource="{Binding Departments}" SelectedItem="{Binding SelectedDepartment}" />
+                        <ComboBox Style="{StaticResource AppComboBox}" Width="120" Height="32" Margin="0,0,8,0"
+                                  ItemsSource="{Binding Months}" SelectedValue="{Binding SelectedMonth}"
+                                  SelectedValuePath="Value" DisplayMemberPath="Label" />
+                        <ComboBox Style="{StaticResource AppComboBox}" Width="90" Height="32" Margin="0,0,8,0"
+                                  ItemsSource="{Binding Years}" SelectedItem="{Binding SelectedYear}" />
+                        <TextBox Style="{StaticResource AppTextBox}" Width="180" Height="32" Margin="0,0,8,0"
+                                 Text="{Binding Search, UpdateSourceTrigger=PropertyChanged}" />
+                        <Button Style="{StaticResource SecondaryButton}" Height="32" Margin="0,0,8,0" Content="{loc:Loc Att_CurrentMonth}" Command="{Binding TodayCommand}" />
+                        <Button Style="{StaticResource SecondaryButton}" Height="32" Content="Calendrier de travail  ·  تقويم العمل" Command="{Binding WorkCalendarCommand}" />
+                    </WrapPanel>
+                </Border>
+
+                <!-- KPI strip -->
+                <WrapPanel Grid.Row="1" Orientation="Horizontal" Margin="0,12,0,0">
+                    <Border Style="{StaticResource Kpi}">
+                        <StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Att_RatePresence}" />
+                            <TextBlock Style="{StaticResource KpiValue}" Foreground="{DynamicResource Salary}" Text="{Binding KpiAttendance}" /></StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource Kpi}">
+                        <StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Att_RateAbsence}" />
+                            <TextBlock Style="{StaticResource KpiValue}" Foreground="{DynamicResource Deduction}" Text="{Binding KpiAbsence}" /></StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource Kpi}">
+                        <StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Att_RateLate}" />
+                            <TextBlock Style="{StaticResource KpiValue}" Foreground="{DynamicResource Warning}" Text="{Binding KpiLate}" /></StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource Kpi}">
+                        <StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Att_WorkingDays}" />
+                            <TextBlock Style="{StaticResource KpiValue}" Text="{Binding KpiWorkingDays}" /></StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource Kpi}">
+                        <StackPanel><TextBlock Style="{StaticResource Caption}" Text="{loc:Loc Dashboard_Kpi_Headcount}" />
+                            <TextBlock Style="{StaticResource KpiValue}" Text="{Binding KpiEmployees}" /></StackPanel>
+                    </Border>
+                </WrapPanel>
+
+                <!-- Palette + bulk toolbar -->
+                <Border Grid.Row="2" Style="{StaticResource Card}" Padding="12,10" Margin="0,12,0,0">
+                    <WrapPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="{loc:Loc Att_StatusLabel}" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{DynamicResource TextSecondary}" FontWeight="SemiBold" />
+                        <ItemsControl ItemsSource="{Binding Palette}" VerticalAlignment="Center">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Style="{StaticResource BrushButton}"
+                                            Command="{Binding DataContext.SelectBrushCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                            CommandParameter="{Binding}" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <Border Width="1" Background="{DynamicResource Border}" Margin="10,2" />
+                        <TextBlock VerticalAlignment="Center" FontSize="11.5" Foreground="{DynamicResource TextMuted}"
+                                   Text="Choisissez un statut puis cliquez un jour · اختر حالة ثمّ انقر يوماً. Double-clic sur un nom = son mois." />
+                        <Border Width="1" Background="{DynamicResource Border}" Margin="10,2" />
+                        <Button Style="{StaticResource SecondaryButton}" Height="32" Content="{loc:Loc Shell_Nav_Settings}" Command="{Binding SettingsCommand}" />
+                    </WrapPanel>
+                </Border>
+
+                <!-- Matrix -->
+                <DataGrid x:Name="Grid" Grid.Row="3" Margin="0,12,0,0" ItemsSource="{Binding Rows}"
+                          AutoGenerateColumns="False" HeadersVisibility="Column" CanUserAddRows="False" CanUserDeleteRows="False"
+                          CanUserReorderColumns="False" CanUserResizeRows="False" SelectionMode="Single" IsReadOnly="True"
+                          EnableRowVirtualization="True" EnableColumnVirtualization="True"
+                          VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"
+                          VirtualizingPanel.ScrollUnit="Pixel" ColumnWidth="Auto"
+                          RowHeight="28" FontFamily="{StaticResource AppFont}" FontSize="12" Background="{DynamicResource Surface}"
+                          RowBackground="{DynamicResource Surface}" AlternatingRowBackground="{DynamicResource SurfaceMuted}"
+                          BorderBrush="{DynamicResource Border}" BorderThickness="1"
+                          HorizontalGridLinesBrush="{DynamicResource Border}" VerticalGridLinesBrush="{DynamicResource Border}"
+                          ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.CanContentScroll="True" />
+
+                <!-- Legend + status -->
+                <Grid Grid.Row="4" Margin="0,10,0,0">
+                    <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Center" HorizontalAlignment="Left" FlowDirection="LeftToRight" Text="{Binding StatusMessage}" />
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <ItemsControl ItemsSource="{Binding Palette}">
+                            <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,10,0" VerticalAlignment="Center">
+                                        <Border Width="14" Height="14" CornerRadius="3" Background="{Binding Fill}" BorderBrush="{DynamicResource BorderStrong}" BorderThickness="1" />
+                                        <TextBlock Text="{Binding Label}" Margin="4,0,0,0" FontSize="11" Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </Expander>
     </Grid>
 </UserControl>

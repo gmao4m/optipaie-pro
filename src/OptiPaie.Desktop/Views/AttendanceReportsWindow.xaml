@@ -1,0 +1,73 @@
+<Window x:Class="OptiPaie.Desktop.Views.AttendanceReportsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="clr-namespace:OptiPaie.Desktop.Localization"
+        Title="{loc:Loc Att_Today_Reports}" Width="560" Height="520"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize" ShowInTaskbar="False"
+        Background="{DynamicResource Canvas}">
+    <Window.Resources>
+        <Style x:Key="RepCard" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource Surface}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource Border}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="Padding" Value="16,12" />
+            <Setter Property="Margin" Value="0,0,0,12" />
+        </Style>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="0,0,0,1" Padding="24,16">
+            <StackPanel>
+                <TextBlock Style="{StaticResource H2}" Text="{loc:Loc Att_Today_Reports}" />
+                <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                    <ComboBox Style="{StaticResource AppComboBox}" Width="150" Height="32" Margin="0,0,8,0"
+                              ItemsSource="{Binding Months}" SelectedValue="{Binding SelectedMonth}"
+                              SelectedValuePath="Value" DisplayMemberPath="Label" />
+                    <ComboBox Style="{StaticResource AppComboBox}" Width="100" Height="32"
+                              ItemsSource="{Binding Years}" SelectedItem="{Binding SelectedYear}" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <StackPanel Grid.Row="1" Margin="24,18">
+            <Border Style="{StaticResource RepCard}">
+                <Grid>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Feuille de présence · ورقة الحضور" FontWeight="SemiBold" FontSize="13.5" />
+                        <TextBlock Text="Entreprise — employés × jours, une lettre par jour." Style="{StaticResource Caption}" Margin="0,3,0,0" />
+                    </StackPanel>
+                    <Button Style="{StaticResource PrimaryButton}" Height="34" HorizontalAlignment="Right" Content="PDF" Command="{Binding SheetCommand}" />
+                </Grid>
+            </Border>
+            <Border Style="{StaticResource RepCard}">
+                <Grid>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Récapitulatif par employé · ملخّص لكل موظف" FontWeight="SemiBold" FontSize="13.5" />
+                        <TextBlock Text="Jours dus, travaillés, absents, congé, demi, retards, retenue." Style="{StaticResource Caption}" Margin="0,3,0,0" />
+                    </StackPanel>
+                    <Button Style="{StaticResource PrimaryButton}" Height="34" HorizontalAlignment="Right" Content="PDF" Command="{Binding SummaryCommand}" />
+                </Grid>
+            </Border>
+            <Border Style="{StaticResource RepCard}">
+                <Grid>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Synthèse de la période · حوصلة الفترة" FontWeight="SemiBold" FontSize="13.5" />
+                        <TextBlock Text="Toute l'entreprise, totalisée." Style="{StaticResource Caption}" Margin="0,3,0,0" />
+                    </StackPanel>
+                    <Button Style="{StaticResource PrimaryButton}" Height="34" HorizontalAlignment="Right" Content="PDF" Command="{Binding PeriodCommand}" />
+                </Grid>
+            </Border>
+        </StackPanel>
+
+        <Border Grid.Row="2" Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="0,1,0,0" Padding="24,14">
+            <Button Style="{StaticResource SecondaryButton}" HorizontalAlignment="Right" Content="{loc:Loc Common_Close}"
+                    IsCancel="True" Click="Close_Click" />
+        </Border>
+    </Grid>
+</Window>

@@ -49,6 +49,8 @@ namespace OptiPaie.Desktop.ViewModels.Attendance
         public AttendanceMatrixViewModel(AppServices services)
         {
             _services = services;
+            Daily = new AttendanceDailyViewModel(services);
+            ReportsCommand = new RelayCommand(OpenReports);
 
             for (int m = 1; m <= 12; m++) Months.Add(new MonthOption(m, Fr.DateTimeFormat.GetMonthName(m)));
             for (int y = DateTime.Today.Year - 5; y <= DateTime.Today.Year + 1; y++) Years.Add(y);
@@ -162,12 +164,33 @@ namespace OptiPaie.Desktop.ViewModels.Attendance
         public ICommand RefreshCommand { get; }
         public ICommand TodayCommand { get; }
 
+        /// <summary>TODAY — the daily entry view shown above the month matrix (the primary surface).</summary>
+        public AttendanceDailyViewModel Daily { get; }
+
+        /// <summary>Opens the attendance reports (company sheet, per-employee summary, period totals).</summary>
+        public ICommand ReportsCommand { get; }
+
         public void OnActivated()
         {
             // The active company comes from the single global selector in the header.
             _selectedCompany = _services.CompanyContext.Active;
             Raise(nameof(SelectedCompany));
+            Daily.Date = DateTime.Today; // opens on today; also triggers Daily.Load()
+            Daily.Load();                // ensure load even if the date was already today
             Load();
+        }
+
+        private void OpenReports()
+        {
+            var vm = new OptiPaie.Desktop.ViewModels.AttendanceReportsViewModel(_services, _selectedYear, _selectedMonth);
+            var win = new OptiPaie.Desktop.Views.AttendanceReportsWindow
+            {
+                DataContext = vm,
+                Owner = System.Windows.Application.Current.MainWindow
+            };
+            OptiPaie.Desktop.App.ApplyFlowDirection(win);
+            vm.RequestClose = () => win.Close();
+            win.ShowDialog();
         }
 
         // ---------------------------------------------------------------- build
