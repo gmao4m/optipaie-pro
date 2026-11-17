@@ -92,8 +92,8 @@
         <Border Grid.Row="3" Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="0,1,0,0" Padding="22,12">
             <DockPanel>
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-                    <Button Content="{loc:Loc Common_Cancel}" Style="{StaticResource SecondaryButton}" Height="38" Margin="0,0,10,0" Command="{Binding CancelCommand}" />
-                    <Button Content="{loc:Loc Common_Save}" Style="{StaticResource PrimaryButton}" Height="38" MinWidth="120" Command="{Binding SaveCommand}" />
+                    <Button Content="{loc:Loc Common_Cancel}" Style="{StaticResource SecondaryButton}" Height="38" Margin="0,0,10,0" Command="{Binding CancelCommand}" IsCancel="True" />
+                    <Button Content="{loc:Loc Common_Save}" Style="{StaticResource PrimaryButton}" Height="38" MinWidth="120" Command="{Binding SaveCommand}" IsDefault="True" />
                 </StackPanel>
                 <TextBlock VerticalAlignment="Center" FontFamily="{StaticResource MonoFont}" Text="{Binding WeightSumText}"
                            Visibility="{Binding ShowWeights, Converter={StaticResource BoolToVis}}">

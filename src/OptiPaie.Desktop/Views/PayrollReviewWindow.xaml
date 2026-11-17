@@ -45,7 +45,7 @@
         </DataGrid>
 
         <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,14,0,0">
-            <Button Style="{StaticResource SecondaryButton}" Content="Annuler" Command="{Binding CancelCommand}" />
+            <Button Style="{StaticResource SecondaryButton}" Content="Annuler" Command="{Binding CancelCommand}" IsCancel="True" />
             <Button Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Content="Confirmer et émettre" Command="{Binding ConfirmCommand}" />
         </StackPanel>
     </Grid>
