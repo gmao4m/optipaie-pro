@@ -1071,6 +1071,21 @@ Les colonnes ne correspondent pas au modèle. Colonnes obligatoires manquantes :
   <data name="Att_St_Leave" xml:space="preserve"><value>عطلة مدفوعة</value></data>
   <data name="Att_St_Holiday" xml:space="preserve"><value>عطلة رسمية</value></data>
   <data name="Att_St_Rest" xml:space="preserve"><value>راحة / نهاية الأسبوع</value></data>
+  <data name="Att_St_Justified" xml:space="preserve"><value>غياب مبرَّر</value></data>
+  <data name="Att_St_Half" xml:space="preserve"><value>نصف يوم</value></data>
+  <data name="Att_St_RestWorked" xml:space="preserve"><value>عمل يوم راحة</value></data>
+  <data name="Att_Today_Legend" xml:space="preserve"><value>المفتاح</value></data>
+  <data name="Att_Today_More" xml:space="preserve"><value>حالات أخرى</value></data>
+  <data name="Employee_GroupSchedule" xml:space="preserve"><value>جدول العمل</value></data>
+  <data name="EmpSched_UseOwn" xml:space="preserve"><value>جدول مخصّص — يتجاوز تقويم المؤسسة</value></data>
+  <data name="EmpSched_Hint" xml:space="preserve"><value>افتراضيًا يتبع الموظف تقويم المؤسسة. فعّل الخيار لتحديد أيام عمله الخاصة (مثل حارس يعمل يوم الجمعة).</value></data>
+  <data name="Day_Mon" xml:space="preserve"><value>إثن</value></data>
+  <data name="Day_Tue" xml:space="preserve"><value>ثلا</value></data>
+  <data name="Day_Wed" xml:space="preserve"><value>أرب</value></data>
+  <data name="Day_Thu" xml:space="preserve"><value>خمي</value></data>
+  <data name="Day_Fri" xml:space="preserve"><value>جمع</value></data>
+  <data name="Day_Sat" xml:space="preserve"><value>سبت</value></data>
+  <data name="Day_Sun" xml:space="preserve"><value>أحد</value></data>
   <data name="Att_Erase" xml:space="preserve"><value>مسح</value></data>
   <data name="Att_Col_Department" xml:space="preserve"><value>القسم</value></data>
   <data name="Att_ApplyMonth" xml:space="preserve"><value>ملء الشهر (الموظفون المحددون)</value></data>

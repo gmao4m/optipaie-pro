@@ -39,11 +39,13 @@ namespace OptiPaie.Data.Repositories
                 "INSERT INTO Employees " +
                 "(CompanyId, LastNameFr, LastNameAr, FirstNameFr, FirstNameAr, Gender, Nss, NationalId, " +
                 " BirthDate, BirthPlace, HireDate, ExitDate, Category, Department, Poste, ContractType, MaritalStatus, Dependents, " +
-                " BaseSalary, PaymentMode, Rib, Address, IsActive, CreatedAtUtc, UpdatedAtUtc, IsDeleted) " +
+                " BaseSalary, PaymentMode, Rib, Address, IsActive, CreatedAtUtc, UpdatedAtUtc, IsDeleted, " +
+                " UsesOwnSchedule, SchedMon, SchedTue, SchedWed, SchedThu, SchedFri, SchedSat, SchedSun) " +
                 "VALUES " +
                 "(@CompanyId, @LastNameFr, @LastNameAr, @FirstNameFr, @FirstNameAr, @Gender, @Nss, @NationalId, " +
                 " @BirthDate, @BirthPlace, @HireDate, @ExitDate, @Category, @Department, @Poste, @ContractType, @MaritalStatus, @Dependents, " +
-                " @BaseSalary, @PaymentMode, @Rib, @Address, @IsActive, @CreatedAtUtc, @UpdatedAtUtc, @IsDeleted); " +
+                " @BaseSalary, @PaymentMode, @Rib, @Address, @IsActive, @CreatedAtUtc, @UpdatedAtUtc, @IsDeleted, " +
+                " @UsesOwnSchedule, @SchedMon, @SchedTue, @SchedWed, @SchedThu, @SchedFri, @SchedSat, @SchedSun); " +
                 "SELECT last_insert_rowid();";
 
             long id = Connection.ExecuteScalar<long>(sql, employee, Transaction);
@@ -66,7 +68,10 @@ namespace OptiPaie.Data.Repositories
                 "Category = @Category, Department = @Department, Poste = @Poste, ContractType = @ContractType, MaritalStatus = @MaritalStatus, " +
                 "Dependents = @Dependents, BaseSalary = @BaseSalary, " +
                 "PaymentMode = @PaymentMode, Rib = @Rib, Address = @Address, IsActive = @IsActive, UpdatedAtUtc = @UpdatedAtUtc, " +
-                "IsDeleted = @IsDeleted, RowVersion = RowVersion + 1 " +
+                "IsDeleted = @IsDeleted, " +
+                "UsesOwnSchedule = @UsesOwnSchedule, SchedMon = @SchedMon, SchedTue = @SchedTue, SchedWed = @SchedWed, " +
+                "SchedThu = @SchedThu, SchedFri = @SchedFri, SchedSat = @SchedSat, SchedSun = @SchedSun, " +
+                "RowVersion = RowVersion + 1 " +
                 "WHERE Id = @Id AND RowVersion = @RowVersion;";
 
             int rows = Connection.Execute(sql, employee, Transaction);

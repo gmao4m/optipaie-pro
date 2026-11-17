@@ -71,6 +71,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -100,8 +101,33 @@
             </StackPanel>
         </Grid>
 
+        <!-- Legend — always visible, every coloured status with its full name -->
+        <Border Grid.Row="1" Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="1"
+                CornerRadius="10" Padding="14,9" Margin="0,12,0,0">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="{loc:Loc Att_Today_Legend}" FontWeight="SemiBold" FontSize="12"
+                           Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Center" Margin="0,0,12,0" />
+                <ItemsControl ItemsSource="{Binding Daily.Legend}" VerticalAlignment="Center">
+                    <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,16,0" VerticalAlignment="Center">
+                                <Border Width="22" Height="22" CornerRadius="5" Background="{Binding Fill}"
+                                        BorderBrush="{DynamicResource BorderStrong}" BorderThickness="1">
+                                    <TextBlock Text="{Binding Letter}" FontSize="12" FontWeight="SemiBold" Foreground="#1B2430"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                                <TextBlock Text="{Binding Label}" Margin="6,0,0,0" FontSize="12"
+                                           Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </Border>
+
         <!-- Live summary + rest-day banner -->
-        <Grid Grid.Row="1" Margin="0,12,0,0">
+        <Grid Grid.Row="2" Margin="0,12,0,0">
             <Border Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Border}" BorderThickness="1"
                     CornerRadius="10" Padding="16,11" Visibility="{Binding Daily.IsRestDay, Converter={StaticResource InverseBoolToVis}}">
                 <TextBlock Text="{Binding Daily.SummaryLine}" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center" />
@@ -114,10 +140,11 @@
         </Grid>
 
         <!-- Daily list -->
-        <Border Grid.Row="2" Style="{StaticResource Card}" Margin="0,12,0,0" Padding="0">
+        <Border Grid.Row="3" Style="{StaticResource Card}" Margin="0,12,0,0" Padding="0"
+                Visibility="{Binding Daily.IsRestDay, Converter={StaticResource InverseBoolToVis}}">
             <Grid>
                 <ScrollViewer VerticalScrollBarVisibility="Auto"
-                              Visibility="{Binding Daily.HasEmployees, Converter={StaticResource BoolToVis}}">
+                              Visibility="{Binding Daily.HasRows, Converter={StaticResource BoolToVis}}">
                     <ItemsControl ItemsSource="{Binding Daily.Rows}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
@@ -131,16 +158,37 @@
                                             <TextBlock Text="{Binding Name}" FontSize="13.5" FontWeight="SemiBold" />
                                             <TextBlock Text="{Binding Department}" FontSize="11" Foreground="{DynamicResource TextMuted}" />
                                         </StackPanel>
-                                        <ItemsControl Grid.Column="1" ItemsSource="{Binding Chips}" VerticalAlignment="Center">
-                                            <ItemsControl.ItemsPanel>
-                                                <ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate>
-                                            </ItemsControl.ItemsPanel>
-                                            <ItemsControl.ItemTemplate>
-                                                <DataTemplate>
-                                                    <Button Style="{StaticResource DailyChip}" Command="{Binding PickCommand}" />
-                                                </DataTemplate>
-                                            </ItemsControl.ItemTemplate>
-                                        </ItemsControl>
+                                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                            <ItemsControl ItemsSource="{Binding PrimaryChips}" VerticalAlignment="Center">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Button Style="{StaticResource DailyChip}" Command="{Binding PickCommand}" />
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                            <Button x:Name="MoreBtn" Style="{StaticResource SecondaryButton}" Height="30" Padding="10,0"
+                                                    Margin="2,0,0,0" Content="..." FontWeight="Bold"
+                                                    ToolTip="{loc:Loc Att_Today_More}" Command="{Binding ToggleMoreCommand}" />
+                                            <Popup IsOpen="{Binding MoreOpen, Mode=TwoWay}" PlacementTarget="{Binding ElementName=MoreBtn}"
+                                                   Placement="Bottom" StaysOpen="False" AllowsTransparency="True">
+                                                <Border Background="{DynamicResource Surface}" BorderBrush="{DynamicResource BorderStrong}"
+                                                        BorderThickness="1" CornerRadius="8" Padding="8" Margin="0,4,0,0">
+                                                    <ItemsControl ItemsSource="{Binding MoreChips}">
+                                                        <ItemsControl.ItemsPanel>
+                                                            <ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+                                                        </ItemsControl.ItemsPanel>
+                                                        <ItemsControl.ItemTemplate>
+                                                            <DataTemplate>
+                                                                <Button Style="{StaticResource DailyChip}" Command="{Binding PickCommand}" />
+                                                            </DataTemplate>
+                                                        </ItemsControl.ItemTemplate>
+                                                    </ItemsControl>
+                                                </Border>
+                                            </Popup>
+                                        </StackPanel>
                                     </Grid>
                                 </Border>
                             </DataTemplate>
@@ -153,11 +201,11 @@
         </Border>
 
         <!-- Feedback -->
-        <TextBlock Grid.Row="3" Margin="2,8,0,0" Style="{StaticResource Caption}" FlowDirection="LeftToRight"
+        <TextBlock Grid.Row="4" Margin="2,8,0,0" Style="{StaticResource Caption}" FlowDirection="LeftToRight"
                    HorizontalAlignment="Left" Text="{Binding Daily.StatusMessage}" />
 
         <!-- ============ THE MONTH (secondary — review & correct) ============ -->
-        <Expander Grid.Row="4" Margin="0,12,0,0" IsExpanded="False" Header="{loc:Loc Att_Today_MonthSection}"
+        <Expander Grid.Row="5" Margin="0,12,0,0" IsExpanded="False" Header="{loc:Loc Att_Today_MonthSection}"
                   FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondary}">
             <Grid Margin="0,10,0,0">
                 <Grid.RowDefinitions>

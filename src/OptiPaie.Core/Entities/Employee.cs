@@ -90,5 +90,48 @@ namespace OptiPaie.Core.Entities
         /// user who saved first is never silently overwritten. Default 0 for existing rows.
         /// </summary>
         public long RowVersion { get; set; }
+
+        // ----- Per-employee weekly work pattern (overrides the company calendar) ------------------
+        //
+        // The default is "follows the company": UsesOwnSchedule = false, so the company work
+        // calendar decides which weekdays this person works. Turn it on and the seven day flags
+        // below define his own week — e.g. a guard who works Friday and Saturday. Nothing changes
+        // for an employee until UsesOwnSchedule is set.
+
+        /// <summary>When true, this employee's own weekly pattern (below) overrides the company calendar.</summary>
+        public bool UsesOwnSchedule { get; set; }
+
+        public bool SchedMon { get; set; } = true;
+        public bool SchedTue { get; set; } = true;
+        public bool SchedWed { get; set; } = true;
+        public bool SchedThu { get; set; } = true;
+        public bool SchedFri { get; set; }
+        public bool SchedSat { get; set; }
+        public bool SchedSun { get; set; } = true;
+
+        /// <summary>
+        /// Whether this employee is expected to work on the given weekday. Uses his own pattern when
+        /// <see cref="UsesOwnSchedule"/> is set, otherwise falls back to the company calendar. This is
+        /// the single answer the daily list, the workable-days maths and the reports all rely on, so a
+        /// guard whose own pattern says he works Friday is expected, counted and paid for that Friday.
+        /// </summary>
+        public bool WorksOn(DayOfWeek day, CompanyWorkCalendar companyFallback)
+        {
+            if (UsesOwnSchedule)
+            {
+                switch (day)
+                {
+                    case DayOfWeek.Monday: return SchedMon;
+                    case DayOfWeek.Tuesday: return SchedTue;
+                    case DayOfWeek.Wednesday: return SchedWed;
+                    case DayOfWeek.Thursday: return SchedThu;
+                    case DayOfWeek.Friday: return SchedFri;
+                    case DayOfWeek.Saturday: return SchedSat;
+                    default: return SchedSun;
+                }
+            }
+
+            return companyFallback != null && companyFallback.IsWorkDay(day);
+        }
     }
 }

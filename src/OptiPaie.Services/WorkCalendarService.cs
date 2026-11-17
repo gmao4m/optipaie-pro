@@ -80,7 +80,9 @@ namespace OptiPaie.Services
                 int count = 0;
                 for (DateTime d = start; d <= end; d = d.AddDays(1))
                 {
-                    if (settings.IsWorkDay(d.DayOfWeek) && !holidays.Contains(d.Date))
+                    // The employee's own pattern overrides the company calendar when set (a guard who
+                    // works Fri/Sat), otherwise the company calendar decides. His days due are HIS.
+                    if (e.WorksOn(d.DayOfWeek, settings) && !holidays.Contains(d.Date))
                     {
                         count++;
                     }

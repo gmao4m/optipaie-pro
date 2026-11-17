@@ -1071,6 +1071,21 @@
   <data name="Att_St_Leave" xml:space="preserve"><value>Congé payé</value></data>
   <data name="Att_St_Holiday" xml:space="preserve"><value>Jour férié</value></data>
   <data name="Att_St_Rest" xml:space="preserve"><value>Repos / week-end</value></data>
+  <data name="Att_St_Justified" xml:space="preserve"><value>Absence justifiée</value></data>
+  <data name="Att_St_Half" xml:space="preserve"><value>Demi-journée</value></data>
+  <data name="Att_St_RestWorked" xml:space="preserve"><value>Repos travaillé</value></data>
+  <data name="Att_Today_Legend" xml:space="preserve"><value>Légende</value></data>
+  <data name="Att_Today_More" xml:space="preserve"><value>Plus de statuts</value></data>
+  <data name="Employee_GroupSchedule" xml:space="preserve"><value>Horaire de travail</value></data>
+  <data name="EmpSched_UseOwn" xml:space="preserve"><value>Horaire personnalisé — déroge au calendrier de l'entreprise</value></data>
+  <data name="EmpSched_Hint" xml:space="preserve"><value>Par défaut, l'employé suit le calendrier de l'entreprise. Cochez pour définir ses propres jours travaillés (ex. un gardien qui travaille le vendredi).</value></data>
+  <data name="Day_Mon" xml:space="preserve"><value>Lun</value></data>
+  <data name="Day_Tue" xml:space="preserve"><value>Mar</value></data>
+  <data name="Day_Wed" xml:space="preserve"><value>Mer</value></data>
+  <data name="Day_Thu" xml:space="preserve"><value>Jeu</value></data>
+  <data name="Day_Fri" xml:space="preserve"><value>Ven</value></data>
+  <data name="Day_Sat" xml:space="preserve"><value>Sam</value></data>
+  <data name="Day_Sun" xml:space="preserve"><value>Dim</value></data>
   <data name="Att_Erase" xml:space="preserve"><value>Effacer</value></data>
   <data name="Att_Col_Department" xml:space="preserve"><value>Département</value></data>
   <data name="Att_ApplyMonth" xml:space="preserve"><value>Remplir le mois (employés cochés)</value></data>

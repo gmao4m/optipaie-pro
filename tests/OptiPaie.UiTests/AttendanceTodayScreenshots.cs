@@ -50,9 +50,11 @@ namespace OptiPaie.UiTests
             AppServices services = CompositionRoot.Build(config);
             TranslationSource.Instance.Attach(services.Localization);
 
-            // --- seed: company A with 8 employees, and an empty company B ---
+            // --- seed: company A (8 employees + a weekend guard), empty company B, and company C
+            //     (normal employees, used to show the pure rest-day banner) ---
             long companyA = services.Companies.Create(new Company { NameFr = "SARL Atlas Industrie", Nif = "000000000000000" }).Value;
             long companyB = services.Companies.Create(new Company { NameFr = "Nouvelle Société (vide)", Nif = "000000000000001" }).Value;
+            long companyC = services.Companies.Create(new Company { NameFr = "SARL Horizon Bureau", Nif = "000000000000002" }).Value;
 
             string[] names = { "AMRANI Salima", "BENALI Karim", "CHERIF Mourad", "FERHAT Yasmine",
                                "HADDAD Bilal", "KADDOUR Amine", "MEDJANI Imene", "ZEROUAL Nadia" };
@@ -67,6 +69,29 @@ namespace OptiPaie.UiTests
                     Gender = Gender.Male, MaritalStatus = MaritalStatus.Single, PaymentMode = PaymentMode.Cash,
                     ContractType = ContractType.Cdi, HireDate = new DateTime(2022, 1, 1), BaseSalary = 45000m, IsActive = true
                 }).Value;
+            }
+
+            // A security guard with his OWN weekly pattern: he works every day, Friday and Saturday
+            // included. On the company's rest day he still appears, expected present.
+            services.Employees.Create(new Employee
+            {
+                CompanyId = companyA, LastNameFr = "SAADI", FirstNameFr = "Lounes", Poste = "Gardien",
+                Department = "Sécurité", Gender = Gender.Male, MaritalStatus = MaritalStatus.Single, PaymentMode = PaymentMode.Cash,
+                ContractType = ContractType.Cdi, HireDate = new DateTime(2022, 1, 1), BaseSalary = 40000m, IsActive = true,
+                UsesOwnSchedule = true, SchedMon = true, SchedTue = true, SchedWed = true, SchedThu = true,
+                SchedFri = true, SchedSat = true, SchedSun = true
+            });
+
+            // Company C: three ordinary employees (no override) — so a Friday shows the rest banner.
+            foreach (string n in new[] { "TOUATI Rachid", "BELKACEM Lila", "OUARED Sofiane" })
+            {
+                string[] p = n.Split(' ');
+                services.Employees.Create(new Employee
+                {
+                    CompanyId = companyC, LastNameFr = p[0], FirstNameFr = p[1], Poste = "Employé",
+                    Department = "Bureau", Gender = Gender.Male, MaritalStatus = MaritalStatus.Single, PaymentMode = PaymentMode.Cash,
+                    ContractType = ContractType.Cdi, HireDate = new DateTime(2022, 1, 1), BaseSalary = 45000m, IsActive = true
+                });
             }
 
             int year = DateTime.Today.Year, month = DateTime.Today.Month;
@@ -93,9 +118,14 @@ namespace OptiPaie.UiTests
             foreach (string lang in new[] { "fr", "ar" })
             {
                 Screen(services, lang, busy, Path.Combine(outDir, $"busy-{lang}.png"), log);
-                Screen(services, lang, rest, Path.Combine(outDir, $"rest-{lang}.png"), log);
+                // The company's Friday is a rest day, but the guard works it → only he shows, no banner.
+                Screen(services, lang, rest, Path.Combine(outDir, $"guard-fri-{lang}.png"), log);
             }
             Screen(services, "fr", quiet, Path.Combine(outDir, "quiet-fr.png"), log);
+
+            // Company C on a Friday: ordinary employees, nobody scheduled → the plain rest-day banner.
+            services.CompanyContext.Active = services.Companies.Get(companyC);
+            Screen(services, "fr", rest, Path.Combine(outDir, "rest-fr.png"), log);
 
             services.CompanyContext.Active = services.Companies.Get(companyB);
             Screen(services, "fr", busy, Path.Combine(outDir, "empty-fr.png"), log);

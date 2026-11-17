@@ -119,9 +119,9 @@ namespace OptiPaie.Desktop.ViewModels.Attendance
                 case AttendanceStatus.Leave: return L("Att_St_Leave");
                 case AttendanceStatus.Holiday: return L("Att_St_Holiday");
                 case AttendanceStatus.Rest: return L("Att_St_Rest");
-                case AttendanceStatus.JustifiedAbsence: return "Absence justifiée · مبرَّر";
-                case AttendanceStatus.HalfDay: return "Demi-journée · نصف يوم";
-                case AttendanceStatus.RestWorked: return "Repos travaillé · عمل بالراحة";
+                case AttendanceStatus.JustifiedAbsence: return L("Att_St_Justified");
+                case AttendanceStatus.HalfDay: return L("Att_St_Half");
+                case AttendanceStatus.RestWorked: return L("Att_St_RestWorked");
                 default: return string.Empty;
             }
         }

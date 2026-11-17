@@ -114,7 +114,9 @@ namespace OptiPaie.Desktop.ViewModels
                 for (int d = 1; d <= days; d++)
                 {
                     var date = new DateTime(_selectedYear, _selectedMonth, d);
-                    bool rest = (cal != null && !cal.IsWorkDay(date.DayOfWeek)) || holidays.Contains(date.Date);
+                    // A rest day for THIS employee uses his own weekly pattern when set (a guard who works
+                    // Friday is not blank on Fridays), otherwise the company calendar; holidays are rest for all.
+                    bool rest = holidays.Contains(date.Date) || (cal != null && !e.WorksOn(date.DayOfWeek, cal));
                     if (byDay != null && byDay.TryGetValue(d, out AttendanceStatus s))
                         cells[d - 1] = AttendanceAppearance.Letter(s, false);
                     else

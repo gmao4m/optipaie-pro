@@ -141,6 +141,71 @@ namespace OptiPaie.Tests
             Assert.That(_sut.GetWorkableDays(emp, 2026, 7), Is.EqualTo(20));
         }
 
+        // ---------------------------------------------------------------- per-employee pattern
+
+        private long AddScheduled(DateTime hire, bool mon, bool tue, bool wed, bool thu, bool fri, bool sat, bool sun, decimal baseSalary = 30000m)
+        {
+            var employees = new EmployeeService(_uow, new EmployeeValidator(), AccessContext.Unrestricted);
+            return employees.Create(new Employee
+            {
+                CompanyId = _companyId, LastNameFr = "GUARD", FirstNameFr = "Shift", Poste = "Gardien",
+                Gender = Gender.Male, MaritalStatus = MaritalStatus.Single, PaymentMode = PaymentMode.Cash,
+                ContractType = ContractType.Cdi, HireDate = hire, IsActive = true, BaseSalary = baseSalary,
+                UsesOwnSchedule = true,
+                SchedMon = mon, SchedTue = tue, SchedWed = wed, SchedThu = thu, SchedFri = fri, SchedSat = sat, SchedSun = sun
+            }).Value;
+        }
+
+        [Test]
+        public void WorkableDays_PerEmployeeSchedule_GuardWorksEveryDay()
+        {
+            // June 2026, no civil holiday. Default employee = 22 (Fri/Sat rest). A guard who works all
+            // seven days has his Fridays and Saturdays as work days → the full 30. His days due are HIS.
+            long normal = AddEmployee(new DateTime(2024, 1, 1));
+            long guard = AddScheduled(new DateTime(2024, 1, 1), true, true, true, true, true, true, true);
+
+            Assert.That(_sut.GetWorkableDays(normal, 2026, 6), Is.EqualTo(22), "default employee unchanged");
+            Assert.That(_sut.GetWorkableDays(guard, 2026, 6), Is.EqualTo(30), "guard works Fri+Sat too");
+        }
+
+        [Test]
+        public void WorkableDays_PerEmployeeSchedule_HonoursTheExactPattern()
+        {
+            // A guard who works Sun–Fri (Saturday off). June 2026 Saturdays: 6,13,20,27 = 4 rest → 30 − 4 = 26.
+            long guard = AddScheduled(new DateTime(2024, 1, 1), true, true, true, true, true, false, true);
+            Assert.That(_sut.GetWorkableDays(guard, 2026, 6), Is.EqualTo(26));
+        }
+
+        [Test]
+        public void WorkableDays_PerEmployeeSchedule_StillExcludesHolidays()
+        {
+            // Guard works all seven days in July 2026; 5 Jul (civil) is a Sunday that he would work → excluded.
+            long guard = AddScheduled(new DateTime(2024, 1, 1), true, true, true, true, true, true, true);
+            Assert.That(_sut.GetWorkableDays(guard, 2026, 7), Is.EqualTo(30), "31 days − 1 civil holiday");
+        }
+
+        [Test]
+        public void ResolveForPayroll_WorkingDaysBasis_PaysGuardOnHisOwnDivisor()
+        {
+            // Company prorates on worked days. A one-day unjustified absence costs each person a slice of
+            // THEIR own days due: the guard's divisor is 30 (he works all week), the default employee's is 22.
+            CompanyWorkCalendar cal = _sut.GetSettings(_companyId);
+            cal.ProrationBasis = ProrationBasis.WorkingDays;
+            Assert.That(_sut.SaveSettings(cal).IsSuccess, Is.True);
+
+            long normal = AddEmployee(new DateTime(2024, 1, 1));
+            long guard = AddScheduled(new DateTime(2024, 1, 1), true, true, true, true, true, true, true);
+            var summary = new AttendanceSummary { Year = 2026, Month = 6, RecordedDays = 1, AbsentDays = 1 };
+
+            ProrationResult n = _sut.ResolveForPayroll(_companyId, normal, 2026, 6, summary, true);
+            ProrationResult g = _sut.ResolveForPayroll(_companyId, guard, 2026, 6, summary, true);
+
+            Assert.That(n.WorkableDays, Is.EqualTo(22m));
+            Assert.That(n.WorkedDays, Is.EqualTo(21m));
+            Assert.That(g.WorkableDays, Is.EqualTo(30m), "guard's days due are his own");
+            Assert.That(g.WorkedDays, Is.EqualTo(29m));
+        }
+
         // ---------------------------------------------------------------- settings
 
         [Test]

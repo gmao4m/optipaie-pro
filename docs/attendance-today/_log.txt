@@ -1,8 +1,9 @@
-busy-fr.png: OK 1700x800
+busy-fr.png: OK 1700x850
+guard-fri-fr.png: OK 1700x800
+busy-ar.png: OK 1700x850
+guard-fri-ar.png: OK 1700x800
+quiet-fr.png: OK 1700x850
 rest-fr.png: OK 1700x800
-busy-ar.png: OK 1700x800
-rest-ar.png: OK 1700x800
-quiet-fr.png: OK 1700x800
 empty-fr.png: OK 1700x800
 empty-ar.png: OK 1700x800
 reports: OK
