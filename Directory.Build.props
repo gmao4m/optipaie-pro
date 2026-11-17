@@ -20,7 +20,7 @@
       (the release process never ships a pre-release suffix), so "$(Version).0" is a valid 4-part
       file/assembly version. Guarded by VersionConsistencyTests.
     -->
-    <Version>1.42.0</Version>
+    <Version>1.43.0</Version>
     <FileVersion>$(Version).0</FileVersion>
     <AssemblyVersion>$(Version).0</AssemblyVersion>
 
