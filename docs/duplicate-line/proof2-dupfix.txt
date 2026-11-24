@@ -1,0 +1,14 @@
+PROOF 2 — employee with an ACTIVE LOAN + two manual deduction lines (octobre 2026)
+  automatic instalment line: added exactly as BatchPayrollService does (licence gate hid the module in this temp DB)
+  free-text (id-less) lines on the payslip: 3 (instalment + 2 manual)
+  generation: SUCCESS (payslip #1)
+
+    Salaire de base                gain      60 000,00
+    Remboursement prêt          retenue       5 000,00
+    Avance exceptionnelle       retenue       2 000,00
+    Retenue matériel perdu      retenue       1 500,00
+    SALAIRE BRUT                             60 000,00
+    CNAS salarié                retenue       5 400,00
+    IRG                         retenue       7 042,00
+    NET À PAYER                              39 058,00
+  check: 60 000,00 − 5 400,00 − 7 042,00 − 8 500,00 = 39 058,00  ✓

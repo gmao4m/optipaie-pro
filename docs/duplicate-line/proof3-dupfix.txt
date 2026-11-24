@@ -1,0 +1,4 @@
+PROOF 3 — the same catalog element (#15 « Prime de rendement ») applied twice
+  generation: REFUSED
+  code    : Payroll_DuplicateElement
+  message : Une rubrique de paie est dupliquée: Prime de rendement

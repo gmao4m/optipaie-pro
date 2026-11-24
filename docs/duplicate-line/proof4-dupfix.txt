@@ -1,0 +1,16 @@
+PROOF 4 — one free-text deduction line only (base 45 000, avance 3 000)
+  success: True
+  brut 45000 | CNAS 4050.00 | IRG 3356.50 | net 34593.50
+  line |Salaire de base|Gain|45000
+  line 0|Avance sur salaire|Deduction|3000
+  step BASE|45000
+  step GROSS|45000
+  step COTISABLE|45000
+  step CNAS|4050.00
+  step TAXABLE|40950.00
+  step IRG_BRUT|4856.50
+  step ABATTEMENT|1500
+  step IRG_REGULAR|3356.50
+  step IRG_TOTAL|3356.50
+  step NET_DEDUCTIONS|3000
+  step NET|34593.50

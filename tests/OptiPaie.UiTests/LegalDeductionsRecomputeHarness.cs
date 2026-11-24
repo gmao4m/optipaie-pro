@@ -36,8 +36,11 @@ namespace OptiPaie.UiTests
             string tag = Environment.GetEnvironmentVariable("LEGAL_PROOF_TAG");
             if (string.IsNullOrWhiteSpace(tag)) tag = "run";
 
-            string live = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                "OptiPaie DZ", AppConstants.DatabaseFileName);
+            // LEGAL_PROOF_DB: an optional frozen snapshot (so a before/after pair runs on identical inputs).
+            string live = Environment.GetEnvironmentVariable("LEGAL_PROOF_DB");
+            if (string.IsNullOrWhiteSpace(live))
+                live = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                    "OptiPaie DZ", AppConstants.DatabaseFileName);
             Assert.That(File.Exists(live), Is.True, "live database not found");
 
             // COPY the live database into a private temp data directory. The live file is only read.

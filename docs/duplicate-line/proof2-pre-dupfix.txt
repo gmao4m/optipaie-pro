@@ -1,0 +1,4 @@
+PROOF 2 — employee with an ACTIVE LOAN + two manual deduction lines (octobre 2026)
+  automatic instalment line: added exactly as BatchPayrollService does (licence gate hid the module in this temp DB)
+  free-text (id-less) lines on the payslip: 3 (instalment + 2 manual)
+  generation: REFUSED  [Payroll_DuplicateElement] Une rubrique de paie est dupliquée: Avance exceptionnelle

@@ -56,7 +56,12 @@ namespace OptiPaie.PayrollEngine.Validation
 
             foreach (PayrollElementInput element in context.Elements)
             {
-                if (element.ElementId.HasValue && !seenElementIds.Add(element.ElementId.Value))
+                // The duplicate rule stops the SAME CATALOG ELEMENT being applied twice. A free-text line
+                // (typed on the worksheet, or the automatic loan instalment) is not a catalog element: it
+                // carries no real id (null, or 0 as the payroll service stamps it), so it is excluded from
+                // this check entirely. Catalog ids start at 1; their protection is unchanged.
+                bool isCatalogElement = element.ElementId.HasValue && element.ElementId.Value > 0;
+                if (isCatalogElement && !seenElementIds.Add(element.ElementId.Value))
                 {
                     messages.Add(PayrollMessage.Error(PayrollErrorCodes.DuplicateElement,
                         "Une rubrique de paie est dupliquée: " + element.LabelFr));
