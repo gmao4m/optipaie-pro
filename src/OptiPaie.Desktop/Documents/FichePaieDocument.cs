@@ -47,7 +47,10 @@ namespace OptiPaie.Desktop.Documents
         public FichePaieDocument(FichePaieModel model)
         {
             _m = model;
-            _cacobatphOn = model.Company != null && model.Company.BtphSector && model.Company.CacobatphEnabled;
+            // CACOBATPH is a legal sectoral contribution on the CNAS base: it is applied only when the
+            // payslip itself was computed WITH the legal deductions (its frozen flag, not the setting).
+            _cacobatphOn = model.LegalDeductionsApplied
+                && model.Company != null && model.Company.BtphSector && model.Company.CacobatphEnabled;
             _cacobatph = _cacobatphOn ? CacobatphCalculator.Compute(model.BaseCotisable) : null;
         }
 
@@ -199,18 +202,28 @@ namespace OptiPaie.Desktop.Documents
                 // reading the engine value directly keeps the headline gross exact even if a display
                 // line were ever off, and the TOTAL GAINS row below stays the verifiable line sum.)
                 BandAt(table, r++, "SALAIRE BRUT", _m.SalaireBrut, true);
-                BandAt(table, r++, "Salaire soumis à cotisation", _m.BaseCotisable, false);
 
-                // 3) CNAS (base + taux shown) [+ CACOBATPH employee share when enabled]
-                RowAt(table, r++, "Retenue CNAS", Money(_m.BaseCotisable), (_m.CnasEmployeeRate * 100m).ToString("0.##", Fr) + " %", null, _m.CnasEmployee);
-                if (_cacobatphOn)
-                    RowAt(table, r++, "CACOBATPH (part salarié)", Money(_m.BaseCotisable), null, null, _cacobatph.EmployeeTotal);
+                // 3)–5) The legal block. Printed ONLY when this payslip was computed with the legal
+                // deductions (its frozen flag). When it was not, these rows are not printed at all —
+                // no empty or zero CNAS/IRG lines — and because every cell is placed at the running row
+                // number r, the table simply closes up: no gap, nothing floating.
+                if (_m.LegalDeductionsApplied)
+                {
+                    BandAt(table, r++, "Salaire soumis à cotisation", _m.BaseCotisable, false);
 
-                // 4) SALAIRE IMPOSABLE
-                BandAt(table, r++, "SALAIRE IMPOSABLE", _m.BaseImposable, false);
+                    // 3) CNAS (base + taux shown) [+ CACOBATPH employee share when enabled]
+                    RowAt(table, r++, "Retenue CNAS", Money(_m.BaseCotisable), (_m.CnasEmployeeRate * 100m).ToString("0.##", Fr) + " %", null, _m.CnasEmployee);
+                    if (_cacobatphOn)
+                        RowAt(table, r++, "CACOBATPH (part salarié)", Money(_m.BaseCotisable), null, null, _cacobatph.EmployeeTotal);
 
-                // 5) IRG (alone on its row) + other deductions
-                RowAt(table, r++, "IRG", Money(_m.BaseImposable), "barème", null, _m.Irg);
+                    // 4) SALAIRE IMPOSABLE
+                    BandAt(table, r++, "SALAIRE IMPOSABLE", _m.BaseImposable, false);
+
+                    // 5) IRG (alone on its row)
+                    RowAt(table, r++, "IRG", Money(_m.BaseImposable), "barème", null, _m.Irg);
+                }
+
+                // Other deductions (advances, instalments, absences…) — always printed.
                 foreach (FicheLineModel l in RetenueLines)
                     RowAt(table, r++, l.Label, l.BaseText, l.TauxText, null, l.Retenue);
 

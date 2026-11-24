@@ -2068,4 +2068,14 @@
   <data name="Workforce_Col_Age" xml:space="preserve"><value>Âge</value></data>
   <data name="Workforce_Col_RetirementDate" xml:space="preserve"><value>Départ en retraite</value></data>
   <data name="Workforce_Col_RetirementStatus" xml:space="preserve"><value>Statut</value></data>
+  <data name="Legal_Title" xml:space="preserve"><value>Calcul de l'IRG et de la CNAS</value></data>
+  <data name="Legal_Desc1" xml:space="preserve"><value>Calculés automatiquement sur chaque paie.</value></data>
+  <data name="Legal_Desc2" xml:space="preserve"><value>Désactivez-le uniquement si votre entreprise n'applique pas les retenues légales.</value></data>
+  <data name="Legal_ReadOnly" xml:space="preserve"><value>Seul l'administrateur peut modifier ce réglage.</value></data>
+  <data name="Legal_Confirm_Title" xml:space="preserve"><value>Désactiver le calcul de l'IRG et de la CNAS ?</value></data>
+  <data name="Legal_Confirm_Line1" xml:space="preserve"><value>Cela n'affectera que les nouvelles paies.</value></data>
+  <data name="Legal_Confirm_Line2" xml:space="preserve"><value>Les paies enregistrées ne changeront pas.</value></data>
+  <data name="Legal_Confirm_Ok" xml:space="preserve"><value>Désactiver</value></data>
+  <data name="Legal_DeclDisabled_Title" xml:space="preserve"><value>Déclarations indisponibles : le calcul de l'IRG et de la CNAS est désactivé.</value></data>
+  <data name="Legal_DeclDisabled_Body" xml:space="preserve"><value>Les déclarations DAC et DAS reposent sur les retenues légales. Réactivez « Calcul de l'IRG et de la CNAS » dans les Paramètres pour les produire.</value></data>
 </root>

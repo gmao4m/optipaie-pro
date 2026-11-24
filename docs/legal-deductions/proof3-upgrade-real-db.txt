@@ -1,0 +1,7 @@
+PROOF 3 — upgrade of a COPY of the real database (C:\Users\PC\AppData\Roaming\OptiPaie DZ\optipaie.db)
+  schema before        : v43 (no LegalDeductionsApplied column)
+  migrations applied   : 1
+  schema after         : v44
+  setting stored       : '1'  → service reads ON
+  payslips flagged ON  : 22 / 22
+  money columns sha256 : before 019c784e05e8479a…  after 019c784e05e8479a…  UNCHANGED

@@ -83,6 +83,14 @@ namespace OptiPaie.Core.Entities
         public DateTime? RevisedAtUtc { get; set; }
 
         /// <summary>
+        /// Whether THIS payslip was computed with the legal deductions (CNAS/IRG), frozen at the
+        /// moment it was calculated (migration 0044 back-fills every pre-existing payslip with true).
+        /// Printing, reprinting, exporting or reopening a saved payslip reads THIS flag — never the
+        /// current setting — so a payslip always reprints exactly as it was paid.
+        /// </summary>
+        public bool LegalDeductionsApplied { get; set; } = true;
+
+        /// <summary>
         /// The detail lines making up this payslip. Populated by services; not mapped by Dapper.
         /// </summary>
         public IList<PayrollDetail> Details { get; set; } = new List<PayrollDetail>();

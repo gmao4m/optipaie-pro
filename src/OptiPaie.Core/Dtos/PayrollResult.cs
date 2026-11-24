@@ -41,6 +41,13 @@ namespace OptiPaie.Core.Dtos
         /// <summary>UTC timestamp when the calculation was performed.</summary>
         public DateTime CalculatedAtUtc { get; }
 
+        /// <summary>
+        /// Whether this result was computed WITH the legal deductions (CNAS/IRG). Set by the engine
+        /// from <see cref="PayrollContext.ApplyLegalDeductions"/>; persisted on the payslip so a saved
+        /// payslip is always reprinted exactly as it was paid. Default true.
+        /// </summary>
+        public bool LegalDeductionsApplied { get; set; } = true;
+
         /// <summary>Error-severity messages.</summary>
         public IEnumerable<PayrollMessage> Errors =>
             Messages.Where(m => m.Severity == PayrollMessageSeverity.Error);

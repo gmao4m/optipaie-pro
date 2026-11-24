@@ -174,7 +174,10 @@ namespace OptiPaie.Services
                     WorkableDays = workableDays,
                     WorkedHours = request.WorkedHours,
                     Legal = snapshot,
-                    Elements = elements
+                    Elements = elements,
+                    // The IRG/CNAS setting decides only the NEXT calculation (read fail-safe: anything
+                    // but an explicit OFF is ON). A saved payslip keeps the flag it was computed with.
+                    ApplyLegalDeductions = _configurationService.GetLegalDeductionsEnabled()
                 };
 
                 return BuildOutcome.Ok(context, snapshot);

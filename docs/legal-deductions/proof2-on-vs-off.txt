@@ -1,0 +1,15 @@
+PROOF 2 — one payslip, the same inputs, computed with the switch ON and OFF (demo database)
+  inputs: base 60 000 DA prorated 29/31 days (2 absent days), prime de rendement 8 000,
+          acompte sur salaire 5 000, remboursement prêt 3 000
+
+                                              ON             OFF
+  Salaire brut                         64 129,03       64 129,03
+  Base cotisable                       64 129,03       64 129,03
+  CNAS salarié (9 %)                    5 771,61            0,00
+  CNAS employeur (26 %)                16 673,55            0,00
+  IRG                                   8 056,50            0,00
+  Retenues saisies (acompte+prêt)        8 000,00        8 000,00
+  NET À PAYER                          42 300,92       56 129,03
+
+  OFF net = brut − retenues saisies = 64 129,03 − 8 000,00 = 56 129,03  ✓
+  legal deductions removed by the switch: CNAS 5 771,61 + IRG 8 056,50 = 13 828,11 (employer CNAS 16 673,55 no longer due)

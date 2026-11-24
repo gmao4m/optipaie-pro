@@ -51,6 +51,59 @@
                     </StackPanel>
                 </Border>
 
+                <!-- IRG / CNAS switch: ON by default; affects NEW payslips only (saved ones keep their own flag).
+                     Administrators only; OFF asks for confirmation; every change is audited. -->
+                <Border Style="{StaticResource Card}" Padding="24" Margin="0,0,0,16">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,16,0">
+                            <TextBlock Style="{StaticResource H2}" Text="{loc:Loc Legal_Title}" />
+                            <TextBlock Margin="0,8,0,0" FontSize="13" TextWrapping="Wrap"
+                                       Foreground="{DynamicResource TextPrimary}" Text="{loc:Loc Legal_Desc1}" />
+                            <TextBlock Margin="0,2,0,0" FontSize="13" TextWrapping="Wrap"
+                                       Foreground="{DynamicResource TextSecondary}" Text="{loc:Loc Legal_Desc2}" />
+                            <TextBlock Margin="0,8,0,0" FontSize="12" FontStyle="Italic" TextWrapping="Wrap"
+                                       Foreground="{DynamicResource TextMuted}" Text="{loc:Loc Legal_ReadOnly}"
+                                       Visibility="{Binding CanEditLegalDeductions, Converter={StaticResource InverseBoolToVis}}" />
+                        </StackPanel>
+
+                        <!-- The switch: a Button drawn as a toggle (its state is bound one-way, so a cancelled
+                             confirmation can never leave it showing the wrong value). -->
+                        <Button Grid.Column="1" VerticalAlignment="Top" Cursor="Hand" Focusable="True"
+                                Command="{Binding ToggleLegalDeductionsCommand}"
+                                AutomationProperties.Name="{loc:Loc Legal_Title}">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <StackPanel Orientation="Horizontal" Background="Transparent">
+                                        <Border x:Name="Track" Width="52" Height="28" CornerRadius="14"
+                                                Background="{DynamicResource BorderStrong}">
+                                            <Border x:Name="Thumb" Width="22" Height="22" CornerRadius="11" Margin="3,0"
+                                                    Background="White" HorizontalAlignment="Left" />
+                                        </Border>
+                                        <TextBlock x:Name="State" Margin="10,0,0,0" VerticalAlignment="Center" Width="34"
+                                                   FontWeight="SemiBold" FontSize="13" Text="OFF"
+                                                   Foreground="{DynamicResource TextSecondary}" />
+                                    </StackPanel>
+                                    <ControlTemplate.Triggers>
+                                        <DataTrigger Binding="{Binding LegalDeductionsOn}" Value="True">
+                                            <Setter TargetName="Track" Property="Background" Value="{DynamicResource Brand}" />
+                                            <Setter TargetName="Thumb" Property="HorizontalAlignment" Value="Right" />
+                                            <Setter TargetName="State" Property="Text" Value="ON" />
+                                            <Setter TargetName="State" Property="Foreground" Value="{DynamicResource BrandText}" />
+                                        </DataTrigger>
+                                        <Trigger Property="IsEnabled" Value="False">
+                                            <Setter TargetName="Track" Property="Opacity" Value="0.5" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                    </Grid>
+                </Border>
+
                 <!-- License -->
                 <Border Style="{StaticResource Card}" Padding="24" Margin="0,0,0,16">
                     <StackPanel>

@@ -41,8 +41,14 @@ namespace OptiPaie.Services
             PayrollTotals t = result.Totals;
             decimal gross = t.SalaireBrut;
 
+            // Rules 1 and 2 catch legal deductions that are ACCIDENTALLY missing. When the IRG/CNAS
+            // setting deliberately switched them off for this calculation, a zero contribution and a
+            // net equal to the gross are the expected outcome, not a suspicious payslip — so these two
+            // rules stand down (and do not block issuance). Rules 3–5 still run.
+            bool legalOn = result.LegalDeductionsApplied;
+
             // Rule 1 — a paid salary with no employee contribution.
-            if (gross > 0m && t.CnasEmployee == 0m)
+            if (legalOn && gross > 0m && t.CnasEmployee == 0m)
             {
                 warnings.Add(new PayslipSanityWarning(
                     PayslipSanityCode.ContributionZeroOnPaidSalary,
@@ -53,7 +59,7 @@ namespace OptiPaie.Services
             }
 
             // Rule 2 — net equals gross exactly (nothing withheld).
-            if (gross > 0m && t.NetSalaire == gross)
+            if (legalOn && gross > 0m && t.NetSalaire == gross)
             {
                 warnings.Add(new PayslipSanityWarning(
                     PayslipSanityCode.NetEqualsGross,

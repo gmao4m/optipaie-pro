@@ -52,6 +52,53 @@ namespace OptiPaie.Desktop.ViewModels
             RenewCommand = new RelayCommand(RenewLicense);
             DeactivateCommand = new RelayCommand(DeactivateDevice);
             CheckUpdatesCommand = new RelayCommand(CheckUpdates);
+            ToggleLegalDeductionsCommand = new RelayCommand(ToggleLegalDeductions, () => CanEditLegalDeductions);
+        }
+
+        // -- IRG / CNAS switch ------------------------------------------------
+        private bool _legalDeductionsOn = true;
+        private bool _canEditLegalDeductions;
+
+        /// <summary>Current value of the IRG/CNAS setting (fail-safe read: anything but OFF is ON).</summary>
+        public bool LegalDeductionsOn { get => _legalDeductionsOn; private set => Set(ref _legalDeductionsOn, value); }
+
+        /// <summary>Administrators only (Permission.ManageSettings). Everyone else sees it read-only.</summary>
+        public bool CanEditLegalDeductions { get => _canEditLegalDeductions; private set => Set(ref _canEditLegalDeductions, value); }
+
+        public ICommand ToggleLegalDeductionsCommand { get; }
+
+        /// <summary>
+        /// Asks before switching OFF (new payslips only; saved ones never change). Replaceable so the
+        /// flow can be exercised headless; defaults to the themed confirmation window.
+        /// </summary>
+        public Func<bool> ConfirmTurnOff { get; set; } = () =>
+        {
+            var window = new LegalDeductionsConfirmWindow { Owner = Application.Current?.MainWindow };
+            return window.ShowDialog() == true;
+        };
+
+        private void RefreshLegalDeductions()
+        {
+            LegalDeductionsOn = _services.ConfigurationService.GetLegalDeductionsEnabled();
+            CanEditLegalDeductions = ScreenAccess.CanEdit(_services, "settings");
+        }
+
+        private void ToggleLegalDeductions()
+        {
+            bool target = !LegalDeductionsOn;
+            if (!target && !ConfirmTurnOff()) return; // turning OFF needs a confirmation; ON does not
+
+            try
+            {
+                Result result = _services.ConfigurationService.SetLegalDeductionsEnabled(target);
+                if (result.IsFailure) Dialogs.Error(result.Error);
+            }
+            catch (OptiPaie.Core.Security.AccessDeniedException)
+            {
+                Dialogs.Error(OptiPaie.Desktop.Localization.TranslationSource.Instance["Legal_ReadOnly"]);
+            }
+
+            RefreshLegalDeductions(); // always re-read what is actually stored
         }
 
         public List<EnumOption> Languages { get; }
@@ -105,6 +152,7 @@ namespace OptiPaie.Desktop.ViewModels
             // footer and the update dialog always agree — support gets the real installed version.
             VersionText = "OptiPaie PRO  ·  version " + OptiPaie.Core.Updates.AppVersion.CurrentProduct();
 
+            RefreshLegalDeductions();
             RefreshLicense();
         }
 

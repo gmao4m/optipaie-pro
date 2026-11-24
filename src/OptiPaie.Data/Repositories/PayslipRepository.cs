@@ -67,12 +67,12 @@ namespace OptiPaie.Data.Repositories
                 "(RunId, EmployeeId, SalaireBrut, BaseCotisable, CnasEmployee, CnasEmployer, BaseImposable, " +
                 " IrgBrut, Abattement, Irg, NetSalaire, CnasEmployeeRateUsed, CnasEmployerRateUsed, " +
                 " WorkedDays, WorkedHours, EngineVersion, GeneratedAtUtc, CreatedAtUtc, " +
-                " Status, SupersedesPayslipId, RevisionReason, RevisedByUser, RevisedAtUtc) " +
+                " Status, SupersedesPayslipId, RevisionReason, RevisedByUser, RevisedAtUtc, LegalDeductionsApplied) " +
                 "VALUES " +
                 "(@RunId, @EmployeeId, @SalaireBrut, @BaseCotisable, @CnasEmployee, @CnasEmployer, @BaseImposable, " +
                 " @IrgBrut, @Abattement, @Irg, @NetSalaire, @CnasEmployeeRateUsed, @CnasEmployerRateUsed, " +
                 " @WorkedDays, @WorkedHours, @EngineVersion, @GeneratedAtUtc, @CreatedAtUtc, " +
-                " @Status, @SupersedesPayslipId, @RevisionReason, @RevisedByUser, @RevisedAtUtc); " +
+                " @Status, @SupersedesPayslipId, @RevisionReason, @RevisedByUser, @RevisedAtUtc, @LegalDeductionsApplied); " +
                 "SELECT last_insert_rowid();";
 
             long id = Connection.ExecuteScalar<long>(sql, ToRow(payslip), Transaction);
@@ -131,7 +131,9 @@ namespace OptiPaie.Data.Repositories
                 p.SupersedesPayslipId,
                 p.RevisionReason,
                 p.RevisedByUser,
-                p.RevisedAtUtc
+                p.RevisedAtUtc,
+                // Frozen at calculation time; reprints read THIS, never the current setting.
+                LegalDeductionsApplied = p.LegalDeductionsApplied ? 1 : 0
             };
         }
     }

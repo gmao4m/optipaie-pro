@@ -59,6 +59,7 @@ namespace OptiPaie.Desktop.Documents
                 Abattement = t.Abattement,
                 Irg = t.Irg,
                 Lissage = LissageFromTrace(result),
+                LegalDeductionsApplied = result.LegalDeductionsApplied,
                 NetSalaire = t.NetSalaire,
                 WorkedDays = workedDays
             };
@@ -101,6 +102,8 @@ namespace OptiPaie.Desktop.Documents
                 Irg = payslip.Irg,
                 NetSalaire = payslip.NetSalaire,
                 WorkedDays = payslip.WorkedDays,
+                // A reprint ALWAYS uses the flag frozen on THIS payslip, never the current setting.
+                LegalDeductionsApplied = payslip.LegalDeductionsApplied,
                 // A corrected version (it supersedes an earlier payslip) prints the rectificatif badge.
                 RevisionMark = payslip.SupersedesPayslipId.HasValue ? revisionMark : null
             };

@@ -62,7 +62,7 @@ namespace OptiPaie.Desktop.Composition
             var companyService = new CompanyService(unitOfWorkFactory, new CompanyValidator(), access);
             var employeeService = new EmployeeService(unitOfWorkFactory, new EmployeeValidator(), access);
             var elementService = new PayrollElementService(unitOfWorkFactory, new PayrollElementValidator(), access);
-            var configurationService = new ConfigurationService(unitOfWorkFactory);
+            var configurationService = new ConfigurationService(unitOfWorkFactory, access); // IRG/CNAS switch: admin-only write
             var settingsService = new SettingsService(unitOfWorkFactory);
             var archiveService = new ArchiveService(unitOfWorkFactory, access);
             var attendanceService = new AttendanceService(unitOfWorkFactory, access);
@@ -95,6 +95,7 @@ namespace OptiPaie.Desktop.Composition
             // optional sink, so history is recorded without changing any service ctor.
             var auditService = new AuditService(unitOfWorkFactory, logger);
             leaveService.Audit = auditService;
+            configurationService.Audit = auditService; // IRG/CNAS switch changes: who, when, old → new
             contractService.Audit = auditService;
             loanService.Audit = auditService;
             assetService.Audit = auditService;

@@ -30,6 +30,20 @@ namespace OptiPaie.PayrollEngine
         private readonly PayrollContextValidator _validator;
         private readonly IReadOnlyList<IPayrollRule> _rules;
 
+        /// <summary>
+        /// The rules that compute a LEGAL deduction or contribution, skipped when
+        /// <see cref="PayrollContext.ApplyLegalDeductions"/> is false (the IRG/CNAS setting):
+        ///   Cnas    — CNAS employee (9 %, deducted) AND employer (26 %, a cost) on the cotisable base;
+        ///   Irg     — IRG on the taxable base (barème, abattement, exonération);
+        ///   Lissage — the IRG on smoothed amounts (it IS IRG).
+        /// Everything else still runs unchanged: element resolution, gross, the cotisable and taxable
+        /// BASES (bases, not deductions) and the net rule, which then subtracts CNAS = 0 and IRG = 0.
+        /// This is a gate AROUND existing rules — no formula is touched. With the flag at its default
+        /// (true) the loop below is exactly the historical pipeline.
+        /// </summary>
+        private static readonly HashSet<string> LegalDeductionRules =
+            new HashSet<string>(StringComparer.Ordinal) { "Cnas", "Irg", "Lissage" };
+
         /// <summary>Creates an engine wired with the built-in defaults.</summary>
         public PayrollCalculationEngine()
         {
@@ -100,12 +114,25 @@ namespace OptiPaie.PayrollEngine
                 calc.Messages.Add(warning);
             }
 
+            if (!context.ApplyLegalDeductions)
+            {
+                calc.AddTrace("LEGAL_OFF", 0m,
+                    "Retenues légales désactivées (paramètre) : CNAS, IRG et lissage ne sont pas calculés.");
+            }
+
             foreach (IPayrollRule rule in _rules)
             {
+                if (!context.ApplyLegalDeductions && LegalDeductionRules.Contains(rule.Name))
+                {
+                    continue; // the IRG/CNAS switch is OFF: this legal rule is skipped, untouched
+                }
+
                 rule.Apply(calc);
             }
 
-            return BuildResult(calc, profile);
+            PayrollResult result = BuildResult(calc, profile);
+            result.LegalDeductionsApplied = context.ApplyLegalDeductions;
+            return result;
         }
 
         private static IReadOnlyList<IPayrollRule> BuildDefaultRules(ElementCalculator elementCalculator)

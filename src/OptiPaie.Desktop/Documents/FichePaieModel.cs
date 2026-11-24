@@ -26,6 +26,13 @@ namespace OptiPaie.Desktop.Documents
         public int Month { get; set; }
         public bool IsArabic { get; set; }
 
+        /// <summary>
+        /// Whether the payslip was computed WITH the legal deductions (IRG/CNAS). Taken from the SAVED
+        /// payslip on any reprint, never from the current setting. When false, the CNAS / IRG /
+        /// CACOBATPH rows and their bases are omitted and the table closes up.
+        /// </summary>
+        public bool LegalDeductionsApplied { get; set; } = true;
+
         public decimal SalaireBrut { get; set; }
         public decimal BaseCotisable { get; set; }
         public decimal CnasEmployee { get; set; }

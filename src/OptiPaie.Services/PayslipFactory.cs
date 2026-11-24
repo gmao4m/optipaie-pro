@@ -48,7 +48,9 @@ namespace OptiPaie.Services
                 EngineVersion = result.EngineVersion,
                 GeneratedAtUtc = DateTime.UtcNow,
                 Status = status,
-                SupersedesPayslipId = supersedesPayslipId
+                SupersedesPayslipId = supersedesPayslipId,
+                // Freeze HOW this payslip was computed (IRG/CNAS on or off), so it reprints as paid.
+                LegalDeductionsApplied = result.LegalDeductionsApplied
             };
         }
 

@@ -2068,4 +2068,14 @@ Les colonnes ne correspondent pas au modèle. Colonnes obligatoires manquantes :
   <data name="Workforce_Col_Age" xml:space="preserve"><value>العمر</value></data>
   <data name="Workforce_Col_RetirementDate" xml:space="preserve"><value>تاريخ التقاعد</value></data>
   <data name="Workforce_Col_RetirementStatus" xml:space="preserve"><value>الحالة</value></data>
+  <data name="Legal_Title" xml:space="preserve"><value>حساب IRG و CNAS</value></data>
+  <data name="Legal_Desc1" xml:space="preserve"><value>يُحسب تلقائيا في كل راتب.</value></data>
+  <data name="Legal_Desc2" xml:space="preserve"><value>أوقفه فقط إذا كانت شركتك لا تطبّق الاقتطاعات القانونية.</value></data>
+  <data name="Legal_ReadOnly" xml:space="preserve"><value>وحده المسؤول يمكنه تغيير هذا الإعداد.</value></data>
+  <data name="Legal_Confirm_Title" xml:space="preserve"><value>إيقاف حساب IRG و CNAS؟</value></data>
+  <data name="Legal_Confirm_Line1" xml:space="preserve"><value>سيؤثر هذا على الرواتب الجديدة فقط.</value></data>
+  <data name="Legal_Confirm_Line2" xml:space="preserve"><value>الرواتب المحفوظة لن تتغيّر.</value></data>
+  <data name="Legal_Confirm_Ok" xml:space="preserve"><value>إيقاف</value></data>
+  <data name="Legal_DeclDisabled_Title" xml:space="preserve"><value>التصريحات غير متاحة: حساب IRG و CNAS متوقّف.</value></data>
+  <data name="Legal_DeclDisabled_Body" xml:space="preserve"><value>تعتمد تصريحات DAC و DAS على الاقتطاعات القانونية. أعد تفعيل «حساب IRG و CNAS» من الإعدادات لإصدارها.</value></data>
 </root>
