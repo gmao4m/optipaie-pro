@@ -163,14 +163,13 @@ Write-Host "==> Building FULL Setup.exe bootstrapper (embeds offline .NET 4.8 + 
 if ($LASTEXITCODE -ne 0) { throw "Setup.exe (full) build failed." }
 
 # ---------------------------------------------------------------------------
-# LIGHT update bootstrapper - SAME Burn bundle, prerequisites REFERENCED for download
-# (DownloadUrl, Compressed="no") instead of embedded. The MSI stays embedded, so the light
-# package carries the app (~23 MB) but not the ~130 MB of runtimes. This is what the in-app
-# auto-updater serves to the 300 existing installs (which already have .NET 4.8 + VC++, so
-# the prerequisites are detected-present and skipped - nothing is downloaded). A new customer
-# downloads the FULL Setup.exe above. The redist files are still present locally for build-time
-# hashing (the DownloadUrl's expected payload), but are NOT embedded into this exe.
-Write-Host "==> Building LIGHT Update.exe bootstrapper (prerequisites referenced for download)..." -ForegroundColor Cyan
+# LIGHT update bootstrapper - what the in-app auto-updater serves to existing installs.
+# It carries the app (MSI) + the VC++ x86 runtime EMBEDDED (~38 MB) and NO .NET package
+# (the updater runs inside a working net48 app; a bal:Condition refuses to run without .NET 4.8).
+# It has ZERO download payloads. The old light build REFERENCED .NET for download assuming an
+# installed .NET would be skipped; Burn v5 still caches (= downloads) it, which broke every
+# update on Windows 7 (no TLS 1.2, 0x80072f7d - incident 2026-11-23). See Bundle.wxs header.
+Write-Host "==> Building LIGHT Update.exe bootstrapper (app + VC++ embedded, no .NET, no downloads)..." -ForegroundColor Cyan
 & $wix build (Join-Path $PSScriptRoot "Bundle.wxs") `
     -d "AppVersion=$wixVersion" -d "Light=yes" -b $PSScriptRoot `
     -ext WixToolset.BootstrapperApplications.wixext `
@@ -196,6 +195,34 @@ foreach ($exeName in @("OptiPaie PRO Setup.exe","OptiPaie PRO Update.exe")) {
         throw "RELEASE GUARD FAILED: '$guardExe' references GetDpiForSystem - this installer will NOT launch on Windows 7 SP1. Refusing to ship. (This is the exact defect that retired the Velopack rail; see release/README.md and docs/WIN7-VERIFICATION.md.)"
     }
     Write-Host "    OK - no GetDpiForSystem import; Windows 7 SP1-safe." -ForegroundColor Green
+}
+
+# ---------------------------------------------------------------------------
+# RELEASE GUARD - no installer may download anything at install time.
+# An un-updated Windows 7 SP1 cannot negotiate TLS 1.2, so ANY download payload (an
+# "external" payload with a DownloadUrl) fails there with 0x80072f7d and aborts the whole
+# install/update. That is exactly what broke the 1.19.0 -> 1.43.0 auto-update on Win 7
+# (incident 2026-11-23). Read the BUILT bundles' Burn manifest (not the .wxs) and refuse to
+# ship either one if it carries an external payload.
+foreach ($exeName in @("OptiPaie PRO Setup.exe","OptiPaie PRO Update.exe")) {
+    $guardExe = Join-Path $outDir $exeName
+    Write-Host "==> Release guard: checking $guardExe for download (external) payloads..." -ForegroundColor Cyan
+    $extractDir = Join-Path ([System.IO.Path]::GetTempPath()) ("optipaie-burn-" + [guid]::NewGuid().ToString("N"))
+    try {
+        & $wix burn extract $guardExe -oba (Join-Path $extractDir "ba") -o (Join-Path $extractDir "c") | Out-Null
+        if ($LASTEXITCODE -ne 0) { throw "RELEASE GUARD FAILED: could not extract '$guardExe' to inspect its manifest." }
+        $manifest = Join-Path $extractDir "ba\manifest.xml"
+        if (-not (Test-Path $manifest)) { throw "RELEASE GUARD FAILED: no Burn manifest found in '$guardExe'." }
+        $text = Get-Content $manifest -Raw
+        if ($text -match 'Packaging="external"' -or $text -match 'DownloadUrl=') {
+            throw "RELEASE GUARD FAILED: '$guardExe' contains a DOWNLOAD payload - it would fetch it over HTTPS at install time, which fails on Windows 7 SP1 (0x80072f7d). Embed it (Compressed=`"yes`") or remove it. Refusing to ship."
+        }
+        $payloads = ([regex]::Matches($text, 'Packaging="embedded"')).Count
+        Write-Host "    OK - $payloads embedded payload(s), 0 download payloads; installs fully offline." -ForegroundColor Green
+    }
+    finally {
+        Remove-Item $extractDir -Recurse -Force -ErrorAction SilentlyContinue
+    }
 }
 # ---------------------------------------------------------------------------
 

@@ -8,24 +8,27 @@
           un-updated Windows 7 SP1 that cannot download over TLS 1.2. This is
           what a NEW customer downloads.
 
-    LIGHT (-d Light=yes)    -> "OptiPaie PRO Update.exe"  (~MSI size)
-          The SAME Burn bootstrapper, but the prerequisites are REFERENCED for
-          download (DownloadUrl) instead of embedded. This is what the in-app
-          AUTO-UPDATER serves to the 300 existing installs: they already run the
-          product, so .NET 4.8 and the VC++ runtime are present -> the detect
-          conditions below are satisfied -> the prerequisites are SKIPPED and
-          nothing is downloaded. A 151 MB push to slow/mobile Algerian
-          connections (the interrupted-download risk) is avoided.
+    LIGHT (-d Light=yes)    -> "OptiPaie PRO Update.exe"  (~38 MB)
+          What the in-app AUTO-UPDATER serves to existing installs. It carries the
+          app (MSI) and the VC++ x86 runtime EMBEDDED, and NO .NET package at all.
+          It contains ZERO download payloads, so it never touches the network.
 
-  WINDOWS 7 FIX (full build): the .NET 4.8 installer is embedded offline, so the
-  full Setup.exe never downloads .NET at install time (an un-updated Win 7 SP1
-  cannot negotiate TLS 1.2 - error 0x80072f7d).
+  WHY THE LIGHT BUILD HAS NO .NET PACKAGE (incident 2026-11-23, Win 7 SP1, 1.19.0 -> 1.43.0):
+  the old light build REFERENCED .NET 4.8 and VC++ for download, on the assumption that an
+  existing install has them -> "detected present -> skipped -> nothing downloaded". FALSE:
+  Burn v5 still CACHES a permanent prerequisite that is already installed (plan showed
+  "execute: None, cache: Vital"), so it DOWNLOADED the 116 MB .NET installer on every update.
+  On Win 7 that HTTPS download fails (no TLS 1.2, 0x80072f7d) and the whole update aborted;
+  on Win 10/11 it silently made every "light" update 116 MB heavier.
+  Fix: the light bundle drops .NET entirely - the updater only ever runs INSIDE a working
+  net48 app, so .NET 4.8 is guaranteed present - and a bal:Condition refuses to run (with a
+  clear bilingual message pointing to the full Setup.exe) on a machine without .NET 4.8.
+  VC++ is EMBEDDED in both builds (14 MB): it may be genuinely absent on an old install (it
+  was, in that log) and must install offline. build-installer.ps1 GUARDS that neither bundle
+  contains an external (download) payload.
 
-  MISSING PREREQUISITE on an existing install (light build): each prerequisite is
-  Vital, so if it is ever absent AND cannot be obtained, Burn rolls the whole
-  install back - it NEVER half-installs - and the bootstrapper names the failed
-  component to the customer (bilingual DisplayName). The guidance is to run the
-  full "OptiPaie PRO Setup.exe", which carries everything offline.
+  WINDOWS 7 (full build): .NET 4.8 and VC++ are embedded offline, so the full Setup.exe
+  never downloads anything at install time either.
 -->
 
 <?ifndef Light ?>
@@ -67,24 +70,19 @@
         Value="Installed"
         Result="value" />
 
-    <Chain>
-      <!-- .NET Framework 4.8. Installed only when .NET 4.8 (release >= 528040) is absent. Permanent.
-           FULL build: embedded offline (Compressed="yes"). LIGHT build: referenced for download
-           (DownloadUrl, Compressed="no") - only ever fetched if actually missing; an existing
-           install has it, so it is detected-present and skipped. -->
 <?if $(var.Light) = "yes" ?>
-      <ExePackage Id="NetFx48"
-                  DisplayName=".NET Framework 4.8 (composant Windows requis / مكوّن ويندوز مطلوب)"
-                  SourceFile="redist\ndp48-x86-x64-allos-enu.exe"
-                  DownloadUrl="https://go.microsoft.com/fwlink/?linkid=2088631"
-                  Compressed="no"
-                  PerMachine="yes" Permanent="yes" Vital="yes"
-                  DetectCondition="NetFx48Release AND NetFx48Release &gt;= 528040"
-                  InstallArguments="/q /norestart" RepairArguments="/q /norestart">
-        <ExitCode Value="1641" Behavior="scheduleReboot" />
-        <ExitCode Value="3010" Behavior="scheduleReboot" />
-      </ExePackage>
-<?else?>
+    <!-- LIGHT build only: no .NET package is carried, so refuse to run where .NET 4.8 is missing
+         (only possible if someone runs Update.exe by hand on a fresh machine). -->
+    <bal:Condition
+        Condition="NetFx48Release AND NetFx48Release &gt;= 528040"
+        Message="Cette mise à jour nécessite .NET Framework 4.8, absent de cet ordinateur. Installez plutôt « OptiPaie PRO Setup.exe » (installation complète, hors ligne).&#13;&#10;&#13;&#10;هذا التحديث يتطلّب .NET Framework 4.8 غير المثبَّت على هذا الحاسوب. ثبّت بدلًا منه « OptiPaie PRO Setup.exe » (التثبيت الكامل، دون إنترنت)." />
+<?endif?>
+
+    <Chain>
+      <!-- .NET Framework 4.8 - FULL build only, embedded offline. Installed only when .NET 4.8
+           (release >= 528040) is absent. Permanent. The LIGHT build carries no .NET package
+           (see the header): it would be cached, i.e. DOWNLOADED, even when already installed. -->
+<?if $(var.Light) != "yes" ?>
       <ExePackage Id="NetFx48"
                   DisplayName=".NET Framework 4.8 (composant Windows requis / مكوّن ويندوز مطلوب)"
                   SourceFile="redist\ndp48-x86-x64-allos-enu.exe"
@@ -98,22 +96,8 @@
 <?endif?>
 
       <!-- Visual C++ 2015-2022 x86 runtime. Installed only when absent. Permanent. Exit 1638 = a
-           newer runtime already present (success). FULL: embedded. LIGHT: referenced for download
-           (skipped on an existing install, which already loaded libSkiaSharp). -->
-<?if $(var.Light) = "yes" ?>
-      <ExePackage Id="VCRedistX86"
-                  DisplayName="Microsoft Visual C++ 2015-2022 (x86) (composant Windows requis / مكوّن ويندوز مطلوب)"
-                  SourceFile="redist\vc_redist.x86.exe"
-                  DownloadUrl="https://aka.ms/vs/17/release/vc_redist.x86.exe"
-                  Compressed="no"
-                  PerMachine="yes" Permanent="yes" Vital="yes"
-                  DetectCondition="VCppX86Installed AND VCppX86Installed = 1"
-                  InstallArguments="/install /quiet /norestart" RepairArguments="/repair /quiet /norestart">
-        <ExitCode Value="1638" Behavior="success" />
-        <ExitCode Value="1641" Behavior="scheduleReboot" />
-        <ExitCode Value="3010" Behavior="scheduleReboot" />
-      </ExePackage>
-<?else?>
+           newer runtime already present (success). EMBEDDED in BOTH builds (14 MB): an old install
+           can genuinely lack it (the 2026-11-23 Win 7 log did), and it must install offline. -->
       <ExePackage Id="VCRedistX86"
                   DisplayName="Microsoft Visual C++ 2015-2022 (x86) (composant Windows requis / مكوّن ويندوز مطلوب)"
                   SourceFile="redist\vc_redist.x86.exe"
@@ -125,10 +109,8 @@
         <ExitCode Value="1641" Behavior="scheduleReboot" />
         <ExitCode Value="3010" Behavior="scheduleReboot" />
       </ExePackage>
-<?endif?>
 
-      <!-- The application. ALWAYS embedded in BOTH builds (it is the product, ~23 MB) so the light
-           update carries the app itself and only the prerequisites are referenced. -->
+      <!-- The application. ALWAYS embedded in BOTH builds (it is the product, ~23 MB). -->
       <MsiPackage Id="OptiPaiePro"
                   SourceFile="output\OptiPaie PRO.msi"
                   Compressed="yes"
