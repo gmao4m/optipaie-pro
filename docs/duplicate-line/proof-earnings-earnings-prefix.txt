@@ -1,0 +1,3 @@
+EARNINGS SIDE — two FREE bonuses + loan instalment + one manual deduction (octobre 2026)
+  free-text (id 0) lines: 4 — 2 gains, 2 deductions
+  generation: REFUSED  [Payroll_DuplicateElement] Une rubrique de paie est dupliquée: Prime exceptionnelle

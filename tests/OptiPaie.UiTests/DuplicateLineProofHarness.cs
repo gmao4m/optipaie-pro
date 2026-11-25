@@ -145,6 +145,47 @@ namespace OptiPaie.UiTests
                 foreach (PayrollMessage msg in r4.Messages) p4.AppendLine("  msg " + msg.Severity + "|" + msg.Code);
                 File.WriteAllText(Path.Combine(outDir, "proof4-" + tag + ".txt"), p4.ToString(), new UTF8Encoding(false));
 
+                // ---------------- EARNINGS SIDE: two free bonuses + loan instalment + one manual deduction ----------------
+                long bilal = hire("HADDAD", "Bilal", 50000m);
+                Assert.That(services.Loans.Save(new Loan
+                {
+                    EmployeeId = bilal, Type = LoanType.Loan, Status = LoanStatus.Active, Principal = 40000m,
+                    MonthlyInstallment = 4000m, StartYear = m.Year, StartMonth = m.Month, Reason = "Prêt personnel"
+                }).IsSuccess, Is.True);
+                PayrollGenerationRequest er = services.Batch.BuildRequest(companyId, bilal, m.Year, m.Month);
+                if (!er.Elements.Any(e => e.IsManual && e.ManualLabel == "Remboursement prêt"))
+                    er.Elements.Add(new PayrollElementEntry
+                    {
+                        ElementId = 0, IsManual = true, ManualType = ElementType.Deduction, ManualLabel = "Remboursement prêt",
+                        LineAmount = services.Loans.GetMonthlyDeduction(bilal, m.Year, m.Month)
+                    });
+                er.Elements.Add(new PayrollElementEntry { IsManual = true, ManualType = ElementType.Gain, ManualLabel = "Prime exceptionnelle", LineAmount = 6000m });
+                er.Elements.Add(new PayrollElementEntry { IsManual = true, ManualType = ElementType.Gain, ManualLabel = "Indemnité de déplacement", LineAmount = 3500m });
+                er.Elements.Add(new PayrollElementEntry { IsManual = true, ManualType = ElementType.Deduction, ManualLabel = "Avance exceptionnelle", LineAmount = 2500m });
+                Result<long> eg = services.Payroll.Generate(er, acknowledgeWarnings: true);
+                var pe = new StringBuilder();
+                pe.AppendLine("EARNINGS SIDE — two FREE bonuses + loan instalment + one manual deduction (" + m.ToString("MMMM yyyy", Fr) + ")");
+                pe.AppendLine("  free-text (id 0) lines: 4 — 2 gains, 2 deductions");
+                pe.AppendLine("  generation: " + (eg.IsSuccess ? "SUCCESS (payslip #" + eg.Value + ")" : "REFUSED  [" + eg.ErrorCode + "] " + eg.Error));
+                if (eg.IsSuccess)
+                {
+                    Payslip ep = services.Archive.GetPayslip(eg.Value);
+                    foreach (PayrollDetail d in ep.Details)
+                        pe.AppendLine(string.Format("    {0,-26} {1,8} {2,14}", d.LabelFr, d.ElementType == ElementType.Gain ? "gain" : "retenue", Money(d.Amount)));
+                    pe.AppendLine(string.Format("    {0,-26} {1,8} {2,14}", "SALAIRE BRUT", "", Money(ep.SalaireBrut)));
+                    pe.AppendLine(string.Format("    {0,-26} {1,8} {2,14}", "Base cotisable", "", Money(ep.BaseCotisable)));
+                    pe.AppendLine(string.Format("    {0,-26} {1,8} {2,14}", "CNAS salarié", "retenue", Money(ep.CnasEmployee)));
+                    pe.AppendLine(string.Format("    {0,-26} {1,8} {2,14}", "IRG", "retenue", Money(ep.Irg)));
+                    pe.AppendLine(string.Format("    {0,-26} {1,8} {2,14}", "NET À PAYER", "", Money(ep.NetSalaire)));
+                    decimal gains = ep.Details.Where(d => d.ElementType == ElementType.Gain).Sum(d => d.Amount);
+                    decimal deds = ep.Details.Where(d => d.ElementType == ElementType.Deduction).Sum(d => d.Amount);
+                    pe.AppendLine("  check gross: lines " + Money(gains) + (gains == ep.SalaireBrut ? " = brut ✓" : " ≠ brut ✗"));
+                    pe.AppendLine("  check net  : " + Money(ep.SalaireBrut) + " − " + Money(ep.CnasEmployee) + " − " + Money(ep.Irg) + " − " + Money(deds) +
+                                  " = " + Money(ep.SalaireBrut - ep.CnasEmployee - ep.Irg - deds) + (ep.SalaireBrut - ep.CnasEmployee - ep.Irg - deds == ep.NetSalaire ? "  ✓" : "  ✗"));
+                }
+                File.WriteAllText(Path.Combine(outDir, "proof-earnings-" + tag + ".txt"), pe.ToString(), new UTF8Encoding(false));
+                TestContext.Out.WriteLine(pe.ToString());
+
                 TestContext.Out.WriteLine(p2.ToString());
                 TestContext.Out.WriteLine(p3);
                 TestContext.Out.WriteLine(p4.ToString());

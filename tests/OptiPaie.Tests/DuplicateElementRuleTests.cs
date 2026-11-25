@@ -58,6 +58,30 @@ namespace OptiPaie.Tests
         }
 
         [Test]
+        public void Two_Free_Bonuses_Plus_Loan_Instalment_Plus_Manual_Deduction_Are_Accepted()
+        {
+            // Free EARNINGS lines are stamped id 0 exactly like free deductions (PayrollService manual branch).
+            PayrollElementInput FreeGain(string label, decimal amount) => new PayrollElementInput
+            {
+                ElementId = 0, LabelFr = label, LabelAr = label, ElementType = ElementType.Gain,
+                CalculationMethod = CalculationMethod.FixedAmount, Amount = amount,
+                IsCnasApplicable = true, IsIrgApplicable = true, CnasFactor = 1m, IrgFactor = 1m,
+                IsIncludedInGross = true, Periodicity = ElementPeriodicity.Monthly
+            };
+
+            PayrollResult r = Run(
+                FreeGain("Prime exceptionnelle", 6000m),
+                FreeGain("Indemnité de déplacement", 3500m),
+                FreeText("Remboursement prêt", 4000m),
+                FreeText("Avance exceptionnelle", 2500m));
+
+            Assert.That(r.IsSuccess, Is.True, Errors(r));
+            Assert.That(r.Totals.SalaireBrut, Is.EqualTo(60000m + 6000m + 3500m), "both free bonuses in the gross");
+            Assert.That(r.Totals.NetSalaire,
+                Is.EqualTo(r.Totals.SalaireBrut - r.Totals.CnasEmployee - r.Totals.Irg - 6500m), "both deductions applied");
+        }
+
+        [Test]
         public void Lines_With_No_Element_Id_At_All_Are_Not_Duplicates()
         {
             PayrollResult r = Run(FreeText("Ligne A", 1000m, id: null), FreeText("Ligne B", 1000m, id: null));

@@ -1,0 +1,15 @@
+EARNINGS SIDE — two FREE bonuses + loan instalment + one manual deduction (octobre 2026)
+  free-text (id 0) lines: 4 — 2 gains, 2 deductions
+  generation: SUCCESS (payslip #2)
+    Salaire de base                gain      50 000,00
+    Remboursement prêt          retenue       4 000,00
+    Prime exceptionnelle           gain       6 000,00
+    Indemnité de déplacement       gain       3 500,00
+    Avance exceptionnelle       retenue       2 500,00
+    SALAIRE BRUT                             59 500,00
+    Base cotisable                           59 500,00
+    CNAS salarié                retenue       5 355,00
+    IRG                         retenue       6 919,15
+    NET À PAYER                              40 725,85
+  check gross: lines 59 500,00 = brut ✓
+  check net  : 59 500,00 − 5 355,00 − 6 919,15 − 6 500,00 = 40 725,85  ✓
