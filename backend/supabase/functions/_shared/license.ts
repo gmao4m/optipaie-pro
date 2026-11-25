@@ -40,11 +40,14 @@ export async function getProductByKey(
   db: SupabaseClient,
   productKey: string,
 ): Promise<ProductRow | null> {
-  const { data } = await db
+  const { data, error } = await db
     .from("products")
     .select("id, key, name, current_version, activation_rules")
     .eq("key", productKey)
     .maybeSingle();
+  // A FAILED query (bad service key, database down, RLS) must never look like "unknown_product":
+  // that error tells the client its product does not exist, and it is never audited.
+  if (error) throw new Error(`products lookup failed for ${JSON.stringify(productKey)}: ${error.message}`);
   return (data as ProductRow) ?? null;
 }
 

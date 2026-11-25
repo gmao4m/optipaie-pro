@@ -56,8 +56,15 @@ serve(async (req) => {
   const db = serviceClient();
   const nowIso = new Date().toISOString();
 
-  const product = await getProductByKey(db, productKey);
+  let product;
+  try {
+    product = await getProductByKey(db, productKey);
+  } catch (e) {
+    console.error(String(e));
+    return json({ error: "server_error", message: "Erreur serveur. Réessayez plus tard." }, 500);
+  }
   if (!product) {
+    console.warn(`unknown_product: productKey=${JSON.stringify(productKey)}`);
     return json({ error: "unknown_product", message: "Produit inconnu." }, 400);
   }
 
