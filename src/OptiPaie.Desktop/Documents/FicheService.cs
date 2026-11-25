@@ -156,7 +156,16 @@ namespace OptiPaie.Desktop.Documents
 
         private static void Render(FichePaieModel model, string path)
         {
-            Document.Create(container => new FichePaieDocument(model).Compose(container)).GeneratePdf(path);
+            try
+            {
+                Document.Create(container => new FichePaieDocument(model).Compose(container)).GeneratePdf(path);
+            }
+            catch (Exception ex)
+            {
+                // Never let a layout/render failure reach the accountant raw: name the employee, keep the
+                // original as the inner exception (logged in full by Dialogs.ErrorWithLog).
+                throw PayslipRender.Wrap(model, ex);
+            }
         }
 
         private static void Open(string path, string verb)

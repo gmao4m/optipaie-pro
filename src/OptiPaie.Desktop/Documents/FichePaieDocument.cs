@@ -97,7 +97,13 @@ namespace OptiPaie.Desktop.Documents
                     // (and logged), the payslip is still produced. See Common.SafeImage.
                     byte[] logo = OptiPaie.Desktop.Common.SafeImage.ToRenderablePng(_m.Company?.Logo, out string logoProblem);
                     if (logo != null)
-                        row.ConstantItem(50).Height(50).AlignMiddle().MaxHeight(50).Image(logo);
+                        // FitArea, not the default FitWidth: in this fixed 50×50 box a PORTRAIT logo scaled to
+                        // the width needs more than 50 pt of height, can never fit, and QuestPDF throws
+                        // "Composed layout generates infinite document" (production bug since 1.30.3 — any logo
+                        // even 1 px taller than wide). FitArea keeps the aspect ratio within BOTH dimensions;
+                        // for a square or landscape logo it yields exactly the FitWidth size, so those payslips
+                        // render byte-for-byte as before.
+                        row.ConstantItem(50).Height(50).AlignMiddle().MaxHeight(50).Image(logo, ImageScaling.FitArea);
                     else if (!string.IsNullOrEmpty(logoProblem))
                         OptiPaie.Desktop.Common.CrashLog.Breadcrumb(
                             "Fiche de paie : logo ignoré (" + logoProblem + ") — bulletin rendu sans logo.");

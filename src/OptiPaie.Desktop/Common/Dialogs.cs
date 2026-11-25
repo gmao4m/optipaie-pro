@@ -25,6 +25,16 @@ namespace OptiPaie.Desktop.Common
         /// </summary>
         public static void ErrorWithLog(string businessMessage, System.Exception ex)
         {
+            // A payslip that could not be produced: log the FULL original exception for support, but show the
+            // accountant only a plain bilingual message naming the employee — never a raw stack trace.
+            if (ex is OptiPaie.Desktop.Documents.PayslipRenderException payslip)
+            {
+                try { Logger?.Error(businessMessage + " — " + payslip.Employee + " " + payslip.Period, payslip.InnerException ?? payslip); } catch { }
+                try { CrashLog.Fatal(businessMessage + " — " + payslip.Employee + " " + payslip.Period, payslip.InnerException ?? payslip); } catch { }
+                MessageBox.Show(payslip.Message, "Fiche de paie · كشف الراتب", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
             try { Logger?.Error(businessMessage, ex); } catch { /* logging must never mask the message */ }
 
             try

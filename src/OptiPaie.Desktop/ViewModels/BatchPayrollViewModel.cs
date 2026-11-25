@@ -296,15 +296,38 @@ namespace OptiPaie.Desktop.ViewModels
                     models.Add(_fiche.FromPayslip(_company, employee, payslip, _services.Localization.IsRightToLeft, _selectedYear, _selectedMonth));
                 }
 
-                // One combined PDF: each payslip appends its own page(s) to the container.
-                Document.Create(container =>
-                {
-                    foreach (FichePaieModel m in models) new FichePaieDocument(m).Compose(container);
-                }).GeneratePdf(dialog.FileName);
+                // One combined PDF: each payslip appends its own page(s) to the container. If one payslip
+                // cannot be produced, the others are still exported and the failed ones are named.
+                PayslipRender.BatchResult exported = PayslipRender.ExportBatch(models, dialog.FileName);
 
-                Dialogs.Info(models.Count + " bulletin(s) exporté(s) dans un seul PDF.");
-                try { System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(dialog.FileName) { UseShellExecute = true }); }
-                catch { /* opening is best-effort */ }
+                foreach (PayslipRenderException failed in exported.Failed)
+                {
+                    _services.Logger.Error("Batch payslip export — " + failed.Employee + " " + failed.Period, failed.InnerException ?? failed);
+                    try { CrashLog.Fatal("Batch payslip export — " + failed.Employee + " " + failed.Period, failed.InnerException ?? failed); } catch { }
+                }
+
+                if (exported.Failed.Count == 0)
+                {
+                    Dialogs.Info(exported.Exported + " bulletin(s) exporté(s) dans un seul PDF.");
+                }
+                else
+                {
+                    string names = string.Join(Environment.NewLine, exported.Failed.Select(f => "  • " + f.Employee + " (" + f.Period + ")"));
+                    System.Windows.MessageBox.Show(
+                        exported.Exported + " bulletin(s) exporté(s). " + exported.Failed.Count + " fiche(s) n'ont pas pu être produites :" +
+                        Environment.NewLine + names + Environment.NewLine +
+                        "Les détails techniques ont été enregistrés : transmettez-les au support." +
+                        Environment.NewLine + Environment.NewLine +
+                        "صُدِّر " + exported.Exported + " كشف. تعذّر إنتاج " + exported.Failed.Count + " كشف (انظر الأسماء أعلاه). " +
+                        "سُجّلت التفاصيل التقنية: أرسلها إلى الدعم.",
+                        "Fiches de paie · كشوف الرواتب", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+                }
+
+                if (exported.Exported > 0)
+                {
+                    try { System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(dialog.FileName) { UseShellExecute = true }); }
+                    catch { /* opening is best-effort */ }
+                }
             }
             catch (Exception ex)
             {
