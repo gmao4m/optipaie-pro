@@ -241,10 +241,12 @@ namespace OptiPaie.UiTests
 
                     var settings = new SettingsViewModel(services);
                     settings.OnActivated();
+                    typeof(SettingsViewModel).GetProperty("DeviceIdText").SetValue(settings, "•••• (masqué)"); // never publish this PC's device id
                     Shot(new SettingsView { DataContext = settings }, 1100, "setting-ON-" + lang, services);
 
                     services.ConfigurationService.SetLegalDeductionsEnabled(false);
                     settings.OnActivated();
+                    typeof(SettingsViewModel).GetProperty("DeviceIdText").SetValue(settings, "•••• (masqué)"); // never publish this PC's device id
                     Shot(new SettingsView { DataContext = settings }, 1100, "setting-OFF-" + lang, services);
 
                     var dialog = new LegalDeductionsConfirmWindow();
