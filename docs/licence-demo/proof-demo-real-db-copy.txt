@@ -1,0 +1,55 @@
+﻿DEMO REMOVAL — on a COPY of the real database (never the live file)
+source copied : snap-1441.db  (966 656 bytes)
+
+schema version after upgrade : 45
+companies in the copy (demo identifiers shown — the user had edited its CNAS number):
+  #3 NIF=000916025478931 NIS=000916025478931 RC=09/00-1245789 B 16 AI=16050124789 CNAS=1234567890 updated=2026-08-25 10:22:11.1959082Z
+  departments of the demo: Production, Commercial, Administration, Informatique, Générale
+  1 | OptiraSO | IsDemo=0 | IsDeleted=1 | employees=0
+  2 | OptiraSoft | IsDemo=0 | IsDeleted=1 | employees=1
+  3 | SARL Atlas Industrie | IsDemo=0 | IsDeleted=0 | employees=20
+
+[1] IDENTIFICATION → company #3 « SARL Atlas Industrie » recognised by: fingerprint (seeded before the flag existed: the 4 seeded legal identifiers NIF/NIS/RC/AI + the exact 20-name roster + departments among the seeded ones and the default « Générale »)
+
+[2] ONLY ACTIVE COMPANY → IsOnlyCompany=True ; Delete() → REFUSED (Demo_OnlyCompany)
+    message: La société de démonstration est la seule entreprise de la base : le logiciel en a besoin d'au moins une. Créez d'abord votre propre entreprise, puis supprimez la société de démonstration. / شركة العرض التجريبي هي الشركة الوحيدة في قاعدة البيانات، والبرنامج يحتاج إلى شركة واحدة على الأقلّ. أنشئ شركتك أوّلًا، ثمّ احذف شركة العرض التجريبي.
+    database hash before/after the refusal: bcf43aae1ba9114b / bcf43aae1ba9114b
+    backups before/after: 1 / 1 (no backup is taken for a refused removal)
+
+[3] BUTTON VISIBILITY → administrator: shown ; HR role: hidden
+
+[4] PREVIEW shown before deletion (SARL Atlas Industrie):
+    La société de démonstration                              1
+    Employés                                                20
+    Bulletins de paie                                       21
+    Lignes des bulletins                                    25
+    Campagnes de paie                                        2
+    Pointages                                              496
+    Congés                                                   5
+    Contrats                                                21
+    Prêts                                                    3
+    Remboursements de prêts                                 15
+    Départements                                             5
+    Campagnes d'évaluation                                   1
+    Participants aux formations                              7
+    Sessions de formation                                    2
+    Affectations de matériel                                 5
+    Matériel                                                 6
+    Attestations de travail                                  4
+    Suivi disciplinaire                                      1
+    Journal d'audit de la société                            3
+    Total : 643 ligne(s) supprimée(s).
+
+[5] BACKUP taken BEFORE deletion: optipaie_20261125_125113.db  (966 656 bytes)
+    backup still holds the demo: company rows=1, employees=20  → restorable
+
+[6] RESULT
+    message shown: Données de démonstration supprimées : 643 ligne(s). / Sauvegarde faite avant la suppression : / C:\Users\PC\AppData\Local\Temp\optipaie-demo-proof-311fae9c240c4e30a189b0776e771081\Backups\optipaie_20261125_125113.db
+    open company after removal: #4 « SARL Bensaïd Distribution » (was the demo #3)
+    demo still recognised: False
+    rows still referencing the demo, per plan table:
+      total = 0
+    orphan scan (declared FKs + every *Id column → its parent): 0 orphans
+    customer company rows hash before/after: 81deadcdcb77cfc3 / 81deadcdcb77cfc3
+    global leave types (CompanyId NULL) before/after: 12 / 12
+    soft-deleted companies #1 and #2 untouched: 2

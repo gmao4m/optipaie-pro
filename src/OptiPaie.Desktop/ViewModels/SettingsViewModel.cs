@@ -53,6 +53,101 @@ namespace OptiPaie.Desktop.ViewModels
             DeactivateCommand = new RelayCommand(DeactivateDevice);
             CheckUpdatesCommand = new RelayCommand(CheckUpdates);
             ToggleLegalDeductionsCommand = new RelayCommand(ToggleLegalDeductions, () => CanEditLegalDeductions);
+            SyncLicenseCommand = new RelayCommand(SyncLicense, () => !IsSyncingLicense);
+            RemoveDemoCommand = new RelayCommand(RemoveDemo, () => CanRemoveDemo);
+        }
+
+        // -- Trial demo company removal --------------------------------------
+        private bool _canRemoveDemo;
+        private string _demoCompanyText = string.Empty;
+
+        /// <summary>
+        /// True only for an administrator AND when the trial demo company is positively identified
+        /// (flag, or full fingerprint + exact roster). Otherwise the block is not shown at all.
+        /// </summary>
+        public bool CanRemoveDemo { get => _canRemoveDemo; private set => Set(ref _canRemoveDemo, value); }
+
+        public string DemoCompanyText { get => _demoCompanyText; private set => Set(ref _demoCompanyText, value); }
+
+        public ICommand RemoveDemoCommand { get; }
+
+        /// <summary>The preview + confirmation. Replaceable so the flow can be exercised headless.</summary>
+        public Func<DemoRemovalPreviewViewModel, bool> ConfirmDemoRemoval { get; set; } = preview =>
+        {
+            var window = new DemoRemovalWindow { DataContext = preview, Owner = Application.Current?.MainWindow };
+            return window.ShowDialog() == true;
+        };
+
+        /// <summary>Shows the outcome. Replaceable so the flow can be exercised headless.</summary>
+        public Action<string> ShowDemoMessage { get; set; } = message => Dialogs.Info(message, "Démonstration · العرض التجريبي");
+
+        private void RefreshDemo()
+        {
+            OptiPaie.Services.DemoCompanyInfo demo = null;
+            if (_services.DemoData != null && ScreenAccess.CanEdit(_services, "settings"))
+            {
+                try { demo = _services.DemoData.FindDemoCompany(); }
+                catch (Exception ex) { _services.Logger?.Warn("Demo detection failed: " + ex.Message); }
+            }
+
+            DemoCompanyText = demo != null ? demo.Name : string.Empty;
+            CanRemoveDemo = demo != null;
+            CommandManager.InvalidateRequerySuggested();
+        }
+
+        private void RemoveDemo()
+        {
+            var t = OptiPaie.Desktop.Localization.TranslationSource.Instance;
+            OptiPaie.Services.DemoDeletionPreview preview = _services.DemoData.Preview();
+            if (preview == null)
+            {
+                ShowDemoMessage(t["Demo_NotFound"]);
+                RefreshDemo();
+                return;
+            }
+
+            // The preview window shows the counts and, when the demo is the only company, the refusal
+            // (its Delete button is then disabled). The service re-checks everything anyway.
+            if (!ConfirmDemoRemoval(new DemoRemovalPreviewViewModel(preview, _services.Localization.IsRightToLeft)) ||
+                preview.IsOnlyCompany)
+            {
+                return;
+            }
+
+            Result<OptiPaie.Services.DemoDeletionOutcome> result;
+            try
+            {
+                result = _services.DemoData.Delete();
+            }
+            catch (OptiPaie.Core.Security.AccessDeniedException)
+            {
+                Dialogs.Error(t["Legal_ReadOnly"]);
+                return;
+            }
+
+            if (result.IsFailure)
+            {
+                Dialogs.Error(result.Error);
+                RefreshDemo();
+                return;
+            }
+
+            long deleted = result.Value.Deleted.Where(r => r.Table != "Candidates.HiredEmployeeId").Sum(r => r.Rows);
+            ShowDemoMessage(string.Format(CultureInfo.InvariantCulture, t["Demo_Done"],
+                deleted.ToString("N0", CultureInfo.GetCultureInfo("fr-FR")), result.Value.BackupPath));
+
+            // If the demo was the open company, switch to the remaining one (the shell rebuilds itself
+            // on an active-company change, so no screen keeps a byte of the removed company).
+            CompanyContext companies = _services.CompanyContext;
+            bool wasActive = companies.ActiveId == preview.Company.Id;
+            companies.Reload();
+            if (wasActive && result.Value.RemainingCompanyId.HasValue)
+            {
+                Company target = companies.Companies.FirstOrDefault(c => c.Id == result.Value.RemainingCompanyId.Value);
+                if (target != null) companies.Active = target;
+            }
+
+            RefreshDemo();
         }
 
         // -- IRG / CNAS switch ------------------------------------------------
@@ -154,6 +249,58 @@ namespace OptiPaie.Desktop.ViewModels
 
             RefreshLegalDeductions();
             RefreshLicense();
+            RefreshDemo();
+        }
+
+        // -- "تحديث الترخيص": force a licence check now ---------------------------
+        private bool _isSyncingLicense;
+
+        /// <summary>
+        /// Checks the licence with the server immediately (no waiting for the startup / 24 h check), for a
+        /// customer who calls while his licence is being upgraded. A Mono ⇄ Multi change is announced by the
+        /// shell (one place for every check); this reports the check itself. Offline/failure never changes
+        /// the entitlement.
+        /// </summary>
+        public ICommand SyncLicenseCommand { get; }
+
+        public bool IsSyncingLicense
+        {
+            get => _isSyncingLicense;
+            private set { if (Set(ref _isSyncingLicense, value)) CommandManager.InvalidateRequerySuggested(); }
+        }
+
+        /// <summary>Shows the check report. Replaceable so the flow can be exercised headless.</summary>
+        public Action<string> ShowLicenseReport { get; set; } = message => Dialogs.Info(message, "Licence · الترخيص");
+
+        /// <summary>Completes when the last licence check finished (lets a test await the button).</summary>
+        public System.Threading.Tasks.Task LastLicenseSync { get; private set; } = System.Threading.Tasks.Task.CompletedTask;
+
+        private void SyncLicense() => LastLicenseSync = SyncLicenseAsync();
+
+        private async System.Threading.Tasks.Task SyncLicenseAsync()
+        {
+            if (IsSyncingLicense) return;
+            IsSyncingLicense = true;
+            LicenseSnapshot before = _services.Licensing.Current;
+            LicenseResult result;
+            try
+            {
+                result = await _services.Licensing.SynchronizeAsync(CancellationToken.None);
+            }
+            catch (Exception ex)
+            {
+                _services.Logger?.Warn("Licence refresh failed: " + ex.Message);
+                result = LicenseResult.Create(LicenseResultKind.Error, string.Empty, _services.Licensing.Current);
+            }
+            finally
+            {
+                IsSyncingLicense = false;
+            }
+
+            LicenseSnapshot after = _services.Licensing.Current;
+            RefreshLicense();
+            if (OptiPaie.Services.Licensing.LicenseScopeChange.Describe(before, after) == null)
+                ShowLicenseReport(OptiPaie.Services.Licensing.LicenseScopeChange.RefreshReport(result, before, after));
         }
 
         private void RefreshLicense()

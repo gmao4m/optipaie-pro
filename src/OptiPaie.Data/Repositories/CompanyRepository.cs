@@ -36,11 +36,11 @@ namespace OptiPaie.Data.Repositories
                 "INSERT INTO Companies " +
                 "(NameFr, NameAr, LegalForm, AddressFr, AddressAr, City, Nif, Nis, Rc, ArticleImposition, " +
                 " CnasEmployerNumber, Cacobatph, BtphSector, CacobatphEnabled, Bank, BankAccount, Currency, ManagerName, Phone, Email, Logo, " +
-                " CreatedAtUtc, UpdatedAtUtc, IsDeleted) " +
+                " CreatedAtUtc, UpdatedAtUtc, IsDeleted, IsDemo) " +
                 "VALUES " +
                 "(@NameFr, @NameAr, @LegalForm, @AddressFr, @AddressAr, @City, @Nif, @Nis, @Rc, @ArticleImposition, " +
                 " @CnasEmployerNumber, @Cacobatph, @BtphSector, @CacobatphEnabled, @Bank, @BankAccount, @Currency, @ManagerName, @Phone, @Email, @Logo, " +
-                " @CreatedAtUtc, @UpdatedAtUtc, @IsDeleted); " +
+                " @CreatedAtUtc, @UpdatedAtUtc, @IsDeleted, @IsDemo); " +
                 "SELECT last_insert_rowid();";
 
             long id = Connection.ExecuteScalar<long>(sql, company, Transaction);

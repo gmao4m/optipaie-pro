@@ -89,14 +89,26 @@ namespace OptiPaie.Desktop.ViewModels
             }
         }
 
+        /// <summary>
+        /// Why a new company is refused. After a Multi → Mono downgrade the customer may already have several
+        /// companies: they ALL stay accessible (nothing is hidden or deleted) — only creating another is blocked.
+        /// </summary>
+        public static string CompanyLimitMessage(int existingCompanies)
+        {
+            var t = OptiPaie.Desktop.Localization.TranslationSource.Instance;
+            return existingCompanies > 1
+                ? string.Format(System.Globalization.CultureInfo.InvariantCulture, t["License_CompanyLimitDowngraded"], existingCompanies)
+                : t["License_CompanyLimitReached"];
+        }
+
         private void New()
         {
             // Mono-société licenses (and the trial) allow a single company; adding
             // more needs a Multi-sociétés license. The first company is always allowed.
-            if (!_services.LicenseGate.CanAddCompany(_services.Companies.GetAll().Count))
+            int existing = _services.Companies.GetAll().Count;
+            if (!_services.LicenseGate.CanAddCompany(existing))
             {
-                Dialogs.Info(
-                    OptiPaie.Desktop.Localization.TranslationSource.Instance["License_CompanyLimitReached"],
+                Dialogs.Info(CompanyLimitMessage(existing),
                     OptiPaie.Desktop.Localization.TranslationSource.Instance["License_CompanyLimitTitle"]);
                 return;
             }

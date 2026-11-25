@@ -193,6 +193,9 @@ namespace OptiPaie.Desktop.Composition
         /// <summary>Public-holidays calendar (wired post-construction by the composition root).</summary>
         public IHolidayService Holidays { get; set; }
 
+        /// <summary>Finds and removes the trial demo company (administrator-only, backup first).</summary>
+        public OptiPaie.Services.DemoDataService DemoData { get; set; }
+
         /// <summary>Loans module (premium) — feeds instalments into payroll as deductions.</summary>
         public ILoanService Loans { get; }
 

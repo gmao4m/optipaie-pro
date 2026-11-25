@@ -81,6 +81,13 @@ namespace OptiPaie.Core.Entities
         /// <summary>Soft-delete flag; deleted companies are hidden but never orphan payroll history.</summary>
         public bool IsDeleted { get; set; }
 
+        /// <summary>
+        /// True for the trial DEMO company, set by the demo seeder (migration 0045). It is the dedicated
+        /// identifier used by "remove demo data"; older databases without it are recognised only by the
+        /// full demo fingerprint, never by name alone. Default false for every real company.
+        /// </summary>
+        public bool IsDemo { get; set; }
+
         /// <summary>Optimistic-concurrency token (see <see cref="Employee.RowVersion"/>). Default 0.</summary>
         public long RowVersion { get; set; }
     }

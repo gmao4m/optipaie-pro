@@ -61,6 +61,7 @@ namespace OptiPaie.Desktop.Shell
 
             // Refresh lock states and the current page whenever the license changes
             // (e.g. after an online synchronization enables a newly purchased module).
+            _lastLicense = _services.Licensing.Current;
             _services.Licensing.Changed += OnLicenseChanged;
 
             // Rebuild the (code-built) navigation and refresh chrome text when the UI
@@ -549,8 +550,20 @@ namespace OptiPaie.Desktop.Shell
             }
         }
 
+        // The licence the user was last told about, to announce a Mono ⇄ Multi change exactly once
+        // (after a background check, or after the "Actualiser la licence" button).
+        private LicenseSnapshot _lastLicense;
+
+        /// <summary>Shows a licence-scope change to the user. Replaceable so it can be exercised headless.</summary>
+        public Action<string> AnnounceLicenseChange { get; set; } =
+            message => OptiPaie.Desktop.Common.Dialogs.Info(message, "Licence · الترخيص");
+
         private void OnLicenseChanged(object sender, EventArgs e)
         {
+            LicenseSnapshot now = _services.Licensing.Current;
+            string scopeMessage = OptiPaie.Services.Licensing.LicenseScopeChange.Describe(_lastLicense, now);
+            _lastLicense = now;
+
             Action refresh = () =>
             {
                 foreach (NavItemViewModel item in ModuleNav)
@@ -584,6 +597,12 @@ namespace OptiPaie.Desktop.Shell
             else
             {
                 refresh();
+            }
+
+            if (scopeMessage != null)
+            {
+                if (dispatcher != null && !dispatcher.CheckAccess()) dispatcher.Invoke(() => AnnounceLicenseChange(scopeMessage));
+                else AnnounceLicenseChange(scopeMessage);
             }
         }
     }

@@ -158,6 +158,8 @@
                         <WrapPanel Margin="0,20,0,0">
                             <Button Style="{StaticResource PrimaryButton}" Content="{loc:Loc Settings_Renew}" Command="{Binding RenewCommand}" Margin="0,0,10,10" />
                             <Button Style="{StaticResource SecondaryButton}" Content="{loc:Loc Settings_CheckUpdates}" Command="{Binding CheckUpdatesCommand}" Margin="0,0,10,10" />
+                            <!-- Forces a licence check now: an upgrade (Mono → Multi) is applied without reactivation. -->
+                            <Button Style="{StaticResource SecondaryButton}" Content="{loc:Loc Settings_SyncLicense}" Command="{Binding SyncLicenseCommand}" Margin="0,0,10,10" />
                         </WrapPanel>
                         <TextBlock Style="{StaticResource Caption}" Margin="0,2,0,0" Text="{Binding LastUpdateCheckText}" />
 
@@ -182,6 +184,18 @@
                         <StackPanel Orientation="Horizontal">
                             <Button Style="{StaticResource PrimaryButton}" Content="{loc:Loc Settings_BackupNow}" Command="{Binding BackupCommand}" />
                             <Button Style="{StaticResource SecondaryButton}" Margin="12,0,0,0" Content="{loc:Loc Settings_RestoreBackup}" Command="{Binding RestoreCommand}" />
+                        </StackPanel>
+
+                        <!-- Trial demo company: shown ONLY to an administrator AND when the demo is positively
+                             identified. Preview with counts, automatic backup first, refused if it is the only company. -->
+                        <StackPanel Margin="0,22,0,0" Visibility="{Binding CanRemoveDemo, Converter={StaticResource BoolToVis}}">
+                            <Separator Margin="0,0,0,16" />
+                            <TextBlock Style="{StaticResource H2}" FontSize="15" Text="{loc:Loc Demo_Title}" />
+                            <TextBlock Margin="0,6,0,0" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap"
+                                       Foreground="{DynamicResource TextPrimary}" Text="{Binding DemoCompanyText}" />
+                            <TextBlock Style="{StaticResource Caption}" Margin="0,4,0,12" TextWrapping="Wrap" Text="{loc:Loc Demo_Hint}" />
+                            <Button Style="{StaticResource DangerButton}" HorizontalAlignment="Left"
+                                    Content="{loc:Loc Demo_Remove}" Command="{Binding RemoveDemoCommand}" />
                         </StackPanel>
                     </StackPanel>
                 </Border>

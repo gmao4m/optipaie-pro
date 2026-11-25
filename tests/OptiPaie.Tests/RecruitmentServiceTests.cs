@@ -266,6 +266,7 @@ namespace OptiPaie.Tests
             public IWorkCertificateRepository Certificates => _inner.Certificates;
             public IAuditRepository Audit => _inner.Audit;
             public IUserRepository Users => _inner.Users;
+            public IDemoDataRepository DemoData => _inner.DemoData;
 
             public void BeginTransaction() => _inner.BeginTransaction();
             public void Commit() => _inner.Commit();

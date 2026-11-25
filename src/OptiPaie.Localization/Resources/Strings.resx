@@ -2078,4 +2078,21 @@
   <data name="Legal_Confirm_Ok" xml:space="preserve"><value>Désactiver</value></data>
   <data name="Legal_DeclDisabled_Title" xml:space="preserve"><value>Déclarations indisponibles : le calcul de l'IRG et de la CNAS est désactivé.</value></data>
   <data name="Legal_DeclDisabled_Body" xml:space="preserve"><value>Les déclarations DAC et DAS reposent sur les retenues légales. Réactivez « Calcul de l'IRG et de la CNAS » dans les Paramètres pour les produire.</value></data>
+  <data name="Settings_SyncLicense" xml:space="preserve"><value>Actualiser la licence</value></data>
+  <data name="License_CompanyLimitDowngraded" xml:space="preserve"><value>Votre licence est désormais Mono-société. Vos {0} entreprises existantes restent toutes accessibles et rien n'a été supprimé ; seule la création d'une nouvelle entreprise est bloquée. Pour en ajouter, repassez à une licence Multi-sociétés.</value></data>
+  <data name="Demo_Title" xml:space="preserve"><value>Données de démonstration</value></data>
+  <data name="Demo_Hint" xml:space="preserve"><value>La société de démonstration créée pendant l'essai est encore dans votre base. Vous pouvez la supprimer avec toutes ses données. Vos propres entreprises ne sont pas touchées, et une sauvegarde complète est faite automatiquement avant.</value></data>
+  <data name="Demo_Remove" xml:space="preserve"><value>Supprimer les données de démonstration</value></data>
+  <data name="Demo_Preview_Title" xml:space="preserve"><value>Supprimer la société de démonstration</value></data>
+  <data name="Demo_Preview_Intro" xml:space="preserve"><value>Les données suivantes seront supprimées définitivement :</value></data>
+  <data name="Demo_Preview_Total" xml:space="preserve"><value>Total : {0} ligne(s) supprimée(s).</value></data>
+  <data name="Demo_Preview_MatchedFlag" xml:space="preserve"><value>Reconnue par son marqueur de démonstration (posé à sa création).</value></data>
+  <data name="Demo_Preview_MatchedFingerprint" xml:space="preserve"><value>Reconnue par son empreinte complète (identifiants et liste exacte des 20 employés de démonstration).</value></data>
+  <data name="Demo_Preview_Backup" xml:space="preserve"><value>Une sauvegarde complète de la base sera faite automatiquement AVANT la suppression : en cas de besoin, elle se restaure depuis Paramètres › Restaurer une sauvegarde.</value></data>
+  <data name="Demo_Preview_OnlyCompany" xml:space="preserve"><value>Suppression impossible : la société de démonstration est la seule entreprise de la base, et le logiciel en a besoin d'au moins une. Créez d'abord votre propre entreprise, puis revenez ici.</value></data>
+  <data name="Demo_Preview_Delete" xml:space="preserve"><value>Supprimer définitivement</value></data>
+  <data name="Demo_Done" xml:space="preserve"><value>Données de démonstration supprimées : {0} ligne(s).
+Sauvegarde faite avant la suppression :
+{1}</value></data>
+  <data name="Demo_NotFound" xml:space="preserve"><value>Aucune donnée de démonstration n'a été reconnue. Rien n'a été supprimé.</value></data>
 </root>

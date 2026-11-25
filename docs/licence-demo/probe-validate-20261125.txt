@@ -1,0 +1,28 @@
+LIVE PROBE of the production validate endpoint — 2026-11-25T11:43:13Z .. 11:43:14Z (UTC)
+Headers: Content-Type: application/json ; apikey + Authorization: Bearer <the anon/publishable key shipped
+in OptiPaie PRO.exe.config — redacted here>. A fake licence key, so no real licence is touched (the backend
+writes one "validation.error" audit row per call that passes the product lookup).
+
+=== POST https://bajiomgtkpdqyvgpigsc.supabase.co/functions/v1/validate
+    body: {"productKey":"payroll","licenseKey":"PAY-PROBE-0000-0000","deviceId":"PROBE-CLAUDE-1","appVersion":"probe"}
+    response: {"error":"invalid_key","message":"Clé de licence invalide."}
+    HTTP 404      → the product lookup SUCCEEDED (it got past it to the licence lookup)
+
+=== same, "productKey":"Payroll"   → HTTP 400 {"error":"unknown_product","message":"Produit inconnu."}
+=== same, "productKey":"PAYROLL"   → HTTP 400 {"error":"unknown_product","message":"Produit inconnu."}
+=== same, "productKey":"zz-no-such-product" (control) → HTTP 400 {"error":"unknown_product","message":"Produit inconnu."}
+
+Side by side
+  lookup (backend/supabase/functions/_shared/license.ts getProductByKey):
+      products.select(...).eq("key", productKey).maybeSingle()   — exact, case-sensitive
+  client sends (ModuleKeys.Payroll, unchanged since the first release): "payroll"
+  production table: a row whose key is exactly "payroll" exists NOW (proved above; the table itself is
+      readable only by the owner account — row-level security — so it was not read directly)
+
+App log on this PC (the only place the failures are visible: unknown_product returns before any audit row):
+  2026-11-20 14:40:32 [WARN] License validation returned an error: unknown_product
+  2026-11-22 19:27:57 [WARN] License validation returned an error: unknown_product
+  2026-11-24 10:22, 2026-11-25 10:22: checks with no warning (success is not logged) — confirmed by the
+  stored LastValidationUtc 2026-11-25T10:22:11Z, written only on a successful validate.
+
+Then a REAL client check (real-validate-*.txt): RESULT Ok, licence type delivered, grace renewed.

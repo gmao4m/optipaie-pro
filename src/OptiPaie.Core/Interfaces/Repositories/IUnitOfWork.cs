@@ -87,6 +87,9 @@ namespace OptiPaie.Core.Interfaces.Repositories
         /// <summary>Local user accounts (optional login).</summary>
         IUserRepository Users { get; }
 
+        /// <summary>Reads and removes the trial demo company (one ordered, transactional plan).</summary>
+        IDemoDataRepository DemoData { get; }
+
         /// <summary>Begins a database transaction for the subsequent repository calls.</summary>
         void BeginTransaction();
 

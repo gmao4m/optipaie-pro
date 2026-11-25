@@ -1,0 +1,28 @@
+﻿REAL validate — production endpoint, real client pipeline, copy of this PC's database
+endpoint      : POST https://bajiomgtkpdqyvgpigsc.supabase.co/functions/v1/validate
+productKey    : "payroll"   appVersion: "1.43.0"   deviceId: D21F•••99
+BEFORE  lastValidation=2026-11-25T10:22:11.7892850Z  graceUntil=2026-12-25T10:22:11.2990000Z  scope=Active / maxCompanies=1 (MONO)
+sent at       : 2026-11-25T11:50:09.4742799Z
+RESULT        : Ok
+AFTER   lastValidation=2026-11-25T11:50:11.5612184Z  graceUntil=2026-12-25T11:50:10.8560000Z  scope=Active / maxCompanies=1 (MONO)
+TOKEN PAYLOAD (signature verified by the client):
+{
+  "v": 1,
+  "product": "payroll",
+  "productVersion": "1.0.0",
+  "licenseKey": "PAY-•••E7",
+  "companyName": "PAY-•••E7",
+  "companyId": null,
+  "customerName": "PAY-•••E7",
+  "email": "admi•••om",
+  "deviceId": "D21F•••99",
+  "status": "active",
+  "type": "lifetime",
+  "maxCompanies": 1,
+  "modules": [
+    "payroll"
+  ],
+  "issuedAt": "2026-11-25T11:50:10.856Z",
+  "expiresAt": null,
+  "graceUntil": "2026-12-25T11:50:10.856Z"
+}

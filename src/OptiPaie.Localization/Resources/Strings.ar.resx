@@ -2078,4 +2078,21 @@ Les colonnes ne correspondent pas au modèle. Colonnes obligatoires manquantes :
   <data name="Legal_Confirm_Ok" xml:space="preserve"><value>إيقاف</value></data>
   <data name="Legal_DeclDisabled_Title" xml:space="preserve"><value>التصريحات غير متاحة: حساب IRG و CNAS متوقّف.</value></data>
   <data name="Legal_DeclDisabled_Body" xml:space="preserve"><value>تعتمد تصريحات DAC و DAS على الاقتطاعات القانونية. أعد تفعيل «حساب IRG و CNAS» من الإعدادات لإصدارها.</value></data>
+  <data name="Settings_SyncLicense" xml:space="preserve"><value>تحديث الترخيص</value></data>
+  <data name="License_CompanyLimitDowngraded" xml:space="preserve"><value>أصبح ترخيصك لشركة واحدة. تبقى شركاتك الحالية ({0}) كلّها متاحة ولم يُحذَف أيّ شيء؛ يُمنَع فقط إنشاء شركة جديدة. لإضافة شركات، عُد إلى ترخيص متعدّد الشركات.</value></data>
+  <data name="Demo_Title" xml:space="preserve"><value>بيانات العرض التجريبي</value></data>
+  <data name="Demo_Hint" xml:space="preserve"><value>شركة العرض التجريبي التي أُنشئت خلال فترة التجربة ما زالت في قاعدة بياناتك. يمكنك حذفها مع كلّ بياناتها. لا تُمَسّ شركاتك أنت، وتُنشأ نسخة احتياطية كاملة تلقائيًّا قبل الحذف.</value></data>
+  <data name="Demo_Remove" xml:space="preserve"><value>حذف بيانات العرض التجريبي</value></data>
+  <data name="Demo_Preview_Title" xml:space="preserve"><value>حذف شركة العرض التجريبي</value></data>
+  <data name="Demo_Preview_Intro" xml:space="preserve"><value>ستُحذَف البيانات التالية نهائيًّا:</value></data>
+  <data name="Demo_Preview_Total" xml:space="preserve"><value>المجموع: {0} سطر محذوف.</value></data>
+  <data name="Demo_Preview_MatchedFlag" xml:space="preserve"><value>تمّ التعرّف عليها بعلامة العرض التجريبي (وُضعت عند إنشائها).</value></data>
+  <data name="Demo_Preview_MatchedFingerprint" xml:space="preserve"><value>تمّ التعرّف عليها ببصمتها الكاملة (المعرّفات والقائمة المطابقة لموظّفي العرض التجريبي العشرين).</value></data>
+  <data name="Demo_Preview_Backup" xml:space="preserve"><value>تُنشأ نسخة احتياطية كاملة لقاعدة البيانات تلقائيًّا قبل الحذف: عند الحاجة، تُستعاد من الإعدادات › استعادة نسخة احتياطية.</value></data>
+  <data name="Demo_Preview_OnlyCompany" xml:space="preserve"><value>الحذف غير ممكن: شركة العرض التجريبي هي الشركة الوحيدة في قاعدة البيانات، والبرنامج يحتاج إلى شركة واحدة على الأقلّ. أنشئ شركتك أوّلًا، ثمّ عُد إلى هنا.</value></data>
+  <data name="Demo_Preview_Delete" xml:space="preserve"><value>حذف نهائي</value></data>
+  <data name="Demo_Done" xml:space="preserve"><value>حُذفت بيانات العرض التجريبي: {0} سطر.
+النسخة الاحتياطية المُنشأة قبل الحذف:
+{1}</value></data>
+  <data name="Demo_NotFound" xml:space="preserve"><value>لم يُتعرَّف على أيّ بيانات تجريبية. لم يُحذَف شيء.</value></data>
 </root>

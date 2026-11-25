@@ -177,7 +177,9 @@ namespace OptiPaie.Services
                 Currency = "DZD",
                 Phone = "025 41 22 30",
                 Email = "contact@atlas-industrie.dz",
-                Logo = BuildLogo()
+                Logo = BuildLogo(),
+                // The dedicated demo identifier (migration 0045): "remove demo data" relies on it.
+                IsDemo = true
             };
 
             return Must(_companies.Create(company), "création de l'entreprise");
