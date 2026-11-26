@@ -38,6 +38,13 @@ namespace OptiPaie.PayrollEngine.Legal
         /// <summary>The lissage method used for non-monthly amounts.</summary>
         public LissageMethod LissageMethod { get; }
 
+        /// <summary>
+        /// The monthly taxable base is rounded DOWN to this step before the barème is applied
+        /// (10 = "arrondi à la dizaine de dinars inférieure", as the DGI monthly IRG tables and
+        /// accountants apply it). 0 = no rounding. The displayed base is never altered.
+        /// </summary>
+        public decimal TaxableBaseRoundingStep { get; }
+
         public LegalProfile(
             string legalVersion,
             DateTime effectiveFrom,
@@ -45,7 +52,8 @@ namespace OptiPaie.PayrollEngine.Legal
             decimal exemptionThreshold,
             AbattementRule abattement,
             SmoothingRule smoothing,
-            LissageMethod lissageMethod)
+            LissageMethod lissageMethod,
+            decimal taxableBaseRoundingStep = 0m)
         {
             if (string.IsNullOrWhiteSpace(legalVersion))
             {
@@ -60,6 +68,7 @@ namespace OptiPaie.PayrollEngine.Legal
             Abattement = abattement ?? throw new ArgumentNullException(nameof(abattement));
             Smoothing = smoothing ?? throw new ArgumentNullException(nameof(smoothing));
             LissageMethod = lissageMethod;
+            TaxableBaseRoundingStep = taxableBaseRoundingStep < 0m ? 0m : taxableBaseRoundingStep;
         }
     }
 }

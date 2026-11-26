@@ -214,8 +214,10 @@ namespace OptiPaie.Tests
 
             Assert.That(r.Totals.CnasEmployee, Is.EqualTo(3000m));
             Assert.That(r.Totals.BaseImposable, Is.EqualTo(30333m));
-            Assert.That(r.Totals.Irg, Is.EqualTo(207m));
-            Assert.That(r.Totals.NetSalaire, Is.EqualTo(30126m));
+            // 1.45.1: barème on 30330 (rounded down to 10 DA): 10330 × 0.23 = 2375.90 − 1000 = 1375.90;
+            // × 137/51 − 27925/8 = 205.42 → 205 (whole dinar). Net = 33333 − 3000 − 205.
+            Assert.That(r.Totals.Irg, Is.EqualTo(205m));
+            Assert.That(r.Totals.NetSalaire, Is.EqualTo(30128m));
         }
 
         [Test]

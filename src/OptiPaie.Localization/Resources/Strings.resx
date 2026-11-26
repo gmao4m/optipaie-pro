@@ -2095,4 +2095,5 @@
 Sauvegarde faite avant la suppression :
 {1}</value></data>
   <data name="Demo_NotFound" xml:space="preserve"><value>Aucune donnée de démonstration n'a été reconnue. Rien n'a été supprimé.</value></data>
+  <data name="PayItem_CotisableIsTaxable" xml:space="preserve"><value>Un élément cotisable est toujours imposable à 100 % (0 % seulement s'il est exonéré d'IRG par la loi). Les parts 50 / 30 / 10 % ne s'appliquent qu'aux éléments non cotisables.</value></data>
 </root>

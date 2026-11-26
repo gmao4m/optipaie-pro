@@ -8,9 +8,9 @@ namespace OptiPaie.PayrollEngine
     public static class EngineVersion
     {
         /// <summary>Version of the engine implementation.</summary>
-        public const string Version = "1.0.0";
+        public const string Version = "1.0.1";
 
         /// <summary>Version of the calculation algorithm/pipeline.</summary>
-        public const string CalculationVersion = "1.0";
+        public const string CalculationVersion = "1.1"; // 1.1: a cotisable line is taxed in full (TaxTreatment)
     }
 }

@@ -1,0 +1,9 @@
+﻿IRG EXPOSURE AUDIT — copy of optipaie.db (this-pc-real-db)
+
+[1] Cotisable elements with a partial taxable share (the cause): 0
+
+[2] Active payslips: 22 ; with stored IRG base < cotisable − CNAS (legal deductions ON): 0
+
+[3] Payslips that used a partially-taxed cotisable element: 0
+    by month:
+    TOTAL IRG NOT DEDUCTED: 0.00 DA

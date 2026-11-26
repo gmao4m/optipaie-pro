@@ -48,8 +48,10 @@ namespace OptiPaie.Tests
         [Test]
         public void Abattement_Minimum_Applies_Just_Above_Exemption()
         {
-            // base 30001 -> gross 2300.23 -> 40% = 920.09 -> raised to the 1000 minimum.
-            Assert.That(_calculator.Compute(30001m, _profile).Abattement, Is.EqualTo(1000m));
+            // 1.45.1: the barème applies to the base rounded down to 10 DA, so 30001 → 30000 → exempt.
+            Assert.That(_calculator.Compute(30001m, _profile).Irg, Is.EqualTo(0m));
+            // base 30010 -> gross 10010 × 0.23 = 2302.30 -> 40% = 920.92 -> raised to the 1000 minimum.
+            Assert.That(_calculator.Compute(30010m, _profile).Abattement, Is.EqualTo(1000m));
         }
 
         [Test]

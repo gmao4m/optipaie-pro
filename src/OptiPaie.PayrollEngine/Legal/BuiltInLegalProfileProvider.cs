@@ -76,7 +76,10 @@ namespace OptiPaie.PayrollEngine.Legal
                 exemptionThreshold: 30000m,
                 abattement: abattement,
                 smoothing: smoothing,
-                lissageMethod: LissageMethod.Differential);
+                lissageMethod: LissageMethod.Differential,
+                // The barème applies to the base rounded down to the 10 DA (reference case: base
+                // 30 576 → 30 570 → IRG 353.70, as the customer's accountant computes it).
+                taxableBaseRoundingStep: 10m);
         }
     }
 }

@@ -52,6 +52,11 @@ namespace OptiPaie.Desktop.ViewModels
             ImposablePercent = element.IrgPercent.HasValue
                 ? element.IrgPercent.Value
                 : (element.IsIrgApplicable ? 100m : 0m);
+            // A cotisable element is taxed in full by the engine (TaxTreatment): show what is applied.
+            if (Cotisable && ImposablePercent > 0m && ImposablePercent < 100m)
+            {
+                ImposablePercent = 100m;
+            }
 
             SaveCommand = new RelayCommand(Save);
             CancelCommand = new RelayCommand(() => RequestClose?.Invoke(false));
@@ -92,6 +97,12 @@ namespace OptiPaie.Desktop.ViewModels
 
             _element.IsCnasApplicable = Cotisable;
             _element.CnasPercent = null;
+
+            // Cotisable ⇒ imposable à 100 % (or 0 % for a legal exemption): no partial share is stored.
+            if (Cotisable && ImposablePercent > 0m && ImposablePercent < 100m)
+            {
+                ImposablePercent = 100m;
+            }
 
             _element.IsIrgApplicable = ImposablePercent > 0m;
             _element.IrgPercent = (ImposablePercent >= 100m || ImposablePercent <= 0m) ? (decimal?)null : ImposablePercent;

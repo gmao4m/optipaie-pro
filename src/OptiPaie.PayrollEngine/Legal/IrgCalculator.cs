@@ -27,6 +27,12 @@ namespace OptiPaie.PayrollEngine.Legal
                 throw new ArgumentNullException(nameof(profile));
             }
 
+            // The barème applies to the base rounded DOWN to the profile's step (10 DA).
+            if (profile.TaxableBaseRoundingStep > 0m && taxableBase > 0m)
+            {
+                taxableBase = Math.Floor(taxableBase / profile.TaxableBaseRoundingStep) * profile.TaxableBaseRoundingStep;
+            }
+
             // Exemption: at or below the threshold there is no tax.
             if (taxableBase <= profile.ExemptionThreshold)
             {

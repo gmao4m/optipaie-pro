@@ -5,8 +5,8 @@ using OptiPaie.PayrollEngine.Pipeline;
 namespace OptiPaie.PayrollEngine.Rules
 {
     /// <summary>
-    /// Regular taxable base = (sum of IRG-applicable, non-lissage lines) − CNAS
-    /// employee. Lissage elements are excluded here and taxed separately by the
+    /// Regular taxable base = (sum of IRG-applicable, non-lissage lines, each at its
+    /// <see cref="TaxTreatment.IrgShare"/>) − CNAS employee. Lissage elements are excluded here and taxed separately by the
     /// lissage rule, so they are not taxed at the full monthly marginal rate.
     /// </summary>
     internal sealed class TaxableBaseRule : IPayrollRule
@@ -23,8 +23,8 @@ namespace OptiPaie.PayrollEngine.Rules
             {
                 if (line.IsIrgApplicable && !line.IsLissage)
                 {
-                    // IrgFactor is 1 for a fully-taxable line and 0..1 for a partial one.
-                    taxableGains += line.Sign * line.Amount * line.IrgFactor;
+                    // The share is decided by TaxTreatment (cotisable ⇒ 100 % taxable; see its table).
+                    taxableGains += line.Sign * line.Amount * TaxTreatment.IrgShare(line);
                 }
             }
 

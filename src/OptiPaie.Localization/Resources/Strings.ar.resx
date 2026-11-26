@@ -2095,4 +2095,5 @@ Les colonnes ne correspondent pas au modèle. Colonnes obligatoires manquantes :
 النسخة الاحتياطية المُنشأة قبل الحذف:
 {1}</value></data>
   <data name="Demo_NotFound" xml:space="preserve"><value>لم يُتعرَّف على أيّ بيانات تجريبية. لم يُحذَف شيء.</value></data>
+  <data name="PayItem_CotisableIsTaxable" xml:space="preserve"><value>العنصر الخاضع للاشتراك يخضع دائمًا للضريبة بنسبة 100 ٪ (0 ٪ فقط إذا كان معفى من الضريبة على الدخل بنصّ القانون). نسب 50 / 30 / 10 ٪ لا تُطبَّق إلا على العناصر غير الخاضعة للاشتراك.</value></data>
 </root>

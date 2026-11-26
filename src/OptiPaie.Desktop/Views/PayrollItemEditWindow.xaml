@@ -48,6 +48,8 @@
             <StackPanel>
                 <TextBlock Style="{StaticResource Fl}" Text="{loc:Loc PayItem_TaxableIrg}" />
                 <ComboBox Style="{StaticResource AppComboBox}" ItemsSource="{Binding ImposableOptions}" SelectedValue="{Binding ImposablePercent}" SelectedValuePath="Value" DisplayMemberPath="Label" />
+                <!-- The engine rule (TaxTreatment): a cotisable element is always fully taxable. -->
+                <TextBlock Margin="0,6,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextSecondary}" Text="{loc:Loc PayItem_CotisableIsTaxable}" />
             </StackPanel>
         </StackPanel>
         </ScrollViewer>
