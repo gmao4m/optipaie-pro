@@ -70,22 +70,30 @@ namespace OptiPaie.Tests
                     var calc = new IrgCalculator(new MoneyEngine(RoundingPolicy.Centime));
 
                     // 1. The cause.
-                    var partial = c.Query("SELECT Id, NameFr, IsCnasApplicable, CnasPercent, IrgPercent FROM PayrollElements " +
-                                          "WHERE (IsCnasApplicable = 1 OR CAST(IFNULL(CnasPercent,'0') AS REAL) > 0) " +
-                                          "AND IrgPercent IS NOT NULL AND CAST(IrgPercent AS REAL) > 0 AND CAST(IrgPercent AS REAL) < 100;")
-                                   .Select(r => new { Id = (long)r.Id, Name = (string)r.NameFr, Pct = Dec(r.IrgPercent) }).ToList();
+                    // Every element with a partial taxable share; only the COTISABLE ones are the defect.
+                    var allPartial = c.Query("SELECT Id, NameFr, IsCnasApplicable, CnasPercent, IrgPercent, IsDeleted, IsEnabled FROM PayrollElements " +
+                                             "WHERE IrgPercent IS NOT NULL AND CAST(IrgPercent AS REAL) > 0 AND CAST(IrgPercent AS REAL) < 100 ORDER BY Id;").ToList();
+                    var partial = new List<dynamic>();
                     o.AppendLine("IRG EXPOSURE AUDIT — copy of " + Path.GetFileName(source) + " (" + tag + ")");
                     o.AppendLine();
-                    o.AppendLine("[1] Cotisable elements with a partial taxable share (the cause): " + partial.Count);
-                    foreach (var p in partial) o.AppendLine(string.Format(Inv, "    #{0} {1} — imposable {2} %", p.Id, p.Name, p.Pct));
+                    o.AppendLine("[1] Elements with a partial taxable share: " + allPartial.Count);
+                    foreach (var e in allPartial)
+                    {
+                        bool cotisable = Convert.ToInt64(e.IsCnasApplicable) == 1 || Dec(e.CnasPercent) > 0m;
+                        if (cotisable) partial.Add(e);
+                        o.AppendLine(string.Format(Inv, "    #{0} {1} — imposable {2} % — soumis CNAS: {3}{4}{5}", (long)e.Id, (string)e.NameFr, Dec(e.IrgPercent),
+                            cotisable ? "OUI  ← DEFECT (cotisable must be 100 % taxable)" : "non (allowed)",
+                            Convert.ToInt64(e.IsDeleted) == 1 ? " [deleted]" : "", Convert.ToInt64(e.IsEnabled) == 0 ? " [disabled]" : ""));
+                    }
                     var shareById = new Dictionary<long, decimal>();
-                    foreach (var p in partial) shareById[(long)p.Id] = (decimal)p.Pct / 100m;
+                    foreach (var p in partial) shareById[(long)p.Id] = Dec(p.IrgPercent) / 100m;
 
                     // 2 + 3. Every active payslip.
-                    var slips = c.Query("SELECT p.Id, r.PeriodYear, r.PeriodMonth, p.EmployeeId, p.BaseCotisable, p.CnasEmployee, p.BaseImposable, " +
-                                        "p.Irg, p.NetSalaire, p.LegalDeductionsApplied FROM Payslips p JOIN PayrollRuns r ON r.Id = p.RunId " +
+                    var slips = c.Query("SELECT p.Id, r.PeriodYear, r.PeriodMonth, p.EmployeeId, IFNULL(e.LastNameFr,'') || ' ' || IFNULL(e.FirstNameFr,'') AS Name, p.BaseCotisable, p.CnasEmployee, p.BaseImposable, " +
+                                        "p.Irg, p.NetSalaire, p.LegalDeductionsApplied FROM Payslips p JOIN PayrollRuns r ON r.Id = p.RunId LEFT JOIN Employees e ON e.Id = p.EmployeeId " +
                                         "WHERE p.Status = 1 ORDER BY r.PeriodYear, r.PeriodMonth, p.Id;").ToList();
-                    var profile = new BuiltInLegalProfileProvider().GetProfile(new PayrollPeriod(2026, 1));
+                    var profiles = new BuiltInLegalProfileProvider();
+                    var employees = new HashSet<long>();
                     int below = 0, affected = 0;
                     decimal totalShortfall = 0m;
                     var byMonth = new SortedDictionary<string, decimal>();
@@ -110,13 +118,14 @@ namespace OptiPaie.Tests
 
                         affected++;
                         decimal correctBase = imp + missed;
-                        decimal owed = calc.Compute(correctBase, profile).Irg;
+                        decimal owed = calc.Compute(correctBase, profiles.GetProfile(new PayrollPeriod(Convert.ToInt32(s.PeriodYear), Convert.ToInt32(s.PeriodMonth)))).Irg;
+                        employees.Add(Convert.ToInt64(s.EmployeeId));
                         decimal shortfall = owed - irg;
                         totalShortfall += shortfall;
                         string month = s.PeriodYear + "-" + Convert.ToInt32(s.PeriodMonth).ToString("00", Inv);
                         byMonth[month] = (byMonth.TryGetValue(month, out decimal m) ? m : 0m) + shortfall;
-                        lines.AppendLine(string.Format(Inv, "    #{0,-5} {1}  emp {2,-5} base {3,12:N2} → {4,12:N2}   IRG {5,10:N2} → {6,10:N2}   shortfall {7,10:N2}",
-                            s.Id, month, s.EmployeeId, imp, correctBase, irg, owed, shortfall));
+                        lines.AppendLine(string.Format(Inv, "    #{0,-5} {1}  {2,-28} base {3,12:N2} → {4,12:N2}   IRG {5,10:N2} → {6,10:N2}   shortfall {7,10:N2}",
+                            s.Id, month, ((string)s.Name).Trim() + " (#" + s.EmployeeId + ")", imp, correctBase, irg, owed, shortfall));
                     }
 
                     o.AppendLine();
@@ -126,7 +135,9 @@ namespace OptiPaie.Tests
                     o.Append(lines);
                     o.AppendLine("    by month:");
                     foreach (var kv in byMonth) o.AppendLine(string.Format(Inv, "      {0}  {1,12:N2}", kv.Key, kv.Value));
-                    o.AppendLine(string.Format(Inv, "    TOTAL IRG NOT DEDUCTED: {0:N2} DA", totalShortfall));
+                    o.AppendLine(string.Format(Inv, "    TOTALS: {0} payslips, {1} employees, {2} months ({3} → {4}); TOTAL IRG NOT DEDUCTED: {5:N2} DA",
+                        affected, employees.Count, byMonth.Count, byMonth.Keys.FirstOrDefault() ?? "-", byMonth.Keys.LastOrDefault() ?? "-", totalShortfall));
+                    o.AppendLine("    (IRG owed = 1.45.1 rules: cotisable elements taxed 100 %, barème on the base rounded down to 10 DA, each payslip's own month.)");
                     return new Result { Affected = affected, BelowCriterion = below, Shortfall = totalShortfall, Report = o.ToString() };
                 }
             }
