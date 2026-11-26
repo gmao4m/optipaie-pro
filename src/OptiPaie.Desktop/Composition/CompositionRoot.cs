@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using OptiPaie.Common.Configuration;
 using OptiPaie.Common.Constants;
@@ -28,7 +29,26 @@ namespace OptiPaie.Desktop.Composition
     {
         public static AppServices Build()
         {
+            // The parameterless overload opens the LIVE data folder (%AppData%\OptiPaie DZ). A test host
+            // must never do that: harnesses build against an explicit temp/copy configuration instead.
+            if (IsTestHost)
+            {
+                throw new InvalidOperationException(
+                    "Refused: a test host tried to open the LIVE OptiPaie database. Use Build(new AppConfiguration(tempDir, lang)).");
+            }
+
             return Build(AppConfigurationReader.Read());
+        }
+
+        /// <summary>True inside a unit-test runner process (VSTest testhost / NUnit console).</summary>
+        public static bool IsTestHost
+        {
+            get
+            {
+                string name = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
+                return name.StartsWith("testhost", StringComparison.OrdinalIgnoreCase)
+                    || name.StartsWith("nunit", StringComparison.OrdinalIgnoreCase);
+            }
         }
 
         /// <summary>

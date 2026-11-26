@@ -1,0 +1,52 @@
+﻿  PASS Sécurité des tests — opening the LIVE database from a test host is refused
+END-TO-END VERIFICATION — temp demo database, 2026-11-26 23:58
+
+  PASS Démo / données — demo company seeded #1
+  PASS Employés — employees = 20
+  PASS Paie — payslips generated 20/20, masse brute 1,183,000.00, every payslip: IRG base = cotisable − CNAS (+ imposable non cotisable), CNAS = 9 %, net = brut − CNAS − IRG − retenues
+  PASS Fiche de paie (PDF) — FR PDF 428,086 bytes
+  PASS Fiche de paie (PDF) — AR PDF 476,772 bytes
+  PASS Archive — saved payslips readable back from the archive
+  PASS Déclarations CNAS — DAC effectif 20, assiette 1,183,000.00 (payslips sum 1,183,000.00)
+  PASS Tableau de bord — masse 1,183,000.00, contrats actifs 20, congés en attente 2, prêts actifs 3
+  PASS Sauvegarde — backup 643,072 bytes
+  PASS Données démo (1.45.0) — demo company recognised by flag
+
+  PASS Écran dashboard — fr OK
+  PASS Écran dashboard — ar OK
+  PASS Écran employees — fr OK
+  PASS Écran employees — ar OK
+  PASS Écran companies — fr OK
+  PASS Écran companies — ar OK
+  PASS Écran payroll — fr OK
+  PASS Écran payroll — ar OK
+  PASS Écran archive — fr OK
+  PASS Écran archive — ar OK
+  PASS Écran loans — fr OK
+  PASS Écran loans — ar OK
+  PASS Écran attendance — fr OK
+  PASS Écran attendance — ar OK
+  PASS Écran leave — fr OK
+  PASS Écran leave — ar OK
+  PASS Écran contracts — fr OK
+  PASS Écran contracts — ar OK
+  PASS Écran performance — fr OK
+  PASS Écran performance — ar OK
+  PASS Écran assets — fr OK
+  PASS Écran assets — ar OK
+  PASS Écran training — fr OK
+  PASS Écran training — ar OK
+  PASS Écran recruitment — fr OK
+  PASS Écran recruitment — ar OK
+  PASS Écran certificates — fr OK
+  PASS Écran certificates — ar OK
+  PASS Écran cnas — fr OK
+  PASS Écran cnas — ar OK
+  PASS Écran attestations — fr OK
+  PASS Écran attestations — ar OK
+  PASS Écran reports — fr OK
+  PASS Écran reports — ar OK
+  PASS Écran settings — fr OK
+  PASS Écran settings — ar OK
+
+FAILURES: 0

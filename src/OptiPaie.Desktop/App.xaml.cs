@@ -41,6 +41,14 @@ namespace OptiPaie.Desktop
 
         protected override void OnStartup(StartupEventArgs e)
         {
+            // A harness that creates an App and pumps the dispatcher (or shows a MessageBox) makes WPF run
+            // this queued startup inside the test process — which would open the LIVE database, migrate it
+            // and show the sign-in window (it happened on 2026-11-25). Never start the real app in a test host.
+            if (OptiPaie.Desktop.Composition.CompositionRoot.IsTestHost)
+            {
+                return;
+            }
+
             // Install last-resort crash capture FIRST, so any failure during startup,
             // composition, or later navigation is written to disk (see Common/CrashLog).
             CrashLog.Install(this);
