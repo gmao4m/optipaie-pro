@@ -390,7 +390,11 @@ namespace OptiPaie.Services.Licensing
                 return LicenseStateKind.Expired;
             }
 
-            if (payload.GraceUntil.HasValue && now > payload.GraceUntil.Value)
+            // The offline grace applies ONLY to a licence that genuinely ends (ExpiresAt set: annual,
+            // monthly). A LIFETIME licence (no end date) never locks, however long the poste stays
+            // offline — a month, a year, ten years — even with a token from the old server that still
+            // carries a graceUntil. LifetimeNeverLocksTests fails if this is ever put back.
+            if (payload.ExpiresAt.HasValue && payload.GraceUntil.HasValue && now > payload.GraceUntil.Value)
             {
                 return LicenseStateKind.GraceExpired;
             }
