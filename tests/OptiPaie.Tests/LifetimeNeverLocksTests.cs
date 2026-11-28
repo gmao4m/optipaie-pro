@@ -28,7 +28,8 @@ namespace OptiPaie.Tests
     /// <summary>
     /// "LIFETIME MEANS LIFETIME." A lifetime licence (no end date), once activated, never locks, never
     /// expires and never signs anyone out, however long the poste stays offline, whatever the server
-    /// answers. Licences with an END DATE and TRIALS keep their limits. Real pipeline: LicensingService,
+    /// answers. An ANNUAL licence never locks offline either: it stops at its END DATE and nowhere else,
+    /// and a clock set back cannot extend it. TRIALS keep their limits. Real pipeline: LicensingService,
     /// Ed25519LicenseVerifier, SqliteLicenseStore on a temp database, LicenseGate / AccessGate; tokens
     /// signed like the backend; the "garbage" cases go through the real SupabaseLicenseBackend HTTP client.
     /// Time passing offline = the client's own anti-rollback clock floor (LastSeenUtc) moved forward.
@@ -147,15 +148,46 @@ namespace OptiPaie.Tests
             Assert.That(client.Current.IsUsable, Is.False);
         }
 
-        [Test]
-        public void ALicenceWithAnEndDate_KeepsItsOfflineGraceExactlyAsBefore()
+        [TestCase(31, 30)]    // old-server token (still carries a 30-day graceUntil)
+        [TestCase(200, 30)]
+        [TestCase(364, 30)]
+        [TestCase(31, null)]  // fixed-server token (no graceUntil)
+        [TestCase(364, null)]
+        public void AnAnnualLicence_NeverLocksOffline_BeforeItsEndDate(int daysOffline, int? graceDays)
         {
-            var server = new Server(this) { GraceDays = 30, ExpiresInDays = 365, Type = "annual" };
+            var server = new Server(this) { GraceDays = graceDays, ExpiresInDays = 365, Type = "annual" };
             LicensingService client = Activate(server);
-            Offline(29);
-            Assert.That(client.Refresh().IsUsable, Is.True, "inside its 30-day grace");
-            Offline(31);
-            Assert.That(client.Refresh().State, Is.EqualTo(LicenseStateKind.GraceExpired), "unchanged: an end-dated licence still needs to check in");
+            Offline(daysOffline);
+            AssertFullAccess(client, "annual, " + daysOffline + " days offline, inside the year paid for");
+        }
+
+        [Test]
+        public void AnExpiredAnnualLicence_ClockSetBack_StillRefuses()
+        {
+            var server = new Server(this) { GraceDays = null, ExpiresInDays = 10, Type = "annual" };
+            LicensingService client = Activate(server);
+            Offline(11);                                    // the app ran on day 11: past the end date
+            Assert.That(client.Refresh().State, Is.EqualTo(LicenseStateKind.Expired));
+
+            // The customer turns the PC clock back: the real clock (today) is BEFORE the end date again.
+            Assert.That(DateTime.UtcNow, Is.LessThan(DateTime.UtcNow.AddDays(10)));
+            for (int i = 0; i < 3; i++)
+                Assert.That(client.Refresh().State, Is.EqualTo(LicenseStateKind.Expired), "the clock floor holds: a finished year cannot be extended");
+            Assert.That(new AccessGate(client, new NoTrial()).Evaluate().State, Is.Not.EqualTo(AccessState.Licensed));
+        }
+
+        [Test]
+        public void ClockSetBackBeforeTheEndDate_IsCaughtByOneOnlineCheck_ServerTimeIsTheFloor()
+        {
+            var server = new Server(this) { GraceDays = null, ExpiresInDays = 10, Type = "annual" };
+            LicensingService client = Activate(server);
+            Assert.That(client.Current.IsUsable, Is.True);
+
+            // The PC's clock is frozen before the end date, but the server's clock is 11 days later.
+            server.IssuedAtOffsetDays = 11;
+            Assert.That(client.SynchronizeAsync(CancellationToken.None).GetAwaiter().GetResult().Kind, Is.Not.EqualTo(LicenseResultKind.Ok),
+                "the check itself reports the licence as no longer usable");
+            Assert.That(client.Refresh().State, Is.EqualTo(LicenseStateKind.Expired), "server time floors the clock");
         }
 
         [Test]
@@ -258,6 +290,7 @@ namespace OptiPaie.Tests
             public int? ExpiresInDays { get; set; }
             public string Type { get; set; } = "lifetime";
             public int MaxCompanies { get; set; } = 1;
+            public int IssuedAtOffsetDays { get; set; }
             public Exception Throw { get; set; }
             public string ErrorCode { get; set; }
             public string Garbage { get; set; }
@@ -281,7 +314,7 @@ namespace OptiPaie.Tests
                 {
                     ["v"] = 1, ["product"] = "payroll", ["licenseKey"] = Key, ["companyName"] = "SARL Test", ["email"] = "rh@test.dz",
                     ["deviceId"] = deviceId, ["status"] = "active", ["type"] = Type, ["maxCompanies"] = MaxCompanies,
-                    ["modules"] = new[] { "payroll" }, ["issuedAt"] = now,
+                    ["modules"] = new[] { "payroll" }, ["issuedAt"] = now.AddDays(IssuedAtOffsetDays),
                     ["expiresAt"] = ExpiresInDays.HasValue ? (object)now.AddDays(ExpiresInDays.Value) : null,
                     ["graceUntil"] = GraceDays.HasValue ? (object)now.AddDays(GraceDays.Value) : null,
                 };

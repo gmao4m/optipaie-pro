@@ -334,9 +334,15 @@ namespace OptiPaie.Services.Licensing
             }
 
             // Anti clock-rollback: never let the effective time go backwards from the
-            // highest value we have ever observed, so expiry/grace can't be cheated.
+            // highest value we have ever observed, so an end date can't be cheated. That floor
+            // includes the SERVER's own clock (the token's issuedAt): one online check after the
+            // end date stops the licence even if the PC's clock was set back before it.
             DateTime now = DateTime.UtcNow;
             DateTime effectiveNow = MaxUtc(ParseIso(stored.LastSeenUtc), now);
+            if (payload.IssuedAt.HasValue)
+            {
+                effectiveNow = MaxUtc(payload.IssuedAt.Value.ToUniversalTime(), effectiveNow);
+            }
             try
             {
                 _store.UpdateLastSeen(ToIso(effectiveNow));
@@ -390,15 +396,11 @@ namespace OptiPaie.Services.Licensing
                 return LicenseStateKind.Expired;
             }
 
-            // The offline grace applies ONLY to a licence that genuinely ends (ExpiresAt set: annual,
-            // monthly). A LIFETIME licence (no end date) never locks, however long the poste stays
-            // offline — a month, a year, ten years — even with a token from the old server that still
-            // carries a graceUntil. LifetimeNeverLocksTests fails if this is ever put back.
-            if (payload.ExpiresAt.HasValue && payload.GraceUntil.HasValue && now > payload.GraceUntil.Value)
-            {
-                return LicenseStateKind.GraceExpired;
-            }
-
+            // NO licence ever locks because the poste stayed offline: there is no offline deadline.
+            // A lifetime licence never stops; a dated (annual) licence stops at its END DATE above and
+            // nowhere else — even with a token from an older server that still carries a graceUntil
+            // (it is ignored). Trials live in TrialService and are untouched.
+            // LifetimeNeverLocksTests fails if an offline deadline is ever put back.
             return LicenseStateKind.Active;
         }
 

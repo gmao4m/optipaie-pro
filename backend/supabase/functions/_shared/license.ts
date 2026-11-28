@@ -100,12 +100,10 @@ export function buildSignedToken(
   customerName: string | null,
 ): { token: string; issuedAt: string; graceUntil: string | null } {
   const now = new Date();
-  // A licence WITHOUT an end date (lifetime) never locks offline: no grace deadline at all.
-  // Only a licence that genuinely ends (expires_at set: annual/monthly) keeps the offline
-  // grace from the product's activation rules, exactly as before.
-  const graceUntil = license.expires_at
-    ? new Date(now.getTime() + graceDays(product) * 86_400_000).toISOString()
-    : null;
+  // No licence ever locks because it stayed offline. A lifetime licence never stops; an annual
+  // (dated) licence stops at its END DATE (expiresAt below) and nowhere else. The offline
+  // grace deadline is gone for every licence (2026-11-28); trials are client-side and untouched.
+  const graceUntil: string | null = null;
 
   // Company scope for the token: 1 = Mono, 0 = Multi (unlimited). A missing OR null
   // value — a row predating the max_companies column (absent from select("*")) or a
@@ -132,7 +130,7 @@ export function buildSignedToken(
     modules,
     issuedAt: now.toISOString(),
     expiresAt: license.expires_at, // null = perpetual
-    graceUntil, // null = lifetime: never locks, however long offline
+    graceUntil, // always null: no offline deadline; a dated licence stops at expiresAt
   };
 
   return {
